@@ -1,0 +1,173 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <metadata name="tabControl1.Locked" type="System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
+    <value>True</value>
+  </metadata>
+  <data name="richTextBox1.Text" xml:space="preserve">
+    <value>一、分表功能
+    分表功能是根据已有表格内容，按照选定字段内容进行分类并新建表后，批量将同一类数据分别建立新表，也可将分表导出独立工作簿的功能。具体操作功能有：
+
+    1.分表：按照选定表的选定字段作为分类依据，在同一工作簿中新建以每一类名称为表名的新表，并将该类所属数据导入。所有分表与原表的结构完全相同；
+
+    2.分表导出：将”分表“所分出的工作表，导出为同名称为工作簿。所有分工作簿与原表的结构完全相同。该功能与分表联合使用，如仅是对已存在的多张表导出为工作簿，请使用批量导删功能；
+
+    3.删除分表：将同一工作簿中所有的分表全部删除（该功能仅能删除”分表“，不可直接删除工作簿中其它表。如要批量删除工作簿的多张表，请使用批量导删功能模块）。
+
+二、并表功能
+    该功能模块为分表功能的逆流程，是将有相同表结构的工作簿和工作表汇总在一张工作表中。具体功能有：
+
+    1.并表（同一工作簿）：将同一工作簿中具有相同表结构的多张工作表汇总生成一张新的工作表，命名为“汇总表”；
+
+    2.工作簿汇总：指定目录路径下所有工作簿中的所有工作表，包括子文件夹中文件，统一汇总至当前工作簿中命名为“汇总表”的新工作表。该功能要求所有工作簿的所有工作表具有相同表结构，否则容易出现数据错乱；
+
+注意：在使用2并表时，如打开的工作簿为目录下需合并的文件，请务必勾选“工作簿已有表列入合并范围（仅对多工作簿合并适用）”，否则该工作簿中已有表不合并入汇总表。
+
+三、批量导删
+     选择框中列出当前工作簿中所有表名称，可以有选择地进行批量导出或批量删除，该功能不要求所有表具有相同结构。具体功能有：
+
+    1.批量导出：将所选中表导出，在指定文件夹下建立以选中表名为工作簿名称的新文件，并将数据对应导入新文件，可一次导出一个或多个表；
+
+    2.批量删除：将所选中表删除，可一次删除一个或多个表，但删除后当前工作簿至少应保留一个表。
+
+四、实用功能
+    包括EXCEL的一些实用功能模块，主要功能有：
+
+    1.多工作簿表转同一工作簿：将指定目录下多个工作簿的多个工作表复制至当前工作簿中，并以“工作簿名”+“工作表名”进行命名。支持指定目录下的子目录工作表转移；
+
+    2.一键建立多个工作表：按照指定数量和指定名称建立空白工作表；
+
+    3.转置：将字段名设定为一个变量字段进行转置，类似于数据交叉表的逆过程；
+
+    4.正则表达式：允许通过选择提取内容的选项，或者自定义过滤规则的方式提取特定字符。如果符合提取条件的内容不连续，默认以“|”分隔符隔开，使用者可自行对提取结果采用“分列”等功能进行再加工。同时，提取的数字也为文本格式，使用者可自行转换为数值格式；
+
+    5.一键工资条：可一键将工资表分割为工资条格式；
+
+    6.生成目录表文件：对需包含多个子表的应用场景，可将第一张表制作成为目录页（表名为：目录；A1单元格：目录；A2~A...为生成子表的名称）后，一键生成空白子表和链接，实现从目录页点击直达子表的功能。</value>
+  </data>
+  <metadata name="split_sheet_timer.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+    <value>17, 17</value>
+  </metadata>
+  <metadata name="folderBrowserDialog1.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+    <value>328, 20</value>
+  </metadata>
+  <metadata name="merge_sheet_timer.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+    <value>162, 18</value>
+  </metadata>
+</root>
