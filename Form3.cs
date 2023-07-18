@@ -1,15 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Documents;
 using System.Windows.Forms;
 
 
@@ -28,10 +21,9 @@ namespace ExcelAddIn
             format_radioButton1.Select();
             fold_path_textBox.Text = "双击选择文件夹";
             fold_path_textBox.ForeColor = Color.LightGray;
-            fold_path_textBox.Font = new Font(fold_path_textBox.Font, System.Drawing.FontStyle.Italic);
+            fold_path_textBox.Font = new Font(fold_path_textBox.Font, FontStyle.Italic);
 
         }
-
 
         static string get_dir_path;
         static string[] files;
@@ -172,7 +164,7 @@ namespace ExcelAddIn
         static void ReadFileNames(string folderPath)
         {
             List<string> filelist = new List<string>( Directory.GetFiles(folderPath,"*.mp3",SearchOption.AllDirectories));
-            filelist.RemoveAll(file => (System.IO.File.GetAttributes(file) & FileAttributes.Hidden) == FileAttributes.Hidden);
+            filelist.RemoveAll(file => (File.GetAttributes(file) & FileAttributes.Hidden) == FileAttributes.Hidden);
             string[] fileNames= filelist.ToArray();
             files = new string[fileNames.Length];
 
@@ -187,7 +179,6 @@ namespace ExcelAddIn
         {
             this.Close();
         }
-
 
     }
 }

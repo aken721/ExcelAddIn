@@ -1,24 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Data;
 using System.Drawing;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Text.RegularExpressions;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement;
-using System.Reflection.Emit;
 using System.Timers;
 using Excel = Microsoft.Office.Interop.Excel;
-using System.Drawing.Text;
 using System.Threading;
 using System.IO;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement.Button;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement.TaskbarClock;
-using System.Reflection;
-using System.Runtime.InteropServices;
 
 
 
@@ -85,39 +76,9 @@ namespace ExcelAddIn
             regex_run_button.Visible = false;
             regex_clear_button.Visible = false;
             function_title_label.Text = "请选择所需使用的功能";
-
-
-            //// 创建文件监视器
-            //fileWatcher = new FileSystemWatcher();
-            //fileWatcher.Path = Path.GetDirectoryName(excelFilePath);
-            //fileWatcher.Filter = Path.GetFileName(excelFilePath);
-            //fileWatcher.NotifyFilter = NotifyFilters.LastWrite;
-            //fileWatcher.Changed += FileWatcher_Changed;
-            //fileWatcher.EnableRaisingEvents = true;
-
         }
 
-
-
-        // 在文件变化时刷新ListBox控件
-        //private void FileWatcher_Changed(object sender, FileSystemEventArgs e)
-        //{
-
-        //    Invoke(new System.Action(() =>
-        //    {
-        //        sheet_listbox.Items.Clear();
-        //        workbook.RefreshAll();
-        //        foreach (Excel.Worksheet worksheet in workbook.Worksheets)
-        //        {
-        //            sheet_listbox.Items.Add(worksheet.Name);
-        //        }
-        //    }));
-        //}
-
-
         //重绘选项页布局
-
-
         private void tabControl1_DrawItem(object sender, DrawItemEventArgs e)
         {
             //调整选项卡文字方向
@@ -132,7 +93,6 @@ namespace ExcelAddIn
         //选项页初始化
         private async void tabControl1_SelectedIndexChanged(object sender, EventArgs e)
         {
-            //Excel.Workbook workbook = ThisAddIn.app.ActiveWorkbook;
             switch (tabControl1.SelectedIndex)
             {
                 case 0:
@@ -205,7 +165,7 @@ namespace ExcelAddIn
                 }
                 if (field_name_combobox.Items.Count > 0)
                 {
-                    field_name_combobox.Text = System.Convert.ToString(field_name_combobox.Items[0]);
+                    field_name_combobox.Text = Convert.ToString(field_name_combobox.Items[0]);
                 }
                 else
                 {
@@ -563,7 +523,7 @@ namespace ExcelAddIn
                     return;
                 }
             }
-            Int32 data_start_row = System.Convert.ToInt32(ThisAddIn.app.InputBox(@"请输入数据起始行的行数（所输数字应大于等于2,若不输入或输入小于2数字则默认数据起始行为第2行）", "输入数据起始行"));
+            Int32 data_start_row = Convert.ToInt32(ThisAddIn.app.InputBox(@"请输入数据起始行的行数（所输数字应大于等于2,若不输入或输入小于2数字则默认数据起始行为第2行）", "输入数据起始行"));
             if (data_start_row < 2)
             {
                 data_start_row = 2;
@@ -610,10 +570,10 @@ namespace ExcelAddIn
                 destination_sheet.Range["A1"].Select();                
 
                 //在合并表中粘贴标题行
-                workbook.Sheets[workbook.Worksheets.Count].Rows["1:" + System.Convert.ToString(titleRow - 1)].Copy(destination_sheet.Cells[1, 1]);
+                workbook.Sheets[workbook.Worksheets.Count].Rows["1:" + Convert.ToString(titleRow - 1)].Copy(destination_sheet.Cells[1, 1]);
 
-                Int32 current_sheet = 1;
-                Int32 total_sheet = workbook.Worksheets.Count;
+                int current_sheet = 1;
+                int total_sheet = workbook.Worksheets.Count;
 
                 //合并各表中数据行
                 switch (exist_bool)
@@ -645,7 +605,7 @@ namespace ExcelAddIn
                         {
                             if (destination_title_range.Value == "序号")
                             {
-                                for (Int32 i = 1; i <= destination_sheet.UsedRange.Columns.Count - titleRow + 1; i++)
+                                for (int i = 1; i <= destination_sheet.UsedRange.Columns.Count - titleRow + 1; i++)
                                 {
                                     destination_sheet.Cells[titleRow - 1 + i, destination_title_range.Column].Value = i;
                                 }
@@ -676,7 +636,7 @@ namespace ExcelAddIn
                         {
                             if (destination_title_range.Value == "序号")
                             {
-                                for (Int32 i = 1; i <= destination_sheet.UsedRange.Columns.Count - titleRow + 1; i++)
+                                for (int i = 1; i <= destination_sheet.UsedRange.Columns.Count - titleRow + 1; i++)
                                 {
                                     destination_sheet.Cells[titleRow - 1 + i, destination_title_range.Column].Value = i;
                                 }
@@ -704,9 +664,6 @@ namespace ExcelAddIn
             }
         }
 
-
-
-
         //不同工作簿并表（UI主线程）
         private void multi_merge_button_Click(object sender, EventArgs e)
         {
@@ -720,7 +677,7 @@ namespace ExcelAddIn
                     return;
                 }
             }
-            Int32 data_start_row = System.Convert.ToInt32(ThisAddIn.app.InputBox(@"请输入数据起始行的行数（所输数字应大于等于2,若不输入或输入小于2数字则默认数据起始行为第2行）", "输入数据起始行"));
+            Int32 data_start_row = Convert.ToInt32(ThisAddIn.app.InputBox(@"请输入数据起始行的行数（所输数字应大于等于2,若不输入或输入小于2数字则默认数据起始行为第2行）", "输入数据起始行"));
             if (data_start_row < 2)
             {
                 data_start_row = 2;
@@ -780,7 +737,7 @@ namespace ExcelAddIn
                     UpdateProgressBar(merge_sheet_progressBar, currentFile_count, totalFile_count,mergeProgressBar_label ,"转移表进度");
 
                     Excel.Workbook source_excel_workbook = ThisAddIn.app.Workbooks.Open(file.FullName);
-                    for (UInt32 i = 1; i <= source_excel_workbook.Worksheets.Count; i++)
+                    for (int i = 1; i <= source_excel_workbook.Worksheets.Count; i++)
                     {
                         if (source_excel_workbook.Worksheets[i].UsedRange.cells.count == 1 && string.IsNullOrEmpty(Convert.ToString(source_excel_workbook.Worksheets[i].UsedRange.cells[1, 1].Value)))
                         {
@@ -877,7 +834,7 @@ namespace ExcelAddIn
             if (all_select_checkbox.Checked == true)
             {
                 all_select_checkbox.Text = "全部取消";
-                for (Int32 i = 0; i <= sheet_listbox.Items.Count - 1; i++)
+                for (int i = 0; i <= sheet_listbox.Items.Count - 1; i++)
                 {
                     sheet_listbox.SetSelected(i, true);
                 }
@@ -970,7 +927,7 @@ namespace ExcelAddIn
             ThisAddIn.app.ScreenUpdating = false;
             ThisAddIn.app.DisplayAlerts = false;
 
-            Int32 selected_sheet_count = sheet_listbox.SelectedItems.Count;
+            int selected_sheet_count = sheet_listbox.SelectedItems.Count;
             if (selected_sheet_count == sheet_listbox.Items.Count)
             {
                 MessageBox.Show("批量删除时不能一次性删除所有表，需至少保留一张表");
@@ -1082,7 +1039,7 @@ namespace ExcelAddIn
                     if (file.Name != ThisAddIn.app.ActiveWorkbook.Name)
                     {
                         Excel.Workbook source_excel_workbook = ThisAddIn.app.Workbooks.Open(file.FullName);
-                        for (UInt32 i = 1; i <= source_excel_workbook.Worksheets.Count; i++)
+                        for (int i = 1; i <= source_excel_workbook.Worksheets.Count; i++)
                         {
                             if (source_excel_workbook.Worksheets[i].UsedRange.cells.count == 1 && string.IsNullOrEmpty(Convert.ToString(source_excel_workbook.Worksheets[i].UsedRange.cells[1, 1].Value)))
                             {
@@ -1137,9 +1094,7 @@ namespace ExcelAddIn
                     contents_button.Enabled = true;                    
                     ThisAddIn.app.DisplayAlerts = true;
                     ThisAddIn.app.ScreenUpdating = true;
-
                 }
-
             }
         }
 
@@ -1171,13 +1126,13 @@ namespace ExcelAddIn
 
             string shtname = "";
             int i = 0;
-            Int16 n = System.Convert.ToInt32(ThisAddIn.app.InputBox("请输入需要新建空表数量：", "输入建表数量"));
+            Int16 n = Convert.ToInt32(ThisAddIn.app.InputBox("请输入需要新建空表数量：", "输入建表数量"));
             ThisAddIn.app.DisplayAlerts = false;
             ThisAddIn.app.ScreenUpdating = false;
             string activated_sheet_name = ThisAddIn.app.ActiveSheet.Name;
             if (n > 0)
             {
-                shtname = System.Convert.ToString(ThisAddIn.app.InputBox("请输入表统一名称,未输入则缺省命名为‘新建表’：", "输入表名称"));
+                shtname = Convert.ToString(ThisAddIn.app.InputBox("请输入表统一名称,未输入则缺省命名为‘新建表’：", "输入表名称"));
                 string pattern = @"[、/?？*\[\]]";
                 if (ContainsSpecialChars(shtname,pattern))
                 {
@@ -1191,7 +1146,7 @@ namespace ExcelAddIn
                 for (i = 1; i <= n; i++)
                 {
                     Excel.Worksheet totelsheet = ThisAddIn.app.ActiveWorkbook.Worksheets.Add(After:ThisAddIn.app.ActiveWorkbook.Worksheets[ThisAddIn.app.ActiveWorkbook.Worksheets.Count]);
-                    totelsheet.Name = shtname + System.Convert.ToString(i);
+                    totelsheet.Name = shtname + Convert.ToString(i);
                 }
             }
             Excel.Worksheet originalWorksheet =(Excel.Worksheet)ThisAddIn.app.ActiveWorkbook.Sheets[activated_sheet_name];
@@ -1324,7 +1279,7 @@ namespace ExcelAddIn
                 }
             }
 
-            UInt32 translation_start_column1 = Convert.ToUInt32(translation_start_column); //将转置起始列转为数值
+            int translation_start_column1 = Convert.ToInt32(translation_start_column); //将转置起始列转为数值
             //新建“转置表”
             Excel.Worksheet trans_sheet = ThisAddIn.app.ActiveWorkbook.Worksheets.Add(Before: worksheet);
             trans_sheet.Name = trans_sheet_name;
@@ -1347,7 +1302,7 @@ namespace ExcelAddIn
 
 
             //复制粘贴转置内容
-            for (UInt32 n = translation_start_column1; n <= used_column_count; n++) //循环重复数据列次
+            for (int n = translation_start_column1; n <= used_column_count; n++) //循环重复数据列次
             {
                 //复制粘贴固定字段
                 worksheet.Activate();
@@ -1416,7 +1371,7 @@ namespace ExcelAddIn
                         }
                         else
                         {
-                            Invoke(new System.Action(() =>
+                            Invoke(new Action(() =>
                             {
                                 which_field_combobox.Items.Add(cell.Value);
                             }));
@@ -1469,8 +1424,8 @@ namespace ExcelAddIn
             ThisAddIn.app.ScreenUpdating = false;
             ThisAddIn.app.DisplayAlerts = false;
 
-            string wbname = System.Convert.ToString(ThisAddIn.app.ActiveWorkbook.Name);
-            string wsname = System.Convert.ToString(ThisAddIn.app.ActiveSheet.name);
+            string wbname = Convert.ToString(ThisAddIn.app.ActiveWorkbook.Name);
+            string wsname = Convert.ToString(ThisAddIn.app.ActiveSheet.name);
             Excel.Worksheet ws = ThisAddIn.app.ActiveSheet;
             long rown = ws.UsedRange.Rows.Count;
             long coln = ws.UsedRange.Columns.Count;
@@ -1647,7 +1602,6 @@ namespace ExcelAddIn
             contents_button.Enabled = true;
             ThisAddIn.app.DisplayAlerts = true;
             ThisAddIn.app.ScreenUpdating = true;
-
         }
 
 
@@ -1840,9 +1794,9 @@ namespace ExcelAddIn
 
         //时间控件，控制完成提示标签显示5秒后消失
         private System.Timers.Timer aTimer = new System.Timers.Timer();
-        private delegate void SafeCallDelegate(System.Windows.Forms.Label label, bool Visible, string Text);
+        private delegate void SafeCallDelegate(Label label, bool Visible, string Text);
 
-        private void ShowLabel(System.Windows.Forms.Label label, bool Visible, string Text)
+        private void ShowLabel(Label label, bool Visible, string Text)
         {
             if (label.InvokeRequired)
             {
@@ -1856,7 +1810,7 @@ namespace ExcelAddIn
             }
         }
 
-        private void HideLabel(System.Windows.Forms.Label label, bool Visible, string Text)
+        private void HideLabel(Label label, bool Visible, string Text)
         {
             if (label.InvokeRequired)
             {
@@ -1890,6 +1844,5 @@ namespace ExcelAddIn
             Regex reg1 = new Regex(reg_rule);
             return reg1.IsMatch(str);
         }
-
     }
 }

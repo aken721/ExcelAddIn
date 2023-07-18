@@ -1,32 +1,13 @@
 ﻿using Microsoft.Office.Tools.Ribbon;
-using System.Threading.Tasks;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Windows.Forms;
-using System.Threading;
 using System.Diagnostics;
-using System.Runtime.InteropServices;
 using Excel = Microsoft.Office.Interop.Excel;
-using FlaUI.Core;
-using FlaUI.Core.AutomationElements;
-using FlaUI.Core.Conditions;
-using FlaUI.Core.Input;
-using FlaUI.Core.WindowsAPI;
-using FlaUI.UIA3;
-using Microsoft.Office.Interop.Excel;
-using System.Windows.Controls.Primitives;
-using System.Reflection;
 using System.IO;
-using System.Windows.Shapes;
-using static System.Net.WebRequestMethods;
-using Microsoft.Office.Tools.Excel;
 
 namespace ExcelAddIn
 {
-
-
     public partial class Ribbon1
     {
         private int readFile;
@@ -112,13 +93,13 @@ namespace ExcelAddIn
                         worksheet.Cells[1, 2] = "旧文件名";
                         worksheet.Cells[1, 3] = "新文件名";
                         List<string> files = new List<string>(Directory.GetFiles(get_directory_path, "*.*", SearchOption.AllDirectories));
-                        files.RemoveAll(file => (System.IO.File.GetAttributes(file) & FileAttributes.Hidden) == FileAttributes.Hidden);
+                        files.RemoveAll(file => (File.GetAttributes(file) & FileAttributes.Hidden) == FileAttributes.Hidden);
                         if (files.Count > 0)                        {
                             
                             for (int i = 1; i <= files.Count; i++)
                             {
-                                string file_name = System.IO.Path.GetFileName(files[i - 1]);
-                                string file_path = System.IO.Path.GetDirectoryName(files[i - 1]);
+                                string file_name = Path.GetFileName(files[i - 1]);
+                                string file_path = Path.GetDirectoryName(files[i - 1]);
                                 workbook.ActiveSheet.Cells[i + 1, 1] = file_path;
                                 workbook.ActiveSheet.Cells[i + 1, 2] = file_name;
                                 workbook.ActiveSheet.Cells[i + 1, 3] = file_name;
@@ -174,32 +155,32 @@ namespace ExcelAddIn
                     string cell2 = workbook.ActiveSheet.Cells[i, 2].Value;
                     string cell3 = workbook.ActiveSheet.Cells[i, 3].Value;
                     string full_path = cell1;
-                    string old_name = System.IO.Path.Combine(cell1, cell2);
-                    string new_name = System.IO.Path.Combine(cell1, cell3);
+                    string old_name = Path.Combine(cell1, cell2);
+                    string new_name = Path.Combine(cell1, cell3);
                     switch (select_f_or_d.Checked == true)
                     {
                         case false:
                             int exist_file = 0;
                             if (old_name != new_name)
                             {
-                                while (System.IO.File.Exists(new_name))
+                                while (File.Exists(new_name))
                                 {
                                     exist_file++;
-                                    new_name = System.IO.Path.Combine(cell1, System.IO.Path.GetFileNameWithoutExtension(new_name) + "(" + exist_file.ToString() + ")" + System.IO.Path.GetExtension(new_name));
+                                    new_name = Path.Combine(cell1, Path.GetFileNameWithoutExtension(new_name) + "(" + exist_file.ToString() + ")" + Path.GetExtension(new_name));
                                 }
-                                System.IO.File.Move(old_name, new_name);
+                                File.Move(old_name, new_name);
                             }
                             break;
                         case true:
                             int exist_fold = 0;
                             if (old_name != new_name)
                             {
-                                while (System.IO.Directory.Exists(new_name))
+                                while (Directory.Exists(new_name))
                                 {
                                     exist_fold++;
-                                    new_name = System.IO.Path.Combine(cell1, cell3 + "(" + exist_fold.ToString() + ")");
+                                    new_name = Path.Combine(cell1, cell3 + "(" + exist_fold.ToString() + ")");
                                 }
-                                System.IO.Directory.Move(old_name, new_name);
+                                Directory.Move(old_name, new_name);
                             }
                             break;
                     }

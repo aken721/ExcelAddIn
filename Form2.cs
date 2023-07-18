@@ -1,19 +1,9 @@
 ﻿using System;
-using System.IO;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement.Button;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 using Excel = Microsoft.Office.Interop.Excel;
 using System.Net.Mail;
-using Microsoft.Office.Interop.Excel;
-using static System.Net.WebRequestMethods;
 
 namespace ExcelAddIn
 {
@@ -47,7 +37,7 @@ namespace ExcelAddIn
             }
             foreach(Control control in this.Controls)
             {
-                if(control is System.Windows.Forms.Label)
+                if(control is Label)
                 {
                     control.TabStop = false;
                 }
@@ -81,7 +71,7 @@ namespace ExcelAddIn
 
 
         //进度条更新函数
-        private void UpdateProgressBar(System.Windows.Forms.ProgressBar progressBar, int currentSheet, int totalSheets, System.Windows.Forms.Label progressBar_result_label, string progressBar_result)
+        private void UpdateProgressBar(ProgressBar progressBar, int currentSheet, int totalSheets, Label progressBar_result_label, string progressBar_result)
         {
             // 计算进度百分比
             int progressPercentage = (int)((double)currentSheet / totalSheets * 100);
@@ -95,8 +85,6 @@ namespace ExcelAddIn
         //发送按钮
         private void send_button_Click(object sender, EventArgs e)
         {
-
-
             if (mailfrom_textBox.Text != "" && mailfrom_comboBox.Text != "" && smtp_textBox.Text != "" && port_textBox.Text != "" && mailpassword_textBox.Text != "")
             {
                 string myMail = mailfrom_textBox.Text + "@" + mailfrom_comboBox.Text;
@@ -117,7 +105,6 @@ namespace ExcelAddIn
                 }
 
                 //读取收件人地址并写入myMailsto列表
-
                 if (mailto_textBox.Text != "" || mailto_comboBox.Text != "")
                 {
                     myMailsto.Clear();
@@ -223,24 +210,18 @@ namespace ExcelAddIn
                         MessageBox.Show(address_key);
                         address_attachment.Add(address_key, myAttachment);
                     }
-                }
-                
-
+                }           
                 int current_maito=1;
                 int total_mailto = myMailsto.Count;
-
-
 
                 //遍历收件人地址，调用发邮件函数发送邮件
                 foreach (string myMailto in myMailsto)
                 {
-                    
                     //更新进度条
                     string result_text = "正在发送" + current_maito.ToString() + "个，共" + total_mailto.ToString() + "个，已完成";
                     UpdateProgressBar(send_progressBar, current_maito, total_mailto, send_progress_label, result_text);
                     send_progress_label.Visible = true;
                     send_progressBar.Visible = true;
-
                     string result;
                     if (ssl_checkBox.Checked)
                     {
@@ -250,10 +231,7 @@ namespace ExcelAddIn
                     {
                         result = SendMail(myMailto, myMail, myPassword, mySmtp, myPort, mySubject, myBody, address_attachment[myMailto]);
                     }
-                    
-                    
                     current_maito++;
-
                     if (result != "finished")
                     {
                         errRecord.Add(myMailto + ":" + result);
@@ -266,9 +244,7 @@ namespace ExcelAddIn
                 else
                 {
                     MessageBox.Show("共" + total_mailto.ToString() + "封邮件，其中有" + errRecord.Count.ToString() + "未发送成功,原因是："+string.Join("\n", errRecord));
-
                 }
-            
             }
             else
             {
