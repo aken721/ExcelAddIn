@@ -39,7 +39,6 @@
             this.excel_extend = this.Factory.CreateRibbonButton();
             this.group2 = this.Factory.CreateRibbonGroup();
             this.send_mail = this.Factory.CreateRibbonButton();
-            this.send_message = this.Factory.CreateRibbonButton();
             this.group3 = this.Factory.CreateRibbonGroup();
             this.files_read = this.Factory.CreateRibbonButton();
             this.file_rename = this.Factory.CreateRibbonButton();
@@ -62,7 +61,7 @@
             this.tab1.Groups.Add(this.group2);
             this.tab1.Groups.Add(this.group3);
             this.tab1.Groups.Add(this.group4);
-            this.tab1.Label = "TabAddIns";
+            this.tab1.Label = "工具箱";
             this.tab1.Name = "tab1";
             // 
             // group1
@@ -83,7 +82,6 @@
             // group2
             // 
             this.group2.Items.Add(this.send_mail);
-            this.group2.Items.Add(this.send_message);
             this.group2.Label = "群发工具";
             this.group2.Name = "group2";
             // 
@@ -95,16 +93,6 @@
             this.send_mail.Name = "send_mail";
             this.send_mail.ShowImage = true;
             this.send_mail.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.send_mail_Click);
-            // 
-            // send_message
-            // 
-            this.send_message.ControlSize = Microsoft.Office.Core.RibbonControlSize.RibbonControlSizeLarge;
-            this.send_message.Enabled = false;
-            this.send_message.Image = global::ExcelAddIn.Properties.Resources.message;
-            this.send_message.Label = "微信群发";
-            this.send_message.Name = "send_message";
-            this.send_message.ShowImage = true;
-            this.send_message.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.send_message_Click);
             // 
             // group3
             // 
@@ -191,7 +179,6 @@
         internal Microsoft.Office.Tools.Ribbon.RibbonGroup group3;
         internal Microsoft.Office.Tools.Ribbon.RibbonGroup group4;
         internal Microsoft.Office.Tools.Ribbon.RibbonButton send_mail;
-        internal Microsoft.Office.Tools.Ribbon.RibbonButton send_message;
         internal Microsoft.Office.Tools.Ribbon.RibbonButton files_read;
         internal Microsoft.Office.Tools.Ribbon.RibbonButton file_rename;
         internal Microsoft.Office.Tools.Ribbon.RibbonToggleButton select_f_or_d;

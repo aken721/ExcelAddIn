@@ -1,15 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Documents;
 using System.Windows.Forms;
 
 
@@ -28,10 +21,9 @@ namespace ExcelAddIn
             format_radioButton1.Select();
             fold_path_textBox.Text = "双击选择文件夹";
             fold_path_textBox.ForeColor = Color.LightGray;
-            fold_path_textBox.Font = new Font(fold_path_textBox.Font, System.Drawing.FontStyle.Italic);
+            fold_path_textBox.Font = new Font(fold_path_textBox.Font, FontStyle.Italic);
 
         }
-
 
         static string get_dir_path;
         static string[] files;
@@ -83,8 +75,6 @@ namespace ExcelAddIn
         }
 
 
-
-
         private void run_button_Click(object sender, EventArgs e)
         {
             fold_path_textBox.Enabled=false;
@@ -95,146 +85,64 @@ namespace ExcelAddIn
 
             if(files.Length > 0)
             {
-                string bat_name = get_dir_path + "\\run.bat";
-                FileInfo run_file = new FileInfo(bat_name);
-                if (run_file.Exists)
+                string[] files_name = new string[files.Length];
+                string[] files_path = new string[files.Length];
+                switch (format_radioButton1.Checked)
                 {
-                    run_file.Delete();
-                }
-                if (format_radioButton1.Checked)
-                {
-                    string[] files_name = new string[files.Length];
-                    string[] files_path = new string[files.Length];
-
-
-                    for (int i = 0; i < files.Length; i++)
-                    {
-                        //从读取文件全名中分解文件名
-                        files_name[i] = Path.GetFileName(files[i]);
-
-                        //从读取文件全名中分解路径，并判断每段文件夹名中是否包含空格
-                        files_path[i] = Path.GetDirectoryName(files[i]);
-                        string file_path = files_path[i];
-                        if(file_path.Contains(" "))
+                    case true:
+                        for (int i = 0; i < files.Length; i++)
                         {
-                            string[] split_file_path = file_path.Split('\\');
-                            for (int a = 0; a < split_file_path.Length; a++)
+                            //从读取文件全名中分解路径
+                            files_path[i] = Path.GetDirectoryName(files[i]);
+
+                            //从读取文件全名中分解文件名
+                            files_name[i] = Path.GetFileName(files[i]);
+
+                            //改新文件名
+                            string new_file_name = files_name[i].Split('-')[1];
+                            if(new_file_name.EndsWith(" ") || new_file_name.StartsWith(" "))
                             {
-                                if (split_file_path[a].Contains(" "))
-                                {
-                                    split_file_path[a] = "\"" + split_file_path[a] + "\"";
-                                }
+                                new_file_name=new_file_name.Trim();
                             }
-                            file_path = string.Join("\\", split_file_path);
-                            files_path[i] = file_path;
-                        }
-                    }
-
-                    //写入新文件名，并判断文件名中是否有空格
-                    string[] new_files_name = new string[files.Length];
-                    for (int n = 0; n < files_name.Length; n++)
-                    {
-                        string new_file_name = files_name[n].Split('-')[1];
-                        if (new_file_name.StartsWith(" ")|| new_file_name.EndsWith(" "))
-                        {
-                            new_file_name = new_file_name.Trim();
-                        }
-                        if (new_file_name.Contains(" "))
-                        {
-                            new_file_name = "\"" + new_file_name + "\"";
-                        }
-                        new_files_name[n] = new_file_name;
-                        if (files_name[n].Contains(" "))
-                        {
-                            files_name[n] = "\"" + files_name[n] + "\"";
-                        }
-                    }
-                    using (StreamWriter bat_file = new StreamWriter(bat_name, false, Encoding.GetEncoding("gb2312")))
-                    {
-                        for (int t = 0; t < files_name.Length; t++)
-                        {
-                            string code = "ren " + files_path[t] + "\\" + files_name[t] + " " + new_files_name[t];
-                            bat_file.WriteLine(code, Encoding.GetEncoding("gb2312"));
-                        }
-                        bat_file.Close();
-                    }                    
-                }
-                else
-                {
-                    string[] files_name = new string[files.Length];
-                    string[] files_path = new string[files.Length];
-
-                    for (int i = 0; i < files.Length; i++)
-                    {
-                        //从读取文件全名中分解文件名
-                        files_name[i] = Path.GetFileName(files[i]);
-
-                        //从读取文件全名中分解路径，并判断每段文件夹名中是否包含空格
-                        files_path[i] = Path.GetDirectoryName(files[i]);
-                        string file_path = files_path[i];
-                        if (file_path.Contains(" "))
-                        {
-                            string[] split_file_path = file_path.Split('\\');
-                            for (int a = 0; a < split_file_path.Length; a++)
+                            int exist_file = 0;
+                            while (File.Exists(Path.Combine(files_path[i], new_file_name)))
                             {
-                                if (split_file_path[a].Contains(" "))
-                                {
-                                    split_file_path[a] = "\"" + split_file_path[a] + "\"";
-                                }
+                                exist_file++;
+                                new_file_name= Path.GetFileNameWithoutExtension(new_file_name)+ "("+exist_file.ToString()+")"+ Path.GetExtension(new_file_name);
                             }
-                            file_path = string.Join("\\", split_file_path);
-                            files_path[i] = file_path;
+                            Directory.Move(Path.Combine(files_path[i],files_name[i]),Path.Combine(files_path[i],new_file_name));
                         }
-                    }
+                        break;
+                    case false:
+                        for (int i = 0; i < files.Length; i++)
+                        {
+                            //从读取文件全名中分解路径
+                            files_path[i] = Path.GetDirectoryName(files[i]);
 
-                    //写入新文件名，并判断文件名中是否有空格
-                    string[] new_files_name = new string[files.Length];
-                    for (int n = 0; n < files_name.Length; n++)
-                    {
-                        string new_file_ext = Path.GetExtension(files_name[n]);
-                        string new_file_name = files_name[n].Split('-')[0];
-                        if(new_file_name.EndsWith(" ")|| new_file_name.StartsWith(" "))
-                        {
-                            new_file_name = new_file_name.Trim();
-                        }
-                        if (new_file_name.Contains(" "))
-                        {
-                            new_file_name = "\"" + new_file_name + "\"";
-                        }
-                        new_files_name[n] = new_file_name+new_file_ext;
-                        if (files_name[n].Contains(" "))
-                        {
-                            files_name[n] = "\"" + files_name[n] + "\"";
-                        }
-                    }
+                            //从读取文件全名中分解文件名
+                            files_name[i] = Path.GetFileName(files[i]);
 
-                    using (StreamWriter bat_file = new StreamWriter(bat_name, false, Encoding.GetEncoding("gb2312")))
-                    {
-                        for (int t = 0; t < files_name.Length; t++)
-                        {
-                            string code = "ren " + files_path[t] + "\\" + files_name[t] + " " + new_files_name[t];
-                            bat_file.WriteLine(code, Encoding.GetEncoding("gb2312"));
+                            //改新文件名
+                            string new_file_name = files_name[i].Split('-')[0];
+                            string new_file_ext = Path.GetExtension(files_name[i]);                            
+                            if (new_file_name.EndsWith(" ") || new_file_name.StartsWith(" "))
+                            {
+                                new_file_name=new_file_name.Trim();
+                            }
+                            int exist_file = 0;
+
+                            while (File.Exists(Path.Combine(files_path[i], new_file_name+new_file_ext)))
+                            {
+                                exist_file++;
+                                new_file_name = new_file_name + "(" + exist_file.ToString() + ")";
+                            }
+                            Directory.Move(Path.Combine(files_path[i],files_name[i]),Path.Combine(files_path[i],new_file_name+new_file_ext));
                         }
-                        bat_file.Close();
-                    }
+                        break;
                 }
 
-                //调用批处理文件改文件名，并且不显示cmd窗口
-                ProcessStartInfo startInfo = new ProcessStartInfo()
-                {
-                    FileName = bat_name,
-                    UseShellExecute = false,
-                    CreateNoWindow = true,
-                    RedirectStandardOutput = true,
-                    RedirectStandardError = true
-                };
-                Process proc = Process.Start(startInfo);
-                proc.WaitForExit();
-                proc.Close();
-                System.IO.File.Delete(bat_name);
                 System.Windows.MessageBox.Show("文件名修改完毕");
                 Process.Start(get_dir_path);
-
                 result_label.Visible = false;
                 fold_path_textBox.Text = "双击选择文件夹";
                 fold_path_textBox.ForeColor = Color.LightGray;
@@ -255,7 +163,9 @@ namespace ExcelAddIn
         //读取文件
         static void ReadFileNames(string folderPath)
         {
-            string[] fileNames = Directory.GetFiles(folderPath,"*.mp3",SearchOption.AllDirectories);
+            List<string> filelist = new List<string>( Directory.GetFiles(folderPath,"*.mp3",SearchOption.AllDirectories));
+            filelist.RemoveAll(file => (File.GetAttributes(file) & FileAttributes.Hidden) == FileAttributes.Hidden);
+            string[] fileNames= filelist.ToArray();
             files = new string[fileNames.Length];
 
             for (int i = 0; i < fileNames.Length; i++)
@@ -264,14 +174,11 @@ namespace ExcelAddIn
             }
         }
 
-
-
         //退出按钮
         private void quit_button_Click(object sender, EventArgs e)
         {
             this.Close();
         }
-
 
     }
 }
