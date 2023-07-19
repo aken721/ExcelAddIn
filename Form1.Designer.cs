@@ -751,7 +751,7 @@
             this.tabPage6.ForeColor = System.Drawing.Color.DarkSlateBlue;
             this.tabPage6.Location = new System.Drawing.Point(124, 4);
             this.tabPage6.Name = "tabPage6";
-            this.tabPage6.Size = new System.Drawing.Size(675, 440);
+            this.tabPage6.Size = new System.Drawing.Size(675, 392);
             this.tabPage6.TabIndex = 5;
             this.tabPage6.Text = "六、退出工具";
             this.tabPage6.UseVisualStyleBackColor = true;
@@ -807,9 +807,10 @@
             this.Controls.Add(this.label4);
             this.Controls.Add(this.pictureBox1);
             this.Controls.Add(this.tabControl1);
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "Form1";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Text = "Form1";
+            this.Text = "表操作工具箱";
             this.Load += new System.EventHandler(this.Form1_Load);
             this.tabControl1.ResumeLayout(false);
             this.tabPage1.ResumeLayout(false);

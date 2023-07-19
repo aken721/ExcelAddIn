@@ -1,4 +1,4 @@
-﻿using Microsoft.Office.Tools.Ribbon;
+﻿ using Microsoft.Office.Tools.Ribbon;
 using System;
 using System.Collections.Generic;
 using System.Windows.Forms;

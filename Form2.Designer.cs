@@ -29,6 +29,7 @@
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form2));
             this.subject_label = new System.Windows.Forms.Label();
             this.body_label = new System.Windows.Forms.Label();
             this.attachment_label = new System.Windows.Forms.Label();
@@ -505,6 +506,7 @@
             this.Controls.Add(this.attachment_label);
             this.Controls.Add(this.body_label);
             this.Controls.Add(this.subject_label);
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "Form2";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "邮件群发";
