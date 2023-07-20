@@ -1126,10 +1126,11 @@ namespace ExcelAddIn
 
             string shtname = "";
             int i = 0;
-            Int16 n = Convert.ToInt32(ThisAddIn.app.InputBox("请输入需要新建空表数量：", "输入建表数量"));
             ThisAddIn.app.DisplayAlerts = false;
             ThisAddIn.app.ScreenUpdating = false;
             string activated_sheet_name = ThisAddIn.app.ActiveSheet.Name;
+            int n = Convert.ToInt32(ThisAddIn.app.InputBox("请输入需要新建空表数量：", "输入建表数量"));
+            
             if (n > 0)
             {
                 shtname = Convert.ToString(ThisAddIn.app.InputBox("请输入表统一名称,未输入则缺省命名为‘新建表’：", "输入表名称"));
@@ -1148,16 +1149,22 @@ namespace ExcelAddIn
                     Excel.Worksheet totelsheet = ThisAddIn.app.ActiveWorkbook.Worksheets.Add(After:ThisAddIn.app.ActiveWorkbook.Worksheets[ThisAddIn.app.ActiveWorkbook.Worksheets.Count]);
                     totelsheet.Name = shtname + Convert.ToString(i);
                 }
+                Excel.Worksheet originalWorksheet = (Excel.Worksheet)ThisAddIn.app.ActiveWorkbook.Sheets[activated_sheet_name];
+                originalWorksheet.Activate();
+                Excel.Range selectrange = ThisAddIn.app.ActiveSheet.Range["A1"];
+                selectrange.Select();
+                ThisAddIn.app.ActiveWorkbook.Save();
+                ThisAddIn.app.DisplayAlerts = true;
+                ThisAddIn.app.ScreenUpdating = true;
+                ShowLabel(run_result_label, true, "新建表完成");
+                StartTimer();
             }
-            Excel.Worksheet originalWorksheet =(Excel.Worksheet)ThisAddIn.app.ActiveWorkbook.Sheets[activated_sheet_name];
-            originalWorksheet.Activate();
-            Excel.Range selectrange = ThisAddIn.app.ActiveSheet.Range["A1"];
-            selectrange.Select();
-            ThisAddIn.app.ActiveWorkbook.Save();
-            ThisAddIn.app.DisplayAlerts = true;
-            ThisAddIn.app.ScreenUpdating = true;
-            ShowLabel(run_result_label, true, "新建表完成");
-            StartTimer();
+            else
+            {
+                ShowLabel(run_result_label, true, "未正确输入新建表数量");
+                StartTimer();
+            }
+
 
             tabControl1.Enabled = true;
             move_sheet_button.Enabled = true;
