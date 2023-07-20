@@ -47,7 +47,7 @@
             this.label1.Location = new System.Drawing.Point(41, 73);
             this.label1.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(163, 20);
+            this.label1.Size = new System.Drawing.Size(208, 24);
             this.label1.TabIndex = 0;
             this.label1.Text = "请双击输入框选择文件夹";
             // 
@@ -58,7 +58,7 @@
             this.format_radioButton1.Location = new System.Drawing.Point(144, 153);
             this.format_radioButton1.Margin = new System.Windows.Forms.Padding(4);
             this.format_radioButton1.Name = "format_radioButton1";
-            this.format_radioButton1.Size = new System.Drawing.Size(87, 21);
+            this.format_radioButton1.Size = new System.Drawing.Size(104, 24);
             this.format_radioButton1.TabIndex = 2;
             this.format_radioButton1.TabStop = true;
             this.format_radioButton1.Text = "歌手 - 歌名";
@@ -71,7 +71,7 @@
             this.format_radioButton2.Location = new System.Drawing.Point(340, 153);
             this.format_radioButton2.Margin = new System.Windows.Forms.Padding(4);
             this.format_radioButton2.Name = "format_radioButton2";
-            this.format_radioButton2.Size = new System.Drawing.Size(87, 21);
+            this.format_radioButton2.Size = new System.Drawing.Size(104, 24);
             this.format_radioButton2.TabIndex = 3;
             this.format_radioButton2.TabStop = true;
             this.format_radioButton2.Text = "歌名 - 歌手";
@@ -110,22 +110,22 @@
             this.result_label.ForeColor = System.Drawing.Color.DarkBlue;
             this.result_label.Location = new System.Drawing.Point(140, 208);
             this.result_label.Name = "result_label";
-            this.result_label.Size = new System.Drawing.Size(37, 20);
+            this.result_label.Size = new System.Drawing.Size(46, 24);
             this.result_label.TabIndex = 6;
             this.result_label.Text = "结果";
             // 
             // fold_path_textBox
             // 
-            this.fold_path_textBox.Location = new System.Drawing.Point(212, 71);
+            this.fold_path_textBox.Location = new System.Drawing.Point(256, 73);
             this.fold_path_textBox.Name = "fold_path_textBox";
-            this.fold_path_textBox.Size = new System.Drawing.Size(265, 23);
+            this.fold_path_textBox.Size = new System.Drawing.Size(265, 27);
             this.fold_path_textBox.TabIndex = 7;
             this.fold_path_textBox.Click += new System.EventHandler(this.fold_path_textBox_Click);
             this.fold_path_textBox.DoubleClick += new System.EventHandler(this.fold_path_textBox_DoubleClick);
             // 
             // Form3
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 17F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(587, 382);
             this.Controls.Add(this.fold_path_textBox);
