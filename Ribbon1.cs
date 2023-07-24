@@ -5,6 +5,7 @@ using System.Windows.Forms;
 using System.Diagnostics;
 using Excel = Microsoft.Office.Interop.Excel;
 using System.IO;
+using Microsoft.Office.Interop.Excel;
 
 namespace ExcelAddIn
 {
@@ -78,13 +79,13 @@ namespace ExcelAddIn
                 }
                 foreach (Excel.Worksheet sheet in workbook.Worksheets)
                 {
-                    if (sheet.Name == "rename")
+                    if (sheet.Name == "_rename")
                     {
-                        sheet.Name = "rename_备份";
+                        sheet.Name = "_rename_备份";
                     }
                 }
                 Excel.Worksheet worksheet = workbook.Worksheets.Add();
-                worksheet.Name = "rename";
+                worksheet.Name = "_rename";
                 worksheet.Activate();
                 switch (select_f_or_d.Checked)
                 {
@@ -94,8 +95,8 @@ namespace ExcelAddIn
                         worksheet.Cells[1, 3] = "新文件名";
                         List<string> files = new List<string>(Directory.GetFiles(get_directory_path, "*.*", SearchOption.AllDirectories));
                         files.RemoveAll(file => (File.GetAttributes(file) & FileAttributes.Hidden) == FileAttributes.Hidden);
-                        if (files.Count > 0)                        {
-                            
+                        if (files.Count > 0)
+                        {                            
                             for (int i = 1; i <= files.Count; i++)
                             {
                                 string file_name = Path.GetFileName(files[i - 1]);
@@ -145,15 +146,14 @@ namespace ExcelAddIn
             ThisAddIn.app.ScreenUpdating = false;
             ThisAddIn.app.DisplayAlerts = false;
 
-            if (!string.IsNullOrEmpty(get_directory_path) && readFile==1)
+            if (!string.IsNullOrEmpty(get_directory_path) && readFile==1 && IsSheetExist(workbook,"_rename"))
             {
-
                 //调用file.move或direction.move修改名
                 for (int i = 2; i <= workbook.ActiveSheet.UsedRange.Rows.Count; i++)
                 {
-                    string cell1 = workbook.ActiveSheet.Cells[i, 1].Value;
-                    string cell2 = workbook.ActiveSheet.Cells[i, 2].Value;
-                    string cell3 = workbook.ActiveSheet.Cells[i, 3].Value;
+                    string cell1 = workbook.Worksheets["_rename"].Cells[i, 1].Value;
+                    string cell2 = workbook.Worksheets["_rename"].Cells[i, 2].Value;
+                    string cell3 = workbook.Worksheets["_rename"].Cells[i, 3].Value;
                     string full_path = cell1;
                     string old_name = Path.Combine(cell1, cell2);
                     string new_name = Path.Combine(cell1, cell3);
@@ -186,14 +186,11 @@ namespace ExcelAddIn
                     }
                 }
 
-                //删除rename表，并显示完成结果
-                workbook.Worksheets["rename"].Delete();
-                foreach (Excel.Worksheet sheet in workbook.Worksheets)
+                //删除_rename表，并显示完成结果
+                workbook.Worksheets["_rename"].Delete();
+                if(IsSheetExist(workbook, "_rename_备份"))
                 {
-                    if (sheet.Name == "rename_备份")
-                    {
-                        workbook.Worksheets["rename_备份"].Name = "rename";
-                    }
+                    workbook.Worksheets["_rename_备份"].Name = "_rename";
                 }
                 MessageBox.Show("文件名修改完毕");
                 Process.Start(get_directory_path);
@@ -231,6 +228,20 @@ namespace ExcelAddIn
         {
             Form3 form3 = new Form3();
             form3.ShowDialog();
+        }
+
+        //判断指定工作簿中指定工作表名是否存在
+        public static bool IsSheetExist(Excel.Workbook workbook,string sheetName)
+        {
+            foreach(Excel.Worksheet worksheet in workbook.Worksheets)
+            {
+                if (worksheet.Name == sheetName)
+                {
+                    return true;
+                    break;
+                }
+            }
+            return false;
         }
     }
 }
