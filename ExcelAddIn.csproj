@@ -209,7 +209,6 @@
       <DependentUpon>Ribbon1.cs</DependentUpon>
     </EmbeddedResource>
     <None Include="ExcelAddIn_TemporaryKey.pfx" />
-    <None Include="License.rtf" />
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
