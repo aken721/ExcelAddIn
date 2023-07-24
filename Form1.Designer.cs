@@ -119,11 +119,10 @@
             this.tabControl1.HotTrack = true;
             this.tabControl1.ItemSize = new System.Drawing.Size(50, 120);
             this.tabControl1.Location = new System.Drawing.Point(0, 1);
-            this.tabControl1.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.tabControl1.Multiline = true;
             this.tabControl1.Name = "tabControl1";
             this.tabControl1.SelectedIndex = 0;
-            this.tabControl1.Size = new System.Drawing.Size(1071, 500);
+            this.tabControl1.Size = new System.Drawing.Size(803, 400);
             this.tabControl1.SizeMode = System.Windows.Forms.TabSizeMode.Fixed;
             this.tabControl1.TabIndex = 0;
             this.tabControl1.DrawItem += new System.Windows.Forms.DrawItemEventHandler(this.tabControl1_DrawItem);
@@ -146,10 +145,9 @@
             this.tabPage1.Font = new System.Drawing.Font("微软雅黑", 10.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.tabPage1.ForeColor = System.Drawing.Color.DarkSlateBlue;
             this.tabPage1.Location = new System.Drawing.Point(124, 4);
-            this.tabPage1.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.tabPage1.Name = "tabPage1";
-            this.tabPage1.Padding = new System.Windows.Forms.Padding(4, 4, 4, 4);
-            this.tabPage1.Size = new System.Drawing.Size(943, 492);
+            this.tabPage1.Padding = new System.Windows.Forms.Padding(3, 3, 3, 3);
+            this.tabPage1.Size = new System.Drawing.Size(675, 392);
             this.tabPage1.TabIndex = 0;
             this.tabPage1.Text = "一、分表功能";
             this.tabPage1.UseVisualStyleBackColor = true;
@@ -159,10 +157,9 @@
             this.splitProgressBar_label.AutoSize = true;
             this.splitProgressBar_label.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.splitProgressBar_label.ForeColor = System.Drawing.Color.SaddleBrown;
-            this.splitProgressBar_label.Location = new System.Drawing.Point(117, 224);
-            this.splitProgressBar_label.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.splitProgressBar_label.Location = new System.Drawing.Point(88, 179);
             this.splitProgressBar_label.Name = "splitProgressBar_label";
-            this.splitProgressBar_label.Size = new System.Drawing.Size(82, 24);
+            this.splitProgressBar_label.Size = new System.Drawing.Size(65, 20);
             this.splitProgressBar_label.TabIndex = 11;
             this.splitProgressBar_label.Text = "分表进度";
             // 
@@ -170,10 +167,9 @@
             // 
             this.clear_button.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.clear_button.ForeColor = System.Drawing.Color.SeaGreen;
-            this.clear_button.Location = new System.Drawing.Point(729, 158);
-            this.clear_button.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.clear_button.Location = new System.Drawing.Point(547, 126);
             this.clear_button.Name = "clear_button";
-            this.clear_button.Size = new System.Drawing.Size(60, 34);
+            this.clear_button.Size = new System.Drawing.Size(45, 27);
             this.clear_button.TabIndex = 10;
             this.clear_button.Text = "清空";
             this.clear_button.UseVisualStyleBackColor = true;
@@ -183,10 +179,9 @@
             // 
             this.splitsheet_delete_button.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.splitsheet_delete_button.ForeColor = System.Drawing.Color.SeaGreen;
-            this.splitsheet_delete_button.Location = new System.Drawing.Point(619, 435);
-            this.splitsheet_delete_button.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.splitsheet_delete_button.Location = new System.Drawing.Point(464, 348);
             this.splitsheet_delete_button.Name = "splitsheet_delete_button";
-            this.splitsheet_delete_button.Size = new System.Drawing.Size(101, 40);
+            this.splitsheet_delete_button.Size = new System.Drawing.Size(76, 32);
             this.splitsheet_delete_button.TabIndex = 9;
             this.splitsheet_delete_button.Text = "删除分表";
             this.splitsheet_delete_button.UseVisualStyleBackColor = true;
@@ -196,10 +191,9 @@
             // 
             this.splitsheet_export_button.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.splitsheet_export_button.ForeColor = System.Drawing.Color.SeaGreen;
-            this.splitsheet_export_button.Location = new System.Drawing.Point(395, 435);
-            this.splitsheet_export_button.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.splitsheet_export_button.Location = new System.Drawing.Point(296, 348);
             this.splitsheet_export_button.Name = "splitsheet_export_button";
-            this.splitsheet_export_button.Size = new System.Drawing.Size(101, 40);
+            this.splitsheet_export_button.Size = new System.Drawing.Size(76, 32);
             this.splitsheet_export_button.TabIndex = 8;
             this.splitsheet_export_button.Text = "分表导出";
             this.splitsheet_export_button.UseVisualStyleBackColor = true;
@@ -207,20 +201,18 @@
             // 
             // split_sheet_progressBar
             // 
-            this.split_sheet_progressBar.Location = new System.Drawing.Point(267, 230);
-            this.split_sheet_progressBar.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.split_sheet_progressBar.Location = new System.Drawing.Point(200, 184);
             this.split_sheet_progressBar.Name = "split_sheet_progressBar";
-            this.split_sheet_progressBar.Size = new System.Drawing.Size(453, 19);
+            this.split_sheet_progressBar.Size = new System.Drawing.Size(340, 15);
             this.split_sheet_progressBar.TabIndex = 7;
             // 
             // split_button
             // 
             this.split_button.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.split_button.ForeColor = System.Drawing.Color.SeaGreen;
-            this.split_button.Location = new System.Drawing.Point(163, 435);
-            this.split_button.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.split_button.Location = new System.Drawing.Point(122, 348);
             this.split_button.Name = "split_button";
-            this.split_button.Size = new System.Drawing.Size(101, 40);
+            this.split_button.Size = new System.Drawing.Size(76, 32);
             this.split_button.TabIndex = 6;
             this.split_button.Text = "分表";
             this.split_button.UseVisualStyleBackColor = true;
@@ -231,10 +223,9 @@
             this.split_sheet_result_label.AutoSize = true;
             this.split_sheet_result_label.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Italic, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.split_sheet_result_label.ForeColor = System.Drawing.Color.SaddleBrown;
-            this.split_sheet_result_label.Location = new System.Drawing.Point(117, 268);
-            this.split_sheet_result_label.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.split_sheet_result_label.Location = new System.Drawing.Point(88, 214);
             this.split_sheet_result_label.Name = "split_sheet_result_label";
-            this.split_sheet_result_label.Size = new System.Drawing.Size(82, 24);
+            this.split_sheet_result_label.Size = new System.Drawing.Size(65, 20);
             this.split_sheet_result_label.TabIndex = 5;
             this.split_sheet_result_label.Text = "分表结果";
             // 
@@ -243,10 +234,9 @@
             this.field_name_combobox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.field_name_combobox.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.field_name_combobox.FormattingEnabled = true;
-            this.field_name_combobox.Location = new System.Drawing.Point(351, 158);
-            this.field_name_combobox.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.field_name_combobox.Location = new System.Drawing.Point(263, 126);
             this.field_name_combobox.Name = "field_name_combobox";
-            this.field_name_combobox.Size = new System.Drawing.Size(368, 31);
+            this.field_name_combobox.Size = new System.Drawing.Size(277, 28);
             this.field_name_combobox.TabIndex = 4;
             // 
             // sheet_name_combobox
@@ -254,10 +244,9 @@
             this.sheet_name_combobox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.sheet_name_combobox.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.sheet_name_combobox.FormattingEnabled = true;
-            this.sheet_name_combobox.Location = new System.Drawing.Point(351, 85);
-            this.sheet_name_combobox.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.sheet_name_combobox.Location = new System.Drawing.Point(263, 68);
             this.sheet_name_combobox.Name = "sheet_name_combobox";
-            this.sheet_name_combobox.Size = new System.Drawing.Size(368, 31);
+            this.sheet_name_combobox.Size = new System.Drawing.Size(277, 28);
             this.sheet_name_combobox.TabIndex = 3;
             this.sheet_name_combobox.TextChanged += new System.EventHandler(this.sheet_name_combobox_TextChanged);
             // 
@@ -266,10 +255,9 @@
             this.label3.AutoSize = true;
             this.label3.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.label3.ForeColor = System.Drawing.Color.Teal;
-            this.label3.Location = new System.Drawing.Point(117, 312);
-            this.label3.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label3.Location = new System.Drawing.Point(88, 250);
             this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(604, 100);
+            this.label3.Size = new System.Drawing.Size(470, 76);
             this.label3.TabIndex = 2;
             this.label3.Text = "注意：\r\n1.分表功能是基于每次所分的表进行操作，所以导出和删除均只能在运行分\r\n表后才有效；\r\n2.如需在不运行分表钱导出或删除，请用导出删除页相关功能。";
             // 
@@ -277,10 +265,9 @@
             // 
             this.label2.AutoSize = true;
             this.label2.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.label2.Location = new System.Drawing.Point(117, 158);
-            this.label2.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label2.Location = new System.Drawing.Point(88, 126);
             this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(208, 24);
+            this.label2.Size = new System.Drawing.Size(163, 20);
             this.label2.TabIndex = 1;
             this.label2.Text = "请选择分表所依据的字段";
             // 
@@ -288,10 +275,9 @@
             // 
             this.label1.AutoSize = true;
             this.label1.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.label1.Location = new System.Drawing.Point(117, 85);
-            this.label1.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label1.Location = new System.Drawing.Point(88, 68);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(172, 24);
+            this.label1.Size = new System.Drawing.Size(135, 20);
             this.label1.TabIndex = 0;
             this.label1.Text = "请选择要分的原始表";
             // 
@@ -301,10 +287,9 @@
             this.tabPage2.Font = new System.Drawing.Font("微软雅黑", 10.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.tabPage2.ForeColor = System.Drawing.Color.DarkSlateBlue;
             this.tabPage2.Location = new System.Drawing.Point(124, 4);
-            this.tabPage2.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.tabPage2.Name = "tabPage2";
-            this.tabPage2.Padding = new System.Windows.Forms.Padding(4, 4, 4, 4);
-            this.tabPage2.Size = new System.Drawing.Size(943, 492);
+            this.tabPage2.Padding = new System.Windows.Forms.Padding(3, 3, 3, 3);
+            this.tabPage2.Size = new System.Drawing.Size(675, 392);
             this.tabPage2.TabIndex = 1;
             this.tabPage2.Text = "二、并表功能";
             this.tabPage2.UseVisualStyleBackColor = true;
@@ -313,8 +298,7 @@
             // 
             this.splitContainer1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.splitContainer1.FixedPanel = System.Windows.Forms.FixedPanel.Panel1;
-            this.splitContainer1.Location = new System.Drawing.Point(4, 4);
-            this.splitContainer1.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.splitContainer1.Location = new System.Drawing.Point(3, 3);
             this.splitContainer1.Name = "splitContainer1";
             this.splitContainer1.Orientation = System.Windows.Forms.Orientation.Horizontal;
             // 
@@ -332,19 +316,17 @@
             this.splitContainer1.Panel2.Controls.Add(this.multi_merge_button);
             this.splitContainer1.Panel2.Controls.Add(this.dir_select_textbox);
             this.splitContainer1.Panel2.Controls.Add(this.label5);
-            this.splitContainer1.Size = new System.Drawing.Size(935, 484);
+            this.splitContainer1.Size = new System.Drawing.Size(669, 386);
             this.splitContainer1.SplitterDistance = 165;
-            this.splitContainer1.SplitterWidth = 5;
             this.splitContainer1.TabIndex = 0;
             // 
             // single_merge_button
             // 
             this.single_merge_button.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.single_merge_button.ForeColor = System.Drawing.Color.SeaGreen;
-            this.single_merge_button.Location = new System.Drawing.Point(341, 46);
-            this.single_merge_button.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.single_merge_button.Location = new System.Drawing.Point(256, 37);
             this.single_merge_button.Name = "single_merge_button";
-            this.single_merge_button.Size = new System.Drawing.Size(160, 76);
+            this.single_merge_button.Size = new System.Drawing.Size(120, 61);
             this.single_merge_button.TabIndex = 0;
             this.single_merge_button.Text = "并表\r\n（同一工作簿）";
             this.single_merge_button.UseVisualStyleBackColor = true;
@@ -355,20 +337,18 @@
             this.mergeProgressBar_label.AutoSize = true;
             this.mergeProgressBar_label.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.mergeProgressBar_label.ForeColor = System.Drawing.Color.SaddleBrown;
-            this.mergeProgressBar_label.Location = new System.Drawing.Point(67, 109);
-            this.mergeProgressBar_label.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.mergeProgressBar_label.Location = new System.Drawing.Point(50, 87);
             this.mergeProgressBar_label.Name = "mergeProgressBar_label";
-            this.mergeProgressBar_label.Size = new System.Drawing.Size(82, 24);
+            this.mergeProgressBar_label.Size = new System.Drawing.Size(65, 20);
             this.mergeProgressBar_label.TabIndex = 8;
             this.mergeProgressBar_label.Text = "完成进度";
             // 
             // merge_sheet_progressBar
             // 
             this.merge_sheet_progressBar.ForeColor = System.Drawing.Color.Purple;
-            this.merge_sheet_progressBar.Location = new System.Drawing.Point(185, 118);
-            this.merge_sheet_progressBar.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.merge_sheet_progressBar.Location = new System.Drawing.Point(139, 94);
             this.merge_sheet_progressBar.Name = "merge_sheet_progressBar";
-            this.merge_sheet_progressBar.Size = new System.Drawing.Size(513, 16);
+            this.merge_sheet_progressBar.Size = new System.Drawing.Size(385, 13);
             this.merge_sheet_progressBar.TabIndex = 7;
             // 
             // merge_sheet_result_label
@@ -376,10 +356,9 @@
             this.merge_sheet_result_label.AutoSize = true;
             this.merge_sheet_result_label.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Italic, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.merge_sheet_result_label.ForeColor = System.Drawing.Color.SaddleBrown;
-            this.merge_sheet_result_label.Location = new System.Drawing.Point(67, 155);
-            this.merge_sheet_result_label.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.merge_sheet_result_label.Location = new System.Drawing.Point(50, 124);
             this.merge_sheet_result_label.Name = "merge_sheet_result_label";
-            this.merge_sheet_result_label.Size = new System.Drawing.Size(82, 24);
+            this.merge_sheet_result_label.Size = new System.Drawing.Size(65, 20);
             this.merge_sheet_result_label.TabIndex = 6;
             this.merge_sheet_result_label.Text = "并表结果";
             // 
@@ -388,10 +367,9 @@
             this.multi_merge_sheet_checkBox.AutoSize = true;
             this.multi_merge_sheet_checkBox.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.multi_merge_sheet_checkBox.ForeColor = System.Drawing.Color.DarkSlateBlue;
-            this.multi_merge_sheet_checkBox.Location = new System.Drawing.Point(120, 255);
-            this.multi_merge_sheet_checkBox.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.multi_merge_sheet_checkBox.Location = new System.Drawing.Point(90, 204);
             this.multi_merge_sheet_checkBox.Name = "multi_merge_sheet_checkBox";
-            this.multi_merge_sheet_checkBox.Size = new System.Drawing.Size(554, 28);
+            this.multi_merge_sheet_checkBox.Size = new System.Drawing.Size(434, 24);
             this.multi_merge_sheet_checkBox.TabIndex = 5;
             this.multi_merge_sheet_checkBox.Text = "当前已打开工作簿的已有表列入合并范围（仅适用多工作簿合并）";
             this.multi_merge_sheet_checkBox.UseVisualStyleBackColor = true;
@@ -400,10 +378,9 @@
             // 
             this.dir_select_button.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.dir_select_button.ForeColor = System.Drawing.Color.SeaGreen;
-            this.dir_select_button.Location = new System.Drawing.Point(620, 59);
-            this.dir_select_button.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.dir_select_button.Location = new System.Drawing.Point(465, 47);
             this.dir_select_button.Name = "dir_select_button";
-            this.dir_select_button.Size = new System.Drawing.Size(79, 32);
+            this.dir_select_button.Size = new System.Drawing.Size(59, 26);
             this.dir_select_button.TabIndex = 4;
             this.dir_select_button.Text = "选择";
             this.dir_select_button.UseVisualStyleBackColor = true;
@@ -413,10 +390,9 @@
             // 
             this.multi_merge_button.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.multi_merge_button.ForeColor = System.Drawing.Color.SeaGreen;
-            this.multi_merge_button.Location = new System.Drawing.Point(341, 190);
-            this.multi_merge_button.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.multi_merge_button.Location = new System.Drawing.Point(256, 152);
             this.multi_merge_button.Name = "multi_merge_button";
-            this.multi_merge_button.Size = new System.Drawing.Size(148, 42);
+            this.multi_merge_button.Size = new System.Drawing.Size(111, 34);
             this.multi_merge_button.TabIndex = 2;
             this.multi_merge_button.Text = "工作簿汇总";
             this.multi_merge_button.UseVisualStyleBackColor = true;
@@ -425,21 +401,19 @@
             // dir_select_textbox
             // 
             this.dir_select_textbox.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.dir_select_textbox.Location = new System.Drawing.Point(289, 59);
-            this.dir_select_textbox.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.dir_select_textbox.Location = new System.Drawing.Point(217, 47);
             this.dir_select_textbox.Name = "dir_select_textbox";
             this.dir_select_textbox.ReadOnly = true;
-            this.dir_select_textbox.Size = new System.Drawing.Size(320, 31);
+            this.dir_select_textbox.Size = new System.Drawing.Size(241, 26);
             this.dir_select_textbox.TabIndex = 1;
             // 
             // label5
             // 
             this.label5.AutoSize = true;
             this.label5.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.label5.Location = new System.Drawing.Point(67, 64);
-            this.label5.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label5.Location = new System.Drawing.Point(50, 51);
             this.label5.Name = "label5";
-            this.label5.Size = new System.Drawing.Size(208, 24);
+            this.label5.Size = new System.Drawing.Size(163, 20);
             this.label5.TabIndex = 0;
             this.label5.Text = "请选择工作簿所在文件夹";
             // 
@@ -453,9 +427,8 @@
             this.tabPage3.Font = new System.Drawing.Font("微软雅黑", 10.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.tabPage3.ForeColor = System.Drawing.Color.DarkSlateBlue;
             this.tabPage3.Location = new System.Drawing.Point(124, 4);
-            this.tabPage3.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.tabPage3.Name = "tabPage3";
-            this.tabPage3.Size = new System.Drawing.Size(943, 492);
+            this.tabPage3.Size = new System.Drawing.Size(675, 392);
             this.tabPage3.TabIndex = 2;
             this.tabPage3.Text = "三、批量导删";
             this.tabPage3.UseVisualStyleBackColor = true;
@@ -464,10 +437,9 @@
             // 
             this.batch_delete_button.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.batch_delete_button.ForeColor = System.Drawing.Color.SeaGreen;
-            this.batch_delete_button.Location = new System.Drawing.Point(483, 352);
-            this.batch_delete_button.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.batch_delete_button.Location = new System.Drawing.Point(362, 282);
             this.batch_delete_button.Name = "batch_delete_button";
-            this.batch_delete_button.Size = new System.Drawing.Size(119, 40);
+            this.batch_delete_button.Size = new System.Drawing.Size(89, 32);
             this.batch_delete_button.TabIndex = 4;
             this.batch_delete_button.Text = "删除所选表";
             this.batch_delete_button.UseVisualStyleBackColor = true;
@@ -477,10 +449,9 @@
             // 
             this.batch_export_button.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.batch_export_button.ForeColor = System.Drawing.Color.SeaGreen;
-            this.batch_export_button.Location = new System.Drawing.Point(217, 352);
-            this.batch_export_button.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.batch_export_button.Location = new System.Drawing.Point(163, 282);
             this.batch_export_button.Name = "batch_export_button";
-            this.batch_export_button.Size = new System.Drawing.Size(119, 40);
+            this.batch_export_button.Size = new System.Drawing.Size(89, 32);
             this.batch_export_button.TabIndex = 3;
             this.batch_export_button.Text = "导出所选表";
             this.batch_export_button.UseVisualStyleBackColor = true;
@@ -490,10 +461,9 @@
             // 
             this.all_select_checkbox.AutoSize = true;
             this.all_select_checkbox.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.all_select_checkbox.Location = new System.Drawing.Point(313, 280);
-            this.all_select_checkbox.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.all_select_checkbox.Location = new System.Drawing.Point(235, 224);
             this.all_select_checkbox.Name = "all_select_checkbox";
-            this.all_select_checkbox.Size = new System.Drawing.Size(104, 28);
+            this.all_select_checkbox.Size = new System.Drawing.Size(84, 24);
             this.all_select_checkbox.TabIndex = 2;
             this.all_select_checkbox.Text = "全部选中";
             this.all_select_checkbox.UseVisualStyleBackColor = true;
@@ -503,12 +473,11 @@
             // 
             this.sheet_listbox.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.sheet_listbox.FormattingEnabled = true;
-            this.sheet_listbox.ItemHeight = 23;
-            this.sheet_listbox.Location = new System.Drawing.Point(313, 122);
-            this.sheet_listbox.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.sheet_listbox.ItemHeight = 20;
+            this.sheet_listbox.Location = new System.Drawing.Point(235, 98);
             this.sheet_listbox.Name = "sheet_listbox";
             this.sheet_listbox.SelectionMode = System.Windows.Forms.SelectionMode.MultiExtended;
-            this.sheet_listbox.Size = new System.Drawing.Size(312, 96);
+            this.sheet_listbox.Size = new System.Drawing.Size(235, 64);
             this.sheet_listbox.TabIndex = 1;
             this.sheet_listbox.SelectedValueChanged += new System.EventHandler(this.sheet_listbox_SelectedValueChanged);
             // 
@@ -516,10 +485,9 @@
             // 
             this.label6.AutoSize = true;
             this.label6.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.label6.Location = new System.Drawing.Point(181, 122);
-            this.label6.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label6.Location = new System.Drawing.Point(136, 98);
             this.label6.Name = "label6";
-            this.label6.Size = new System.Drawing.Size(118, 48);
+            this.label6.Size = new System.Drawing.Size(93, 40);
             this.label6.TabIndex = 0;
             this.label6.Text = "选择要导出\r\n或删除的表：";
             // 
@@ -529,9 +497,8 @@
             this.tabPage4.Font = new System.Drawing.Font("微软雅黑", 10.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.tabPage4.ForeColor = System.Drawing.Color.DarkSlateBlue;
             this.tabPage4.Location = new System.Drawing.Point(124, 4);
-            this.tabPage4.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.tabPage4.Name = "tabPage4";
-            this.tabPage4.Size = new System.Drawing.Size(943, 492);
+            this.tabPage4.Size = new System.Drawing.Size(675, 392);
             this.tabPage4.TabIndex = 6;
             this.tabPage4.Text = "四、实用功能";
             this.tabPage4.UseVisualStyleBackColor = true;
@@ -541,7 +508,6 @@
             this.splitContainer2.Dock = System.Windows.Forms.DockStyle.Fill;
             this.splitContainer2.FixedPanel = System.Windows.Forms.FixedPanel.Panel1;
             this.splitContainer2.Location = new System.Drawing.Point(0, 0);
-            this.splitContainer2.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.splitContainer2.Name = "splitContainer2";
             // 
             // splitContainer2.Panel1
@@ -565,19 +531,17 @@
             this.splitContainer2.Panel2.Controls.Add(this.which_field_combobox);
             this.splitContainer2.Panel2.Controls.Add(this.which_field_label);
             this.splitContainer2.Panel2.Controls.Add(this.function_title_label);
-            this.splitContainer2.Size = new System.Drawing.Size(943, 492);
+            this.splitContainer2.Size = new System.Drawing.Size(675, 392);
             this.splitContainer2.SplitterDistance = 440;
-            this.splitContainer2.SplitterWidth = 5;
             this.splitContainer2.TabIndex = 0;
             // 
             // contents_button
             // 
             this.contents_button.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.contents_button.ForeColor = System.Drawing.Color.SeaGreen;
-            this.contents_button.Location = new System.Drawing.Point(247, 360);
-            this.contents_button.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.contents_button.Location = new System.Drawing.Point(185, 288);
             this.contents_button.Name = "contents_button";
-            this.contents_button.Size = new System.Drawing.Size(120, 62);
+            this.contents_button.Size = new System.Drawing.Size(90, 50);
             this.contents_button.TabIndex = 5;
             this.contents_button.Text = "建立目录页新表";
             this.contents_button.UseVisualStyleBackColor = true;
@@ -587,10 +551,9 @@
             // 
             this.payslip_button.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.payslip_button.ForeColor = System.Drawing.Color.SeaGreen;
-            this.payslip_button.Location = new System.Drawing.Point(60, 361);
-            this.payslip_button.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.payslip_button.Location = new System.Drawing.Point(45, 289);
             this.payslip_button.Name = "payslip_button";
-            this.payslip_button.Size = new System.Drawing.Size(120, 62);
+            this.payslip_button.Size = new System.Drawing.Size(90, 50);
             this.payslip_button.TabIndex = 4;
             this.payslip_button.Text = "一键生成工资条";
             this.payslip_button.UseVisualStyleBackColor = true;
@@ -600,10 +563,9 @@
             // 
             this.regex_button.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.regex_button.ForeColor = System.Drawing.Color.SeaGreen;
-            this.regex_button.Location = new System.Drawing.Point(247, 228);
-            this.regex_button.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.regex_button.Location = new System.Drawing.Point(185, 182);
             this.regex_button.Name = "regex_button";
-            this.regex_button.Size = new System.Drawing.Size(120, 62);
+            this.regex_button.Size = new System.Drawing.Size(90, 50);
             this.regex_button.TabIndex = 3;
             this.regex_button.Text = "正则表达式";
             this.regex_button.UseVisualStyleBackColor = true;
@@ -613,10 +575,9 @@
             // 
             this.transposition_button.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.transposition_button.ForeColor = System.Drawing.Color.SeaGreen;
-            this.transposition_button.Location = new System.Drawing.Point(60, 229);
-            this.transposition_button.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.transposition_button.Location = new System.Drawing.Point(45, 183);
             this.transposition_button.Name = "transposition_button";
-            this.transposition_button.Size = new System.Drawing.Size(120, 62);
+            this.transposition_button.Size = new System.Drawing.Size(90, 50);
             this.transposition_button.TabIndex = 2;
             this.transposition_button.Text = "转置工作表";
             this.transposition_button.UseVisualStyleBackColor = true;
@@ -626,10 +587,9 @@
             // 
             this.add_sheet_button.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.add_sheet_button.ForeColor = System.Drawing.Color.SeaGreen;
-            this.add_sheet_button.Location = new System.Drawing.Point(247, 102);
-            this.add_sheet_button.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.add_sheet_button.Location = new System.Drawing.Point(185, 82);
             this.add_sheet_button.Name = "add_sheet_button";
-            this.add_sheet_button.Size = new System.Drawing.Size(120, 62);
+            this.add_sheet_button.Size = new System.Drawing.Size(90, 50);
             this.add_sheet_button.TabIndex = 1;
             this.add_sheet_button.Text = "一键建立多个工作表";
             this.add_sheet_button.UseVisualStyleBackColor = true;
@@ -639,10 +599,9 @@
             // 
             this.move_sheet_button.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.move_sheet_button.ForeColor = System.Drawing.Color.SeaGreen;
-            this.move_sheet_button.Location = new System.Drawing.Point(60, 102);
-            this.move_sheet_button.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.move_sheet_button.Location = new System.Drawing.Point(45, 82);
             this.move_sheet_button.Name = "move_sheet_button";
-            this.move_sheet_button.Size = new System.Drawing.Size(120, 62);
+            this.move_sheet_button.Size = new System.Drawing.Size(90, 50);
             this.move_sheet_button.TabIndex = 0;
             this.move_sheet_button.Text = "多工作簿表转同工作簿";
             this.move_sheet_button.UseVisualStyleBackColor = true;
@@ -652,10 +611,9 @@
             // 
             this.run_result_label.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Italic, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.run_result_label.ForeColor = System.Drawing.Color.SaddleBrown;
-            this.run_result_label.Location = new System.Drawing.Point(55, 316);
-            this.run_result_label.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.run_result_label.Location = new System.Drawing.Point(41, 253);
             this.run_result_label.Name = "run_result_label";
-            this.run_result_label.Size = new System.Drawing.Size(328, 64);
+            this.run_result_label.Size = new System.Drawing.Size(246, 51);
             this.run_result_label.TabIndex = 9;
             this.run_result_label.Text = "运行结果";
             // 
@@ -663,10 +621,9 @@
             // 
             this.regex_clear_button.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.regex_clear_button.ForeColor = System.Drawing.Color.SeaGreen;
-            this.regex_clear_button.Location = new System.Drawing.Point(303, 398);
-            this.regex_clear_button.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.regex_clear_button.Location = new System.Drawing.Point(227, 318);
             this.regex_clear_button.Name = "regex_clear_button";
-            this.regex_clear_button.Size = new System.Drawing.Size(80, 38);
+            this.regex_clear_button.Size = new System.Drawing.Size(60, 30);
             this.regex_clear_button.TabIndex = 8;
             this.regex_clear_button.Text = "清空";
             this.regex_clear_button.UseVisualStyleBackColor = true;
@@ -676,10 +633,9 @@
             // 
             this.regex_run_button.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.regex_run_button.ForeColor = System.Drawing.Color.SeaGreen;
-            this.regex_run_button.Location = new System.Drawing.Point(80, 396);
-            this.regex_run_button.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.regex_run_button.Location = new System.Drawing.Point(60, 317);
             this.regex_run_button.Name = "regex_run_button";
-            this.regex_run_button.Size = new System.Drawing.Size(80, 38);
+            this.regex_run_button.Size = new System.Drawing.Size(60, 30);
             this.regex_run_button.TabIndex = 7;
             this.regex_run_button.Text = "运行";
             this.regex_run_button.UseVisualStyleBackColor = true;
@@ -688,20 +644,18 @@
             // regex_rule_textbox
             // 
             this.regex_rule_textbox.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.regex_rule_textbox.Location = new System.Drawing.Point(149, 250);
-            this.regex_rule_textbox.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.regex_rule_textbox.Location = new System.Drawing.Point(112, 200);
             this.regex_rule_textbox.Name = "regex_rule_textbox";
-            this.regex_rule_textbox.Size = new System.Drawing.Size(232, 31);
+            this.regex_rule_textbox.Size = new System.Drawing.Size(175, 26);
             this.regex_rule_textbox.TabIndex = 6;
             // 
             // regex_rule_label
             // 
             this.regex_rule_label.AutoSize = true;
             this.regex_rule_label.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.regex_rule_label.Location = new System.Drawing.Point(55, 254);
-            this.regex_rule_label.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.regex_rule_label.Location = new System.Drawing.Point(41, 203);
             this.regex_rule_label.Name = "regex_rule_label";
-            this.regex_rule_label.Size = new System.Drawing.Size(82, 24);
+            this.regex_rule_label.Size = new System.Drawing.Size(65, 20);
             this.regex_rule_label.TabIndex = 5;
             this.regex_rule_label.Text = "过滤规则";
             // 
@@ -720,10 +674,9 @@
             "电话号码",
             "IP地址",
             "自定义"});
-            this.what_type_combobox.Location = new System.Drawing.Point(149, 184);
-            this.what_type_combobox.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.what_type_combobox.Location = new System.Drawing.Point(112, 147);
             this.what_type_combobox.Name = "what_type_combobox";
-            this.what_type_combobox.Size = new System.Drawing.Size(232, 31);
+            this.what_type_combobox.Size = new System.Drawing.Size(175, 28);
             this.what_type_combobox.TabIndex = 4;
             this.what_type_combobox.SelectedIndexChanged += new System.EventHandler(this.what_type_combobox_SelectedIndexChanged);
             // 
@@ -731,10 +684,9 @@
             // 
             this.what_type_label.AutoSize = true;
             this.what_type_label.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.what_type_label.Location = new System.Drawing.Point(55, 188);
-            this.what_type_label.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.what_type_label.Location = new System.Drawing.Point(41, 150);
             this.what_type_label.Name = "what_type_label";
-            this.what_type_label.Size = new System.Drawing.Size(82, 24);
+            this.what_type_label.Size = new System.Drawing.Size(65, 20);
             this.what_type_label.TabIndex = 3;
             this.what_type_label.Text = "提取内容";
             // 
@@ -742,10 +694,9 @@
             // 
             this.which_field_combobox.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.which_field_combobox.FormattingEnabled = true;
-            this.which_field_combobox.Location = new System.Drawing.Point(149, 102);
-            this.which_field_combobox.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.which_field_combobox.Location = new System.Drawing.Point(112, 82);
             this.which_field_combobox.Name = "which_field_combobox";
-            this.which_field_combobox.Size = new System.Drawing.Size(232, 31);
+            this.which_field_combobox.Size = new System.Drawing.Size(175, 28);
             this.which_field_combobox.TabIndex = 2;
             this.which_field_combobox.VisibleChanged += new System.EventHandler(this.which_field_combobox_VisibleChanged);
             // 
@@ -753,10 +704,9 @@
             // 
             this.which_field_label.AutoSize = true;
             this.which_field_label.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.which_field_label.Location = new System.Drawing.Point(55, 106);
-            this.which_field_label.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.which_field_label.Location = new System.Drawing.Point(41, 85);
             this.which_field_label.Name = "which_field_label";
-            this.which_field_label.Size = new System.Drawing.Size(82, 24);
+            this.which_field_label.Size = new System.Drawing.Size(65, 20);
             this.which_field_label.TabIndex = 1;
             this.which_field_label.Text = "提取哪列";
             // 
@@ -767,10 +717,9 @@
             | System.Windows.Forms.AnchorStyles.Right)));
             this.function_title_label.AutoSize = true;
             this.function_title_label.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.function_title_label.Location = new System.Drawing.Point(55, 38);
-            this.function_title_label.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.function_title_label.Location = new System.Drawing.Point(41, 30);
             this.function_title_label.Name = "function_title_label";
-            this.function_title_label.Size = new System.Drawing.Size(84, 25);
+            this.function_title_label.Size = new System.Drawing.Size(65, 19);
             this.function_title_label.TabIndex = 0;
             this.function_title_label.Text = "功能标题";
             this.function_title_label.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
@@ -781,9 +730,8 @@
             this.tabPage5.Font = new System.Drawing.Font("微软雅黑", 10.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.tabPage5.ForeColor = System.Drawing.Color.DarkSlateBlue;
             this.tabPage5.Location = new System.Drawing.Point(124, 4);
-            this.tabPage5.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.tabPage5.Name = "tabPage5";
-            this.tabPage5.Size = new System.Drawing.Size(943, 492);
+            this.tabPage5.Size = new System.Drawing.Size(675, 392);
             this.tabPage5.TabIndex = 4;
             this.tabPage5.Text = "五、使用帮助";
             this.tabPage5.UseVisualStyleBackColor = true;
@@ -791,11 +739,10 @@
             // richTextBox1
             // 
             this.richTextBox1.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.richTextBox1.Location = new System.Drawing.Point(103, 60);
-            this.richTextBox1.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.richTextBox1.Location = new System.Drawing.Point(77, 48);
             this.richTextBox1.Name = "richTextBox1";
             this.richTextBox1.ReadOnly = true;
-            this.richTextBox1.Size = new System.Drawing.Size(691, 399);
+            this.richTextBox1.Size = new System.Drawing.Size(519, 320);
             this.richTextBox1.TabIndex = 0;
             this.richTextBox1.Text = resources.GetString("richTextBox1.Text");
             // 
@@ -804,9 +751,8 @@
             this.tabPage6.Font = new System.Drawing.Font("微软雅黑", 10.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.tabPage6.ForeColor = System.Drawing.Color.DarkSlateBlue;
             this.tabPage6.Location = new System.Drawing.Point(124, 4);
-            this.tabPage6.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.tabPage6.Name = "tabPage6";
-            this.tabPage6.Size = new System.Drawing.Size(943, 492);
+            this.tabPage6.Size = new System.Drawing.Size(675, 392);
             this.tabPage6.TabIndex = 5;
             this.tabPage6.Text = "六、退出工具";
             this.tabPage6.UseVisualStyleBackColor = true;
@@ -822,10 +768,9 @@
             // pictureBox1
             // 
             this.pictureBox1.BackColor = System.Drawing.Color.DarkGreen;
-            this.pictureBox1.Location = new System.Drawing.Point(0, 500);
-            this.pictureBox1.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
+            this.pictureBox1.Location = new System.Drawing.Point(0, 400);
             this.pictureBox1.Name = "pictureBox1";
-            this.pictureBox1.Size = new System.Drawing.Size(1065, 62);
+            this.pictureBox1.Size = new System.Drawing.Size(799, 50);
             this.pictureBox1.TabIndex = 1;
             this.pictureBox1.TabStop = false;
             // 
@@ -836,10 +781,9 @@
             this.label4.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
             this.label4.Font = new System.Drawing.Font("Franklin Gothic Medium", 10.5F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.label4.ForeColor = System.Drawing.SystemColors.Control;
-            this.label4.Location = new System.Drawing.Point(343, 521);
-            this.label4.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label4.Location = new System.Drawing.Point(257, 417);
             this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(355, 23);
+            this.label4.Size = new System.Drawing.Size(285, 18);
             this.label4.TabIndex = 2;
             this.label4.Text = "Copyright © He Kun.  All rights reserved";
             // 
@@ -849,24 +793,22 @@
             this.label7.BackColor = System.Drawing.Color.DarkGreen;
             this.label7.Font = new System.Drawing.Font("Franklin Gothic Medium", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.label7.ForeColor = System.Drawing.Color.Transparent;
-            this.label7.Location = new System.Drawing.Point(16, 524);
-            this.label7.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
+            this.label7.Location = new System.Drawing.Point(12, 419);
             this.label7.Name = "label7";
-            this.label7.Size = new System.Drawing.Size(114, 20);
+            this.label7.Size = new System.Drawing.Size(90, 16);
             this.label7.TabIndex = 3;
-            this.label7.Text = "Version  2.0.1";
+            this.label7.Text = "Version  2.0.2";
             // 
             // Form1
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 15F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1067, 562);
+            this.ClientSize = new System.Drawing.Size(800, 450);
             this.Controls.Add(this.label7);
             this.Controls.Add(this.label4);
             this.Controls.Add(this.pictureBox1);
             this.Controls.Add(this.tabControl1);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
-            this.Margin = new System.Windows.Forms.Padding(4, 4, 4, 4);
             this.Name = "Form1";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "表操作工具箱";
