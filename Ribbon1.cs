@@ -202,6 +202,7 @@ namespace ExcelAddIn
             else
             {
                 MessageBox.Show("没有选择文件夹，请先使用批读文件名功能后再使用该功能");
+                readFile = 0;
             }
         }
 
