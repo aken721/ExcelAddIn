@@ -240,7 +240,6 @@ namespace ExcelAddIn
                 if (worksheet.Name == sheetName)
                 {
                     return true;
-                    break;
                 }
             }
             return false;
