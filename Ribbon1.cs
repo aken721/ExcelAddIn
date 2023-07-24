@@ -6,6 +6,7 @@ using System.Diagnostics;
 using Excel = Microsoft.Office.Interop.Excel;
 using System.IO;
 using Microsoft.Office.Interop.Excel;
+using System.Threading.Tasks;
 
 namespace ExcelAddIn
 {
@@ -89,14 +90,14 @@ namespace ExcelAddIn
                 worksheet.Activate();
                 switch (select_f_or_d.Checked)
                 {
-                    case false:  
+                    case false:
                         worksheet.Cells[1, 1] = "路径";
                         worksheet.Cells[1, 2] = "旧文件名";
                         worksheet.Cells[1, 3] = "新文件名";
                         List<string> files = new List<string>(Directory.GetFiles(get_directory_path, "*.*", SearchOption.AllDirectories));
                         files.RemoveAll(file => (File.GetAttributes(file) & FileAttributes.Hidden) == FileAttributes.Hidden);
                         if (files.Count > 0)
-                        {                            
+                        {
                             for (int i = 1; i <= files.Count; i++)
                             {
                                 string file_name = Path.GetFileName(files[i - 1]);

@@ -146,7 +146,7 @@
             this.tabPage1.ForeColor = System.Drawing.Color.DarkSlateBlue;
             this.tabPage1.Location = new System.Drawing.Point(124, 4);
             this.tabPage1.Name = "tabPage1";
-            this.tabPage1.Padding = new System.Windows.Forms.Padding(3, 3, 3, 3);
+            this.tabPage1.Padding = new System.Windows.Forms.Padding(3);
             this.tabPage1.Size = new System.Drawing.Size(675, 392);
             this.tabPage1.TabIndex = 0;
             this.tabPage1.Text = "一、分表功能";
@@ -288,7 +288,7 @@
             this.tabPage2.ForeColor = System.Drawing.Color.DarkSlateBlue;
             this.tabPage2.Location = new System.Drawing.Point(124, 4);
             this.tabPage2.Name = "tabPage2";
-            this.tabPage2.Padding = new System.Windows.Forms.Padding(3, 3, 3, 3);
+            this.tabPage2.Padding = new System.Windows.Forms.Padding(3);
             this.tabPage2.Size = new System.Drawing.Size(675, 392);
             this.tabPage2.TabIndex = 1;
             this.tabPage2.Text = "二、并表功能";
@@ -797,7 +797,7 @@
             this.label7.Name = "label7";
             this.label7.Size = new System.Drawing.Size(90, 16);
             this.label7.TabIndex = 3;
-            this.label7.Text = "Version  2.0.2";
+            this.label7.Text = "Version  2.1.0";
             // 
             // Form1
             // 
