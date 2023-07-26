@@ -1,7 +1,5 @@
 # ExcelAddIn
 
-####代码安全验证
-[![Security Status](https://www.murphysec.com/platform3/v31/badge/1684046904480055296.svg)](https://www.murphysec.com/console/report/1684046904182259712/1684046904480055296)
 
 #### 介绍
 **以下是 Excel-add-in 插件说明**
@@ -39,4 +37,4 @@
 
 
 
-
+[![Security Status](https://www.murphysec.com/platform3/v31/badge/1684046904480055296.svg)](https://www.murphysec.com/console/report/1684046904182259712/1684046904480055296)
