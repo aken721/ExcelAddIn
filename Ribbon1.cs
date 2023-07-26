@@ -1,12 +1,10 @@
-﻿ using Microsoft.Office.Tools.Ribbon;
+﻿using Microsoft.Office.Tools.Ribbon;
 using System;
 using System.Collections.Generic;
-using System.Windows.Forms;
 using System.Diagnostics;
-using Excel = Microsoft.Office.Interop.Excel;
 using System.IO;
-using Microsoft.Office.Interop.Excel;
-using System.Threading.Tasks;
+using System.Windows.Forms;
+using Excel = Microsoft.Office.Interop.Excel;
 
 namespace ExcelAddIn
 {
@@ -39,12 +37,12 @@ namespace ExcelAddIn
         }
 
         //指定字段名所处的列
-        private  int getUsedRangeColumn(string targetColumn)
+        private int getUsedRangeColumn(string targetColumn)
         {
-            for(int n=1;n<=ThisAddIn.app.ActiveSheet.UsedRange.Columns.Count;n++)
+            for (int n = 1; n <= ThisAddIn.app.ActiveSheet.UsedRange.Columns.Count; n++)
             {
-                string targetValue= ThisAddIn.app.ActiveSheet.Cells[1,n].Value.ToString();
-                if( targetValue== targetColumn) return n;
+                string targetValue = ThisAddIn.app.ActiveSheet.Cells[1, n].Value.ToString();
+                if (targetValue == targetColumn) return n;
             }
             return 0;
         }
@@ -56,7 +54,7 @@ namespace ExcelAddIn
         //批读文件名
         private void files_read_Click(object sender, RibbonControlEventArgs e)
         {
-            Excel.Workbook workbook = ThisAddIn.app.ActiveWorkbook;            
+            Excel.Workbook workbook = ThisAddIn.app.ActiveWorkbook;
             ThisAddIn.app.DisplayAlerts = false;
             ThisAddIn.app.ScreenUpdating = false;
 
@@ -141,13 +139,13 @@ namespace ExcelAddIn
         }
 
         //批量重命名
-        private  void file_rename_Click(object sender, RibbonControlEventArgs e)
+        private void file_rename_Click(object sender, RibbonControlEventArgs e)
         {
             Excel.Workbook workbook = ThisAddIn.app.ActiveWorkbook;
             ThisAddIn.app.ScreenUpdating = false;
             ThisAddIn.app.DisplayAlerts = false;
 
-            if (!string.IsNullOrEmpty(get_directory_path) && readFile==1 && IsSheetExist(workbook,"_rename"))
+            if (!string.IsNullOrEmpty(get_directory_path) && readFile == 1 && IsSheetExist(workbook, "_rename"))
             {
                 //调用file.move或direction.move修改名
                 for (int i = 2; i <= workbook.ActiveSheet.UsedRange.Rows.Count; i++)
@@ -189,7 +187,7 @@ namespace ExcelAddIn
 
                 //删除_rename表，并显示完成结果
                 workbook.Worksheets["_rename"].Delete();
-                if(IsSheetExist(workbook, "_rename_备份"))
+                if (IsSheetExist(workbook, "_rename_备份"))
                 {
                     workbook.Worksheets["_rename_备份"].Name = "_rename";
                 }
@@ -210,7 +208,7 @@ namespace ExcelAddIn
         //文件目录选项
         private void select_f_or_d_Click(object sender, RibbonControlEventArgs e)
         {
-            if(select_f_or_d.Checked==true)
+            if (select_f_or_d.Checked == true)
             {
                 select_f_or_d.Image = ExcelAddIn.Properties.Resources.Radio_Button_on;
                 select_f_or_d.Label = "改文件夹名";
@@ -233,9 +231,9 @@ namespace ExcelAddIn
         }
 
         //判断指定工作簿中指定工作表名是否存在
-        public static bool IsSheetExist(Excel.Workbook workbook,string sheetName)
+        public static bool IsSheetExist(Excel.Workbook workbook, string sheetName)
         {
-            foreach(Excel.Worksheet worksheet in workbook.Worksheets)
+            foreach (Excel.Worksheet worksheet in workbook.Worksheets)
             {
                 if (worksheet.Name == sheetName)
                 {

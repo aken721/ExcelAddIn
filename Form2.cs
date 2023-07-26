@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Net.Mail;
 using System.Windows.Forms;
 using Excel = Microsoft.Office.Interop.Excel;
-using System.Net.Mail;
 
 namespace ExcelAddIn
 {
@@ -35,13 +35,13 @@ namespace ExcelAddIn
             {
                 mailto_comboBox.Items.Add(ThisAddIn.app.ActiveSheet.Cells[1, i].Text);
             }
-            foreach(Control control in this.Controls)
+            foreach (Control control in this.Controls)
             {
-                if(control is Label)
+                if (control is Label)
                 {
                     control.TabStop = false;
                 }
-            }            
+            }
         }
 
         //发送附件radioButton选中或未选中
@@ -95,8 +95,8 @@ namespace ExcelAddIn
                 string myAttachpath = attachment_textBox.Text;
 
                 string myBody = body_richTextBox.Text;
-                int address_column=0;
-                int attachment_column=0;
+                int address_column = 0;
+                int attachment_column = 0;
 
                 if (attachment_textBox.Text == "请手工输入附件所在目录的完整路径，或双击选择目录" || attachment_textBox.Text == "请手工输入文件的完整路径，或双击选择文件")
                 {
@@ -129,7 +129,7 @@ namespace ExcelAddIn
                             }
                         }
                         foreach (Excel.Range records_range in ThisAddIn.app.ActiveSheet.Range[ThisAddIn.app.ActiveSheet.Cells[2, address_column], ThisAddIn.app.ActiveSheet.Cells[ThisAddIn.app.ActiveSheet.UsedRange.Rows.Count, address_column]])
-                        {                            
+                        {
                             if (!string.IsNullOrEmpty(records_range.Value) && !myMailsto.Contains(records_range.Value))
                             {
                                 myMailsto.Add(records_range.Value);
@@ -157,7 +157,7 @@ namespace ExcelAddIn
                             }
                         }
                         address_attachment.Clear();
-                        for(int i=2;i<=ThisAddIn.app.ActiveSheet.UsedRange.Rows.Count;i++)
+                        for (int i = 2; i <= ThisAddIn.app.ActiveSheet.UsedRange.Rows.Count; i++)
                         {
                             if (!address_attachment.ContainsKey(ThisAddIn.app.ActiveSheet.Cells[i, address_column].Value))
                             {
@@ -183,19 +183,19 @@ namespace ExcelAddIn
                                 else
                                 {
                                     dic_value.Add(myAttachpath + "\\" + attach_path);
-                                }                              
-                                address_attachment.Add(dic_key,dic_value);
+                                }
+                                address_attachment.Add(dic_key, dic_value);
                             }
                             else
                             {
                                 continue;
-                            }                            
+                            }
                         }
                     }
                     else
                     {
                         address_attachment.Clear();
-                        foreach(string address_key in myMailsto)
+                        foreach (string address_key in myMailsto)
                         {
                             MessageBox.Show(address_key);
                             address_attachment.Add(address_key, myAttachment);
@@ -210,8 +210,8 @@ namespace ExcelAddIn
                         MessageBox.Show(address_key);
                         address_attachment.Add(address_key, myAttachment);
                     }
-                }           
-                int current_maito=1;
+                }
+                int current_maito = 1;
                 int total_mailto = myMailsto.Count;
 
                 //遍历收件人地址，调用发邮件函数发送邮件
@@ -225,7 +225,7 @@ namespace ExcelAddIn
                     string result;
                     if (ssl_checkBox.Checked)
                     {
-                        result = SendMail(myMailto, myMail, myPassword, mySmtp, myPort, mySubject, myBody, address_attachment[myMailto],true);
+                        result = SendMail(myMailto, myMail, myPassword, mySmtp, myPort, mySubject, myBody, address_attachment[myMailto], true);
                     }
                     else
                     {
@@ -239,11 +239,11 @@ namespace ExcelAddIn
                 }
                 if (errRecord.Count == 0)
                 {
-                    MessageBox.Show("共"+total_mailto.ToString()+"封邮件，全部发送成功");
+                    MessageBox.Show("共" + total_mailto.ToString() + "封邮件，全部发送成功");
                 }
                 else
                 {
-                    MessageBox.Show("共" + total_mailto.ToString() + "封邮件，其中有" + errRecord.Count.ToString() + "未发送成功,原因是："+string.Join("\n", errRecord));
+                    MessageBox.Show("共" + total_mailto.ToString() + "封邮件，其中有" + errRecord.Count.ToString() + "未发送成功,原因是：" + string.Join("\n", errRecord));
                 }
             }
             else
@@ -254,7 +254,7 @@ namespace ExcelAddIn
 
 
         //邮件发送
-        private string SendMail(string mailTo, string mailFrom, string password, string mailSmtp, string smtPort, string mailSubject, string mailBody, List<string> mailAttachPaths=null,bool ssl=false)
+        private string SendMail(string mailTo, string mailFrom, string password, string mailSmtp, string smtPort, string mailSubject, string mailBody, List<string> mailAttachPaths = null, bool ssl = false)
         {
             try
             {
@@ -278,7 +278,7 @@ namespace ExcelAddIn
                 mail.IsBodyHtml = true;
 
                 //添加附件
-                if (mailAttachPaths!=null)
+                if (mailAttachPaths != null)
                 {
                     foreach (string mailAttachPath in mailAttachPaths)
                     {
@@ -653,7 +653,7 @@ namespace ExcelAddIn
             }
         }
 
-        
+
         //密码可见图片单击时
         private void mailpassword_pictureBox_Click(object sender, EventArgs e)
         {
@@ -682,7 +682,7 @@ namespace ExcelAddIn
             }
         }
 
-        
+
         private void mailfrom_comboBox_GotFocus(object sender, EventArgs e)
         {
             mailfrom_comboBox.Text = mailfrom_comboBox.Items[0].ToString();

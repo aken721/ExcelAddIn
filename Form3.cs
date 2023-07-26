@@ -47,7 +47,7 @@ namespace ExcelAddIn
                 fold_path_textBox.ForeColor = Color.Black;
                 fold_path_textBox.Font = new Font(fold_path_textBox.Font, System.Drawing.FontStyle.Regular);
                 get_dir_path = select_path;
-                ReadFileNames(get_dir_path); 
+                ReadFileNames(get_dir_path);
                 result_label.Text = "文件夹中现有格式参考：" + Path.GetFileName(files[0]);
                 result_label.Visible = true;
             }
@@ -59,7 +59,7 @@ namespace ExcelAddIn
                     fold_path_textBox.Text = "双击选择文件夹";
                     fold_path_textBox.ForeColor = Color.LightGray;
                     fold_path_textBox.Font = new Font(fold_path_textBox.Font, System.Drawing.FontStyle.Italic);
-                }                
+                }
             }
         }
 
@@ -68,7 +68,7 @@ namespace ExcelAddIn
         {
             if (fold_path_textBox.Text == "双击选择文件夹")
             {
-                fold_path_textBox.Text="" ;
+                fold_path_textBox.Text = "";
                 result_label.Text = "";
                 result_label.Visible = false;
             }
@@ -77,13 +77,13 @@ namespace ExcelAddIn
 
         private void run_button_Click(object sender, EventArgs e)
         {
-            fold_path_textBox.Enabled=false;
+            fold_path_textBox.Enabled = false;
             run_button.Enabled = false;
             quit_button.Enabled = false;
             format_radioButton1.Enabled = false;
             format_radioButton2.Enabled = false;
 
-            if(files.Length > 0)
+            if (files.Length > 0)
             {
                 string[] files_name = new string[files.Length];
                 string[] files_path = new string[files.Length];
@@ -100,17 +100,17 @@ namespace ExcelAddIn
 
                             //改新文件名
                             string new_file_name = files_name[i].Split('-')[1];
-                            if(new_file_name.EndsWith(" ") || new_file_name.StartsWith(" "))
+                            if (new_file_name.EndsWith(" ") || new_file_name.StartsWith(" "))
                             {
-                                new_file_name=new_file_name.Trim();
+                                new_file_name = new_file_name.Trim();
                             }
                             int exist_file = 0;
                             while (File.Exists(Path.Combine(files_path[i], new_file_name)))
                             {
                                 exist_file++;
-                                new_file_name= Path.GetFileNameWithoutExtension(new_file_name)+ "("+exist_file.ToString()+")"+ Path.GetExtension(new_file_name);
+                                new_file_name = Path.GetFileNameWithoutExtension(new_file_name) + "(" + exist_file.ToString() + ")" + Path.GetExtension(new_file_name);
                             }
-                            Directory.Move(Path.Combine(files_path[i],files_name[i]),Path.Combine(files_path[i],new_file_name));
+                            Directory.Move(Path.Combine(files_path[i], files_name[i]), Path.Combine(files_path[i], new_file_name));
                         }
                         break;
                     case false:
@@ -124,19 +124,19 @@ namespace ExcelAddIn
 
                             //改新文件名
                             string new_file_name = files_name[i].Split('-')[0];
-                            string new_file_ext = Path.GetExtension(files_name[i]);                            
+                            string new_file_ext = Path.GetExtension(files_name[i]);
                             if (new_file_name.EndsWith(" ") || new_file_name.StartsWith(" "))
                             {
-                                new_file_name=new_file_name.Trim();
+                                new_file_name = new_file_name.Trim();
                             }
                             int exist_file = 0;
 
-                            while (File.Exists(Path.Combine(files_path[i], new_file_name+new_file_ext)))
+                            while (File.Exists(Path.Combine(files_path[i], new_file_name + new_file_ext)))
                             {
                                 exist_file++;
                                 new_file_name = new_file_name + "(" + exist_file.ToString() + ")";
                             }
-                            Directory.Move(Path.Combine(files_path[i],files_name[i]),Path.Combine(files_path[i],new_file_name+new_file_ext));
+                            Directory.Move(Path.Combine(files_path[i], files_name[i]), Path.Combine(files_path[i], new_file_name + new_file_ext));
                         }
                         break;
                 }
@@ -163,9 +163,9 @@ namespace ExcelAddIn
         //读取文件
         static void ReadFileNames(string folderPath)
         {
-            List<string> filelist = new List<string>( Directory.GetFiles(folderPath,"*.mp3",SearchOption.AllDirectories));
+            List<string> filelist = new List<string>(Directory.GetFiles(folderPath, "*.mp3", SearchOption.AllDirectories));
             filelist.RemoveAll(file => (File.GetAttributes(file) & FileAttributes.Hidden) == FileAttributes.Hidden);
-            string[] fileNames= filelist.ToArray();
+            string[] fileNames = filelist.ToArray();
             files = new string[fileNames.Length];
 
             for (int i = 0; i < fileNames.Length; i++)

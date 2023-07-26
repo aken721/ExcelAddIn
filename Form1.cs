@@ -2,14 +2,14 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Drawing;
-using System.Linq;
-using System.Threading.Tasks;
-using System.Windows.Forms;
-using System.Text.RegularExpressions;
-using System.Timers;
-using Excel = Microsoft.Office.Interop.Excel;
-using System.Threading;
 using System.IO;
+using System.Linq;
+using System.Text.RegularExpressions;
+using System.Threading;
+using System.Threading.Tasks;
+using System.Timers;
+using System.Windows.Forms;
+using Excel = Microsoft.Office.Interop.Excel;
 
 
 
@@ -20,7 +20,7 @@ namespace ExcelAddIn
 
         private Excel.Workbook workbook;
         private string excelFilePath;
-        private Int32 used_time_count=0;
+        private Int32 used_time_count = 0;
         private bool res = false;
         private Thread thread;
         private List<string> active_sheet_names = new List<string>();
@@ -50,7 +50,7 @@ namespace ExcelAddIn
             split_sheet_result_label.Visible = false;
             split_sheet_result_label.Text = "";
             split_sheet_progressBar.Visible = false;
-            splitProgressBar_label.Visible=false;
+            splitProgressBar_label.Visible = false;
 
             if (active_sheet_names.Count > 0)
             {
@@ -191,8 +191,8 @@ namespace ExcelAddIn
                 StartTimer();
                 return;
             }
-            int field_column=0;
-            foreach (Excel.Range range in workbook.Worksheets[sheet_name_combobox.Text].Range[workbook.Worksheets[sheet_name_combobox.Text].Cells[1,1], workbook.Worksheets[sheet_name_combobox.Text].Cells[1, workbook.Worksheets[sheet_name_combobox.Text].UsedRange.Columns.Count]])
+            int field_column = 0;
+            foreach (Excel.Range range in workbook.Worksheets[sheet_name_combobox.Text].Range[workbook.Worksheets[sheet_name_combobox.Text].Cells[1, 1], workbook.Worksheets[sheet_name_combobox.Text].Cells[1, workbook.Worksheets[sheet_name_combobox.Text].UsedRange.Columns.Count]])
             {
                 if (range.Value == field_name_combobox.Text)
                 {
@@ -234,9 +234,9 @@ namespace ExcelAddIn
                 int total_record = 0;
 
                 //将去重后的表名加入数组
-                foreach (Excel.Range range in workbook.Worksheets[sheetName].Range[workbook.Worksheets[sheetName].Cells[2,selectFieldsColumn],workbook.Worksheets[sheetName].Cells[record_row, selectFieldsColumn]])
+                foreach (Excel.Range range in workbook.Worksheets[sheetName].Range[workbook.Worksheets[sheetName].Cells[2, selectFieldsColumn], workbook.Worksheets[sheetName].Cells[record_row, selectFieldsColumn]])
                 {
-                    if (records.Contains(range.Value)|| string.IsNullOrEmpty(range.Value))
+                    if (records.Contains(range.Value) || string.IsNullOrEmpty(range.Value))
                     {
                         continue;
                     }
@@ -244,10 +244,10 @@ namespace ExcelAddIn
                     {
                         records.Add(range.Value);
                     }
-                 }
+                }
 
                 total_record = records.Count;
-               
+
                 //动态更新一个分表工作簿中所有表的名称
                 List<string> dynamic_sheet_name = new List<string>();
 
@@ -278,14 +278,14 @@ namespace ExcelAddIn
                         int i = 1;
                         do { i++; } while (dynamic_sheet_name.Contains(record + i.ToString()));
                         add_sheet.Name = record + i.ToString();
-                    }                    
+                    }
                     workbook.Worksheets[sheetName].select();
                     ThisAddIn.app.ActiveSheet.Range[ThisAddIn.app.ActiveSheet.Cells[1, 1], ThisAddIn.app.ActiveSheet.Cells[1, ThisAddIn.app.ActiveSheet.UsedRange.Columns.Count]].Select();
                     ThisAddIn.app.Selection.AutoFilter(selectFieldsColumn, record);
                     ThisAddIn.app.ActiveSheet.Rows[1].Select();
                     ThisAddIn.app.ActiveSheet.Range[ThisAddIn.app.Selection, ThisAddIn.app.Selection.End(Excel.XlDirection.xlDown)].Select();
                     ThisAddIn.app.Selection.Copy(ThisAddIn.app.ActiveWorkbook.Worksheets[record].Range["A1"]);
-                    current_record ++;
+                    current_record++;
                 }
                 ThisAddIn.app.ActiveSheet.Range[ThisAddIn.app.ActiveSheet.Cells[1, 1], ThisAddIn.app.ActiveSheet.Cells[1, ThisAddIn.app.ActiveSheet.UsedRange.Columns.Count]].AutoFilter();
                 ThisAddIn.app.ActiveSheet.Range["A1"].Select();
@@ -299,9 +299,9 @@ namespace ExcelAddIn
                         if (rng.Value == "序号")
                         {
                             int tt = rng.Column;
-                            for (int number = 1; number <ThisAddIn.app.ActiveSheet.UsedRange.Rows.count; number++)
+                            for (int number = 1; number < ThisAddIn.app.ActiveSheet.UsedRange.Rows.count; number++)
                             {
-                                ThisAddIn.app.ActiveSheet.Cells[number+1,tt].Value = number;
+                                ThisAddIn.app.ActiveSheet.Cells[number + 1, tt].Value = number;
                             }
                             break;
                         }
@@ -322,7 +322,7 @@ namespace ExcelAddIn
                 {
                     new_sheet_names.Clear();
                 }
-                foreach(Excel.Worksheet newsheet in workbook.Worksheets)
+                foreach (Excel.Worksheet newsheet in workbook.Worksheets)
                 {
                     if (!active_sheet_names.Contains(newsheet.Name))
                     {
@@ -400,7 +400,7 @@ namespace ExcelAddIn
                         {
                             Directory.CreateDirectory(create_dir);
                         }
-                        if ( !File.Exists(save_as1)&& exportsheet.Name != ThisAddIn.app.ActiveWorkbook.Name.Split('.')[0])
+                        if (!File.Exists(save_as1) && exportsheet.Name != ThisAddIn.app.ActiveWorkbook.Name.Split('.')[0])
                         {
                             Excel.Workbook exportworkbook = ThisAddIn.app.Workbooks.Add();
                             exportsheet.Copy(exportworkbook.Sheets[1]);
@@ -413,8 +413,8 @@ namespace ExcelAddIn
                             do
                             {
                                 i++;
-                               save_as2 = create_dir + "\\" + exportsheet.Name + i.ToString() + ".xlsx";
-                            } while (File.Exists(save_as2).ToString() == "true" || exportsheet.Name+i.ToString() == ThisAddIn.app.ActiveWorkbook.Name.Split('.')[0]);
+                                save_as2 = create_dir + "\\" + exportsheet.Name + i.ToString() + ".xlsx";
+                            } while (File.Exists(save_as2).ToString() == "true" || exportsheet.Name + i.ToString() == ThisAddIn.app.ActiveWorkbook.Name.Split('.')[0]);
                             Excel.Workbook exportworkbook = ThisAddIn.app.Workbooks.Add();
                             exportsheet.Copy(exportworkbook.Sheets[1]);
                             exportworkbook.Sheets[1].Name = exportsheet.Name;
@@ -423,9 +423,9 @@ namespace ExcelAddIn
                         }
                     }
                     current_sheet++;
-                }   
+                }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 MessageBox.Show("导出错误，原因是：" + ex.Message);
             }
@@ -464,7 +464,7 @@ namespace ExcelAddIn
 
             if (new_sheet_names.Count > 0)
             {
-                foreach(Excel.Worksheet deletesheet in workbook.Worksheets)
+                foreach (Excel.Worksheet deletesheet in workbook.Worksheets)
                 {
                     if (new_sheet_names.Contains(deletesheet.Name))
                     {
@@ -501,12 +501,12 @@ namespace ExcelAddIn
             string select_export_path = folderBrowserDialog1.SelectedPath;
             if (!string.IsNullOrEmpty(select_export_path))
             {
-                dir_select_textbox.Text=select_export_path;
+                dir_select_textbox.Text = select_export_path;
             }
             else
             {
                 MessageBox.Show("未选择需合并文件所在文件夹");
-            }                  
+            }
         }
 
 
@@ -539,8 +539,8 @@ namespace ExcelAddIn
             }
 
             //启动并表线程
-            thread = new Thread(() =>mergeTask(data_start_row,active_sheet_names));
-            thread.Start();            
+            thread = new Thread(() => mergeTask(data_start_row, active_sheet_names));
+            thread.Start();
             merge_sheet_timer.Interval = 1000;
             merge_sheet_timer.Enabled = true;
             merge_sheet_result_label.Visible = true;
@@ -551,7 +551,7 @@ namespace ExcelAddIn
 
 
         //同一工作簿并表（程序执行线程）
-        private void mergeTask(Int32 titleRow,List<string> unMergeSheets,bool exist_bool=true)
+        private void mergeTask(Int32 titleRow, List<string> unMergeSheets, bool exist_bool = true)
         {
             try
             {
@@ -567,7 +567,7 @@ namespace ExcelAddIn
                 Excel.Worksheet destination_sheet = workbook.Worksheets.Add(Before: workbook.Sheets[1]);
                 destination_sheet.Name = "并表汇总";
                 destination_sheet.Activate();
-                destination_sheet.Range["A1"].Select();                
+                destination_sheet.Range["A1"].Select();
 
                 //在合并表中粘贴标题行
                 workbook.Sheets[workbook.Worksheets.Count].Rows["1:" + Convert.ToString(titleRow - 1)].Copy(destination_sheet.Cells[1, 1]);
@@ -581,7 +581,7 @@ namespace ExcelAddIn
                     case true:
                         foreach (Excel.Worksheet source_sheet in workbook.Worksheets)
                         {
-                              if (source_sheet.Name != "并表汇总")
+                            if (source_sheet.Name != "并表汇总")
                             {
                                 //更新进度条
                                 UpdateProgressBar(merge_sheet_progressBar, current_sheet, total_sheet - 1, mergeProgressBar_label, "并表进度");
@@ -644,7 +644,7 @@ namespace ExcelAddIn
                         }
                         break;
                 }
-                
+
             }
             catch (Exception ex)
             {
@@ -692,9 +692,9 @@ namespace ExcelAddIn
             {
                 active_sheet_names.Add(active_sheet_name.Name);
             }
-            
+
             //启动并表线程
-            thread = new Thread(() => multiMergeTask(data_start_row,active_sheet_names));
+            thread = new Thread(() => multiMergeTask(data_start_row, active_sheet_names));
             thread.Start();
             merge_sheet_timer.Interval = 1000;
             merge_sheet_timer.Enabled = true;
@@ -704,7 +704,7 @@ namespace ExcelAddIn
         }
 
         //不同工作簿并表（程序执行线程）
-        private void multiMergeTask(Int32 titleRow,List<string> activeSheetNames)
+        private void multiMergeTask(Int32 titleRow, List<string> activeSheetNames)
         {
             tabControl1.Enabled = false;
             single_merge_button.Enabled = false;
@@ -722,7 +722,7 @@ namespace ExcelAddIn
             string source_workbook_name = null;
             ThisAddIn.app.ScreenUpdating = false;
             ThisAddIn.app.DisplayAlerts = false;
-            
+
 
             //获取当前打开excel文件名称
             int totalFile_count = get_File_Count(dir_select_textbox.Text, "*.xls*");
@@ -732,7 +732,7 @@ namespace ExcelAddIn
                 if (file.Name != ThisAddIn.app.ActiveWorkbook.Name)
                 {
                     //更新进度条
-                    UpdateProgressBar(merge_sheet_progressBar, currentFile_count, totalFile_count,mergeProgressBar_label ,"转移表进度");
+                    UpdateProgressBar(merge_sheet_progressBar, currentFile_count, totalFile_count, mergeProgressBar_label, "转移表进度");
 
                     Excel.Workbook source_excel_workbook = ThisAddIn.app.Workbooks.Open(file.FullName);
                     for (int i = 1; i <= source_excel_workbook.Worksheets.Count; i++)
@@ -777,13 +777,13 @@ namespace ExcelAddIn
                 ThisAddIn.app.DisplayAlerts = true;
                 ThisAddIn.app.ScreenUpdating = true;
             }
-            if(multi_merge_sheet_checkBox.Checked)
+            if (multi_merge_sheet_checkBox.Checked)
             {
-                mergeTask(titleRow,activeSheetNames,true);
+                mergeTask(titleRow, activeSheetNames, true);
             }
             else
             {
-                mergeTask(titleRow, activeSheetNames,false);
+                mergeTask(titleRow, activeSheetNames, false);
             }
 
             tabControl1.Enabled = true;
@@ -799,7 +799,7 @@ namespace ExcelAddIn
 
 
         //进度条更新函数
-        private void UpdateProgressBar(System.Windows.Forms.ProgressBar progressBar ,int currentSheet, int totalSheets,System.Windows.Forms.Label progressBar_result_label,string progressBar_result)
+        private void UpdateProgressBar(System.Windows.Forms.ProgressBar progressBar, int currentSheet, int totalSheets, System.Windows.Forms.Label progressBar_result_label, string progressBar_result)
         {
             // 计算进度百分比
             int progressPercentage = (int)((double)currentSheet / totalSheets * 100);
@@ -807,13 +807,13 @@ namespace ExcelAddIn
             progressBar.Value = progressPercentage;
             progressBar.Update();
             // 显示百分比数字
-            progressBar_result_label.Text = progressBar_result+progressPercentage.ToString() + "%";
+            progressBar_result_label.Text = progressBar_result + progressPercentage.ToString() + "%";
         }
 
 
 
         //获取指定文件夹符合要求文件的数量（包含子文件夹）
-        private int get_File_Count(string dir_path,string ext)
+        private int get_File_Count(string dir_path, string ext)
         {
             List<string> files = new List<string>();
             DirectoryInfo folder = new DirectoryInfo(dir_path);
@@ -821,7 +821,7 @@ namespace ExcelAddIn
             {
                 files.Add(file.Name);
             }
-                return files.Count;
+            return files.Count;
         }
 
 
@@ -886,17 +886,17 @@ namespace ExcelAddIn
                 ThisAddIn.app.DisplayAlerts = false;
 
                 foreach (string item in sheet_listbox.SelectedItems)
-                {   
-                    Excel.Workbook export_workbook=ThisAddIn.app.Workbooks.Add();                 
+                {
+                    Excel.Workbook export_workbook = ThisAddIn.app.Workbooks.Add();
                     workbook.Worksheets[item].Activate();
                     workbook.Worksheets[item].Copy(export_workbook.Sheets[1]);
                     export_workbook.Sheets[1].Name = item;
-                    export_workbook.SaveAs(select_export_path + "\\" + item+".xlsx");
+                    export_workbook.SaveAs(select_export_path + "\\" + item + ".xlsx");
                     export_workbook.Close();
                 }
                 ThisAddIn.app.ScreenUpdating = true;
                 ThisAddIn.app.DisplayAlerts = true;
-                MessageBox.Show("所选分表已导出到指定文件夹" );
+                MessageBox.Show("所选分表已导出到指定文件夹");
             }
             else
             {
@@ -985,7 +985,7 @@ namespace ExcelAddIn
             folderBrowserDialog1.Description = "请选择工作簿所在文件夹";
             folderBrowserDialog1.ShowDialog();
             string select_fold_path = folderBrowserDialog1.SelectedPath;
-            
+
             //转移文件夹，启动多线程并等待执行结果
             if (!string.IsNullOrEmpty(select_fold_path))
             {
@@ -1130,12 +1130,12 @@ namespace ExcelAddIn
             ThisAddIn.app.ScreenUpdating = false;
             string activated_sheet_name = ThisAddIn.app.ActiveSheet.Name;
             int n = Convert.ToInt32(ThisAddIn.app.InputBox("请输入需要新建空表数量：", "输入建表数量"));
-            
+
             if (n > 0)
             {
                 shtname = Convert.ToString(ThisAddIn.app.InputBox("请输入表统一名称,未输入则缺省命名为‘新建表’：", "输入表名称"));
                 string pattern = @"[、/?？*\[\]]";
-                if (ContainsSpecialChars(shtname,pattern))
+                if (ContainsSpecialChars(shtname, pattern))
                 {
                     MessageBox.Show("表名输入不合法，将按照缺省名称建表");
                     shtname = "新建表";
@@ -1146,7 +1146,7 @@ namespace ExcelAddIn
                 }
                 for (i = 1; i <= n; i++)
                 {
-                    Excel.Worksheet totelsheet = ThisAddIn.app.ActiveWorkbook.Worksheets.Add(After:ThisAddIn.app.ActiveWorkbook.Worksheets[ThisAddIn.app.ActiveWorkbook.Worksheets.Count]);
+                    Excel.Worksheet totelsheet = ThisAddIn.app.ActiveWorkbook.Worksheets.Add(After: ThisAddIn.app.ActiveWorkbook.Worksheets[ThisAddIn.app.ActiveWorkbook.Worksheets.Count]);
                     totelsheet.Name = shtname + Convert.ToString(i);
                 }
                 Excel.Worksheet originalWorksheet = (Excel.Worksheet)ThisAddIn.app.ActiveWorkbook.Sheets[activated_sheet_name];
@@ -1209,7 +1209,7 @@ namespace ExcelAddIn
             Task.Run(() =>
             {
                 // 启动多线程执行长时间任务
-                result=transTask();
+                result = transTask();
 
             }).ContinueWith((task) =>
             {
@@ -1580,12 +1580,12 @@ namespace ExcelAddIn
             ThisAddIn.app.DisplayAlerts = false;
 
             long used_range_row = ThisAddIn.app.ActiveSheet.UsedRange.rows.count;
-            Excel.Range range=workbook.ActiveSheet.UsedRange;
+            Excel.Range range = workbook.ActiveSheet.UsedRange;
             range.Select();
             ThisAddIn.app.Selection.Copy();
-            Excel.Worksheet worksheet = workbook.Worksheets.Add(Before:workbook.ActiveSheet);
+            Excel.Worksheet worksheet = workbook.Worksheets.Add(Before: workbook.ActiveSheet);
             worksheet.Name = "工资条";
-            Excel.Worksheet new_worksheet=workbook.Worksheets["工资条"];
+            Excel.Worksheet new_worksheet = workbook.Worksheets["工资条"];
             new_worksheet.Activate();
             new_worksheet.Range["A1"].PasteSpecial(Excel.XlPasteType.xlPasteAll);
             for (long n = used_range_row; n >= 3; n--)
@@ -1656,18 +1656,18 @@ namespace ExcelAddIn
                     for (var i = 2; i <= used_row_count; i++)
                     {
                         worksheet.Activate();
-                        string add_sheet_name=System.Convert.ToString(workbook.Worksheets["目录"].Cells(i, 1).Value);
-                        Excel.Worksheet add_sheet = workbook.Worksheets.Add(After:workbook.Worksheets[workbook.Worksheets.Count]);
+                        string add_sheet_name = System.Convert.ToString(workbook.Worksheets["目录"].Cells(i, 1).Value);
+                        Excel.Worksheet add_sheet = workbook.Worksheets.Add(After: workbook.Worksheets[workbook.Worksheets.Count]);
                         add_sheet.Name = add_sheet_name;
                         worksheet.Activate();
-                        worksheet.Hyperlinks.Add(worksheet.Cells[i, 1], "", Convert.ToString(worksheet.Cells[i,1].value)+"!A1", Convert.ToString(worksheet.Cells[i, 1].value));
+                        worksheet.Hyperlinks.Add(worksheet.Cells[i, 1], "", Convert.ToString(worksheet.Cells[i, 1].value) + "!A1", Convert.ToString(worksheet.Cells[i, 1].value));
                         worksheet.Cells[i, 1].Font.Name = "微软雅黑";
                         worksheet.Cells[i, 1].Font.Size = 12;
-                        worksheet.Cells[i,1].HorizontalAlignment = Excel.XlHAlign.xlHAlignCenter;
+                        worksheet.Cells[i, 1].HorizontalAlignment = Excel.XlHAlign.xlHAlignCenter;
                         worksheet.Cells[i, 1].VerticalAlignment = Excel.XlVAlign.xlVAlignCenter;
                     }
                     workbook.Worksheets["目录"].Activate();
-                    ThisAddIn.app.ActiveSheet.Range["A1"].Font.Name="微软雅黑";
+                    ThisAddIn.app.ActiveSheet.Range["A1"].Font.Name = "微软雅黑";
                     ThisAddIn.app.ActiveSheet.Range["A1"].Font.Size = 12;
                     ThisAddIn.app.ActiveSheet.Range["A1"].Font.Bold = true;
                     ThisAddIn.app.ActiveSheet.Range["A1"].HorizontalAlignment = Excel.XlHAlign.xlHAlignCenter;
@@ -1853,7 +1853,7 @@ namespace ExcelAddIn
         }
 
         //自建函数
-        
+
         //正则表达式函数，判断输入字符是否合规，如有不合规字符，返回true，否则返回false
         public static bool ContainsSpecialChars(string str, string reg_rule)
         {
