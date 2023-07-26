@@ -1,5 +1,8 @@
 # ExcelAddIn
 
+####代码安全验证
+[![Security Status](https://www.murphysec.com/platform3/v31/badge/1684046904480055296.svg)](https://www.murphysec.com/console/report/1684046904182259712/1684046904480055296)
+
 #### 介绍
 **以下是 Excel-add-in 插件说明**
 该插件是以往工作中VBA实现的表中数据批量自动化操作，以及利用Excel表格进行文件管理。近期使用C#对代码进行了重写，并对部分算法进行重构和功能增强，通过VSTO方式便于分发安装。安装者可利用经常接触的Excel进行数据管理和文件管理，增强Excel功能。
