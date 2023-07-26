@@ -703,8 +703,6 @@ namespace ExcelAddIn
             merge_sheet_progressBar.Visible = true;
         }
 
-
-
         //不同工作簿并表（程序执行线程）
         private void multiMergeTask(Int32 titleRow,List<string> activeSheetNames)
         {
@@ -961,6 +959,7 @@ namespace ExcelAddIn
         //目录下多工作簿的表转同一个工作簿内（UI主线程）
         private void move_sheet_button_Click(object sender, EventArgs e)
         {
+            //右侧功能区初始化
             which_field_label.Visible = false;
             which_field_combobox.Visible = false;
             what_type_label.Visible = false;
@@ -974,6 +973,14 @@ namespace ExcelAddIn
             ThisAddIn.app.ScreenUpdating = false;
             ThisAddIn.app.DisplayAlerts = false;
             //this.TopMost = true;
+
+            //左侧按钮状态改变
+            move_sheet_button.Enabled = false;
+            add_sheet_button.Enabled = false;
+            transposition_button.Enabled = false;
+            regex_button.Enabled = false;
+            payslip_button.Enabled = false;
+            contents_button.Enabled = false;
 
             folderBrowserDialog1.Description = "请选择工作簿所在文件夹";
             folderBrowserDialog1.ShowDialog();
@@ -1009,22 +1016,22 @@ namespace ExcelAddIn
                 ShowLabel(run_result_label, true, "未正确选择文件夹");
                 StartTimer();
             }
+
+            //左侧按钮状态改变
+            move_sheet_button.Enabled = true;
+            add_sheet_button.Enabled = true;
+            transposition_button.Enabled = true;
+            regex_button.Enabled = true;
+            payslip_button.Enabled = true;
+            contents_button.Enabled = true;
+            ThisAddIn.app.DisplayAlerts = true;
+            ThisAddIn.app.ScreenUpdating = true;
             //this.TopMost = false;
         }
 
         //目录下多工作簿表转同一工作簿内（程序执行线程）
         private string movesheetTask(string get_fold_path)
         {
-            tabControl1.Enabled = false;
-            move_sheet_button.Enabled = false;
-            add_sheet_button.Enabled = false;
-            transposition_button.Enabled = false;
-            regex_button.Enabled = false;
-            payslip_button.Enabled = false;
-            contents_button.Enabled = false;
-            ThisAddIn.app.ScreenUpdating = false;
-            ThisAddIn.app.DisplayAlerts = false;
-
             Excel.Workbook destination_workbook = ThisAddIn.app.ActiveWorkbook;
             string destination_workbook_name = destination_workbook.Name;
             DirectoryInfo folder = new DirectoryInfo(get_fold_path);
@@ -1085,15 +1092,6 @@ namespace ExcelAddIn
                     {
                         opened_workbook.Close(false);
                     }
-                    tabControl1.Enabled=true;
-                    move_sheet_button.Enabled = true;
-                    add_sheet_button.Enabled = true;
-                    transposition_button.Enabled = true;
-                    regex_button.Enabled = true;
-                    payslip_button.Enabled = true;
-                    contents_button.Enabled = true;                    
-                    ThisAddIn.app.DisplayAlerts = true;
-                    ThisAddIn.app.ScreenUpdating = true;
                 }
             }
         }
@@ -1103,6 +1101,7 @@ namespace ExcelAddIn
         //一键建立多个工作表
         private void add_sheet_button_Click(object sender, EventArgs e)
         {
+            //右侧功能区初始化
             function_title_label.Text = "建立指定名称和数量的新工作表";
             which_field_label.Visible = false;
             which_field_combobox.Visible = false;
@@ -1114,6 +1113,7 @@ namespace ExcelAddIn
             regex_run_button.Visible = false;
             regex_clear_button.Visible = false;
 
+            //左侧按钮状态改变
             tabControl1.Enabled = false;
             move_sheet_button.Enabled = false;
             add_sheet_button.Enabled = false;
@@ -1165,7 +1165,7 @@ namespace ExcelAddIn
                 StartTimer();
             }
 
-
+            //左侧按钮状态改变
             tabControl1.Enabled = true;
             move_sheet_button.Enabled = true;
             add_sheet_button.Enabled = true;
@@ -1182,6 +1182,7 @@ namespace ExcelAddIn
         //转置工作表(UI主线程）
         private void transposition_button_Click(object sender, EventArgs e)
         {
+            //右侧功能区初始化
             function_title_label.Text = "将列名称转置为字段内数据";
             which_field_label.Visible = false;
             which_field_combobox.Visible = false;
@@ -1193,6 +1194,7 @@ namespace ExcelAddIn
             regex_run_button.Visible = false;
             regex_clear_button.Visible = false;
 
+            //左侧按钮状态改变
             tabControl1.Enabled = false;
             move_sheet_button.Enabled = false;
             add_sheet_button.Enabled = false;
@@ -1230,6 +1232,7 @@ namespace ExcelAddIn
                 }
             }, TaskScheduler.FromCurrentSynchronizationContext());
 
+            //左侧按钮状态改变
             tabControl1.Enabled = true;
             move_sheet_button.Enabled = true;
             add_sheet_button.Enabled = true;
@@ -1553,6 +1556,7 @@ namespace ExcelAddIn
         //一键生成工资条
         private void payslip_button_Click(object sender, EventArgs e)
         {
+            //右侧功能区初始化
             function_title_label.Text = "工资表转换为工资条格式";
             which_field_label.Visible = false;
             which_field_combobox.Visible = false;
@@ -1564,6 +1568,7 @@ namespace ExcelAddIn
             regex_run_button.Visible = false;
             regex_clear_button.Visible = false;
 
+            //左侧按钮状态改变
             tabControl1.Enabled = false;
             move_sheet_button.Enabled = false;
             add_sheet_button.Enabled = false;
@@ -1575,7 +1580,6 @@ namespace ExcelAddIn
             ThisAddIn.app.DisplayAlerts = false;
 
             long used_range_row = ThisAddIn.app.ActiveSheet.UsedRange.rows.count;
-            //Excel.Workbook workbook = ThisAddIn.app.ActiveWorkbook;
             Excel.Range range=workbook.ActiveSheet.UsedRange;
             range.Select();
             ThisAddIn.app.Selection.Copy();
@@ -1600,6 +1604,7 @@ namespace ExcelAddIn
             ShowLabel(run_result_label, true, "工资条转换完毕");
             StartTimer();
 
+            //左侧按钮状态改变
             tabControl1.Enabled = true;
             move_sheet_button.Enabled = true;
             add_sheet_button.Enabled = true;
@@ -1616,6 +1621,7 @@ namespace ExcelAddIn
         //一键根据目录页建立新表
         private void contents_button_Click(object sender, EventArgs e)
         {
+            //右侧功能区初始化
             function_title_label.Text = "根据目录页新建空白表";
             which_field_label.Visible = false;
             which_field_combobox.Visible = false;
@@ -1627,6 +1633,7 @@ namespace ExcelAddIn
             regex_run_button.Visible = false;
             regex_clear_button.Visible = false;
 
+            //左侧按钮状态改变
             tabControl1.Enabled = false;
             move_sheet_button.Enabled = false;
             add_sheet_button.Enabled = false;
@@ -1674,6 +1681,8 @@ namespace ExcelAddIn
                 }
             }
 
+
+            //左侧按钮状态改变
             tabControl1.Enabled = true;
             move_sheet_button.Enabled = true;
             add_sheet_button.Enabled = true;
