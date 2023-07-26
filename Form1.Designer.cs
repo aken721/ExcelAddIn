@@ -506,7 +506,8 @@
             // splitContainer2
             // 
             this.splitContainer2.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.splitContainer2.FixedPanel = System.Windows.Forms.FixedPanel.Panel1;
+            this.splitContainer2.FixedPanel = System.Windows.Forms.FixedPanel.Panel2;
+            this.splitContainer2.IsSplitterFixed = true;
             this.splitContainer2.Location = new System.Drawing.Point(0, 0);
             this.splitContainer2.Name = "splitContainer2";
             // 
@@ -532,7 +533,7 @@
             this.splitContainer2.Panel2.Controls.Add(this.which_field_label);
             this.splitContainer2.Panel2.Controls.Add(this.function_title_label);
             this.splitContainer2.Size = new System.Drawing.Size(675, 392);
-            this.splitContainer2.SplitterDistance = 440;
+            this.splitContainer2.SplitterDistance = 318;
             this.splitContainer2.TabIndex = 0;
             // 
             // contents_button
@@ -808,6 +809,7 @@
             this.Controls.Add(this.label4);
             this.Controls.Add(this.pictureBox1);
             this.Controls.Add(this.tabControl1);
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.Fixed3D;
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "Form1";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
