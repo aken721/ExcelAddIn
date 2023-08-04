@@ -197,7 +197,7 @@ namespace ExcelAddIn
                         address_attachment.Clear();
                         foreach (string address_key in myMailsto)
                         {
-                            MessageBox.Show(address_key);
+                            //MessageBox.Show(address_key);
                             address_attachment.Add(address_key, myAttachment);
                         }
                     }
@@ -207,7 +207,7 @@ namespace ExcelAddIn
                     address_attachment.Clear();
                     foreach (string address_key in myMailsto)
                     {
-                        MessageBox.Show(address_key);
+                        //MessageBox.Show(address_key);
                         address_attachment.Add(address_key, myAttachment);
                     }
                 }
