@@ -34,24 +34,39 @@
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
             this.tab1 = this.Factory.CreateRibbonTab();
             this.group1 = this.Factory.CreateRibbonGroup();
-            this.excel_extend = this.Factory.CreateRibbonButton();
+            this.Excel_extend = this.Factory.CreateRibbonButton();
             this.group2 = this.Factory.CreateRibbonGroup();
-            this.send_mail = this.Factory.CreateRibbonButton();
+            this.Send_mail = this.Factory.CreateRibbonButton();
             this.group3 = this.Factory.CreateRibbonGroup();
-            this.files_read = this.Factory.CreateRibbonButton();
-            this.file_rename = this.Factory.CreateRibbonButton();
-            this.select_f_or_d = this.Factory.CreateRibbonToggleButton();
+            this.Files_read = this.Factory.CreateRibbonButton();
+            this.File_rename = this.Factory.CreateRibbonButton();
+            this.Select_f_or_d = this.Factory.CreateRibbonToggleButton();
             this.switch_FD_label = this.Factory.CreateRibbonLabel();
             this.group4 = this.Factory.CreateRibbonGroup();
-            this.rename_mp3 = this.Factory.CreateRibbonButton();
+            this.Rename_mp3 = this.Factory.CreateRibbonButton();
+            this.separator2 = this.Factory.CreateRibbonSeparator();
+            this.box1 = this.Factory.CreateRibbonBox();
+            this.buttonGroup1 = this.Factory.CreateRibbonButtonGroup();
+            this.Select_mp3_button = this.Factory.CreateRibbonButton();
+            this.Mode_btuuon = this.Factory.CreateRibbonButton();
+            this.buttonGroup2 = this.Factory.CreateRibbonButtonGroup();
+            this.Play_button = this.Factory.CreateRibbonButton();
+            this.Stop_button = this.Factory.CreateRibbonButton();
+            this.Next_button = this.Factory.CreateRibbonButton();
+            this.Previous_button = this.Factory.CreateRibbonButton();
             this.folderBrowserDialog1 = new System.Windows.Forms.FolderBrowserDialog();
+            this.timer1 = new System.Windows.Forms.Timer(this.components);
             this.tab1.SuspendLayout();
             this.group1.SuspendLayout();
             this.group2.SuspendLayout();
             this.group3.SuspendLayout();
             this.group4.SuspendLayout();
+            this.box1.SuspendLayout();
+            this.buttonGroup1.SuspendLayout();
+            this.buttonGroup2.SuspendLayout();
             this.SuspendLayout();
             // 
             // tab1
@@ -66,69 +81,69 @@
             // 
             // group1
             // 
-            this.group1.Items.Add(this.excel_extend);
+            this.group1.Items.Add(this.Excel_extend);
             this.group1.Label = "表工具";
             this.group1.Name = "group1";
             // 
-            // excel_extend
+            // Excel_extend
             // 
-            this.excel_extend.ControlSize = Microsoft.Office.Core.RibbonControlSize.RibbonControlSizeLarge;
-            this.excel_extend.Image = global::ExcelAddIn.Properties.Resources.excel;
-            this.excel_extend.Label = "Excel表操作";
-            this.excel_extend.Name = "excel_extend";
-            this.excel_extend.ShowImage = true;
-            this.excel_extend.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.excel_extend_Click);
+            this.Excel_extend.ControlSize = Microsoft.Office.Core.RibbonControlSize.RibbonControlSizeLarge;
+            this.Excel_extend.Image = global::ExcelAddIn.Properties.Resources.excel;
+            this.Excel_extend.Label = "Excel表操作";
+            this.Excel_extend.Name = "Excel_extend";
+            this.Excel_extend.ShowImage = true;
+            this.Excel_extend.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.Excel_extend_Click);
             // 
             // group2
             // 
-            this.group2.Items.Add(this.send_mail);
+            this.group2.Items.Add(this.Send_mail);
             this.group2.Label = "群发工具";
             this.group2.Name = "group2";
             // 
-            // send_mail
+            // Send_mail
             // 
-            this.send_mail.ControlSize = Microsoft.Office.Core.RibbonControlSize.RibbonControlSizeLarge;
-            this.send_mail.Image = global::ExcelAddIn.Properties.Resources.email;
-            this.send_mail.Label = "Email群发";
-            this.send_mail.Name = "send_mail";
-            this.send_mail.ShowImage = true;
-            this.send_mail.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.send_mail_Click);
+            this.Send_mail.ControlSize = Microsoft.Office.Core.RibbonControlSize.RibbonControlSizeLarge;
+            this.Send_mail.Image = global::ExcelAddIn.Properties.Resources.email;
+            this.Send_mail.Label = "Email群发";
+            this.Send_mail.Name = "Send_mail";
+            this.Send_mail.ShowImage = true;
+            this.Send_mail.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.Send_mail_Click);
             // 
             // group3
             // 
-            this.group3.Items.Add(this.files_read);
-            this.group3.Items.Add(this.file_rename);
-            this.group3.Items.Add(this.select_f_or_d);
+            this.group3.Items.Add(this.Files_read);
+            this.group3.Items.Add(this.File_rename);
+            this.group3.Items.Add(this.Select_f_or_d);
             this.group3.Items.Add(this.switch_FD_label);
             this.group3.Label = "文件/文件夹工具";
             this.group3.Name = "group3";
             // 
-            // files_read
+            // Files_read
             // 
-            this.files_read.ControlSize = Microsoft.Office.Core.RibbonControlSize.RibbonControlSizeLarge;
-            this.files_read.Image = global::ExcelAddIn.Properties.Resources.read;
-            this.files_read.Label = "批读文件名";
-            this.files_read.Name = "files_read";
-            this.files_read.ShowImage = true;
-            this.files_read.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.files_read_Click);
+            this.Files_read.ControlSize = Microsoft.Office.Core.RibbonControlSize.RibbonControlSizeLarge;
+            this.Files_read.Image = global::ExcelAddIn.Properties.Resources.read;
+            this.Files_read.Label = "批读文件名";
+            this.Files_read.Name = "Files_read";
+            this.Files_read.ShowImage = true;
+            this.Files_read.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.Files_read_Click);
             // 
-            // file_rename
+            // File_rename
             // 
-            this.file_rename.ControlSize = Microsoft.Office.Core.RibbonControlSize.RibbonControlSizeLarge;
-            this.file_rename.Image = global::ExcelAddIn.Properties.Resources.write;
-            this.file_rename.Label = "批量重命名";
-            this.file_rename.Name = "file_rename";
-            this.file_rename.ShowImage = true;
-            this.file_rename.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.file_rename_Click);
+            this.File_rename.ControlSize = Microsoft.Office.Core.RibbonControlSize.RibbonControlSizeLarge;
+            this.File_rename.Image = global::ExcelAddIn.Properties.Resources.write;
+            this.File_rename.Label = "批量重命名";
+            this.File_rename.Name = "File_rename";
+            this.File_rename.ShowImage = true;
+            this.File_rename.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.File_rename_Click);
             // 
-            // select_f_or_d
+            // Select_f_or_d
             // 
-            this.select_f_or_d.Image = global::ExcelAddIn.Properties.Resources.Radio_Button_off;
-            this.select_f_or_d.Label = "文件名";
-            this.select_f_or_d.Name = "select_f_or_d";
-            this.select_f_or_d.ShowImage = true;
-            this.select_f_or_d.ShowLabel = false;
-            this.select_f_or_d.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.select_f_or_d_Click);
+            this.Select_f_or_d.Image = global::ExcelAddIn.Properties.Resources.Radio_Button_off;
+            this.Select_f_or_d.Label = "文件名";
+            this.Select_f_or_d.Name = "Select_f_or_d";
+            this.Select_f_or_d.ShowImage = true;
+            this.Select_f_or_d.ShowLabel = false;
+            this.Select_f_or_d.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.Select_f_or_d_Click);
             // 
             // switch_FD_label
             // 
@@ -137,18 +152,109 @@
             // 
             // group4
             // 
-            this.group4.Items.Add(this.rename_mp3);
+            this.group4.Items.Add(this.Rename_mp3);
+            this.group4.Items.Add(this.separator2);
+            this.group4.Items.Add(this.box1);
             this.group4.Label = "音乐工具";
             this.group4.Name = "group4";
             // 
-            // rename_mp3
+            // Rename_mp3
             // 
-            this.rename_mp3.ControlSize = Microsoft.Office.Core.RibbonControlSize.RibbonControlSizeLarge;
-            this.rename_mp3.Image = global::ExcelAddIn.Properties.Resources.MP3;
-            this.rename_mp3.Label = "MP3批量改名";
-            this.rename_mp3.Name = "rename_mp3";
-            this.rename_mp3.ShowImage = true;
-            this.rename_mp3.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.rename_mp3_Click);
+            this.Rename_mp3.ControlSize = Microsoft.Office.Core.RibbonControlSize.RibbonControlSizeLarge;
+            this.Rename_mp3.Image = global::ExcelAddIn.Properties.Resources.MP3;
+            this.Rename_mp3.Label = "MP3批量改名";
+            this.Rename_mp3.Name = "Rename_mp3";
+            this.Rename_mp3.ShowImage = true;
+            this.Rename_mp3.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.Rename_mp3_Click);
+            // 
+            // separator2
+            // 
+            this.separator2.Name = "separator2";
+            // 
+            // box1
+            // 
+            this.box1.BoxStyle = Microsoft.Office.Tools.Ribbon.RibbonBoxStyle.Vertical;
+            this.box1.Items.Add(this.buttonGroup1);
+            this.box1.Items.Add(this.buttonGroup2);
+            this.box1.Name = "box1";
+            // 
+            // buttonGroup1
+            // 
+            this.buttonGroup1.Items.Add(this.Select_mp3_button);
+            this.buttonGroup1.Items.Add(this.Mode_btuuon);
+            this.buttonGroup1.Name = "buttonGroup1";
+            // 
+            // Select_mp3_button
+            // 
+            this.Select_mp3_button.Image = global::ExcelAddIn.Properties.Resources.no_open_fold;
+            this.Select_mp3_button.Label = "音乐目录";
+            this.Select_mp3_button.Name = "Select_mp3_button";
+            this.Select_mp3_button.ScreenTip = "选择音乐所在文件夹";
+            this.Select_mp3_button.ShowImage = true;
+            this.Select_mp3_button.ShowLabel = false;
+            this.Select_mp3_button.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.Select_mp3_button_Click);
+            // 
+            // Mode_btuuon
+            // 
+            this.Mode_btuuon.Image = global::ExcelAddIn.Properties.Resources.order_play;
+            this.Mode_btuuon.Label = "顺序播放";
+            this.Mode_btuuon.Name = "Mode_btuuon";
+            this.Mode_btuuon.ScreenTip = "顺序播放";
+            this.Mode_btuuon.ShowImage = true;
+            this.Mode_btuuon.ShowLabel = false;
+            this.Mode_btuuon.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.Mode_btuuon_Click);
+            // 
+            // buttonGroup2
+            // 
+            this.buttonGroup2.Items.Add(this.Play_button);
+            this.buttonGroup2.Items.Add(this.Stop_button);
+            this.buttonGroup2.Items.Add(this.Next_button);
+            this.buttonGroup2.Items.Add(this.Previous_button);
+            this.buttonGroup2.Name = "buttonGroup2";
+            // 
+            // Play_button
+            // 
+            this.Play_button.Image = global::ExcelAddIn.Properties.Resources.play;
+            this.Play_button.Label = "播放";
+            this.Play_button.Name = "Play_button";
+            this.Play_button.ScreenTip = "播放";
+            this.Play_button.ShowImage = true;
+            this.Play_button.ShowLabel = false;
+            this.Play_button.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.Play_button_Click);
+            // 
+            // Stop_button
+            // 
+            this.Stop_button.Image = global::ExcelAddIn.Properties.Resources.stop;
+            this.Stop_button.Label = "停止";
+            this.Stop_button.Name = "Stop_button";
+            this.Stop_button.ScreenTip = "停止";
+            this.Stop_button.ShowImage = true;
+            this.Stop_button.ShowLabel = false;
+            this.Stop_button.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.Stop_button_Click);
+            // 
+            // Next_button
+            // 
+            this.Next_button.Image = global::ExcelAddIn.Properties.Resources.next;
+            this.Next_button.Label = "下一首";
+            this.Next_button.Name = "Next_button";
+            this.Next_button.ScreenTip = "下一曲";
+            this.Next_button.ShowImage = true;
+            this.Next_button.ShowLabel = false;
+            this.Next_button.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.Next_button_Click);
+            // 
+            // Previous_button
+            // 
+            this.Previous_button.Image = global::ExcelAddIn.Properties.Resources.previous;
+            this.Previous_button.Label = "上一首";
+            this.Previous_button.Name = "Previous_button";
+            this.Previous_button.ScreenTip = "上一曲";
+            this.Previous_button.ShowImage = true;
+            this.Previous_button.ShowLabel = false;
+            this.Previous_button.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.Previous_button_Click);
+            // 
+            // timer1
+            // 
+            this.timer1.Tick += new System.EventHandler(this.timer1_Tick);
             // 
             // Ribbon1
             // 
@@ -166,6 +272,12 @@
             this.group3.PerformLayout();
             this.group4.ResumeLayout(false);
             this.group4.PerformLayout();
+            this.box1.ResumeLayout(false);
+            this.box1.PerformLayout();
+            this.buttonGroup1.ResumeLayout(false);
+            this.buttonGroup1.PerformLayout();
+            this.buttonGroup2.ResumeLayout(false);
+            this.buttonGroup2.PerformLayout();
             this.ResumeLayout(false);
 
         }
@@ -174,17 +286,28 @@
 
         internal Microsoft.Office.Tools.Ribbon.RibbonTab tab1;
         internal Microsoft.Office.Tools.Ribbon.RibbonGroup group1;
-        internal Microsoft.Office.Tools.Ribbon.RibbonButton excel_extend;
+        internal Microsoft.Office.Tools.Ribbon.RibbonButton Excel_extend;
         internal Microsoft.Office.Tools.Ribbon.RibbonGroup group2;
         internal Microsoft.Office.Tools.Ribbon.RibbonGroup group3;
         internal Microsoft.Office.Tools.Ribbon.RibbonGroup group4;
-        internal Microsoft.Office.Tools.Ribbon.RibbonButton send_mail;
-        internal Microsoft.Office.Tools.Ribbon.RibbonButton files_read;
-        internal Microsoft.Office.Tools.Ribbon.RibbonButton file_rename;
-        internal Microsoft.Office.Tools.Ribbon.RibbonToggleButton select_f_or_d;
-        internal Microsoft.Office.Tools.Ribbon.RibbonButton rename_mp3;
+        internal Microsoft.Office.Tools.Ribbon.RibbonButton Send_mail;
+        internal Microsoft.Office.Tools.Ribbon.RibbonButton Files_read;
+        internal Microsoft.Office.Tools.Ribbon.RibbonButton File_rename;
+        internal Microsoft.Office.Tools.Ribbon.RibbonToggleButton Select_f_or_d;
+        internal Microsoft.Office.Tools.Ribbon.RibbonButton Rename_mp3;
         internal Microsoft.Office.Tools.Ribbon.RibbonLabel switch_FD_label;
         private System.Windows.Forms.FolderBrowserDialog folderBrowserDialog1;
+        internal Microsoft.Office.Tools.Ribbon.RibbonButton Play_button;
+        internal Microsoft.Office.Tools.Ribbon.RibbonButton Select_mp3_button;
+        internal Microsoft.Office.Tools.Ribbon.RibbonButton Mode_btuuon;
+        internal Microsoft.Office.Tools.Ribbon.RibbonButtonGroup buttonGroup1;
+        internal Microsoft.Office.Tools.Ribbon.RibbonButtonGroup buttonGroup2;
+        internal Microsoft.Office.Tools.Ribbon.RibbonButton Stop_button;
+        internal Microsoft.Office.Tools.Ribbon.RibbonSeparator separator2;
+        internal Microsoft.Office.Tools.Ribbon.RibbonButton Next_button;
+        internal Microsoft.Office.Tools.Ribbon.RibbonButton Previous_button;
+        private Microsoft.Office.Tools.Ribbon.RibbonBox box1;
+        private System.Windows.Forms.Timer timer1;
     }
 
     partial class ThisRibbonCollection
