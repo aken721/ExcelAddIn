@@ -1,21 +1,19 @@
 ﻿using Microsoft.Office.Tools.Ribbon;
+using NAudio.Wave;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
-using System.Windows.Forms;
-using Excel = Microsoft.Office.Interop.Excel;
-using NAudio.Wave;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.Office.Interop.Excel;
-using NAudio.CoreAudioApi;
+using System.Windows.Forms;
+using Excel = Microsoft.Office.Interop.Excel;
 
 namespace ExcelAddIn
 {
     public partial class Ribbon1
     {
-        
+
         //是否执行读文件名功能标识
         private int readFile;
 
@@ -280,14 +278,14 @@ namespace ExcelAddIn
             Paused
         }
         //初始化音乐播放模式
-        private PlaybackMode playbackMode=PlaybackMode.Sequential;
+        private PlaybackMode playbackMode = PlaybackMode.Sequential;
         //初始化音乐播放状态
-        private PlaybackState currentPlayState=PlaybackState.Stopped;
+        private PlaybackState currentPlayState = PlaybackState.Stopped;
 
         //实例化WaveOutEvent对象
-        private WaveOutEvent waveOutEvent;        
+        private WaveOutEvent waveOutEvent;
         //实例化AudioFileReader对象
-        private AudioFileReader audioFile=null;
+        private AudioFileReader audioFile = null;
         //音乐播放列表
         private List<string> musicFiles = new List<string>();
         //当前播放歌曲序号
@@ -301,8 +299,8 @@ namespace ExcelAddIn
             folderBrowserDialog1.Description = "请选择音乐文件所在文件夹";
             if (folderBrowserDialog1.ShowDialog() == DialogResult.OK)
             {
-                LoadMusicFiles(folderBrowserDialog1.SelectedPath);                
-                if(musicFiles.Count == 0)
+                LoadMusicFiles(folderBrowserDialog1.SelectedPath);
+                if (musicFiles.Count == 0)
                 {
                     Select_mp3_button.Image = Properties.Resources.no_open_fold;
                     ThisAddIn.app.Application.StatusBar = "选择的文件夹中没有支持格式的音乐";
@@ -336,7 +334,7 @@ namespace ExcelAddIn
         //播放模式选择按钮
         private void Mode_btuuon_Click(object sender, RibbonControlEventArgs e)
         {
-            switch(playbackMode)
+            switch (playbackMode)
             {
                 case PlaybackMode.Sequential:
                     playbackMode = PlaybackMode.AllLoop;
@@ -345,7 +343,7 @@ namespace ExcelAddIn
                     Mode_btuuon.Image = Properties.Resources.all_cycle;
                     break;
                 case PlaybackMode.AllLoop:
-                    playbackMode=PlaybackMode.SingleLoop;
+                    playbackMode = PlaybackMode.SingleLoop;
                     Mode_btuuon.Label = "单曲循环";
                     Mode_btuuon.ScreenTip = "单曲循环";
                     Mode_btuuon.Image = Properties.Resources.single_cycle;
@@ -359,7 +357,7 @@ namespace ExcelAddIn
             }
         }
 
-        private bool isMusicEnded=false;
+        private bool isMusicEnded = false;
 
         //播放按钮单击事件
         private async void Play_button_Click(object sender, RibbonControlEventArgs e)
@@ -402,7 +400,7 @@ namespace ExcelAddIn
         //播放/暂停（方法）
         private async Task PlayMusic()
         {
-            
+
             isMusicEnded = false;
             if (currentPlayState == PlaybackState.Stopped)
             {
@@ -471,15 +469,15 @@ namespace ExcelAddIn
                         {
                             currentSongIndex = 0;
                             StopMusic();
-                            
-                        }                       
+
+                        }
                         break;
 
                     case PlaybackMode.AllLoop:
                         if (currentSongIndex == musicFiles.Count)
                         {
                             currentSongIndex = 0;
-                            
+
                         }
                         await Task.Delay(1000);
                         await PlayMusic();
@@ -555,7 +553,7 @@ namespace ExcelAddIn
         }
 
         //当前播放歌曲信息
-        private async  void UpdateTrackInfo()
+        private async void UpdateTrackInfo()
         {
             if (audioFile != null && currentSongIndex < musicFiles.Count)
             {
@@ -573,14 +571,14 @@ namespace ExcelAddIn
             else
             {
 
-               ThisAddIn.app.Application.StatusBar = false;
+                ThisAddIn.app.Application.StatusBar = false;
 
             }
         }
-        
+
         private void timer1_Tick(object sender, EventArgs e)
         {
-           UpdateTrackInfo();            
+            UpdateTrackInfo();
         }
     }
 }
