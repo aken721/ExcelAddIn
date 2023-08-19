@@ -270,6 +270,7 @@ namespace ExcelAddIn
             SingleLoop,
             AllLoop
         }
+
         //音乐播放状态
         private enum PlaybackState
         {
@@ -277,6 +278,7 @@ namespace ExcelAddIn
             Playing,
             Paused
         }
+
         //初始化音乐播放模式
         private PlaybackMode playbackMode = PlaybackMode.Sequential;
         //初始化音乐播放状态
@@ -499,7 +501,7 @@ namespace ExcelAddIn
             StopMusic();
         }
 
-
+        //停止播放
         private void StopMusic()
         {
             if (waveOutEvent != null)
@@ -522,24 +524,41 @@ namespace ExcelAddIn
             Play_button.Label = "播放";
         }
 
+        //下一首曲目
         private async void Next_button_Click(object sender, RibbonControlEventArgs e)
-        {
+        {           
             if (musicFiles.Count != 0)
             {
-                waveOutEvent.Stop();
-                currentSongIndex = (currentSongIndex + 1) % musicFiles.Count;
-                await PlayMusic();
+                if (currentPlayState == PlaybackState.Stopped)
+                {
+                    currentSongIndex = (currentSongIndex + 1) % musicFiles.Count;
+                    ThisAddIn.app.Application.StatusBar = $"当前未播放音乐，共{musicFiles.Count}首音乐，第{currentSongIndex + 1}首：{Path.GetFileName(musicFiles[currentSongIndex])}";
+                }
+                else
+                {
+                    waveOutEvent.Stop();
+                    currentSongIndex = (currentSongIndex + 1) % musicFiles.Count;
+                    await PlayMusic();
+                }
             }
-
         }
 
+        //上一首曲目
         private async void Previous_button_Click(object sender, RibbonControlEventArgs e)
         {
             if (musicFiles.Count != 0)
             {
-                waveOutEvent.Stop();
-                currentSongIndex = (currentSongIndex - 1 + musicFiles.Count) % musicFiles.Count;
-                await PlayMusic();
+                if (currentPlayState == PlaybackState.Stopped)
+                {
+                    currentSongIndex = (currentSongIndex - 1 + musicFiles.Count) % musicFiles.Count;
+                    ThisAddIn.app.Application.StatusBar = $"当前未播放音乐，共{musicFiles.Count}首音乐，第{currentSongIndex + 1}首：{Path.GetFileName(musicFiles[currentSongIndex])}";
+                }
+                else
+                {
+                    waveOutEvent.Stop();
+                    currentSongIndex = (currentSongIndex - 1 + musicFiles.Count) % musicFiles.Count;
+                    await PlayMusic();
+                }
             }
         }
 
