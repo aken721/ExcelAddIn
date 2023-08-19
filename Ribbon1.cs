@@ -583,15 +583,35 @@ namespace ExcelAddIn
                     //return $"正在播放第{currentSongIndex + 1}首：{Path.GetFileName(musicFiles[currentSongIndex])}，" +
                     //    $"已播放时长：{audioFile.CurrentTime.ToString(@"mm\:ss")}，" + $"歌曲时长：{audioFile.TotalTime.ToString(@"mm\:ss")}";
                 });
-
-                ThisAddIn.app.Application.StatusBar = trackInfo;
-
+                try
+                {
+                    ThisAddIn.app.Application.StatusBar = trackInfo;
+                }
+                catch(System.Runtime.InteropServices.COMException ex)
+                {
+                    // 捕获COM异常，判断是否是锁定焦点的交互框
+                    if (ex.Message.Contains("locked for editing"))
+                    {
+                        Debug.WriteLine("Excel交互框已锁定焦点");
+                    }
+                    else
+                    {
+                        Debug.WriteLine("发生其他COM异常:"+ex.Message);
+                    }
+                    if (currentPlayState == PlaybackState.Playing)
+                    {
+                        waveOutEvent?.Pause();
+                        //timer1.Enabled = false;
+                        currentPlayState = PlaybackState.Paused;
+                        //ThisAddIn.app.Application.StatusBar = "播放暂停中......";
+                        Play_button.Image = Properties.Resources.play;
+                        Play_button.ScreenTip = "播放";
+                    }
+                }      
             }
             else
             {
-
                 ThisAddIn.app.Application.StatusBar = false;
-
             }
         }
 
