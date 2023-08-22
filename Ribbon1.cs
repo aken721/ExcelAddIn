@@ -171,7 +171,6 @@ namespace ExcelAddIn
                     }
                     else
                     {
-                        string full_path = cell1;
                         string old_name = Path.Combine(cell1, cell2);
                         string new_name = Path.Combine(cell1, cell3);
                         switch (Select_f_or_d.Checked == true)
@@ -290,7 +289,7 @@ namespace ExcelAddIn
         private AudioFileReader audioFile = null;
 
         //音乐播放列表
-        private List<string> musicFiles = new List<string>();
+        private readonly List<string> musicFiles = new List<string>();
         //当前播放歌曲序号
         private int currentSongIndex = -1;
 
@@ -332,7 +331,6 @@ namespace ExcelAddIn
             musicFiles.AddRange(Directory.GetFiles(folderPath, "*.aac", SearchOption.AllDirectories));
             musicFiles.AddRange(Directory.GetFiles(folderPath, "*.g711", SearchOption.AllDirectories));
             musicFiles.AddRange(Directory.GetFiles(folderPath, "*.mp4", SearchOption.AllDirectories));
-            //musicFiles.AddRange(Directory.GetFiles(folderPath, "*.ape", SearchOption.AllDirectories));
         }
 
         //播放模式选择按钮
@@ -372,8 +370,6 @@ namespace ExcelAddIn
             if (musicFiles.Count == 0)
                 return;
 
-            syncContext = new SynchronizationContext();
-
             isAutoContinue = true;
 
             if (currentPlayState == PlaybackState.Stopped)
@@ -383,7 +379,7 @@ namespace ExcelAddIn
             }
             else if (currentPlayState == PlaybackState.Paused)
             {
-                waveOutEvent.Play();
+                waveOutEvent?.Play();
                 //timer1.Enabled = true;
                 currentPlayState = PlaybackState.Playing;
                 UpdateTrackInfo();
@@ -423,7 +419,7 @@ namespace ExcelAddIn
                     waveOutEvent?.Init(audioFile);
                 }
                 UpdateTrackInfo();
-                waveOutEvent.Play();
+                waveOutEvent?.Play();
 
                 await Task.Delay(200);
 
@@ -435,7 +431,6 @@ namespace ExcelAddIn
             }
         }
 
-        private SynchronizationContext syncContext = SynchronizationContext.Current;
 
         //播放完毕事件触发
         private async void OnPlaybackStopped(object sender, StoppedEventArgs args)
@@ -502,7 +497,7 @@ namespace ExcelAddIn
         {
             if (waveOutEvent != null)
             {
-                waveOutEvent.Stop();
+                waveOutEvent?.Stop();
                 waveOutEvent.PlaybackStopped += OnPlaybackStopped;
 
             }
@@ -522,7 +517,7 @@ namespace ExcelAddIn
 
         //下一首曲目
         private async void Next_button_Click(object sender, RibbonControlEventArgs e)
-        {           
+        {
             if (musicFiles.Count != 0)
             {
                 if (currentPlayState == PlaybackState.Stopped)
@@ -532,9 +527,18 @@ namespace ExcelAddIn
                 }
                 else
                 {
-                    waveOutEvent.Stop();
-                    currentSongIndex = (currentSongIndex) % musicFiles.Count;
-                    await PlayMusic();
+                    if (playbackMode == PlaybackMode.SingleLoop)
+                    {
+                        waveOutEvent?.Stop();
+                        currentSongIndex = (currentSongIndex + 1) % musicFiles.Count;
+                        await PlayMusic();
+                    }
+                    else
+                    {
+                        waveOutEvent?.Stop();
+                        currentSongIndex = (currentSongIndex) % musicFiles.Count;
+                        await PlayMusic();
+                    }
                 }
             }
         }
@@ -551,9 +555,18 @@ namespace ExcelAddIn
                 }
                 else
                 {
-                    waveOutEvent.Stop();
-                    currentSongIndex = (currentSongIndex - 2 + musicFiles.Count) % musicFiles.Count;
-                    await PlayMusic();
+                    if (playbackMode==PlaybackMode.SingleLoop)
+                    {
+                        waveOutEvent?.Stop();
+                        currentSongIndex = (currentSongIndex - 1 + musicFiles.Count) % musicFiles.Count;
+                        await PlayMusic();
+                    }
+                    else
+                    {
+                        waveOutEvent?.Stop();
+                        currentSongIndex = (currentSongIndex - 2 + musicFiles.Count) % musicFiles.Count;
+                        await PlayMusic();
+                    }                    
                 }
             }
         }
@@ -575,7 +588,7 @@ namespace ExcelAddIn
                 string trackInfo = await Task.Run(() =>
                 {
                     return $"正在播放第{currentSongIndex + 1}首：{Path.GetFileName(musicFiles[currentSongIndex])}，" +
-                        $"时长：{audioFile.TotalTime.ToString(@"mm\:ss")}";
+                        $"时长：{audioFile.TotalTime:mm\\:ss}";
                     //return $"正在播放第{currentSongIndex + 1}首：{Path.GetFileName(musicFiles[currentSongIndex])}，" +
                     //    $"已播放时长：{audioFile.CurrentTime.ToString(@"mm\:ss")}，" + $"歌曲时长：{audioFile.TotalTime.ToString(@"mm\:ss")}";
                 });
@@ -583,17 +596,8 @@ namespace ExcelAddIn
                 {
                     ThisAddIn.app.Application.StatusBar = trackInfo;
                 }
-                catch(System.Runtime.InteropServices.COMException ex)
+                catch
                 {
-                    // 捕获COM异常，判断是否是锁定焦点的交互框
-                    if (ex.Message.Contains("locked for editing"))
-                    {
-                        Debug.WriteLine("Excel交互框已锁定焦点");
-                    }
-                    else
-                    {
-                        Debug.WriteLine("发生其他COM异常:"+ex.Message);
-                    }
                     if (currentPlayState == PlaybackState.Playing)
                     {
                         waveOutEvent?.Pause();
@@ -603,7 +607,7 @@ namespace ExcelAddIn
                         Play_button.Image = Properties.Resources.play;
                         Play_button.ScreenTip = "播放";
                     }
-                }      
+                }
             }
             else
             {
