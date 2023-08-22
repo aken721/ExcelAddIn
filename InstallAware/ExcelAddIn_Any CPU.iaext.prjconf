@@ -1,0 +1,75 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<iasettings>
+  <projectproperties>
+    <manufacturer>Administrator</manufacturer>
+    <productname>ExcelAddIn</productname>
+    <productversion>1.0.0</productversion>
+    <productcode>{69489d9f-e3b2-4b7b-8591-0b858205b28b}</productcode>
+    <upgradecode>{788a7bea-de2f-4fd7-9524-59697eb661fd}</upgradecode>
+    <language>0</language>
+    <languagename>English</languagename>
+  </projectproperties>
+  <summary>
+    <title>ExcelAddIn</title>
+    <subject>ExcelAddIn</subject>
+    <author>Administrator</author>
+    <summarycomments>ExcelAddIn</summarycomments>
+    <revisioncode>{c6665e34-2f05-4711-a826-23144a2cfed4}</revisioncode>
+    <uacelevation>highestAvailable</uacelevation>
+  </summary>
+  <addremove>
+    <publishername>Administrator</publishername>
+    <contactname>Administrator</contactname>
+    <helplink>http://www.mywebsite.com</helplink>
+    <productupdatelink>http://www.mywebsite.com</productupdatelink>
+    <addremovecomments>All Rights Reserved</addremovecomments>
+    <iconfile />
+  </addremove>
+  <codegen>
+    <generateincludefiles>0</generateincludefiles>
+    <generatefeatures>1</generatefeatures>
+    <refreshscript>0</refreshscript>
+  </codegen>
+  <compilervariables>
+    <variables />
+  </compilervariables>
+  <build>
+    <buildtype>0</buildtype>
+    <buildasmsi>False</buildasmsi>
+    <cachesources>1</cachesources>
+  </build>
+  <targetfolders />
+  <files>
+    <filedetails filename="D:\SourceCode\C#\ExcelAddIn\bin\Debug\ExcelAddIn.dll" targetlocation="$TARGETDIR$" type="3" generatenativeimage="0" registerassembly="0" runinstallerclass="0" createshortcut="0" runprogram="0" installfilecommand="1" VsProjectOutputfile ="1" />
+  </files>
+  <dependencies />
+  <registry />
+  <dialogtheme>
+    <themename>Official</themename>
+  </dialogtheme>
+  <authenticode>
+    <sign>0</sign>
+    <mode>0</mode>
+    <certificatefile />
+    <keyfile />
+    <pfxfile />
+    <productinfourl />
+    <authpassword />
+    <timestampurl />
+    <evCertFile />
+    <evKeyContainerName />
+    <signall>0</signall>
+  </authenticode>
+  <compression>
+    <compressiontype>6</compressiontype>
+    <encrypt>0</encrypt>
+    <compressionpassword />
+  </compression>
+  <output>
+    <outputtype>0</outputtype>
+    <location />
+    <filename />
+    <calculatefilehash>0</calculatefilehash>
+    <refreshrevisioncode>1</refreshrevisioncode>
+  </output>
+</iasettings>
