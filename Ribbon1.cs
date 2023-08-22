@@ -288,6 +288,7 @@ namespace ExcelAddIn
         private WaveOutEvent waveOutEvent;
         //实例化AudioFileReader对象
         private AudioFileReader audioFile = null;
+
         //音乐播放列表
         private List<string> musicFiles = new List<string>();
         //当前播放歌曲序号
@@ -331,6 +332,7 @@ namespace ExcelAddIn
             musicFiles.AddRange(Directory.GetFiles(folderPath, "*.aac", SearchOption.AllDirectories));
             musicFiles.AddRange(Directory.GetFiles(folderPath, "*.g711", SearchOption.AllDirectories));
             musicFiles.AddRange(Directory.GetFiles(folderPath, "*.mp4", SearchOption.AllDirectories));
+            //musicFiles.AddRange(Directory.GetFiles(folderPath, "*.ape", SearchOption.AllDirectories));
         }
 
         //播放模式选择按钮
@@ -450,12 +452,6 @@ namespace ExcelAddIn
             }
             else
             {
-                //// 在UI线程上更新UI
-                //syncContext.Send(state =>
-                //{
-                //    UpdateTrackInfo();
-                //}, null);
-
                 // 播放下一首歌曲
                 currentSongIndex++;
                 switch (playbackMode)
@@ -537,7 +533,7 @@ namespace ExcelAddIn
                 else
                 {
                     waveOutEvent.Stop();
-                    currentSongIndex = (currentSongIndex + 1) % musicFiles.Count;
+                    currentSongIndex = (currentSongIndex) % musicFiles.Count;
                     await PlayMusic();
                 }
             }
@@ -556,7 +552,7 @@ namespace ExcelAddIn
                 else
                 {
                     waveOutEvent.Stop();
-                    currentSongIndex = (currentSongIndex - 1 + musicFiles.Count) % musicFiles.Count;
+                    currentSongIndex = (currentSongIndex - 2 + musicFiles.Count) % musicFiles.Count;
                     await PlayMusic();
                 }
             }
