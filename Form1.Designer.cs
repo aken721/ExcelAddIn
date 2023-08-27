@@ -143,6 +143,7 @@
             this.tabPage1.Controls.Add(this.label3);
             this.tabPage1.Controls.Add(this.label2);
             this.tabPage1.Controls.Add(this.label1);
+            this.tabPage1.Cursor = System.Windows.Forms.Cursors.Arrow;
             this.tabPage1.Font = new System.Drawing.Font("微软雅黑", 10.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.tabPage1.ForeColor = System.Drawing.Color.DarkSlateBlue;
             this.tabPage1.Location = new System.Drawing.Point(124, 4);
@@ -167,6 +168,8 @@
             // clear_button
             // 
             this.clear_button.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.clear_button.FlatAppearance.MouseDownBackColor = System.Drawing.SystemColors.ButtonShadow;
+            this.clear_button.FlatAppearance.MouseOverBackColor = System.Drawing.SystemColors.ButtonFace;
             this.clear_button.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.clear_button.ForeColor = System.Drawing.Color.SeaGreen;
             this.clear_button.Location = new System.Drawing.Point(547, 126);
@@ -180,6 +183,8 @@
             // splitsheet_delete_button
             // 
             this.splitsheet_delete_button.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.splitsheet_delete_button.FlatAppearance.MouseDownBackColor = System.Drawing.SystemColors.ButtonShadow;
+            this.splitsheet_delete_button.FlatAppearance.MouseOverBackColor = System.Drawing.SystemColors.ButtonFace;
             this.splitsheet_delete_button.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.splitsheet_delete_button.ForeColor = System.Drawing.Color.SeaGreen;
             this.splitsheet_delete_button.Location = new System.Drawing.Point(464, 348);
@@ -193,6 +198,8 @@
             // splitsheet_export_button
             // 
             this.splitsheet_export_button.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.splitsheet_export_button.FlatAppearance.MouseDownBackColor = System.Drawing.SystemColors.ButtonShadow;
+            this.splitsheet_export_button.FlatAppearance.MouseOverBackColor = System.Drawing.SystemColors.ButtonFace;
             this.splitsheet_export_button.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.splitsheet_export_button.ForeColor = System.Drawing.Color.SeaGreen;
             this.splitsheet_export_button.Location = new System.Drawing.Point(296, 348);
@@ -213,6 +220,8 @@
             // split_button
             // 
             this.split_button.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.split_button.FlatAppearance.MouseDownBackColor = System.Drawing.SystemColors.ButtonShadow;
+            this.split_button.FlatAppearance.MouseOverBackColor = System.Drawing.SystemColors.ButtonFace;
             this.split_button.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.split_button.ForeColor = System.Drawing.Color.SeaGreen;
             this.split_button.Location = new System.Drawing.Point(122, 348);
@@ -312,6 +321,7 @@
             // splitContainer1.Panel1
             // 
             this.splitContainer1.Panel1.Controls.Add(this.single_merge_button);
+            this.splitContainer1.Panel1.Cursor = System.Windows.Forms.Cursors.Arrow;
             // 
             // splitContainer1.Panel2
             // 
@@ -323,6 +333,7 @@
             this.splitContainer1.Panel2.Controls.Add(this.multi_merge_button);
             this.splitContainer1.Panel2.Controls.Add(this.dir_select_textbox);
             this.splitContainer1.Panel2.Controls.Add(this.label5);
+            this.splitContainer1.Panel2.Cursor = System.Windows.Forms.Cursors.Arrow;
             this.splitContainer1.Size = new System.Drawing.Size(669, 386);
             this.splitContainer1.SplitterDistance = 120;
             this.splitContainer1.TabIndex = 0;
@@ -330,6 +341,8 @@
             // single_merge_button
             // 
             this.single_merge_button.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.single_merge_button.FlatAppearance.MouseDownBackColor = System.Drawing.SystemColors.ButtonShadow;
+            this.single_merge_button.FlatAppearance.MouseOverBackColor = System.Drawing.SystemColors.ButtonFace;
             this.single_merge_button.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.single_merge_button.ForeColor = System.Drawing.Color.SeaGreen;
             this.single_merge_button.Location = new System.Drawing.Point(256, 28);
@@ -386,6 +399,8 @@
             // dir_select_button
             // 
             this.dir_select_button.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.dir_select_button.FlatAppearance.MouseDownBackColor = System.Drawing.SystemColors.ButtonShadow;
+            this.dir_select_button.FlatAppearance.MouseOverBackColor = System.Drawing.SystemColors.ButtonFace;
             this.dir_select_button.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.dir_select_button.ForeColor = System.Drawing.Color.SeaGreen;
             this.dir_select_button.Location = new System.Drawing.Point(465, 47);
@@ -399,6 +414,8 @@
             // multi_merge_button
             // 
             this.multi_merge_button.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.multi_merge_button.FlatAppearance.MouseDownBackColor = System.Drawing.SystemColors.ButtonShadow;
+            this.multi_merge_button.FlatAppearance.MouseOverBackColor = System.Drawing.SystemColors.ButtonFace;
             this.multi_merge_button.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.multi_merge_button.ForeColor = System.Drawing.Color.SeaGreen;
             this.multi_merge_button.Location = new System.Drawing.Point(256, 152);
@@ -435,6 +452,7 @@
             this.tabPage3.Controls.Add(this.all_select_checkbox);
             this.tabPage3.Controls.Add(this.sheet_listbox);
             this.tabPage3.Controls.Add(this.label6);
+            this.tabPage3.Cursor = System.Windows.Forms.Cursors.Arrow;
             this.tabPage3.Font = new System.Drawing.Font("微软雅黑", 10.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.tabPage3.ForeColor = System.Drawing.Color.DarkSlateBlue;
             this.tabPage3.Location = new System.Drawing.Point(124, 4);
@@ -446,6 +464,9 @@
             // 
             // batch_delete_button
             // 
+            this.batch_delete_button.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.batch_delete_button.FlatAppearance.MouseDownBackColor = System.Drawing.SystemColors.ButtonShadow;
+            this.batch_delete_button.FlatAppearance.MouseOverBackColor = System.Drawing.SystemColors.ButtonFace;
             this.batch_delete_button.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.batch_delete_button.ForeColor = System.Drawing.Color.SeaGreen;
             this.batch_delete_button.Location = new System.Drawing.Point(362, 282);
@@ -458,6 +479,9 @@
             // 
             // batch_export_button
             // 
+            this.batch_export_button.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.batch_export_button.FlatAppearance.MouseDownBackColor = System.Drawing.SystemColors.ButtonShadow;
+            this.batch_export_button.FlatAppearance.MouseOverBackColor = System.Drawing.SystemColors.ButtonFace;
             this.batch_export_button.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.batch_export_button.ForeColor = System.Drawing.Color.SeaGreen;
             this.batch_export_button.Location = new System.Drawing.Point(163, 282);
@@ -471,6 +495,7 @@
             // all_select_checkbox
             // 
             this.all_select_checkbox.AutoSize = true;
+            this.all_select_checkbox.Cursor = System.Windows.Forms.Cursors.Hand;
             this.all_select_checkbox.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.all_select_checkbox.Location = new System.Drawing.Point(235, 224);
             this.all_select_checkbox.Name = "all_select_checkbox";
@@ -482,6 +507,7 @@
             // 
             // sheet_listbox
             // 
+            this.sheet_listbox.Cursor = System.Windows.Forms.Cursors.Hand;
             this.sheet_listbox.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.sheet_listbox.FormattingEnabled = true;
             this.sheet_listbox.ItemHeight = 20;
@@ -517,8 +543,6 @@
             // splitContainer2
             // 
             this.splitContainer2.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.splitContainer2.FixedPanel = System.Windows.Forms.FixedPanel.Panel2;
-            this.splitContainer2.IsSplitterFixed = true;
             this.splitContainer2.Location = new System.Drawing.Point(0, 0);
             this.splitContainer2.Name = "splitContainer2";
             // 
@@ -530,9 +554,11 @@
             this.splitContainer2.Panel1.Controls.Add(this.transposition_button);
             this.splitContainer2.Panel1.Controls.Add(this.add_sheet_button);
             this.splitContainer2.Panel1.Controls.Add(this.move_sheet_button);
+            this.splitContainer2.Panel1.Cursor = System.Windows.Forms.Cursors.Arrow;
             // 
             // splitContainer2.Panel2
             // 
+            this.splitContainer2.Panel2.AutoScroll = true;
             this.splitContainer2.Panel2.Controls.Add(this.run_result_label);
             this.splitContainer2.Panel2.Controls.Add(this.regex_clear_button);
             this.splitContainer2.Panel2.Controls.Add(this.regex_run_button);
@@ -543,6 +569,7 @@
             this.splitContainer2.Panel2.Controls.Add(this.which_field_combobox);
             this.splitContainer2.Panel2.Controls.Add(this.which_field_label);
             this.splitContainer2.Panel2.Controls.Add(this.function_title_label);
+            this.splitContainer2.Panel2.Cursor = System.Windows.Forms.Cursors.Arrow;
             this.splitContainer2.Size = new System.Drawing.Size(675, 392);
             this.splitContainer2.SplitterDistance = 318;
             this.splitContainer2.TabIndex = 0;
@@ -556,7 +583,7 @@
             this.contents_button.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.contents_button.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.contents_button.ForeColor = System.Drawing.Color.SeaGreen;
-            this.contents_button.Location = new System.Drawing.Point(185, 288);
+            this.contents_button.Location = new System.Drawing.Point(154, 288);
             this.contents_button.Name = "contents_button";
             this.contents_button.Size = new System.Drawing.Size(90, 50);
             this.contents_button.TabIndex = 5;
@@ -573,7 +600,7 @@
             this.payslip_button.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.payslip_button.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.payslip_button.ForeColor = System.Drawing.Color.SeaGreen;
-            this.payslip_button.Location = new System.Drawing.Point(45, 289);
+            this.payslip_button.Location = new System.Drawing.Point(26, 288);
             this.payslip_button.Name = "payslip_button";
             this.payslip_button.Size = new System.Drawing.Size(90, 50);
             this.payslip_button.TabIndex = 4;
@@ -590,7 +617,7 @@
             this.regex_button.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.regex_button.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.regex_button.ForeColor = System.Drawing.Color.SeaGreen;
-            this.regex_button.Location = new System.Drawing.Point(185, 182);
+            this.regex_button.Location = new System.Drawing.Point(154, 182);
             this.regex_button.Name = "regex_button";
             this.regex_button.Size = new System.Drawing.Size(90, 50);
             this.regex_button.TabIndex = 3;
@@ -607,7 +634,7 @@
             this.transposition_button.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.transposition_button.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.transposition_button.ForeColor = System.Drawing.Color.SeaGreen;
-            this.transposition_button.Location = new System.Drawing.Point(45, 183);
+            this.transposition_button.Location = new System.Drawing.Point(26, 182);
             this.transposition_button.Name = "transposition_button";
             this.transposition_button.Size = new System.Drawing.Size(90, 50);
             this.transposition_button.TabIndex = 2;
@@ -624,7 +651,7 @@
             this.add_sheet_button.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.add_sheet_button.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.add_sheet_button.ForeColor = System.Drawing.Color.SeaGreen;
-            this.add_sheet_button.Location = new System.Drawing.Point(185, 82);
+            this.add_sheet_button.Location = new System.Drawing.Point(154, 82);
             this.add_sheet_button.Name = "add_sheet_button";
             this.add_sheet_button.Size = new System.Drawing.Size(90, 50);
             this.add_sheet_button.TabIndex = 1;
@@ -641,7 +668,7 @@
             this.move_sheet_button.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.move_sheet_button.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.move_sheet_button.ForeColor = System.Drawing.Color.SeaGreen;
-            this.move_sheet_button.Location = new System.Drawing.Point(45, 82);
+            this.move_sheet_button.Location = new System.Drawing.Point(26, 82);
             this.move_sheet_button.Name = "move_sheet_button";
             this.move_sheet_button.Size = new System.Drawing.Size(90, 50);
             this.move_sheet_button.TabIndex = 0;
@@ -769,6 +796,7 @@
             // tabPage5
             // 
             this.tabPage5.Controls.Add(this.richTextBox1);
+            this.tabPage5.Cursor = System.Windows.Forms.Cursors.Arrow;
             this.tabPage5.Font = new System.Drawing.Font("微软雅黑", 10.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.tabPage5.ForeColor = System.Drawing.Color.DarkSlateBlue;
             this.tabPage5.Location = new System.Drawing.Point(124, 4);
