@@ -1361,6 +1361,7 @@ namespace ExcelAddIn
             what_type_combobox.Visible = true;
             regex_run_button.Visible = true;
             regex_clear_button.Visible = true;
+            run_result_label.Visible = false;
 
         }
 
@@ -1859,6 +1860,16 @@ namespace ExcelAddIn
         {
             Regex reg1 = new Regex(reg_rule);
             return reg1.IsMatch(str);
+        }
+
+        private void multi_merge_sheet_checkBox_CheckedChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void function_title_label_Click(object sender, EventArgs e)
+        {
+
         }
     }
 }
