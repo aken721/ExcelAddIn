@@ -1375,7 +1375,8 @@ namespace ExcelAddIn
                     long usedrange_columns = ThisAddIn.app.ActiveSheet.UsedRange.Columns.Count;
                     foreach (Excel.Range cell in ThisAddIn.app.ActiveSheet.Range[ThisAddIn.app.ActiveSheet.Cells[1, 1], ThisAddIn.app.ActiveSheet.Cells[1, usedrange_columns]])
                     {
-                        if (string.IsNullOrEmpty(cell.Value.ToString()))
+                        string cellValue = cell.Value?.ToString();
+                        if (string.IsNullOrEmpty(cellValue))
                         {
                             Invoke(new Action(() =>
                             {
@@ -1457,7 +1458,8 @@ namespace ExcelAddIn
                 foreach (Excel.Range cell in ws.Range[ws.Cells[1, 1], ws.Cells[1, coln]])
                 {
                     string type_selected = which_field_combobox.Text;
-                    if (cell.Value.ToString() == type_selected)
+                    string currentCellValue = cell.Value?.ToString();
+                    if ( currentCellValue == type_selected)
                     {
                         col = cell.Column;
                     }
