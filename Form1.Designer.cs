@@ -32,42 +32,55 @@
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabPage1 = new System.Windows.Forms.TabPage();
-            this.splitProgressBar_label = new System.Windows.Forms.Label();
-            this.clear_button = new System.Windows.Forms.Button();
-            this.splitsheet_delete_button = new System.Windows.Forms.Button();
-            this.splitsheet_export_button = new System.Windows.Forms.Button();
-            this.split_sheet_progressBar = new System.Windows.Forms.ProgressBar();
-            this.split_button = new System.Windows.Forms.Button();
-            this.split_sheet_result_label = new System.Windows.Forms.Label();
-            this.field_name_combobox = new System.Windows.Forms.ComboBox();
-            this.sheet_name_combobox = new System.Windows.Forms.ComboBox();
-            this.label3 = new System.Windows.Forms.Label();
-            this.label2 = new System.Windows.Forms.Label();
+            this.panel1 = new System.Windows.Forms.Panel();
             this.label1 = new System.Windows.Forms.Label();
+            this.splitProgressBar_label = new System.Windows.Forms.Label();
+            this.label2 = new System.Windows.Forms.Label();
+            this.clear_button = new System.Windows.Forms.Button();
+            this.label3 = new System.Windows.Forms.Label();
+            this.splitsheet_delete_button = new System.Windows.Forms.Button();
+            this.sheet_name_combobox = new System.Windows.Forms.ComboBox();
+            this.splitsheet_export_button = new System.Windows.Forms.Button();
+            this.field_name_combobox = new System.Windows.Forms.ComboBox();
+            this.split_sheet_progressBar = new System.Windows.Forms.ProgressBar();
+            this.split_sheet_result_label = new System.Windows.Forms.Label();
+            this.split_button = new System.Windows.Forms.Button();
             this.tabPage2 = new System.Windows.Forms.TabPage();
+            this.panel2 = new System.Windows.Forms.Panel();
+            this.mergeProgressBar_label = new System.Windows.Forms.Label();
+            this.single_merge_button = new System.Windows.Forms.Button();
+            this.merge_sheet_progressBar = new System.Windows.Forms.ProgressBar();
+            this.label5 = new System.Windows.Forms.Label();
+            this.merge_sheet_result_label = new System.Windows.Forms.Label();
+            this.dir_select_textbox = new System.Windows.Forms.TextBox();
+            this.multi_merge_sheet_checkBox = new System.Windows.Forms.CheckBox();
+            this.multi_merge_button = new System.Windows.Forms.Button();
+            this.dir_select_button = new System.Windows.Forms.Button();
             this.tabPage3 = new System.Windows.Forms.TabPage();
+            this.panel3 = new System.Windows.Forms.Panel();
+            this.sheet_listbox = new System.Windows.Forms.ListBox();
             this.batch_delete_button = new System.Windows.Forms.Button();
+            this.label6 = new System.Windows.Forms.Label();
             this.batch_export_button = new System.Windows.Forms.Button();
             this.all_select_checkbox = new System.Windows.Forms.CheckBox();
-            this.sheet_listbox = new System.Windows.Forms.ListBox();
-            this.label6 = new System.Windows.Forms.Label();
             this.tabPage4 = new System.Windows.Forms.TabPage();
-            this.contents_button = new System.Windows.Forms.Button();
-            this.payslip_button = new System.Windows.Forms.Button();
-            this.regex_button = new System.Windows.Forms.Button();
-            this.transposition_button = new System.Windows.Forms.Button();
-            this.add_sheet_button = new System.Windows.Forms.Button();
-            this.move_sheet_button = new System.Windows.Forms.Button();
+            this.panel4 = new System.Windows.Forms.Panel();
             this.run_result_label = new System.Windows.Forms.Label();
+            this.contents_button = new System.Windows.Forms.Button();
             this.regex_clear_button = new System.Windows.Forms.Button();
             this.regex_run_button = new System.Windows.Forms.Button();
+            this.payslip_button = new System.Windows.Forms.Button();
             this.regex_rule_textbox = new System.Windows.Forms.TextBox();
+            this.move_sheet_button = new System.Windows.Forms.Button();
             this.regex_rule_label = new System.Windows.Forms.Label();
+            this.regex_button = new System.Windows.Forms.Button();
             this.what_type_combobox = new System.Windows.Forms.ComboBox();
+            this.add_sheet_button = new System.Windows.Forms.Button();
             this.what_type_label = new System.Windows.Forms.Label();
+            this.transposition_button = new System.Windows.Forms.Button();
             this.which_field_combobox = new System.Windows.Forms.ComboBox();
-            this.which_field_label = new System.Windows.Forms.Label();
             this.function_title_label = new System.Windows.Forms.Label();
+            this.which_field_label = new System.Windows.Forms.Label();
             this.tabPage5 = new System.Windows.Forms.TabPage();
             this.richTextBox1 = new System.Windows.Forms.RichTextBox();
             this.tabPage6 = new System.Windows.Forms.TabPage();
@@ -77,30 +90,17 @@
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
             this.label4 = new System.Windows.Forms.Label();
             this.label7 = new System.Windows.Forms.Label();
-            this.panel1 = new System.Windows.Forms.Panel();
-            this.panel2 = new System.Windows.Forms.Panel();
-            this.dir_select_button = new System.Windows.Forms.Button();
-            this.multi_merge_button = new System.Windows.Forms.Button();
-            this.multi_merge_sheet_checkBox = new System.Windows.Forms.CheckBox();
-            this.dir_select_textbox = new System.Windows.Forms.TextBox();
-            this.merge_sheet_result_label = new System.Windows.Forms.Label();
-            this.label5 = new System.Windows.Forms.Label();
-            this.merge_sheet_progressBar = new System.Windows.Forms.ProgressBar();
-            this.single_merge_button = new System.Windows.Forms.Button();
-            this.mergeProgressBar_label = new System.Windows.Forms.Label();
-            this.panel3 = new System.Windows.Forms.Panel();
-            this.panel4 = new System.Windows.Forms.Panel();
             this.tabControl1.SuspendLayout();
             this.tabPage1.SuspendLayout();
+            this.panel1.SuspendLayout();
             this.tabPage2.SuspendLayout();
+            this.panel2.SuspendLayout();
             this.tabPage3.SuspendLayout();
+            this.panel3.SuspendLayout();
             this.tabPage4.SuspendLayout();
+            this.panel4.SuspendLayout();
             this.tabPage5.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
-            this.panel1.SuspendLayout();
-            this.panel2.SuspendLayout();
-            this.panel3.SuspendLayout();
-            this.panel4.SuspendLayout();
             this.SuspendLayout();
             // 
             // tabControl1
@@ -141,6 +141,37 @@
             this.tabPage1.Text = "一、分表功能";
             this.tabPage1.UseVisualStyleBackColor = true;
             // 
+            // panel1
+            // 
+            this.panel1.AutoSize = true;
+            this.panel1.Controls.Add(this.label1);
+            this.panel1.Controls.Add(this.splitProgressBar_label);
+            this.panel1.Controls.Add(this.label2);
+            this.panel1.Controls.Add(this.clear_button);
+            this.panel1.Controls.Add(this.label3);
+            this.panel1.Controls.Add(this.splitsheet_delete_button);
+            this.panel1.Controls.Add(this.sheet_name_combobox);
+            this.panel1.Controls.Add(this.splitsheet_export_button);
+            this.panel1.Controls.Add(this.field_name_combobox);
+            this.panel1.Controls.Add(this.split_sheet_progressBar);
+            this.panel1.Controls.Add(this.split_sheet_result_label);
+            this.panel1.Controls.Add(this.split_button);
+            this.panel1.Cursor = System.Windows.Forms.Cursors.Arrow;
+            this.panel1.Location = new System.Drawing.Point(0, 3);
+            this.panel1.Name = "panel1";
+            this.panel1.Size = new System.Drawing.Size(675, 389);
+            this.panel1.TabIndex = 12;
+            // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.label1.Location = new System.Drawing.Point(104, 45);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(135, 20);
+            this.label1.TabIndex = 0;
+            this.label1.Text = "请选择要分的原始表";
+            // 
             // splitProgressBar_label
             // 
             this.splitProgressBar_label.AutoSize = true;
@@ -151,6 +182,16 @@
             this.splitProgressBar_label.Size = new System.Drawing.Size(65, 20);
             this.splitProgressBar_label.TabIndex = 11;
             this.splitProgressBar_label.Text = "分表进度";
+            // 
+            // label2
+            // 
+            this.label2.AutoSize = true;
+            this.label2.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.label2.Location = new System.Drawing.Point(104, 103);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(163, 20);
+            this.label2.TabIndex = 1;
+            this.label2.Text = "请选择分表所依据的字段";
             // 
             // clear_button
             // 
@@ -167,6 +208,17 @@
             this.clear_button.UseVisualStyleBackColor = true;
             this.clear_button.Click += new System.EventHandler(this.clear_button_Click);
             // 
+            // label3
+            // 
+            this.label3.AutoSize = true;
+            this.label3.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.label3.ForeColor = System.Drawing.Color.Teal;
+            this.label3.Location = new System.Drawing.Point(104, 227);
+            this.label3.Name = "label3";
+            this.label3.Size = new System.Drawing.Size(470, 76);
+            this.label3.TabIndex = 2;
+            this.label3.Text = "注意：\r\n1.分表功能是基于每次所分的表进行操作，所以导出和删除均只能在运行分\r\n表后才有效；\r\n2.如需在不运行分表钱导出或删除，请用导出删除页相关功能。";
+            // 
             // splitsheet_delete_button
             // 
             this.splitsheet_delete_button.Cursor = System.Windows.Forms.Cursors.Hand;
@@ -181,6 +233,18 @@
             this.splitsheet_delete_button.Text = "删除分表";
             this.splitsheet_delete_button.UseVisualStyleBackColor = true;
             this.splitsheet_delete_button.Click += new System.EventHandler(this.splitsheet_delete_button_Click);
+            // 
+            // sheet_name_combobox
+            // 
+            this.sheet_name_combobox.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.sheet_name_combobox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.sheet_name_combobox.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.sheet_name_combobox.FormattingEnabled = true;
+            this.sheet_name_combobox.Location = new System.Drawing.Point(279, 45);
+            this.sheet_name_combobox.Name = "sheet_name_combobox";
+            this.sheet_name_combobox.Size = new System.Drawing.Size(277, 28);
+            this.sheet_name_combobox.TabIndex = 3;
+            this.sheet_name_combobox.TextChanged += new System.EventHandler(this.sheet_name_combobox_TextChanged);
             // 
             // splitsheet_export_button
             // 
@@ -197,12 +261,34 @@
             this.splitsheet_export_button.UseVisualStyleBackColor = true;
             this.splitsheet_export_button.Click += new System.EventHandler(this.splitsheet_export_button_Click);
             // 
+            // field_name_combobox
+            // 
+            this.field_name_combobox.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.field_name_combobox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.field_name_combobox.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.field_name_combobox.FormattingEnabled = true;
+            this.field_name_combobox.Location = new System.Drawing.Point(279, 103);
+            this.field_name_combobox.Name = "field_name_combobox";
+            this.field_name_combobox.Size = new System.Drawing.Size(277, 28);
+            this.field_name_combobox.TabIndex = 4;
+            // 
             // split_sheet_progressBar
             // 
             this.split_sheet_progressBar.Location = new System.Drawing.Point(216, 161);
             this.split_sheet_progressBar.Name = "split_sheet_progressBar";
             this.split_sheet_progressBar.Size = new System.Drawing.Size(340, 15);
             this.split_sheet_progressBar.TabIndex = 7;
+            // 
+            // split_sheet_result_label
+            // 
+            this.split_sheet_result_label.AutoSize = true;
+            this.split_sheet_result_label.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Italic, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.split_sheet_result_label.ForeColor = System.Drawing.Color.SaddleBrown;
+            this.split_sheet_result_label.Location = new System.Drawing.Point(104, 191);
+            this.split_sheet_result_label.Name = "split_sheet_result_label";
+            this.split_sheet_result_label.Size = new System.Drawing.Size(65, 20);
+            this.split_sheet_result_label.TabIndex = 5;
+            this.split_sheet_result_label.Text = "分表结果";
             // 
             // split_button
             // 
@@ -219,71 +305,6 @@
             this.split_button.UseVisualStyleBackColor = true;
             this.split_button.Click += new System.EventHandler(this.split_button_Click);
             // 
-            // split_sheet_result_label
-            // 
-            this.split_sheet_result_label.AutoSize = true;
-            this.split_sheet_result_label.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Italic, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.split_sheet_result_label.ForeColor = System.Drawing.Color.SaddleBrown;
-            this.split_sheet_result_label.Location = new System.Drawing.Point(104, 191);
-            this.split_sheet_result_label.Name = "split_sheet_result_label";
-            this.split_sheet_result_label.Size = new System.Drawing.Size(65, 20);
-            this.split_sheet_result_label.TabIndex = 5;
-            this.split_sheet_result_label.Text = "分表结果";
-            // 
-            // field_name_combobox
-            // 
-            this.field_name_combobox.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.field_name_combobox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.field_name_combobox.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.field_name_combobox.FormattingEnabled = true;
-            this.field_name_combobox.Location = new System.Drawing.Point(279, 103);
-            this.field_name_combobox.Name = "field_name_combobox";
-            this.field_name_combobox.Size = new System.Drawing.Size(277, 28);
-            this.field_name_combobox.TabIndex = 4;
-            // 
-            // sheet_name_combobox
-            // 
-            this.sheet_name_combobox.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.sheet_name_combobox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.sheet_name_combobox.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.sheet_name_combobox.FormattingEnabled = true;
-            this.sheet_name_combobox.Location = new System.Drawing.Point(279, 45);
-            this.sheet_name_combobox.Name = "sheet_name_combobox";
-            this.sheet_name_combobox.Size = new System.Drawing.Size(277, 28);
-            this.sheet_name_combobox.TabIndex = 3;
-            this.sheet_name_combobox.TextChanged += new System.EventHandler(this.sheet_name_combobox_TextChanged);
-            // 
-            // label3
-            // 
-            this.label3.AutoSize = true;
-            this.label3.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.label3.ForeColor = System.Drawing.Color.Teal;
-            this.label3.Location = new System.Drawing.Point(104, 227);
-            this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(470, 76);
-            this.label3.TabIndex = 2;
-            this.label3.Text = "注意：\r\n1.分表功能是基于每次所分的表进行操作，所以导出和删除均只能在运行分\r\n表后才有效；\r\n2.如需在不运行分表钱导出或删除，请用导出删除页相关功能。";
-            // 
-            // label2
-            // 
-            this.label2.AutoSize = true;
-            this.label2.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.label2.Location = new System.Drawing.Point(104, 103);
-            this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(163, 20);
-            this.label2.TabIndex = 1;
-            this.label2.Text = "请选择分表所依据的字段";
-            // 
-            // label1
-            // 
-            this.label1.AutoSize = true;
-            this.label1.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.label1.Location = new System.Drawing.Point(104, 45);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(135, 20);
-            this.label1.TabIndex = 0;
-            this.label1.Text = "请选择要分的原始表";
-            // 
             // tabPage2
             // 
             this.tabPage2.Controls.Add(this.panel2);
@@ -297,6 +318,132 @@
             this.tabPage2.Text = "二、并表功能";
             this.tabPage2.UseVisualStyleBackColor = true;
             // 
+            // panel2
+            // 
+            this.panel2.AutoSize = true;
+            this.panel2.Controls.Add(this.mergeProgressBar_label);
+            this.panel2.Controls.Add(this.single_merge_button);
+            this.panel2.Controls.Add(this.merge_sheet_progressBar);
+            this.panel2.Controls.Add(this.label5);
+            this.panel2.Controls.Add(this.merge_sheet_result_label);
+            this.panel2.Controls.Add(this.dir_select_textbox);
+            this.panel2.Controls.Add(this.multi_merge_sheet_checkBox);
+            this.panel2.Controls.Add(this.multi_merge_button);
+            this.panel2.Controls.Add(this.dir_select_button);
+            this.panel2.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.panel2.Location = new System.Drawing.Point(3, 3);
+            this.panel2.Name = "panel2";
+            this.panel2.Size = new System.Drawing.Size(669, 386);
+            this.panel2.TabIndex = 1;
+            // 
+            // mergeProgressBar_label
+            // 
+            this.mergeProgressBar_label.AutoSize = true;
+            this.mergeProgressBar_label.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.mergeProgressBar_label.ForeColor = System.Drawing.Color.SaddleBrown;
+            this.mergeProgressBar_label.Location = new System.Drawing.Point(80, 216);
+            this.mergeProgressBar_label.Name = "mergeProgressBar_label";
+            this.mergeProgressBar_label.Size = new System.Drawing.Size(65, 20);
+            this.mergeProgressBar_label.TabIndex = 8;
+            this.mergeProgressBar_label.Text = "完成进度";
+            // 
+            // single_merge_button
+            // 
+            this.single_merge_button.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.single_merge_button.FlatAppearance.MouseDownBackColor = System.Drawing.SystemColors.ButtonShadow;
+            this.single_merge_button.FlatAppearance.MouseOverBackColor = System.Drawing.SystemColors.ButtonFace;
+            this.single_merge_button.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.single_merge_button.ForeColor = System.Drawing.Color.SeaGreen;
+            this.single_merge_button.Location = new System.Drawing.Point(265, 41);
+            this.single_merge_button.Name = "single_merge_button";
+            this.single_merge_button.Size = new System.Drawing.Size(120, 61);
+            this.single_merge_button.TabIndex = 0;
+            this.single_merge_button.Text = "并表\r\n（同一工作簿）";
+            this.single_merge_button.UseVisualStyleBackColor = true;
+            this.single_merge_button.Click += new System.EventHandler(this.single_merge_button_Click);
+            // 
+            // merge_sheet_progressBar
+            // 
+            this.merge_sheet_progressBar.ForeColor = System.Drawing.Color.Purple;
+            this.merge_sheet_progressBar.Location = new System.Drawing.Point(169, 223);
+            this.merge_sheet_progressBar.Name = "merge_sheet_progressBar";
+            this.merge_sheet_progressBar.Size = new System.Drawing.Size(385, 13);
+            this.merge_sheet_progressBar.TabIndex = 7;
+            // 
+            // label5
+            // 
+            this.label5.AutoSize = true;
+            this.label5.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.label5.Location = new System.Drawing.Point(80, 180);
+            this.label5.Name = "label5";
+            this.label5.Size = new System.Drawing.Size(163, 20);
+            this.label5.TabIndex = 0;
+            this.label5.Text = "请选择工作簿所在文件夹";
+            // 
+            // merge_sheet_result_label
+            // 
+            this.merge_sheet_result_label.AutoSize = true;
+            this.merge_sheet_result_label.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Italic, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.merge_sheet_result_label.ForeColor = System.Drawing.Color.SaddleBrown;
+            this.merge_sheet_result_label.Location = new System.Drawing.Point(80, 253);
+            this.merge_sheet_result_label.Name = "merge_sheet_result_label";
+            this.merge_sheet_result_label.Size = new System.Drawing.Size(65, 20);
+            this.merge_sheet_result_label.TabIndex = 6;
+            this.merge_sheet_result_label.Text = "并表结果";
+            // 
+            // dir_select_textbox
+            // 
+            this.dir_select_textbox.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.dir_select_textbox.Location = new System.Drawing.Point(247, 176);
+            this.dir_select_textbox.Name = "dir_select_textbox";
+            this.dir_select_textbox.ReadOnly = true;
+            this.dir_select_textbox.Size = new System.Drawing.Size(241, 26);
+            this.dir_select_textbox.TabIndex = 1;
+            // 
+            // multi_merge_sheet_checkBox
+            // 
+            this.multi_merge_sheet_checkBox.AutoSize = true;
+            this.multi_merge_sheet_checkBox.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.multi_merge_sheet_checkBox.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.multi_merge_sheet_checkBox.ForeColor = System.Drawing.Color.DarkSlateBlue;
+            this.multi_merge_sheet_checkBox.Location = new System.Drawing.Point(120, 337);
+            this.multi_merge_sheet_checkBox.Name = "multi_merge_sheet_checkBox";
+            this.multi_merge_sheet_checkBox.Size = new System.Drawing.Size(434, 24);
+            this.multi_merge_sheet_checkBox.TabIndex = 5;
+            this.multi_merge_sheet_checkBox.Text = "当前已打开工作簿的已有表列入合并范围（仅适用多工作簿合并）";
+            this.multi_merge_sheet_checkBox.UseVisualStyleBackColor = true;
+            this.multi_merge_sheet_checkBox.CheckedChanged += new System.EventHandler(this.multi_merge_sheet_checkBox_CheckedChanged);
+            // 
+            // multi_merge_button
+            // 
+            this.multi_merge_button.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.multi_merge_button.FlatAppearance.MouseDownBackColor = System.Drawing.SystemColors.ButtonShadow;
+            this.multi_merge_button.FlatAppearance.MouseOverBackColor = System.Drawing.SystemColors.ButtonFace;
+            this.multi_merge_button.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.multi_merge_button.ForeColor = System.Drawing.Color.SeaGreen;
+            this.multi_merge_button.Location = new System.Drawing.Point(274, 287);
+            this.multi_merge_button.Name = "multi_merge_button";
+            this.multi_merge_button.Size = new System.Drawing.Size(111, 34);
+            this.multi_merge_button.TabIndex = 2;
+            this.multi_merge_button.Text = "工作簿汇总";
+            this.multi_merge_button.UseVisualStyleBackColor = true;
+            this.multi_merge_button.Click += new System.EventHandler(this.multi_merge_button_Click);
+            // 
+            // dir_select_button
+            // 
+            this.dir_select_button.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.dir_select_button.FlatAppearance.MouseDownBackColor = System.Drawing.SystemColors.ButtonShadow;
+            this.dir_select_button.FlatAppearance.MouseOverBackColor = System.Drawing.SystemColors.ButtonFace;
+            this.dir_select_button.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.dir_select_button.ForeColor = System.Drawing.Color.SeaGreen;
+            this.dir_select_button.Location = new System.Drawing.Point(495, 176);
+            this.dir_select_button.Name = "dir_select_button";
+            this.dir_select_button.Size = new System.Drawing.Size(59, 26);
+            this.dir_select_button.TabIndex = 4;
+            this.dir_select_button.Text = "选择";
+            this.dir_select_button.UseVisualStyleBackColor = true;
+            this.dir_select_button.Click += new System.EventHandler(this.dir_select_button_Click);
+            // 
             // tabPage3
             // 
             this.tabPage3.Controls.Add(this.panel3);
@@ -309,6 +456,33 @@
             this.tabPage3.TabIndex = 2;
             this.tabPage3.Text = "三、批量导删";
             this.tabPage3.UseVisualStyleBackColor = true;
+            // 
+            // panel3
+            // 
+            this.panel3.AutoSize = true;
+            this.panel3.Controls.Add(this.sheet_listbox);
+            this.panel3.Controls.Add(this.batch_delete_button);
+            this.panel3.Controls.Add(this.label6);
+            this.panel3.Controls.Add(this.batch_export_button);
+            this.panel3.Controls.Add(this.all_select_checkbox);
+            this.panel3.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.panel3.Location = new System.Drawing.Point(0, 0);
+            this.panel3.Name = "panel3";
+            this.panel3.Size = new System.Drawing.Size(675, 392);
+            this.panel3.TabIndex = 5;
+            // 
+            // sheet_listbox
+            // 
+            this.sheet_listbox.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.sheet_listbox.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.sheet_listbox.FormattingEnabled = true;
+            this.sheet_listbox.ItemHeight = 20;
+            this.sheet_listbox.Location = new System.Drawing.Point(263, 85);
+            this.sheet_listbox.Name = "sheet_listbox";
+            this.sheet_listbox.SelectionMode = System.Windows.Forms.SelectionMode.MultiExtended;
+            this.sheet_listbox.Size = new System.Drawing.Size(235, 104);
+            this.sheet_listbox.TabIndex = 1;
+            this.sheet_listbox.SelectedValueChanged += new System.EventHandler(this.sheet_listbox_SelectedValueChanged);
             // 
             // batch_delete_button
             // 
@@ -324,6 +498,16 @@
             this.batch_delete_button.Text = "删除所选表";
             this.batch_delete_button.UseVisualStyleBackColor = true;
             this.batch_delete_button.Click += new System.EventHandler(this.batch_delete_button_Click);
+            // 
+            // label6
+            // 
+            this.label6.AutoSize = true;
+            this.label6.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.label6.Location = new System.Drawing.Point(164, 85);
+            this.label6.Name = "label6";
+            this.label6.Size = new System.Drawing.Size(93, 40);
+            this.label6.TabIndex = 0;
+            this.label6.Text = "选择要导出\r\n或删除的表：";
             // 
             // batch_export_button
             // 
@@ -353,29 +537,6 @@
             this.all_select_checkbox.UseVisualStyleBackColor = true;
             this.all_select_checkbox.Click += new System.EventHandler(this.all_select_checkbox_Click);
             // 
-            // sheet_listbox
-            // 
-            this.sheet_listbox.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.sheet_listbox.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.sheet_listbox.FormattingEnabled = true;
-            this.sheet_listbox.ItemHeight = 20;
-            this.sheet_listbox.Location = new System.Drawing.Point(263, 85);
-            this.sheet_listbox.Name = "sheet_listbox";
-            this.sheet_listbox.SelectionMode = System.Windows.Forms.SelectionMode.MultiExtended;
-            this.sheet_listbox.Size = new System.Drawing.Size(235, 104);
-            this.sheet_listbox.TabIndex = 1;
-            this.sheet_listbox.SelectedValueChanged += new System.EventHandler(this.sheet_listbox_SelectedValueChanged);
-            // 
-            // label6
-            // 
-            this.label6.AutoSize = true;
-            this.label6.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.label6.Location = new System.Drawing.Point(164, 85);
-            this.label6.Name = "label6";
-            this.label6.Size = new System.Drawing.Size(93, 40);
-            this.label6.TabIndex = 0;
-            this.label6.Text = "选择要导出\r\n或删除的表：";
-            // 
             // tabPage4
             // 
             this.tabPage4.Controls.Add(this.panel4);
@@ -387,6 +548,41 @@
             this.tabPage4.TabIndex = 6;
             this.tabPage4.Text = "四、实用功能";
             this.tabPage4.UseVisualStyleBackColor = true;
+            // 
+            // panel4
+            // 
+            this.panel4.AutoSize = true;
+            this.panel4.Controls.Add(this.run_result_label);
+            this.panel4.Controls.Add(this.contents_button);
+            this.panel4.Controls.Add(this.regex_clear_button);
+            this.panel4.Controls.Add(this.regex_run_button);
+            this.panel4.Controls.Add(this.payslip_button);
+            this.panel4.Controls.Add(this.regex_rule_textbox);
+            this.panel4.Controls.Add(this.move_sheet_button);
+            this.panel4.Controls.Add(this.regex_rule_label);
+            this.panel4.Controls.Add(this.regex_button);
+            this.panel4.Controls.Add(this.what_type_combobox);
+            this.panel4.Controls.Add(this.add_sheet_button);
+            this.panel4.Controls.Add(this.what_type_label);
+            this.panel4.Controls.Add(this.transposition_button);
+            this.panel4.Controls.Add(this.which_field_combobox);
+            this.panel4.Controls.Add(this.function_title_label);
+            this.panel4.Controls.Add(this.which_field_label);
+            this.panel4.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.panel4.Location = new System.Drawing.Point(0, 0);
+            this.panel4.Name = "panel4";
+            this.panel4.Size = new System.Drawing.Size(675, 392);
+            this.panel4.TabIndex = 1;
+            // 
+            // run_result_label
+            // 
+            this.run_result_label.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Italic, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.run_result_label.ForeColor = System.Drawing.Color.SaddleBrown;
+            this.run_result_label.Location = new System.Drawing.Point(326, 252);
+            this.run_result_label.Name = "run_result_label";
+            this.run_result_label.Size = new System.Drawing.Size(242, 44);
+            this.run_result_label.TabIndex = 9;
+            this.run_result_label.Text = "运行结果";
             // 
             // contents_button
             // 
@@ -404,101 +600,6 @@
             this.contents_button.Text = "建立目录页新表";
             this.contents_button.UseVisualStyleBackColor = true;
             this.contents_button.Click += new System.EventHandler(this.contents_button_Click);
-            // 
-            // payslip_button
-            // 
-            this.payslip_button.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.payslip_button.FlatAppearance.BorderSize = 0;
-            this.payslip_button.FlatAppearance.MouseDownBackColor = System.Drawing.SystemColors.ButtonShadow;
-            this.payslip_button.FlatAppearance.MouseOverBackColor = System.Drawing.SystemColors.ButtonFace;
-            this.payslip_button.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.payslip_button.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.payslip_button.ForeColor = System.Drawing.Color.SeaGreen;
-            this.payslip_button.Location = new System.Drawing.Point(35, 237);
-            this.payslip_button.Name = "payslip_button";
-            this.payslip_button.Size = new System.Drawing.Size(90, 50);
-            this.payslip_button.TabIndex = 4;
-            this.payslip_button.Text = "一键生成工资条";
-            this.payslip_button.UseVisualStyleBackColor = true;
-            this.payslip_button.Click += new System.EventHandler(this.payslip_button_Click);
-            // 
-            // regex_button
-            // 
-            this.regex_button.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.regex_button.FlatAppearance.BorderSize = 0;
-            this.regex_button.FlatAppearance.MouseDownBackColor = System.Drawing.SystemColors.ButtonShadow;
-            this.regex_button.FlatAppearance.MouseOverBackColor = System.Drawing.SystemColors.ButtonFace;
-            this.regex_button.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.regex_button.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.regex_button.ForeColor = System.Drawing.Color.SeaGreen;
-            this.regex_button.Location = new System.Drawing.Point(162, 150);
-            this.regex_button.Name = "regex_button";
-            this.regex_button.Size = new System.Drawing.Size(90, 50);
-            this.regex_button.TabIndex = 3;
-            this.regex_button.Text = "正则表达式";
-            this.regex_button.UseVisualStyleBackColor = true;
-            this.regex_button.Click += new System.EventHandler(this.regex_button_Click);
-            // 
-            // transposition_button
-            // 
-            this.transposition_button.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.transposition_button.FlatAppearance.BorderSize = 0;
-            this.transposition_button.FlatAppearance.MouseDownBackColor = System.Drawing.SystemColors.ButtonShadow;
-            this.transposition_button.FlatAppearance.MouseOverBackColor = System.Drawing.SystemColors.ButtonFace;
-            this.transposition_button.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.transposition_button.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.transposition_button.ForeColor = System.Drawing.Color.SeaGreen;
-            this.transposition_button.Location = new System.Drawing.Point(35, 150);
-            this.transposition_button.Name = "transposition_button";
-            this.transposition_button.Size = new System.Drawing.Size(90, 50);
-            this.transposition_button.TabIndex = 2;
-            this.transposition_button.Text = "转置工作表";
-            this.transposition_button.UseVisualStyleBackColor = true;
-            this.transposition_button.Click += new System.EventHandler(this.transposition_button_Click);
-            // 
-            // add_sheet_button
-            // 
-            this.add_sheet_button.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.add_sheet_button.FlatAppearance.BorderSize = 0;
-            this.add_sheet_button.FlatAppearance.MouseDownBackColor = System.Drawing.SystemColors.ButtonShadow;
-            this.add_sheet_button.FlatAppearance.MouseOverBackColor = System.Drawing.SystemColors.ButtonFace;
-            this.add_sheet_button.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.add_sheet_button.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.add_sheet_button.ForeColor = System.Drawing.Color.SeaGreen;
-            this.add_sheet_button.Location = new System.Drawing.Point(162, 51);
-            this.add_sheet_button.Name = "add_sheet_button";
-            this.add_sheet_button.Size = new System.Drawing.Size(90, 50);
-            this.add_sheet_button.TabIndex = 1;
-            this.add_sheet_button.Text = "一键建立多个工作表";
-            this.add_sheet_button.UseVisualStyleBackColor = true;
-            this.add_sheet_button.Click += new System.EventHandler(this.add_sheet_button_Click);
-            // 
-            // move_sheet_button
-            // 
-            this.move_sheet_button.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.move_sheet_button.FlatAppearance.BorderSize = 0;
-            this.move_sheet_button.FlatAppearance.MouseDownBackColor = System.Drawing.SystemColors.ButtonShadow;
-            this.move_sheet_button.FlatAppearance.MouseOverBackColor = System.Drawing.SystemColors.ButtonFace;
-            this.move_sheet_button.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.move_sheet_button.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.move_sheet_button.ForeColor = System.Drawing.Color.SeaGreen;
-            this.move_sheet_button.Location = new System.Drawing.Point(35, 51);
-            this.move_sheet_button.Name = "move_sheet_button";
-            this.move_sheet_button.Size = new System.Drawing.Size(90, 50);
-            this.move_sheet_button.TabIndex = 0;
-            this.move_sheet_button.Text = "多工作簿表转同工作簿";
-            this.move_sheet_button.UseVisualStyleBackColor = true;
-            this.move_sheet_button.Click += new System.EventHandler(this.move_sheet_button_Click);
-            // 
-            // run_result_label
-            // 
-            this.run_result_label.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Italic, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.run_result_label.ForeColor = System.Drawing.Color.SaddleBrown;
-            this.run_result_label.Location = new System.Drawing.Point(326, 252);
-            this.run_result_label.Name = "run_result_label";
-            this.run_result_label.Size = new System.Drawing.Size(242, 44);
-            this.run_result_label.TabIndex = 9;
-            this.run_result_label.Text = "运行结果";
             // 
             // regex_clear_button
             // 
@@ -524,6 +625,23 @@
             this.regex_run_button.UseVisualStyleBackColor = true;
             this.regex_run_button.Click += new System.EventHandler(this.regex_run_button_Click);
             // 
+            // payslip_button
+            // 
+            this.payslip_button.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.payslip_button.FlatAppearance.BorderSize = 0;
+            this.payslip_button.FlatAppearance.MouseDownBackColor = System.Drawing.SystemColors.ButtonShadow;
+            this.payslip_button.FlatAppearance.MouseOverBackColor = System.Drawing.SystemColors.ButtonFace;
+            this.payslip_button.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.payslip_button.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.payslip_button.ForeColor = System.Drawing.Color.SeaGreen;
+            this.payslip_button.Location = new System.Drawing.Point(35, 237);
+            this.payslip_button.Name = "payslip_button";
+            this.payslip_button.Size = new System.Drawing.Size(90, 50);
+            this.payslip_button.TabIndex = 4;
+            this.payslip_button.Text = "一键生成工资条";
+            this.payslip_button.UseVisualStyleBackColor = true;
+            this.payslip_button.Click += new System.EventHandler(this.payslip_button_Click);
+            // 
             // regex_rule_textbox
             // 
             this.regex_rule_textbox.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
@@ -531,6 +649,23 @@
             this.regex_rule_textbox.Name = "regex_rule_textbox";
             this.regex_rule_textbox.Size = new System.Drawing.Size(175, 26);
             this.regex_rule_textbox.TabIndex = 6;
+            // 
+            // move_sheet_button
+            // 
+            this.move_sheet_button.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.move_sheet_button.FlatAppearance.BorderSize = 0;
+            this.move_sheet_button.FlatAppearance.MouseDownBackColor = System.Drawing.SystemColors.ButtonShadow;
+            this.move_sheet_button.FlatAppearance.MouseOverBackColor = System.Drawing.SystemColors.ButtonFace;
+            this.move_sheet_button.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.move_sheet_button.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.move_sheet_button.ForeColor = System.Drawing.Color.SeaGreen;
+            this.move_sheet_button.Location = new System.Drawing.Point(35, 51);
+            this.move_sheet_button.Name = "move_sheet_button";
+            this.move_sheet_button.Size = new System.Drawing.Size(90, 50);
+            this.move_sheet_button.TabIndex = 0;
+            this.move_sheet_button.Text = "多工作簿表转同工作簿";
+            this.move_sheet_button.UseVisualStyleBackColor = true;
+            this.move_sheet_button.Click += new System.EventHandler(this.move_sheet_button_Click);
             // 
             // regex_rule_label
             // 
@@ -541,6 +676,23 @@
             this.regex_rule_label.Size = new System.Drawing.Size(65, 20);
             this.regex_rule_label.TabIndex = 5;
             this.regex_rule_label.Text = "过滤规则";
+            // 
+            // regex_button
+            // 
+            this.regex_button.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.regex_button.FlatAppearance.BorderSize = 0;
+            this.regex_button.FlatAppearance.MouseDownBackColor = System.Drawing.SystemColors.ButtonShadow;
+            this.regex_button.FlatAppearance.MouseOverBackColor = System.Drawing.SystemColors.ButtonFace;
+            this.regex_button.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.regex_button.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.regex_button.ForeColor = System.Drawing.Color.SeaGreen;
+            this.regex_button.Location = new System.Drawing.Point(162, 150);
+            this.regex_button.Name = "regex_button";
+            this.regex_button.Size = new System.Drawing.Size(90, 50);
+            this.regex_button.TabIndex = 3;
+            this.regex_button.Text = "正则表达式";
+            this.regex_button.UseVisualStyleBackColor = true;
+            this.regex_button.Click += new System.EventHandler(this.regex_button_Click);
             // 
             // what_type_combobox
             // 
@@ -563,6 +715,23 @@
             this.what_type_combobox.TabIndex = 4;
             this.what_type_combobox.SelectedIndexChanged += new System.EventHandler(this.what_type_combobox_SelectedIndexChanged);
             // 
+            // add_sheet_button
+            // 
+            this.add_sheet_button.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.add_sheet_button.FlatAppearance.BorderSize = 0;
+            this.add_sheet_button.FlatAppearance.MouseDownBackColor = System.Drawing.SystemColors.ButtonShadow;
+            this.add_sheet_button.FlatAppearance.MouseOverBackColor = System.Drawing.SystemColors.ButtonFace;
+            this.add_sheet_button.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.add_sheet_button.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.add_sheet_button.ForeColor = System.Drawing.Color.SeaGreen;
+            this.add_sheet_button.Location = new System.Drawing.Point(162, 51);
+            this.add_sheet_button.Name = "add_sheet_button";
+            this.add_sheet_button.Size = new System.Drawing.Size(90, 50);
+            this.add_sheet_button.TabIndex = 1;
+            this.add_sheet_button.Text = "一键建立多个工作表";
+            this.add_sheet_button.UseVisualStyleBackColor = true;
+            this.add_sheet_button.Click += new System.EventHandler(this.add_sheet_button_Click);
+            // 
             // what_type_label
             // 
             this.what_type_label.AutoSize = true;
@@ -573,6 +742,23 @@
             this.what_type_label.TabIndex = 3;
             this.what_type_label.Text = "提取内容";
             // 
+            // transposition_button
+            // 
+            this.transposition_button.Cursor = System.Windows.Forms.Cursors.Hand;
+            this.transposition_button.FlatAppearance.BorderSize = 0;
+            this.transposition_button.FlatAppearance.MouseDownBackColor = System.Drawing.SystemColors.ButtonShadow;
+            this.transposition_button.FlatAppearance.MouseOverBackColor = System.Drawing.SystemColors.ButtonFace;
+            this.transposition_button.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.transposition_button.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.transposition_button.ForeColor = System.Drawing.Color.SeaGreen;
+            this.transposition_button.Location = new System.Drawing.Point(35, 150);
+            this.transposition_button.Name = "transposition_button";
+            this.transposition_button.Size = new System.Drawing.Size(90, 50);
+            this.transposition_button.TabIndex = 2;
+            this.transposition_button.Text = "转置工作表";
+            this.transposition_button.UseVisualStyleBackColor = true;
+            this.transposition_button.Click += new System.EventHandler(this.transposition_button_Click);
+            // 
             // which_field_combobox
             // 
             this.which_field_combobox.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
@@ -582,16 +768,6 @@
             this.which_field_combobox.Size = new System.Drawing.Size(175, 28);
             this.which_field_combobox.TabIndex = 2;
             this.which_field_combobox.VisibleChanged += new System.EventHandler(this.which_field_combobox_VisibleChanged);
-            // 
-            // which_field_label
-            // 
-            this.which_field_label.AutoSize = true;
-            this.which_field_label.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.which_field_label.Location = new System.Drawing.Point(322, 88);
-            this.which_field_label.Name = "which_field_label";
-            this.which_field_label.Size = new System.Drawing.Size(65, 20);
-            this.which_field_label.TabIndex = 1;
-            this.which_field_label.Text = "提取哪列";
             // 
             // function_title_label
             // 
@@ -607,6 +783,16 @@
             this.function_title_label.Text = "功能标题";
             this.function_title_label.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             this.function_title_label.Click += new System.EventHandler(this.function_title_label_Click);
+            // 
+            // which_field_label
+            // 
+            this.which_field_label.AutoSize = true;
+            this.which_field_label.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.which_field_label.Location = new System.Drawing.Point(322, 88);
+            this.which_field_label.Name = "which_field_label";
+            this.which_field_label.Size = new System.Drawing.Size(65, 20);
+            this.which_field_label.TabIndex = 1;
+            this.which_field_label.Text = "提取哪列";
             // 
             // tabPage5
             // 
@@ -682,193 +868,7 @@
             this.label7.Name = "label7";
             this.label7.Size = new System.Drawing.Size(90, 16);
             this.label7.TabIndex = 3;
-            this.label7.Text = "Version  2.2.5";
-            // 
-            // panel1
-            // 
-            this.panel1.AutoSize = true;
-            this.panel1.Controls.Add(this.label1);
-            this.panel1.Controls.Add(this.splitProgressBar_label);
-            this.panel1.Controls.Add(this.label2);
-            this.panel1.Controls.Add(this.clear_button);
-            this.panel1.Controls.Add(this.label3);
-            this.panel1.Controls.Add(this.splitsheet_delete_button);
-            this.panel1.Controls.Add(this.sheet_name_combobox);
-            this.panel1.Controls.Add(this.splitsheet_export_button);
-            this.panel1.Controls.Add(this.field_name_combobox);
-            this.panel1.Controls.Add(this.split_sheet_progressBar);
-            this.panel1.Controls.Add(this.split_sheet_result_label);
-            this.panel1.Controls.Add(this.split_button);
-            this.panel1.Cursor = System.Windows.Forms.Cursors.Arrow;
-            this.panel1.Location = new System.Drawing.Point(0, 3);
-            this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(675, 389);
-            this.panel1.TabIndex = 12;
-            // 
-            // panel2
-            // 
-            this.panel2.AutoSize = true;
-            this.panel2.Controls.Add(this.mergeProgressBar_label);
-            this.panel2.Controls.Add(this.single_merge_button);
-            this.panel2.Controls.Add(this.merge_sheet_progressBar);
-            this.panel2.Controls.Add(this.label5);
-            this.panel2.Controls.Add(this.merge_sheet_result_label);
-            this.panel2.Controls.Add(this.dir_select_textbox);
-            this.panel2.Controls.Add(this.multi_merge_sheet_checkBox);
-            this.panel2.Controls.Add(this.multi_merge_button);
-            this.panel2.Controls.Add(this.dir_select_button);
-            this.panel2.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.panel2.Location = new System.Drawing.Point(3, 3);
-            this.panel2.Name = "panel2";
-            this.panel2.Size = new System.Drawing.Size(669, 386);
-            this.panel2.TabIndex = 1;
-            // 
-            // dir_select_button
-            // 
-            this.dir_select_button.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.dir_select_button.FlatAppearance.MouseDownBackColor = System.Drawing.SystemColors.ButtonShadow;
-            this.dir_select_button.FlatAppearance.MouseOverBackColor = System.Drawing.SystemColors.ButtonFace;
-            this.dir_select_button.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.dir_select_button.ForeColor = System.Drawing.Color.SeaGreen;
-            this.dir_select_button.Location = new System.Drawing.Point(495, 176);
-            this.dir_select_button.Name = "dir_select_button";
-            this.dir_select_button.Size = new System.Drawing.Size(59, 26);
-            this.dir_select_button.TabIndex = 4;
-            this.dir_select_button.Text = "选择";
-            this.dir_select_button.UseVisualStyleBackColor = true;
-            this.dir_select_button.Click += new System.EventHandler(this.dir_select_button_Click);
-            // 
-            // multi_merge_button
-            // 
-            this.multi_merge_button.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.multi_merge_button.FlatAppearance.MouseDownBackColor = System.Drawing.SystemColors.ButtonShadow;
-            this.multi_merge_button.FlatAppearance.MouseOverBackColor = System.Drawing.SystemColors.ButtonFace;
-            this.multi_merge_button.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.multi_merge_button.ForeColor = System.Drawing.Color.SeaGreen;
-            this.multi_merge_button.Location = new System.Drawing.Point(274, 287);
-            this.multi_merge_button.Name = "multi_merge_button";
-            this.multi_merge_button.Size = new System.Drawing.Size(111, 34);
-            this.multi_merge_button.TabIndex = 2;
-            this.multi_merge_button.Text = "工作簿汇总";
-            this.multi_merge_button.UseVisualStyleBackColor = true;
-            this.multi_merge_button.Click += new System.EventHandler(this.multi_merge_button_Click);
-            // 
-            // multi_merge_sheet_checkBox
-            // 
-            this.multi_merge_sheet_checkBox.AutoSize = true;
-            this.multi_merge_sheet_checkBox.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.multi_merge_sheet_checkBox.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.multi_merge_sheet_checkBox.ForeColor = System.Drawing.Color.DarkSlateBlue;
-            this.multi_merge_sheet_checkBox.Location = new System.Drawing.Point(120, 337);
-            this.multi_merge_sheet_checkBox.Name = "multi_merge_sheet_checkBox";
-            this.multi_merge_sheet_checkBox.Size = new System.Drawing.Size(434, 24);
-            this.multi_merge_sheet_checkBox.TabIndex = 5;
-            this.multi_merge_sheet_checkBox.Text = "当前已打开工作簿的已有表列入合并范围（仅适用多工作簿合并）";
-            this.multi_merge_sheet_checkBox.UseVisualStyleBackColor = true;
-            this.multi_merge_sheet_checkBox.CheckedChanged += new System.EventHandler(this.multi_merge_sheet_checkBox_CheckedChanged);
-            // 
-            // dir_select_textbox
-            // 
-            this.dir_select_textbox.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.dir_select_textbox.Location = new System.Drawing.Point(247, 176);
-            this.dir_select_textbox.Name = "dir_select_textbox";
-            this.dir_select_textbox.ReadOnly = true;
-            this.dir_select_textbox.Size = new System.Drawing.Size(241, 26);
-            this.dir_select_textbox.TabIndex = 1;
-            // 
-            // merge_sheet_result_label
-            // 
-            this.merge_sheet_result_label.AutoSize = true;
-            this.merge_sheet_result_label.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Italic, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.merge_sheet_result_label.ForeColor = System.Drawing.Color.SaddleBrown;
-            this.merge_sheet_result_label.Location = new System.Drawing.Point(80, 253);
-            this.merge_sheet_result_label.Name = "merge_sheet_result_label";
-            this.merge_sheet_result_label.Size = new System.Drawing.Size(65, 20);
-            this.merge_sheet_result_label.TabIndex = 6;
-            this.merge_sheet_result_label.Text = "并表结果";
-            // 
-            // label5
-            // 
-            this.label5.AutoSize = true;
-            this.label5.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.label5.Location = new System.Drawing.Point(80, 180);
-            this.label5.Name = "label5";
-            this.label5.Size = new System.Drawing.Size(163, 20);
-            this.label5.TabIndex = 0;
-            this.label5.Text = "请选择工作簿所在文件夹";
-            // 
-            // merge_sheet_progressBar
-            // 
-            this.merge_sheet_progressBar.ForeColor = System.Drawing.Color.Purple;
-            this.merge_sheet_progressBar.Location = new System.Drawing.Point(169, 223);
-            this.merge_sheet_progressBar.Name = "merge_sheet_progressBar";
-            this.merge_sheet_progressBar.Size = new System.Drawing.Size(385, 13);
-            this.merge_sheet_progressBar.TabIndex = 7;
-            // 
-            // single_merge_button
-            // 
-            this.single_merge_button.Cursor = System.Windows.Forms.Cursors.Hand;
-            this.single_merge_button.FlatAppearance.MouseDownBackColor = System.Drawing.SystemColors.ButtonShadow;
-            this.single_merge_button.FlatAppearance.MouseOverBackColor = System.Drawing.SystemColors.ButtonFace;
-            this.single_merge_button.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.single_merge_button.ForeColor = System.Drawing.Color.SeaGreen;
-            this.single_merge_button.Location = new System.Drawing.Point(265, 41);
-            this.single_merge_button.Name = "single_merge_button";
-            this.single_merge_button.Size = new System.Drawing.Size(120, 61);
-            this.single_merge_button.TabIndex = 0;
-            this.single_merge_button.Text = "并表\r\n（同一工作簿）";
-            this.single_merge_button.UseVisualStyleBackColor = true;
-            this.single_merge_button.Click += new System.EventHandler(this.single_merge_button_Click);
-            // 
-            // mergeProgressBar_label
-            // 
-            this.mergeProgressBar_label.AutoSize = true;
-            this.mergeProgressBar_label.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.mergeProgressBar_label.ForeColor = System.Drawing.Color.SaddleBrown;
-            this.mergeProgressBar_label.Location = new System.Drawing.Point(80, 216);
-            this.mergeProgressBar_label.Name = "mergeProgressBar_label";
-            this.mergeProgressBar_label.Size = new System.Drawing.Size(65, 20);
-            this.mergeProgressBar_label.TabIndex = 8;
-            this.mergeProgressBar_label.Text = "完成进度";
-            // 
-            // panel3
-            // 
-            this.panel3.AutoSize = true;
-            this.panel3.Controls.Add(this.sheet_listbox);
-            this.panel3.Controls.Add(this.batch_delete_button);
-            this.panel3.Controls.Add(this.label6);
-            this.panel3.Controls.Add(this.batch_export_button);
-            this.panel3.Controls.Add(this.all_select_checkbox);
-            this.panel3.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.panel3.Location = new System.Drawing.Point(0, 0);
-            this.panel3.Name = "panel3";
-            this.panel3.Size = new System.Drawing.Size(675, 392);
-            this.panel3.TabIndex = 5;
-            // 
-            // panel4
-            // 
-            this.panel4.AutoSize = true;
-            this.panel4.Controls.Add(this.run_result_label);
-            this.panel4.Controls.Add(this.contents_button);
-            this.panel4.Controls.Add(this.regex_clear_button);
-            this.panel4.Controls.Add(this.regex_run_button);
-            this.panel4.Controls.Add(this.payslip_button);
-            this.panel4.Controls.Add(this.regex_rule_textbox);
-            this.panel4.Controls.Add(this.move_sheet_button);
-            this.panel4.Controls.Add(this.regex_rule_label);
-            this.panel4.Controls.Add(this.regex_button);
-            this.panel4.Controls.Add(this.what_type_combobox);
-            this.panel4.Controls.Add(this.add_sheet_button);
-            this.panel4.Controls.Add(this.what_type_label);
-            this.panel4.Controls.Add(this.transposition_button);
-            this.panel4.Controls.Add(this.which_field_combobox);
-            this.panel4.Controls.Add(this.function_title_label);
-            this.panel4.Controls.Add(this.which_field_label);
-            this.panel4.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.panel4.Location = new System.Drawing.Point(0, 0);
-            this.panel4.Name = "panel4";
-            this.panel4.Size = new System.Drawing.Size(675, 392);
-            this.panel4.TabIndex = 1;
+            this.label7.Text = "Version  2.2.6";
             // 
             // Form1
             // 
@@ -888,22 +888,22 @@
             this.tabControl1.ResumeLayout(false);
             this.tabPage1.ResumeLayout(false);
             this.tabPage1.PerformLayout();
-            this.tabPage2.ResumeLayout(false);
-            this.tabPage2.PerformLayout();
-            this.tabPage3.ResumeLayout(false);
-            this.tabPage3.PerformLayout();
-            this.tabPage4.ResumeLayout(false);
-            this.tabPage4.PerformLayout();
-            this.tabPage5.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
             this.panel1.ResumeLayout(false);
             this.panel1.PerformLayout();
+            this.tabPage2.ResumeLayout(false);
+            this.tabPage2.PerformLayout();
             this.panel2.ResumeLayout(false);
             this.panel2.PerformLayout();
+            this.tabPage3.ResumeLayout(false);
+            this.tabPage3.PerformLayout();
             this.panel3.ResumeLayout(false);
             this.panel3.PerformLayout();
+            this.tabPage4.ResumeLayout(false);
+            this.tabPage4.PerformLayout();
             this.panel4.ResumeLayout(false);
             this.panel4.PerformLayout();
+            this.tabPage5.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 

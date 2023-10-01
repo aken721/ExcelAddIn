@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data;
 using System.Drawing;
 using System.IO;
 using System.Linq;
@@ -1376,9 +1375,12 @@ namespace ExcelAddIn
                     long usedrange_columns = ThisAddIn.app.ActiveSheet.UsedRange.Columns.Count;
                     foreach (Excel.Range cell in ThisAddIn.app.ActiveSheet.Range[ThisAddIn.app.ActiveSheet.Cells[1, 1], ThisAddIn.app.ActiveSheet.Cells[1, usedrange_columns]])
                     {
-                        if (string.IsNullOrEmpty(cell.Value))
+                        if (string.IsNullOrEmpty(cell.Value.ToString()))
                         {
-                            continue;
+                            Invoke(new Action(() =>
+                            {
+                                which_field_combobox.Items.Add($"列{cell.Column}空");
+                            }));
                         }
                         else
                         {
@@ -1435,11 +1437,14 @@ namespace ExcelAddIn
             ThisAddIn.app.ScreenUpdating = false;
             ThisAddIn.app.DisplayAlerts = false;
 
-            string wbname = Convert.ToString(ThisAddIn.app.ActiveWorkbook.Name);
-            string wsname = Convert.ToString(ThisAddIn.app.ActiveSheet.name);
             Excel.Worksheet ws = ThisAddIn.app.ActiveSheet;
+
+            //定义已有数据范围的行数变量
             long rown = ws.UsedRange.Rows.Count;
+            //定义已有数据范围的列数变量
             long coln = ws.UsedRange.Columns.Count;
+
+            //定义所选择列变量
             long col = 0;
 
             //窗体内选择需过滤的数据列和过滤规则
@@ -1451,12 +1456,15 @@ namespace ExcelAddIn
             {
                 foreach (Excel.Range cell in ws.Range[ws.Cells[1, 1], ws.Cells[1, coln]])
                 {
-                    string type_selected = cell.Value2;
-                    if (type_selected == which_field_combobox.Text)
+                    string type_selected = which_field_combobox.Text;
+                    if (cell.Value.ToString() == type_selected)
                     {
                         col = cell.Column;
                     }
-
+                    else if (type_selected.Length==3 && type_selected.Substring(0,1)=="列" && type_selected.Substring(2,1)=="空")
+                    {
+                        col = int.Parse(type_selected.Substring(1, 1));
+                    }
                 }
             }
             string regex_type = what_type_combobox.Text;
@@ -1517,13 +1525,17 @@ namespace ExcelAddIn
                 List<string> matchValue = new List<string>();
                 foreach (Excel.Range tempLoopVar_rng in ThisAddIn.app.Selection)
                 {
-                    matchValue.Clear();
-                    foreach (Match match in rgx.Matches(System.Convert.ToString(tempLoopVar_rng.Value)))
+                    string tempLoopVar_rngValue=tempLoopVar_rng.Value?.ToString();
+                    if (!string.IsNullOrEmpty(tempLoopVar_rngValue))
                     {
-                        matchValue.Add(match.Value);
+                        matchValue.Clear();
+                        foreach (Match match in rgx.Matches(System.Convert.ToString(tempLoopVar_rng.Value)))
+                        {
+                            matchValue.Add(match.Value);
+                        }
+                        string result = string.Join("|", matchValue);
+                        ThisAddIn.app.Cells[tempLoopVar_rng.Row, coln + 1] = result;
                     }
-                    string result = string.Join("|", matchValue);
-                    ThisAddIn.app.Cells[tempLoopVar_rng.Row, coln + 1] = result;
                 }
                 ShowLabel(run_result_label, true, "提取完毕");
                 StartTimer();
