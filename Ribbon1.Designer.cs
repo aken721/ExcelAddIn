@@ -51,7 +51,7 @@
             this.box1 = this.Factory.CreateRibbonBox();
             this.buttonGroup1 = this.Factory.CreateRibbonButtonGroup();
             this.Select_mp3_button = this.Factory.CreateRibbonButton();
-            this.Mode_btuuon = this.Factory.CreateRibbonButton();
+            this.Mode_button = this.Factory.CreateRibbonButton();
             this.buttonGroup2 = this.Factory.CreateRibbonButtonGroup();
             this.Play_button = this.Factory.CreateRibbonButton();
             this.Stop_button = this.Factory.CreateRibbonButton();
@@ -181,7 +181,7 @@
             // buttonGroup1
             // 
             this.buttonGroup1.Items.Add(this.Select_mp3_button);
-            this.buttonGroup1.Items.Add(this.Mode_btuuon);
+            this.buttonGroup1.Items.Add(this.Mode_button);
             this.buttonGroup1.Name = "buttonGroup1";
             // 
             // Select_mp3_button
@@ -194,15 +194,15 @@
             this.Select_mp3_button.ShowLabel = false;
             this.Select_mp3_button.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.Select_mp3_button_Click);
             // 
-            // Mode_btuuon
+            // Mode_button
             // 
-            this.Mode_btuuon.Image = global::ExcelAddIn.Properties.Resources.order_play;
-            this.Mode_btuuon.Label = "顺序播放";
-            this.Mode_btuuon.Name = "Mode_btuuon";
-            this.Mode_btuuon.ScreenTip = "顺序播放";
-            this.Mode_btuuon.ShowImage = true;
-            this.Mode_btuuon.ShowLabel = false;
-            this.Mode_btuuon.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.Mode_btuuon_Click);
+            this.Mode_button.Image = global::ExcelAddIn.Properties.Resources.order_play;
+            this.Mode_button.Label = "顺序播放";
+            this.Mode_button.Name = "Mode_button";
+            this.Mode_button.ScreenTip = "顺序播放";
+            this.Mode_button.ShowImage = true;
+            this.Mode_button.ShowLabel = false;
+            this.Mode_button.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.Mode_button_Click);
             // 
             // buttonGroup2
             // 
@@ -299,7 +299,7 @@
         private System.Windows.Forms.FolderBrowserDialog folderBrowserDialog1;
         internal Microsoft.Office.Tools.Ribbon.RibbonButton Play_button;
         internal Microsoft.Office.Tools.Ribbon.RibbonButton Select_mp3_button;
-        internal Microsoft.Office.Tools.Ribbon.RibbonButton Mode_btuuon;
+        internal Microsoft.Office.Tools.Ribbon.RibbonButton Mode_button;
         internal Microsoft.Office.Tools.Ribbon.RibbonButtonGroup buttonGroup1;
         internal Microsoft.Office.Tools.Ribbon.RibbonButtonGroup buttonGroup2;
         internal Microsoft.Office.Tools.Ribbon.RibbonButton Stop_button;

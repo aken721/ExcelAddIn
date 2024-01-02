@@ -24,8 +24,8 @@ namespace ExcelAddIn
             switch_FD_label.Label = "文件名";
             readFile = 0;
             playbackMode = PlaybackMode.Sequential;
-            Mode_btuuon.Label = "顺序播放";
-            Mode_btuuon.Image = Properties.Resources.order_play;
+            Mode_button.Label = "顺序播放";
+            Mode_button.Image = Properties.Resources.order_play;
             currentPlayState = PlaybackState.Stopped;
             Select_mp3_button.Image = Properties.Resources.no_open_fold;
             musicFiles.Clear();
@@ -333,27 +333,27 @@ namespace ExcelAddIn
         }
 
         //播放模式选择按钮
-        private void Mode_btuuon_Click(object sender, RibbonControlEventArgs e)
+        private void Mode_button_Click(object sender, RibbonControlEventArgs e)
         {
             switch (playbackMode)
             {
                 case PlaybackMode.Sequential:
                     playbackMode = PlaybackMode.AllLoop;
-                    Mode_btuuon.Label = "全部循环";
-                    Mode_btuuon.ScreenTip = "全部循环";
-                    Mode_btuuon.Image = Properties.Resources.all_cycle;
+                    Mode_button.Label = "全部循环";
+                    Mode_button.ScreenTip = "全部循环";
+                    Mode_button.Image = Properties.Resources.all_cycle;
                     break;
                 case PlaybackMode.AllLoop:
                     playbackMode = PlaybackMode.SingleLoop;
-                    Mode_btuuon.Label = "单曲循环";
-                    Mode_btuuon.ScreenTip = "单曲循环";
-                    Mode_btuuon.Image = Properties.Resources.single_cycle;
+                    Mode_button.Label = "单曲循环";
+                    Mode_button.ScreenTip = "单曲循环";
+                    Mode_button.Image = Properties.Resources.single_cycle;
                     break;
                 case PlaybackMode.SingleLoop:
                     playbackMode = PlaybackMode.Sequential;
-                    Mode_btuuon.Label = "顺序播放";
-                    Mode_btuuon.ScreenTip = "顺序播放";
-                    Mode_btuuon.Image = Properties.Resources.order_play;
+                    Mode_button.Label = "顺序播放";
+                    Mode_button.ScreenTip = "顺序播放";
+                    Mode_button.Image = Properties.Resources.order_play;
                     break;
             }
         }
