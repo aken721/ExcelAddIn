@@ -6,10 +6,13 @@ using System.Diagnostics;
 using System.IO;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using static ExcelAddIn.ThisAddIn;
 using Excel = Microsoft.Office.Interop.Excel;
 
 namespace ExcelAddIn
 {
+
+
     public partial class Ribbon1
     {
 
@@ -23,6 +26,7 @@ namespace ExcelAddIn
             Select_f_or_d.ShowLabel = false;
             switch_FD_label.Label = "文件名";
             readFile = 0;
+            confirm_spotlight.Checked = false;
             playbackMode = PlaybackMode.Sequential;
             Mode_button.Label = "顺序播放";
             Mode_button.Image = Properties.Resources.order_play;
@@ -617,6 +621,61 @@ namespace ExcelAddIn
         private void timer1_Tick(object sender, EventArgs e)
         {
             UpdateTrackInfo();
+        }
+
+        //记录聚光灯功能打开前的彩色单元格位置和填充颜色
+        Dictionary<string, int> cellColor = new Dictionary<string, int>();  
+
+        //聚光灯功能按钮
+        private void confirm_spotlight_Click(object sender, RibbonControlEventArgs e)
+        {
+            Excel.Worksheet currentWorksheet = ThisAddIn.app.ActiveSheet;
+            Excel.Range usedRange = currentWorksheet.UsedRange;
+            if (confirm_spotlight.Checked==true)
+            {
+                cellColor = GetColorDictionary(usedRange);
+                confirm_spotlight.Label = "关闭聚光灯";
+                confirm_spotlight.Image = ExcelAddIn.Properties.Resources.spotlight_open;
+                Globle.spotlight = 1;
+            }
+            else
+            {
+                confirm_spotlight.Label = "打开聚光灯";
+                confirm_spotlight.Image = ExcelAddIn.Properties.Resources.spotlight_close;
+                Globle.spotlight = 0;
+                Excel.Range selectCell= ThisAddIn.app.ActiveCell;
+                ThisAddIn.app.ScreenUpdating = false;
+                selectCell.EntireRow.Interior.ColorIndex = 0;
+                selectCell.EntireColumn.Interior.ColorIndex = 0;
+                if (cellColor.Count>0)
+                {
+                    foreach (var cellColorEntry in cellColor)
+                    {
+                        string cellAddress = cellColorEntry.Key;
+                        int cellColorIndex=cellColorEntry.Value;
+                        Excel.Range cell= currentWorksheet.Range[cellAddress];
+                        cell.Interior.ColorIndex = cellColorIndex;
+                    }
+                }
+                cellColor.Clear();
+                ThisAddIn.app.ScreenUpdating = true;
+            }
+        }
+
+        //获取已有彩色单元格位置和颜色索引的字典变量的方法
+        private Dictionary<string,int> GetColorDictionary(Excel.Range usedRange)
+        {
+            Dictionary<string,int> cellColorDict=new Dictionary<string,int>();
+            foreach (Excel.Range cell in usedRange)
+            {
+                if (cell.Interior.ColorIndex>0)
+                {
+                    string cellAddress = cell.Address;
+                    int cellColorIndex = cell.Interior.ColorIndex;
+                    cellColorDict.Add(cellAddress,cellColorIndex);
+                }
+            }
+            return cellColorDict;
         }
     }
 }

@@ -178,6 +178,12 @@
   <data name="single_cycle" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>Resources\单曲循环.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
+  <data name="spotlight_close" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Resources\spotlight_close.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="spotlight_open" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Resources\spotlight_open.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
   <data name="stop" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>Resources\停止.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>

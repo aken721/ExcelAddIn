@@ -38,6 +38,7 @@
             this.tab1 = this.Factory.CreateRibbonTab();
             this.group1 = this.Factory.CreateRibbonGroup();
             this.Excel_extend = this.Factory.CreateRibbonButton();
+            this.confirm_spotlight = this.Factory.CreateRibbonToggleButton();
             this.group2 = this.Factory.CreateRibbonGroup();
             this.Send_mail = this.Factory.CreateRibbonButton();
             this.group3 = this.Factory.CreateRibbonGroup();
@@ -82,6 +83,7 @@
             // group1
             // 
             this.group1.Items.Add(this.Excel_extend);
+            this.group1.Items.Add(this.confirm_spotlight);
             this.group1.Label = "表工具";
             this.group1.Name = "group1";
             // 
@@ -93,6 +95,15 @@
             this.Excel_extend.Name = "Excel_extend";
             this.Excel_extend.ShowImage = true;
             this.Excel_extend.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.Excel_extend_Click);
+            // 
+            // confirm_spotlight
+            // 
+            this.confirm_spotlight.ControlSize = Microsoft.Office.Core.RibbonControlSize.RibbonControlSizeLarge;
+            this.confirm_spotlight.Image = global::ExcelAddIn.Properties.Resources.spotlight_close;
+            this.confirm_spotlight.Label = "打开聚光灯";
+            this.confirm_spotlight.Name = "confirm_spotlight";
+            this.confirm_spotlight.ShowImage = true;
+            this.confirm_spotlight.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.confirm_spotlight_Click);
             // 
             // group2
             // 
@@ -308,6 +319,7 @@
         internal Microsoft.Office.Tools.Ribbon.RibbonButton Previous_button;
         private Microsoft.Office.Tools.Ribbon.RibbonBox box1;
         private System.Windows.Forms.Timer timer1;
+        internal Microsoft.Office.Tools.Ribbon.RibbonToggleButton confirm_spotlight;
     }
 
     partial class ThisRibbonCollection

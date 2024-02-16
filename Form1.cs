@@ -1253,7 +1253,7 @@ namespace ExcelAddIn
             //获取当前表全部行数
             long row_count = worksheet.Rows.Count;
             //获取当前表全部列数
-            long column_count = worksheet.Columns.Count;
+            //long column_count = worksheet.Columns.Count;
             //获取最后数据行数
             long used_row_count = worksheet.UsedRange.Rows.Count;
             //获取最后数据列数
