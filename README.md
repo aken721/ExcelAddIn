@@ -11,7 +11,7 @@
 
 #### 安装教程
 
-1.  下载安装版msi文件，https://gitee.com/aken721/excel-add-in/releases
+1.  下载安装版msi文件，https://gitee.com/aken721/excel-addin/releases
 2.  打开Excel后会自动加载
 3.  加载后会在Excel的功能区增加“工具箱”选项卡
 
