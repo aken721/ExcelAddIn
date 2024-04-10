@@ -1656,32 +1656,41 @@ namespace ExcelAddIn
             regex_button.Enabled = false;
             payslip_button.Enabled = false;
             contents_button.Enabled = false;
-            ThisAddIn.app.ScreenUpdating = false;
-            ThisAddIn.app.DisplayAlerts = false;
+
 
             //Excel.Workbook workbook = ThisAddIn.app.ActiveWorkbook;
-            MessageBox.Show("该选项是将只包含一个命名为‘目录’Sheet的excel文件自动生成各页空白表的功能,请确定该文件中只包含一个Sheet且已改名为‘目录’，同时各目录项从第二行开始");
+            MessageBox.Show("1.该选项是将包含一个命名为‘目录’的表时，自动将目录各行生成链接空白表。\n\n2.各目录项从第二行开始。");
+
+            List<string> sheetsName = new List<string>();
             foreach (Excel.Worksheet worksheet in workbook.Worksheets)
             {
-                string sheet_name = worksheet.Name;
-                if (sheet_name == "目录")
+                sheetsName.Add(worksheet.Name);
+            }
+            string sheet_name = "目录";
+
+            if (sheetsName.Contains(sheet_name))
+            {
+                Excel.Worksheet contentsSheet = workbook.Worksheets["目录"];
+                Task.Run(() =>
                 {
-                    long row_count = worksheet.Rows.Count;
-                    long used_row_count = worksheet.UsedRange.Rows.Count;
+                    ThisAddIn.app.ScreenUpdating = false;
+                    ThisAddIn.app.DisplayAlerts = false;
+                    long row_count = contentsSheet.Rows.Count;
+                    long used_row_count = contentsSheet.UsedRange.Rows.Count;
                     for (var i = 2; i <= used_row_count; i++)
                     {
-                        worksheet.Activate();
-                        string add_sheet_name = System.Convert.ToString(workbook.Worksheets["目录"].Cells(i, 1).Value);
+                        contentsSheet.Activate();
+                        string add_sheet_name = System.Convert.ToString(contentsSheet.Cells[i, 1].Value);
                         Excel.Worksheet add_sheet = workbook.Worksheets.Add(After: workbook.Worksheets[workbook.Worksheets.Count]);
                         add_sheet.Name = add_sheet_name;
-                        worksheet.Activate();
-                        worksheet.Hyperlinks.Add(worksheet.Cells[i, 1], "", Convert.ToString(worksheet.Cells[i, 1].value) + "!A1", Convert.ToString(worksheet.Cells[i, 1].value));
-                        worksheet.Cells[i, 1].Font.Name = "微软雅黑";
-                        worksheet.Cells[i, 1].Font.Size = 12;
-                        worksheet.Cells[i, 1].HorizontalAlignment = Excel.XlHAlign.xlHAlignCenter;
-                        worksheet.Cells[i, 1].VerticalAlignment = Excel.XlVAlign.xlVAlignCenter;
+                        contentsSheet.Activate();
+                        contentsSheet.Hyperlinks.Add(contentsSheet.Cells[i, 1], "", Convert.ToString(contentsSheet.Cells[i, 1].value) + "!A1", Convert.ToString(contentsSheet.Cells[i, 1].value));
+                        contentsSheet.Cells[i, 1].Font.Name = "微软雅黑";
+                        contentsSheet.Cells[i, 1].Font.Size = 12;
+                        contentsSheet.Cells[i, 1].HorizontalAlignment = Excel.XlHAlign.xlHAlignCenter;
+                        contentsSheet.Cells[i, 1].VerticalAlignment = Excel.XlVAlign.xlVAlignCenter;
                     }
-                    workbook.Worksheets["目录"].Activate();
+                    contentsSheet.Activate();
                     ThisAddIn.app.ActiveSheet.Range["A1"].Font.Name = "微软雅黑";
                     ThisAddIn.app.ActiveSheet.Range["A1"].Font.Size = 12;
                     ThisAddIn.app.ActiveSheet.Range["A1"].Font.Bold = true;
@@ -1690,12 +1699,28 @@ namespace ExcelAddIn
                     ThisAddIn.app.DisplayAlerts = true;
                     ThisAddIn.app.ScreenUpdating = true;
 
-                    ShowLabel(run_result_label, true, "根据目录页建新表完成");
-                    StartTimer();
-                    return;
-                }
-            }
+                    // 更新界面
+                    this.Invoke((MethodInvoker)delegate
+                    {
+                        ShowLabel(run_result_label, true, "根据目录页建新表完成");
+                        StartTimer();
+                        tabControl1.Enabled = true;
+                        move_sheet_button.Enabled = true;
+                        add_sheet_button.Enabled = true;
+                        transposition_button.Enabled = true;
+                        regex_button.Enabled = true;
+                        payslip_button.Enabled = true;
+                        contents_button.Enabled = true;
+                        ThisAddIn.app.DisplayAlerts = true;
+                        ThisAddIn.app.ScreenUpdating = true;
+                    });
+                });
 
+            }
+            else
+            {
+                MessageBox.Show("未包含命名为'目录'的表格");
+            }
 
             //左侧按钮状态改变
             tabControl1.Enabled = true;
@@ -1707,7 +1732,7 @@ namespace ExcelAddIn
             contents_button.Enabled = true;
             ThisAddIn.app.DisplayAlerts = true;
             ThisAddIn.app.ScreenUpdating = true;
-            MessageBox.Show("未包含命名为'目录'的表格");
+
         }
 
 
@@ -1823,7 +1848,7 @@ namespace ExcelAddIn
 
 
 
-        //时间控件，控制完成提示标签显示5秒后消失
+        //时间控件，控制完成提示标签显示3秒后消失
         private System.Timers.Timer aTimer = new System.Timers.Timer();
         private delegate void SafeCallDelegate(Label label, bool Visible, string Text);
 
@@ -1857,7 +1882,7 @@ namespace ExcelAddIn
 
         private void StartTimer()
         {
-            aTimer.Interval = 5000; //5 seconds
+            aTimer.Interval = 3000;          //3 seconds
             aTimer.Elapsed += OnTimedEvent;
             aTimer.Enabled = true;
         }
@@ -1874,16 +1899,6 @@ namespace ExcelAddIn
         {
             Regex reg1 = new Regex(reg_rule);
             return reg1.IsMatch(str);
-        }
-
-        private void multi_merge_sheet_checkBox_CheckedChanged(object sender, EventArgs e)
-        {
-
-        }
-
-        private void function_title_label_Click(object sender, EventArgs e)
-        {
-
         }
     }
 }

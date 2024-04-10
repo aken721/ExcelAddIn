@@ -412,7 +412,6 @@
             this.multi_merge_sheet_checkBox.TabIndex = 5;
             this.multi_merge_sheet_checkBox.Text = "当前已打开工作簿的已有表列入合并范围（仅适用多工作簿合并）";
             this.multi_merge_sheet_checkBox.UseVisualStyleBackColor = true;
-            this.multi_merge_sheet_checkBox.CheckedChanged += new System.EventHandler(this.multi_merge_sheet_checkBox_CheckedChanged);
             // 
             // multi_merge_button
             // 
@@ -782,7 +781,6 @@
             this.function_title_label.TabIndex = 0;
             this.function_title_label.Text = "功能标题";
             this.function_title_label.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
-            this.function_title_label.Click += new System.EventHandler(this.function_title_label_Click);
             // 
             // which_field_label
             // 
