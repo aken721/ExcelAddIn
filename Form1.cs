@@ -1659,7 +1659,7 @@ namespace ExcelAddIn
 
 
             //Excel.Workbook workbook = ThisAddIn.app.ActiveWorkbook;
-            MessageBox.Show("1.该选项是将包含一个命名为‘目录’的表时，自动将目录各行生成链接空白表。\n\n2.各目录项从第二行开始。");
+            MessageBox.Show("1.该选项是将包含一个命名为‘目录’的表时，自动将目录各行生成链接空白表。\n\n2.各目录项从第二行开始。\n\n3.仅对“目录”表中存在的表进行生成和链接。\n\n4.“目录”表需自行手工建立");
 
             List<string> sheetsName = new List<string>();
             foreach (Excel.Worksheet worksheet in workbook.Worksheets)
@@ -1681,9 +1681,12 @@ namespace ExcelAddIn
                     {
                         contentsSheet.Activate();
                         string add_sheet_name = System.Convert.ToString(contentsSheet.Cells[i, 1].Value);
-                        Excel.Worksheet add_sheet = workbook.Worksheets.Add(After: workbook.Worksheets[workbook.Worksheets.Count]);
-                        add_sheet.Name = add_sheet_name;
-                        contentsSheet.Activate();
+                        if (!sheetsName.Contains(add_sheet_name))
+                        {
+                            Excel.Worksheet add_sheet = workbook.Worksheets.Add(After: workbook.Worksheets[workbook.Worksheets.Count]);
+                            add_sheet.Name = add_sheet_name;
+                            contentsSheet.Activate();
+                        }
                         contentsSheet.Hyperlinks.Add(contentsSheet.Cells[i, 1], "", Convert.ToString(contentsSheet.Cells[i, 1].value) + "!A1", Convert.ToString(contentsSheet.Cells[i, 1].value));
                         contentsSheet.Cells[i, 1].Font.Name = "微软雅黑";
                         contentsSheet.Cells[i, 1].Font.Size = 12;
@@ -1719,7 +1722,8 @@ namespace ExcelAddIn
             }
             else
             {
-                MessageBox.Show("未包含命名为'目录'的表格");
+                ShowLabel(run_result_label, true, "未包含命名为'目录'的表格");
+                StartTimer();
             }
 
             //左侧按钮状态改变
@@ -1844,8 +1848,6 @@ namespace ExcelAddIn
                 }
             }
         }
-
-
 
 
         //时间控件，控制完成提示标签显示3秒后消失
