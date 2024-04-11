@@ -65,6 +65,8 @@
             this.all_select_checkbox = new System.Windows.Forms.CheckBox();
             this.tabPage4 = new System.Windows.Forms.TabPage();
             this.panel4 = new System.Windows.Forms.Panel();
+            this.sheet_to_contents_radioButton = new System.Windows.Forms.RadioButton();
+            this.contents_to_sheet_radioButton = new System.Windows.Forms.RadioButton();
             this.run_result_label = new System.Windows.Forms.Label();
             this.contents_button = new System.Windows.Forms.Button();
             this.regex_clear_button = new System.Windows.Forms.Button();
@@ -551,6 +553,8 @@
             // panel4
             // 
             this.panel4.AutoSize = true;
+            this.panel4.Controls.Add(this.sheet_to_contents_radioButton);
+            this.panel4.Controls.Add(this.contents_to_sheet_radioButton);
             this.panel4.Controls.Add(this.run_result_label);
             this.panel4.Controls.Add(this.contents_button);
             this.panel4.Controls.Add(this.regex_clear_button);
@@ -573,11 +577,37 @@
             this.panel4.Size = new System.Drawing.Size(675, 392);
             this.panel4.TabIndex = 1;
             // 
+            // sheet_to_contents_radioButton
+            // 
+            this.sheet_to_contents_radioButton.AutoSize = true;
+            this.sheet_to_contents_radioButton.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.sheet_to_contents_radioButton.Location = new System.Drawing.Point(485, 252);
+            this.sheet_to_contents_radioButton.Name = "sheet_to_contents_radioButton";
+            this.sheet_to_contents_radioButton.Size = new System.Drawing.Size(125, 24);
+            this.sheet_to_contents_radioButton.TabIndex = 11;
+            this.sheet_to_contents_radioButton.TabStop = true;
+            this.sheet_to_contents_radioButton.Text = "子表生成目录表";
+            this.sheet_to_contents_radioButton.UseVisualStyleBackColor = true;
+            this.sheet_to_contents_radioButton.CheckedChanged += new System.EventHandler(this.sheet_to_contents_radioButton_CheckedChanged);
+            // 
+            // contents_to_sheet_radioButton
+            // 
+            this.contents_to_sheet_radioButton.AutoSize = true;
+            this.contents_to_sheet_radioButton.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.contents_to_sheet_radioButton.Location = new System.Drawing.Point(326, 252);
+            this.contents_to_sheet_radioButton.Name = "contents_to_sheet_radioButton";
+            this.contents_to_sheet_radioButton.Size = new System.Drawing.Size(139, 24);
+            this.contents_to_sheet_radioButton.TabIndex = 10;
+            this.contents_to_sheet_radioButton.TabStop = true;
+            this.contents_to_sheet_radioButton.Text = "目录页创建链接表";
+            this.contents_to_sheet_radioButton.UseVisualStyleBackColor = true;
+            this.contents_to_sheet_radioButton.CheckedChanged += new System.EventHandler(this.contents_to_sheet_radioButton_CheckedChanged);
+            // 
             // run_result_label
             // 
             this.run_result_label.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Italic, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.run_result_label.ForeColor = System.Drawing.Color.SaddleBrown;
-            this.run_result_label.Location = new System.Drawing.Point(326, 252);
+            this.run_result_label.Location = new System.Drawing.Point(326, 292);
             this.run_result_label.Name = "run_result_label";
             this.run_result_label.Size = new System.Drawing.Size(242, 44);
             this.run_result_label.TabIndex = 9;
@@ -596,7 +626,7 @@
             this.contents_button.Name = "contents_button";
             this.contents_button.Size = new System.Drawing.Size(90, 50);
             this.contents_button.TabIndex = 5;
-            this.contents_button.Text = "建立目录页新表";
+            this.contents_button.Text = "目录页";
             this.contents_button.UseVisualStyleBackColor = true;
             this.contents_button.Click += new System.EventHandler(this.contents_button_Click);
             // 
@@ -604,7 +634,7 @@
             // 
             this.regex_clear_button.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.regex_clear_button.ForeColor = System.Drawing.Color.SeaGreen;
-            this.regex_clear_button.Location = new System.Drawing.Point(508, 299);
+            this.regex_clear_button.Location = new System.Drawing.Point(508, 339);
             this.regex_clear_button.Name = "regex_clear_button";
             this.regex_clear_button.Size = new System.Drawing.Size(60, 30);
             this.regex_clear_button.TabIndex = 8;
@@ -616,7 +646,7 @@
             // 
             this.regex_run_button.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.regex_run_button.ForeColor = System.Drawing.Color.SeaGreen;
-            this.regex_run_button.Location = new System.Drawing.Point(326, 299);
+            this.regex_run_button.Location = new System.Drawing.Point(326, 339);
             this.regex_run_button.Name = "regex_run_button";
             this.regex_run_button.Size = new System.Drawing.Size(60, 30);
             this.regex_run_button.TabIndex = 7;
@@ -760,12 +790,14 @@
             // 
             // which_field_combobox
             // 
+            this.which_field_combobox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.which_field_combobox.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.which_field_combobox.FormattingEnabled = true;
             this.which_field_combobox.Location = new System.Drawing.Point(393, 85);
             this.which_field_combobox.Name = "which_field_combobox";
             this.which_field_combobox.Size = new System.Drawing.Size(175, 28);
             this.which_field_combobox.TabIndex = 2;
+            this.which_field_combobox.UseWaitCursor = true;
             this.which_field_combobox.VisibleChanged += new System.EventHandler(this.which_field_combobox_VisibleChanged);
             // 
             // function_title_label
@@ -969,5 +1001,7 @@
         private System.Windows.Forms.Button dir_select_button;
         private System.Windows.Forms.Panel panel3;
         private System.Windows.Forms.Panel panel4;
+        private System.Windows.Forms.RadioButton sheet_to_contents_radioButton;
+        private System.Windows.Forms.RadioButton contents_to_sheet_radioButton;
     }
 }

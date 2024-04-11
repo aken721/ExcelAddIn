@@ -16,8 +16,8 @@ namespace ExcelAddIn
 {
     public partial class Form1 : Form
     {
-
         private Excel.Workbook workbook;
+        private string sheetindex;
         private string excelFilePath;
         private Int32 used_time_count = 0;
         private bool res = false;
@@ -37,6 +37,7 @@ namespace ExcelAddIn
             //初始化tabcontrol控件
             tabControl1.SelectTab(0);
             workbook = ThisAddIn.app.ActiveWorkbook;
+            sheetindex = ThisAddIn.app.ActiveSheet.Name;
             excelFilePath = workbook.FullName;
             sheet_name_combobox.Items.Clear();
             field_name_combobox.Items.Clear();
@@ -74,6 +75,8 @@ namespace ExcelAddIn
             run_result_label.Visible = false;
             regex_run_button.Visible = false;
             regex_clear_button.Visible = false;
+            contents_to_sheet_radioButton.Visible = false;
+            sheet_to_contents_radioButton.Visible = false;
             function_title_label.Text = "请选择所需使用的功能";
         }
 
@@ -131,6 +134,18 @@ namespace ExcelAddIn
                     sheet_listbox.Refresh();
                     break;
                 case 3:
+                    which_field_label.Visible = false;
+                    which_field_combobox.Visible = false;
+                    what_type_label.Visible = false;
+                    what_type_combobox.Visible = false;
+                    regex_rule_label.Visible = false;
+                    regex_rule_textbox.Visible = false;
+                    run_result_label.Visible = false;
+                    regex_run_button.Visible = false;
+                    regex_clear_button.Visible = false;
+                    contents_to_sheet_radioButton.Visible = false;
+                    sheet_to_contents_radioButton.Visible = false;
+                    function_title_label.Text = "请选择所需使用的功能";
                     break;
                 case 4:
                     break;
@@ -491,7 +506,6 @@ namespace ExcelAddIn
             ThisAddIn.app.ScreenUpdating = true;
         }
 
-
         //并表功能中的选择文件夹按钮
         private void dir_select_button_Click(object sender, EventArgs e)
         {
@@ -507,7 +521,6 @@ namespace ExcelAddIn
                 MessageBox.Show("未选择需合并文件所在文件夹");
             }
         }
-
 
         //同一工作簿并表（UI主线程）
         private void single_merge_button_Click(object sender, EventArgs e)
@@ -546,8 +559,6 @@ namespace ExcelAddIn
             mergeProgressBar_label.Visible = true;
             merge_sheet_progressBar.Visible = true;
         }
-
-
 
         //同一工作簿并表（程序执行线程）
         private void mergeTask(Int32 titleRow, List<string> unMergeSheets, bool exist_bool = true)
@@ -795,8 +806,6 @@ namespace ExcelAddIn
             ThisAddIn.app.ScreenUpdating = true;
         }
 
-
-
         //进度条更新函数
         private void UpdateProgressBar(System.Windows.Forms.ProgressBar progressBar, int currentSheet, int totalSheets, System.Windows.Forms.Label progressBar_result_label, string progressBar_result)
         {
@@ -809,8 +818,6 @@ namespace ExcelAddIn
             progressBar_result_label.Text = progressBar_result + progressPercentage.ToString() + "%";
         }
 
-
-
         //获取指定文件夹符合要求文件的数量（包含子文件夹）
         private int get_File_Count(string dir_path, string ext)
         {
@@ -822,8 +829,6 @@ namespace ExcelAddIn
             }
             return files.Count;
         }
-
-
 
         //批量导删中的checkbox被按下时
         private void all_select_checkbox_Click(object sender, EventArgs e)
@@ -866,7 +871,6 @@ namespace ExcelAddIn
                 }
             }
         }
-
 
         //批量导出当前工作簿中的表
         private void batch_export_button_Click(object sender, EventArgs e)
@@ -911,8 +915,6 @@ namespace ExcelAddIn
             ThisAddIn.app.ScreenUpdating = true;
         }
 
-
-
         //批量删除当前工作簿中的表
         private void batch_delete_button_Click(object sender, EventArgs e)
         {
@@ -953,8 +955,6 @@ namespace ExcelAddIn
             ThisAddIn.app.ScreenUpdating = true;
         }
 
-
-
         //目录下多工作簿的表转同一个工作簿内（UI主线程）
         private void move_sheet_button_Click(object sender, EventArgs e)
         {
@@ -968,9 +968,12 @@ namespace ExcelAddIn
             run_result_label.Visible = false;
             regex_run_button.Visible = false;
             regex_clear_button.Visible = false;
+            contents_to_sheet_radioButton.Visible = false;
+            sheet_to_contents_radioButton.Visible = false;
             function_title_label.Text = "不同工作簿中的表全部复制到本工作簿";
             ThisAddIn.app.ScreenUpdating = false;
             ThisAddIn.app.DisplayAlerts = false;
+
             //this.TopMost = true;
 
             //左侧按钮状态改变
@@ -1095,8 +1098,6 @@ namespace ExcelAddIn
             }
         }
 
-
-
         //一键建立多个工作表
         private void add_sheet_button_Click(object sender, EventArgs e)
         {
@@ -1111,6 +1112,8 @@ namespace ExcelAddIn
             run_result_label.Visible = false;
             regex_run_button.Visible = false;
             regex_clear_button.Visible = false;
+            contents_to_sheet_radioButton.Visible = false;
+            sheet_to_contents_radioButton.Visible = false;
 
             //左侧按钮状态改变
             tabControl1.Enabled = false;
@@ -1176,8 +1179,6 @@ namespace ExcelAddIn
             ThisAddIn.app.DisplayAlerts = true;
         }
 
-
-
         //转置工作表(UI主线程）
         private void transposition_button_Click(object sender, EventArgs e)
         {
@@ -1192,6 +1193,8 @@ namespace ExcelAddIn
             run_result_label.Visible = false;
             regex_run_button.Visible = false;
             regex_clear_button.Visible = false;
+            contents_to_sheet_radioButton.Visible = false;
+            sheet_to_contents_radioButton.Visible = false;
 
             //左侧按钮状态改变
             tabControl1.Enabled = false;
@@ -1348,12 +1351,24 @@ namespace ExcelAddIn
             return 0;
         }
 
-
-
         //正则表达式功能激活
         private void regex_button_Click(object sender, EventArgs e)
         {
+            selectfunction = 1;
+            if (which_field_label.Visible == true && which_field_combobox.Visible == true)
+            {
+                which_field_combobox.Text = "";
+                which_field_combobox.Items.Clear();
+                which_field_label.Visible = false;
+                which_field_combobox.Visible = false;
+            }
+            contents_to_sheet_radioButton.Checked = false;
+            sheet_to_contents_radioButton.Checked = false;
+            workbook.Worksheets[sheetindex].Activate();
+            workbook.RefreshAll();
             function_title_label.Text = "正则表达式提取指定内容";
+            which_field_label.Text = "提取哪列";
+            which_field_combobox.Text = "";
             which_field_label.Visible = true;
             which_field_combobox.Visible = true;
             what_type_label.Visible = true;
@@ -1361,42 +1376,76 @@ namespace ExcelAddIn
             regex_run_button.Visible = true;
             regex_clear_button.Visible = true;
             run_result_label.Visible = false;
-
+            contents_to_sheet_radioButton.Visible = false;
+            sheet_to_contents_radioButton.Visible = false;
         }
 
-        //正则表达式功能区中各控件可见时
+        //which_field_combobox控件可见时
         private async void which_field_combobox_VisibleChanged(object sender, EventArgs e)
         {
-            if (Visible)
+            if (which_field_combobox.Visible==true)
             {
-                which_field_combobox.Items.Clear();
-                await Task.Run(() =>
+                switch (selectfunction)
                 {
-                    long usedrange_columns = ThisAddIn.app.ActiveSheet.UsedRange.Columns.Count;
-                    foreach (Excel.Range cell in ThisAddIn.app.ActiveSheet.Range[ThisAddIn.app.ActiveSheet.Cells[1, 1], ThisAddIn.app.ActiveSheet.Cells[1, usedrange_columns]])
-                    {
-                        string cellValue = cell.Value?.ToString();
-                        if (string.IsNullOrEmpty(cellValue))
+                    case 1:
+                        which_field_combobox.Items.Clear();
+                        which_field_combobox.Text = "";
+                        await Task.Run(() =>
                         {
-                            Invoke(new Action(() =>
+                            long usedrange_columns = ThisAddIn.app.ActiveSheet.UsedRange.Columns.Count;
+                            foreach (Excel.Range cell in ThisAddIn.app.ActiveSheet.Range[ThisAddIn.app.ActiveSheet.Cells[1, 1], ThisAddIn.app.ActiveSheet.Cells[1, usedrange_columns]])
                             {
-                                which_field_combobox.Items.Add($"列{cell.Column}空");
-                            }));
-                        }
-                        else
+                                string cellValue = cell.Value?.ToString();
+                                if (string.IsNullOrEmpty(cellValue))
+                                {
+                                    Invoke(new Action(() =>
+                                    {
+                                        which_field_combobox.Items.Add($"列{cell.Column}空");
+                                    }));
+                                }
+                                else
+                                {
+                                    Invoke(new Action(() =>
+                                    {
+                                        which_field_combobox.Items.Add(cell.Value);
+                                    }));
+                                }
+                            }
+                        });
+                        break;
+
+                    case 2:
+                        which_field_combobox.Items.Clear();
+                        await Task.Run(() =>
                         {
-                            Invoke(new Action(() =>
+                            if (SheetExist("目录"))
                             {
-                                which_field_combobox.Items.Add(cell.Value);
-                            }));
-                        }
-                    }
-                });
+                                Excel.Worksheet contentSheet = workbook.Worksheets["目录"];
+                                long usedrange_columns = contentSheet.UsedRange.Columns.Count;
+                                foreach (Excel.Range cell in contentSheet.Range[contentSheet.Cells[1, 1], contentSheet.Cells[1, usedrange_columns]])
+                                {
+                                    string cellValue = cell.Value?.ToString();
+                                    if (string.IsNullOrEmpty(cellValue))
+                                    {
+                                        Invoke(new Action(() =>
+                                        {
+                                            which_field_combobox.Items.Add($"列{cell.Column}空");
+                                        }));
+                                    }
+                                    else
+                                    {
+                                        Invoke(new Action(() =>
+                                        {
+                                            which_field_combobox.Items.Add(cell.Value);
+                                        }));
+                                    }
+                                }
+                            }
+                        });
+                        break;
+                }
             }
-            else
-            {
-                which_field_combobox.Items.Clear();
-            }
+
         }
 
         //正则表达式功能区提取内容如果选择自定义时，过滤规则标签和文本框显示，否则不显示
@@ -1425,137 +1474,268 @@ namespace ExcelAddIn
             }
         }
 
-        //正则表达式提取内容
+        private int selectfunction = 0;
+
+        //右侧功能区运行按钮，包括正则表达式和目录页功能
         private void regex_run_button_Click(object sender, EventArgs e)
         {
-            tabControl1.Enabled = false;
-            move_sheet_button.Enabled = false;
-            add_sheet_button.Enabled = false;
-            transposition_button.Enabled = false;
-            regex_button.Enabled = false;
-            payslip_button.Enabled = false;
-            contents_button.Enabled = false;
-            ThisAddIn.app.ScreenUpdating = false;
-            ThisAddIn.app.DisplayAlerts = false;
-
-            Excel.Worksheet ws = ThisAddIn.app.ActiveSheet;
-
-            //定义已有数据范围的行数变量
-            long rown = ws.UsedRange.Rows.Count;
-            //定义已有数据范围的列数变量
-            long coln = ws.UsedRange.Columns.Count;
-
-            //定义所选择列变量
-            long col = 0;
-
-            //窗体内选择需过滤的数据列和过滤规则
-            if (what_type_combobox.SelectedItem == null)
+            switch (selectfunction)
             {
-                col = 0;
-            }
-            else
-            {
-                foreach (Excel.Range cell in ws.Range[ws.Cells[1, 1], ws.Cells[1, coln]])
-                {
-                    string type_selected = which_field_combobox.Text;
-                    string currentCellValue = cell.Value?.ToString();
-                    if ( currentCellValue == type_selected)
-                    {
-                        col = cell.Column;
-                    }
-                    else if (type_selected.Length==3 && type_selected.Substring(0,1)=="列" && type_selected.Substring(2,1)=="空")
-                    {
-                        col = int.Parse(type_selected.Substring(1, 1));
-                    }
-                }
-            }
-            string regex_type = what_type_combobox.Text;
-            string pat = null;
+                case 0:
+                    break;
+                case 1:
+                    /*该部分为按正则表达式功能模块
+                    * 可按既定规则提取相应内容
+                    * 也可自定义提取规则提取相应内容
+                    */
 
-            //选择已定义的正则表达式过滤条件，或自行写入过滤规则
-            switch (regex_type)
-            {
-                case "数字":
-                    pat = "\\d+\\.?\\d*";
-                    ws.Range[ws.Cells[1, coln + 1], ws.Cells[rown, coln + 1]].NumberFormatLocal = "@";
-                    break;
-                case "英文":
-                    pat = "[A-Za-z]+";
-                    ws.Range[ws.Cells[1, coln + 1], ws.Cells[rown, coln + 1]].NumberFormatLocal = "@";
-                    break;
-                case "中文":
-                    pat = "[^\\x00-\\xff]+";
-                    ws.Range[ws.Cells[1, coln + 1], ws.Cells[rown, coln + 1]].NumberFormatLocal = "@";
-                    break;
-                case "网址":
-                    pat = "((http|https):\\/\\/)?[\\w-]+(\\.[\\w-]+)+([\\w.,@?^=%&amp;:/~+#-]*[\\w@?^=%&amp;/~+#-])?";
-                    ws.Range[ws.Cells[1, coln + 1], ws.Cells[rown, coln + 1]].NumberFormatLocal = "@";
-                    break;
-                case "身份证号":
-                    pat = "\\d{15}$|\\d{17}([0-9]|X|x)";
-                    ws.Range[ws.Cells[1, coln + 1], ws.Cells[rown, coln + 1]].NumberFormatLocal = "@";
-                    break;
-                case "电子邮箱":
-                    pat = "\\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Z|a-z]{2,}\\b";
-                    ws.Range[ws.Cells[1, coln + 1], ws.Cells[rown, coln + 1]].NumberFormatLocal = "@";
-                    break;
-                case "电话号码":
-                    pat = "(?:(?:\\+|00)86)?1[3-9]\\d{9}|(?:0[1-9]\\d{1,2}-)?\\d{7,8}";
-                    ws.Range[ws.Cells[1, coln + 1], ws.Cells[rown, coln + 1]].NumberFormatLocal = "@";
-                    break;
-                case "IP地址":
-                    pat = "\\b\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\b";
-                    ws.Range[ws.Cells[1, coln + 1], ws.Cells[rown, coln + 1]].NumberFormatLocal = "@";
-                    break;
-                case "自定义":
-                    if (string.IsNullOrEmpty(regex_rule_textbox.Text))
+                    //左侧按钮状态改变
+                    tabControl1.Enabled = false;
+                    move_sheet_button.Enabled = false;
+                    add_sheet_button.Enabled = false;
+                    transposition_button.Enabled = false;
+                    regex_button.Enabled = false;
+                    payslip_button.Enabled = false;
+                    contents_button.Enabled = false;
+                    ThisAddIn.app.ScreenUpdating = false;
+                    ThisAddIn.app.DisplayAlerts = false;
+
+                    Excel.Worksheet ws = ThisAddIn.app.ActiveSheet;
+
+                    //定义已有数据范围的行数变量
+                    long rown = ws.UsedRange.Rows.Count;
+                    //定义已有数据范围的列数变量
+                    long coln = ws.UsedRange.Columns.Count;
+
+                    //定义所选择列变量
+                    long col = 0;
+
+                    //窗体内选择需过滤的数据列和过滤规则
+                    if (what_type_combobox.SelectedItem == null)
                     {
-                        MessageBox.Show("请输入正则表达式过滤规则");
-                        return;
+                        col = 0;
                     }
                     else
                     {
-                        pat = regex_rule_textbox.Text;
-                    }
-                    break;
-            }
-
-            if (col < coln + 1 && col > 0)
-            {
-                ws.Range[ws.Cells[1, col], ws.Cells[rown, col]].Select();
-                Regex rgx = new Regex(pat);
-                List<string> matchValue = new List<string>();
-                foreach (Excel.Range tempLoopVar_rng in ThisAddIn.app.Selection)
-                {
-                    string tempLoopVar_rngValue=tempLoopVar_rng.Value?.ToString();
-                    if (!string.IsNullOrEmpty(tempLoopVar_rngValue))
-                    {
-                        matchValue.Clear();
-                        foreach (Match match in rgx.Matches(System.Convert.ToString(tempLoopVar_rng.Value)))
+                        foreach (Excel.Range cell in ws.Range[ws.Cells[1, 1], ws.Cells[1, coln]])
                         {
-                            matchValue.Add(match.Value);
+                            string type_selected = which_field_combobox.Text;
+                            string currentCellValue = cell.Value?.ToString();
+                            if (currentCellValue == type_selected)
+                            {
+                                col = cell.Column;
+                            }
+                            else if (type_selected.Length == 3 && type_selected.Substring(0, 1) == "列" && type_selected.Substring(2, 1) == "空")
+                            {
+                                col = int.Parse(type_selected.Substring(1, 1));
+                            }
                         }
-                        string result = string.Join("|", matchValue);
-                        ThisAddIn.app.Cells[tempLoopVar_rng.Row, coln + 1] = result;
                     }
-                }
-                ShowLabel(run_result_label, true, "提取完毕");
-                StartTimer();
-            }
-            else
-            {
-                MessageBox.Show("您输入的列数有误，请确认");
-            }
+                    string regex_type = what_type_combobox.Text;
+                    string pat = null;
 
-            tabControl1.Enabled = true;
-            move_sheet_button.Enabled = true;
-            add_sheet_button.Enabled = true;
-            transposition_button.Enabled = true;
-            regex_button.Enabled = true;
-            payslip_button.Enabled = true;
-            contents_button.Enabled = true;
-            ThisAddIn.app.DisplayAlerts = true;
-            ThisAddIn.app.ScreenUpdating = true;
+                    //选择已定义的正则表达式过滤条件，或自行写入过滤规则
+                    switch (regex_type)
+                    {
+                        case "数字":
+                            pat = "\\d+\\.?\\d*";
+                            ws.Range[ws.Cells[1, coln + 1], ws.Cells[rown, coln + 1]].NumberFormatLocal = "@";
+                            break;
+                        case "英文":
+                            pat = "[A-Za-z]+";
+                            ws.Range[ws.Cells[1, coln + 1], ws.Cells[rown, coln + 1]].NumberFormatLocal = "@";
+                            break;
+                        case "中文":
+                            pat = "[^\\x00-\\xff]+";
+                            ws.Range[ws.Cells[1, coln + 1], ws.Cells[rown, coln + 1]].NumberFormatLocal = "@";
+                            break;
+                        case "网址":
+                            pat = "((http|https):\\/\\/)?[\\w-]+(\\.[\\w-]+)+([\\w.,@?^=%&amp;:/~+#-]*[\\w@?^=%&amp;/~+#-])?";
+                            ws.Range[ws.Cells[1, coln + 1], ws.Cells[rown, coln + 1]].NumberFormatLocal = "@";
+                            break;
+                        case "身份证号":
+                            pat = "\\d{15}$|\\d{17}([0-9]|X|x)";
+                            ws.Range[ws.Cells[1, coln + 1], ws.Cells[rown, coln + 1]].NumberFormatLocal = "@";
+                            break;
+                        case "电子邮箱":
+                            pat = "\\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Z|a-z]{2,}\\b";
+                            ws.Range[ws.Cells[1, coln + 1], ws.Cells[rown, coln + 1]].NumberFormatLocal = "@";
+                            break;
+                        case "电话号码":
+                            pat = "(?:(?:\\+|00)86)?1[3-9]\\d{9}|(?:0[1-9]\\d{1,2}-)?\\d{7,8}";
+                            ws.Range[ws.Cells[1, coln + 1], ws.Cells[rown, coln + 1]].NumberFormatLocal = "@";
+                            break;
+                        case "IP地址":
+                            pat = "\\b\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\.\\d{1,3}\\b";
+                            ws.Range[ws.Cells[1, coln + 1], ws.Cells[rown, coln + 1]].NumberFormatLocal = "@";
+                            break;
+                        case "自定义":
+                            if (string.IsNullOrEmpty(regex_rule_textbox.Text))
+                            {
+                                MessageBox.Show("请输入正则表达式过滤规则");
+                                return;
+                            }
+                            else
+                            {
+                                pat = regex_rule_textbox.Text;
+                            }
+                            break;
+                    }
+
+                    if (col < coln + 1 && col > 0)
+                    {
+                        ws.Range[ws.Cells[1, col], ws.Cells[rown, col]].Select();
+                        Regex rgx = new Regex(pat);
+                        List<string> matchValue = new List<string>();
+                        foreach (Excel.Range tempLoopVar_rng in ThisAddIn.app.Selection)
+                        {
+                            string tempLoopVar_rngValue = tempLoopVar_rng.Value?.ToString();
+                            if (!string.IsNullOrEmpty(tempLoopVar_rngValue))
+                            {
+                                matchValue.Clear();
+                                foreach (Match match in rgx.Matches(System.Convert.ToString(tempLoopVar_rng.Value)))
+                                {
+                                    matchValue.Add(match.Value);
+                                }
+                                string result = string.Join("|", matchValue);
+                                ThisAddIn.app.Cells[tempLoopVar_rng.Row, coln + 1] = result;
+                            }
+                        }
+                        ShowLabel(run_result_label, true, "提取完毕");
+                        StartTimer();
+                    }
+                    else
+                    {
+                        MessageBox.Show("您输入的列数有误，请确认");
+                    }
+
+                    tabControl1.Enabled = true;
+                    move_sheet_button.Enabled = true;
+                    add_sheet_button.Enabled = true;
+                    transposition_button.Enabled = true;
+                    regex_button.Enabled = true;
+                    payslip_button.Enabled = true;
+                    contents_button.Enabled = true;
+                    ThisAddIn.app.DisplayAlerts = true;
+                    ThisAddIn.app.ScreenUpdating = true;
+                    break;
+
+                case 2:
+                    /*该部分为按目录页创建（或链接）工作簿中表的功能
+                     * 目录页只需表名设置为“目录”
+                     * 目录页各字段可个性化设定，可按字段选择需链接列
+                     */
+
+                    //左侧按钮状态改变
+                    tabControl1.Enabled = false;
+                    move_sheet_button.Enabled = false;
+                    add_sheet_button.Enabled = false;
+                    transposition_button.Enabled = false;
+                    regex_button.Enabled = false;
+                    payslip_button.Enabled = false;
+                    contents_button.Enabled = false;
+
+                    List<string> sheetsName = new List<string>();
+                    foreach (Excel.Worksheet worksheet in workbook.Worksheets)
+                    {
+                        sheetsName.Add(worksheet.Name);
+                    }
+
+                    if (sheetsName.Contains("目录"))
+                    {
+                        Excel.Worksheet contentsSheet = workbook.Worksheets["目录"];
+                        int targetColumn = TargetField(contentsSheet, which_field_combobox.Text);
+                        if (which_field_combobox.Text != "")
+                        {
+                            Task.Run(() =>
+                            {
+                                ThisAddIn.app.ScreenUpdating = false;
+                                ThisAddIn.app.DisplayAlerts = false;
+                                long row_count = contentsSheet.Rows.Count;
+                                long used_row_count = contentsSheet.UsedRange.Rows.Count;
+                                for (var i = 2; i <= used_row_count; i++)
+                                {
+                                    contentsSheet.Activate();
+                                    string add_sheet_name = System.Convert.ToString(contentsSheet.Cells[i, targetColumn].Value);
+                                    if (!sheetsName.Contains(add_sheet_name))
+                                    {
+                                        Excel.Worksheet add_sheet = workbook.Worksheets.Add(After: workbook.Worksheets[workbook.Worksheets.Count]);
+                                        add_sheet.Name = add_sheet_name;
+                                        contentsSheet.Activate();
+                                    }
+                                    contentsSheet.Hyperlinks.Add(contentsSheet.Cells[i, targetColumn], "", Convert.ToString(contentsSheet.Cells[i, targetColumn].value) + "!A1", Convert.ToString(contentsSheet.Cells[i, targetColumn].value));
+                                    contentsSheet.Cells[i, targetColumn].Font.Name = "微软雅黑";
+                                    contentsSheet.Cells[i, targetColumn].Font.Size = 12;
+                                    contentsSheet.Cells[i, targetColumn].HorizontalAlignment = Excel.XlHAlign.xlHAlignCenter;
+                                    contentsSheet.Cells[i, targetColumn].VerticalAlignment = Excel.XlVAlign.xlVAlignCenter;
+                                }
+                                contentsSheet.Activate();
+                                ThisAddIn.app.ActiveSheet.UsedRange.Font.Name = "微软雅黑";
+                                ThisAddIn.app.ActiveSheet.UsedRange.Font.Size = 12;
+                                ThisAddIn.app.ActiveSheet.Range[ThisAddIn.app.ActiveSheet.Cells[1,1], ThisAddIn.app.ActiveSheet.Cells[1, ThisAddIn.app.ActiveSheet.UsedRange.Columns.Count]].Font.Bold = true;
+                                ThisAddIn.app.ActiveSheet.UsedRange.HorizontalAlignment = Excel.XlHAlign.xlHAlignCenter;
+                                ThisAddIn.app.ActiveSheet.UsedRange.VerticalAlignment = Excel.XlVAlign.xlVAlignCenter;
+                                ThisAddIn.app.DisplayAlerts = true;
+                                ThisAddIn.app.ScreenUpdating = true;
+
+                                // 更新界面
+                                this.Invoke((MethodInvoker)delegate
+                                {
+                                    ShowLabel(run_result_label, true, "根据目录页建新表完成");
+                                    StartTimer();
+                                    tabControl1.Enabled = true;
+                                    move_sheet_button.Enabled = true;
+                                    add_sheet_button.Enabled = true;
+                                    transposition_button.Enabled = true;
+                                    regex_button.Enabled = true;
+                                    payslip_button.Enabled = true;
+                                    contents_button.Enabled = true;
+                                    ThisAddIn.app.DisplayAlerts = true;
+                                    ThisAddIn.app.ScreenUpdating = true;
+                                });
+                            });
+                        }
+                    }
+                    else
+                    {
+                        ShowLabel(run_result_label, true, "未包含命名为'目录'的表格");
+                        StartTimer();
+                    }
+
+                    //左侧按钮状态改变
+                    tabControl1.Enabled = true;
+                    move_sheet_button.Enabled = true;
+                    add_sheet_button.Enabled = true;
+                    transposition_button.Enabled = true;
+                    regex_button.Enabled = true;
+                    payslip_button.Enabled = true;
+                    contents_button.Enabled = true;
+                    ThisAddIn.app.DisplayAlerts = true;
+                    ThisAddIn.app.ScreenUpdating = true;
+                    break;
+
+
+                /*case 3 功能尚未完全写完
+                 * 暂不可用，近日内完成后升级打包安装程序版本
+                 */
+
+                //case 3:
+                //    //左侧按钮状态改变
+                //    tabControl1.Enabled = false;
+                //    move_sheet_button.Enabled = false;
+                //    add_sheet_button.Enabled = false;
+                //    transposition_button.Enabled = false;
+                //    regex_button.Enabled = false;
+                //    payslip_button.Enabled = false;
+                //    contents_button.Enabled = false;
+
+                //    List<string> shtsName = new List<string>();
+                //    foreach (Excel.Worksheet worksheet in workbook.Worksheets)
+                //    {
+                //        shtsName.Add(worksheet.Name);
+                //    }
+                //    break;
+            }
         }
 
         //正则表达式清空选项
@@ -1565,8 +1745,6 @@ namespace ExcelAddIn
             what_type_combobox.Text = null;
             regex_rule_textbox.Text = null;
         }
-
-
 
         //一键生成工资条
         private void payslip_button_Click(object sender, EventArgs e)
@@ -1582,6 +1760,8 @@ namespace ExcelAddIn
             run_result_label.Visible = false;
             regex_run_button.Visible = false;
             regex_clear_button.Visible = false;
+            contents_to_sheet_radioButton.Visible = false;
+            sheet_to_contents_radioButton.Visible = false;
 
             //左侧按钮状态改变
             tabControl1.Enabled = false;
@@ -1631,9 +1811,7 @@ namespace ExcelAddIn
             ThisAddIn.app.ScreenUpdating = true;
         }
 
-
-
-        //一键根据目录页建立新表
+        //目录页功能启动
         private void contents_button_Click(object sender, EventArgs e)
         {
             //右侧功能区初始化
@@ -1644,101 +1822,41 @@ namespace ExcelAddIn
             what_type_combobox.Visible = false;
             regex_rule_label.Visible = false;
             regex_rule_textbox.Visible = false;
-            run_result_label.Visible = false;
-            regex_run_button.Visible = false;
+            run_result_label.Visible = false;            
             regex_clear_button.Visible = false;
-
-            //左侧按钮状态改变
-            tabControl1.Enabled = false;
-            move_sheet_button.Enabled = false;
-            add_sheet_button.Enabled = false;
-            transposition_button.Enabled = false;
-            regex_button.Enabled = false;
-            payslip_button.Enabled = false;
-            contents_button.Enabled = false;
-
-
-            //Excel.Workbook workbook = ThisAddIn.app.ActiveWorkbook;
-            MessageBox.Show("1.该选项是将包含一个命名为‘目录’的表时，自动将目录各行生成链接空白表。\n\n2.各目录项从第二行开始。\n\n3.仅对“目录”表中存在的表进行生成和链接。\n\n4.“目录”表需自行手工建立");
-
-            List<string> sheetsName = new List<string>();
-            foreach (Excel.Worksheet worksheet in workbook.Worksheets)
-            {
-                sheetsName.Add(worksheet.Name);
-            }
-            string sheet_name = "目录";
-
-            if (sheetsName.Contains(sheet_name))
-            {
-                Excel.Worksheet contentsSheet = workbook.Worksheets["目录"];
-                Task.Run(() =>
-                {
-                    ThisAddIn.app.ScreenUpdating = false;
-                    ThisAddIn.app.DisplayAlerts = false;
-                    long row_count = contentsSheet.Rows.Count;
-                    long used_row_count = contentsSheet.UsedRange.Rows.Count;
-                    for (var i = 2; i <= used_row_count; i++)
-                    {
-                        contentsSheet.Activate();
-                        string add_sheet_name = System.Convert.ToString(contentsSheet.Cells[i, 1].Value);
-                        if (!sheetsName.Contains(add_sheet_name))
-                        {
-                            Excel.Worksheet add_sheet = workbook.Worksheets.Add(After: workbook.Worksheets[workbook.Worksheets.Count]);
-                            add_sheet.Name = add_sheet_name;
-                            contentsSheet.Activate();
-                        }
-                        contentsSheet.Hyperlinks.Add(contentsSheet.Cells[i, 1], "", Convert.ToString(contentsSheet.Cells[i, 1].value) + "!A1", Convert.ToString(contentsSheet.Cells[i, 1].value));
-                        contentsSheet.Cells[i, 1].Font.Name = "微软雅黑";
-                        contentsSheet.Cells[i, 1].Font.Size = 12;
-                        contentsSheet.Cells[i, 1].HorizontalAlignment = Excel.XlHAlign.xlHAlignCenter;
-                        contentsSheet.Cells[i, 1].VerticalAlignment = Excel.XlVAlign.xlVAlignCenter;
-                    }
-                    contentsSheet.Activate();
-                    ThisAddIn.app.ActiveSheet.Range["A1"].Font.Name = "微软雅黑";
-                    ThisAddIn.app.ActiveSheet.Range["A1"].Font.Size = 12;
-                    ThisAddIn.app.ActiveSheet.Range["A1"].Font.Bold = true;
-                    ThisAddIn.app.ActiveSheet.Range["A1"].HorizontalAlignment = Excel.XlHAlign.xlHAlignCenter;
-                    ThisAddIn.app.ActiveSheet.Range["A1"].VerticalAlignment = Excel.XlVAlign.xlVAlignCenter;
-                    ThisAddIn.app.DisplayAlerts = true;
-                    ThisAddIn.app.ScreenUpdating = true;
-
-                    // 更新界面
-                    this.Invoke((MethodInvoker)delegate
-                    {
-                        ShowLabel(run_result_label, true, "根据目录页建新表完成");
-                        StartTimer();
-                        tabControl1.Enabled = true;
-                        move_sheet_button.Enabled = true;
-                        add_sheet_button.Enabled = true;
-                        transposition_button.Enabled = true;
-                        regex_button.Enabled = true;
-                        payslip_button.Enabled = true;
-                        contents_button.Enabled = true;
-                        ThisAddIn.app.DisplayAlerts = true;
-                        ThisAddIn.app.ScreenUpdating = true;
-                    });
-                });
-
-            }
-            else
-            {
-                ShowLabel(run_result_label, true, "未包含命名为'目录'的表格");
-                StartTimer();
-            }
-
-            //左侧按钮状态改变
-            tabControl1.Enabled = true;
-            move_sheet_button.Enabled = true;
-            add_sheet_button.Enabled = true;
-            transposition_button.Enabled = true;
-            regex_button.Enabled = true;
-            payslip_button.Enabled = true;
-            contents_button.Enabled = true;
-            ThisAddIn.app.DisplayAlerts = true;
-            ThisAddIn.app.ScreenUpdating = true;
-
+            contents_to_sheet_radioButton.Visible = true;
+            sheet_to_contents_radioButton.Visible = true;
+            regex_run_button.Visible = true;
+            contents_to_sheet_radioButton.Checked = false;
+            sheet_to_contents_radioButton.Checked = false;
+            selectfunction = 0;
         }
 
+        //目录页单选模式改变时        
+        private void contents_to_sheet_radioButton_CheckedChanged(object sender, EventArgs e)
+        {
+            if (contents_to_sheet_radioButton.Checked == true)
+            {                
+                selectfunction = 2;
+                which_field_label.Text = "链接哪列";
+                which_field_label.Visible = true;
+                which_field_combobox.Visible = true;
+                MessageBox.Show("1.该选项是将包含一个命名为‘目录’的表时，自动将目录各行生成链接空白表。\n\n2.各目录项从第二行开始。\n\n3.仅对“目录”表中存在的表进行生成和链接。\n\n4.“目录”表需自行手工建立");
+            }
+        }
+
+        private void sheet_to_contents_radioButton_CheckedChanged(object sender, EventArgs e)
+        {
+            if (sheet_to_contents_radioButton.Checked == true)
+            {
+                selectfunction = 3;
+                which_field_label.Visible = false;
+                which_field_label.Text = "提取哪列";
+                which_field_combobox.Visible = false;
+                which_field_combobox.Items.Clear();
+                which_field_combobox.Text = "";
+            }
+        }
 
         //分表时间控件，显示分表运行时间
         private void split_sheet_timer_Tick(object sender, EventArgs e)
@@ -1793,7 +1911,6 @@ namespace ExcelAddIn
                 }
             }
         }
-
 
         //并表时间控件，显示并表运行时间
         private void merge_sheet_timer_Tick(object sender, EventArgs e)
@@ -1896,11 +2013,40 @@ namespace ExcelAddIn
 
         //自建函数
 
+
         //正则表达式函数，判断输入字符是否合规，如有不合规字符，返回true，否则返回false
         public static bool ContainsSpecialChars(string str, string reg_rule)
         {
             Regex reg1 = new Regex(reg_rule);
             return reg1.IsMatch(str);
         }
+
+        //判断当前工作簿中是否存在指定表，如存在，返回true，否则返回false
+        public static bool SheetExist(string sheet_name)
+        {
+            foreach(Excel.Worksheet sheet in ThisAddIn.app.ActiveWorkbook.Worksheets)
+            {
+                if (sheet.Name == sheet_name)
+                {
+                    return true;
+                }
+            }            
+            return false;
+        }
+
+        //判断指定字段位于指定表中的哪一列（数字）
+        public static int TargetField(Excel.Worksheet targetSheet, string targetText)
+        {
+
+            foreach (Excel.Range targetCell in targetSheet.Range[targetSheet.Cells[1, 1], targetSheet.Cells[1, targetSheet.UsedRange.Columns.Count]])
+            {
+                if (targetCell.Value == targetText)
+                {
+                    return targetCell.Column;
+                }
+            }
+            return 0;
+        }
+
     }
 }
