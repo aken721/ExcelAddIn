@@ -1125,58 +1125,74 @@ namespace ExcelAddIn
             contents_button.Enabled = false;
             ThisAddIn.app.ScreenUpdating = false;
             ThisAddIn.app.DisplayAlerts = false;
-
-            string shtname = "";
-            int i = 0;
-            ThisAddIn.app.DisplayAlerts = false;
-            ThisAddIn.app.ScreenUpdating = false;
-            string activated_sheet_name = ThisAddIn.app.ActiveSheet.Name;
-            int n = Convert.ToInt32(ThisAddIn.app.InputBox("请输入需要新建空表数量：", "输入建表数量"));
-
-            if (n > 0)
+            try
             {
-                shtname = Convert.ToString(ThisAddIn.app.InputBox("请输入表统一名称,未输入则缺省命名为‘新建表’：", "输入表名称"));
-                string pattern = @"[、/?？*\[\]]";
-                if (ContainsSpecialChars(shtname, pattern))
+                string shtname = "";
+                int i = 0;
+                ThisAddIn.app.DisplayAlerts = false;
+                ThisAddIn.app.ScreenUpdating = false;
+                string activated_sheet_name = ThisAddIn.app.ActiveSheet.Name;
+                int n = Convert.ToInt32(ThisAddIn.app.InputBox("请输入需要新建空表数量（最多15张）：", "输入建表数量"));
+                if (n > 0 && n <= 15)
                 {
-                    MessageBox.Show("表名输入不合法，将按照缺省名称建表");
-                    shtname = "新建表";
+                    shtname = Convert.ToString(ThisAddIn.app.InputBox("请输入表统一名称,未输入则缺省命名为‘新建表’：", "输入表名称"));
+                    if (shtname == "False")
+                    {
+                        ShowLabel(run_result_label, true, "取消表名输入");
+                        StartTimer();
+                    }
+                    else
+                    {
+                        string pattern = @"[、/?？*\[\]]";
+                        if (ContainsSpecialChars(shtname, pattern))
+                        {
+                            MessageBox.Show("表名输入不合法，将按照缺省名称建表");
+                            shtname = "新建表";
+                        }
+                        else if (string.IsNullOrEmpty(shtname))
+                        {
+                            shtname = "新建表";
+                        }
+                        for (i = 1; i <= n; i++)
+                        {
+                            Excel.Worksheet totelsheet = ThisAddIn.app.ActiveWorkbook.Worksheets.Add(After: ThisAddIn.app.ActiveWorkbook.Worksheets[ThisAddIn.app.ActiveWorkbook.Worksheets.Count]);
+                            totelsheet.Name = shtname + Convert.ToString(i);
+                        }
+                        Excel.Worksheet originalWorksheet = (Excel.Worksheet)ThisAddIn.app.ActiveWorkbook.Sheets[activated_sheet_name];
+                        originalWorksheet.Activate();
+                        Excel.Range selectrange = ThisAddIn.app.ActiveSheet.Range["A1"];
+                        selectrange.Select();
+                        ThisAddIn.app.ActiveWorkbook.Save();
+                        ThisAddIn.app.DisplayAlerts = true;
+                        ThisAddIn.app.ScreenUpdating = true;
+                        ShowLabel(run_result_label, true, "新建表完成");
+                        StartTimer();
+                    }
+
                 }
-                else if (string.IsNullOrEmpty(shtname))
+                else
                 {
-                    shtname = "新建表";
+                    ShowLabel(run_result_label, true, "未正确输入新建表数量");
+                    StartTimer();
                 }
-                for (i = 1; i <= n; i++)
-                {
-                    Excel.Worksheet totelsheet = ThisAddIn.app.ActiveWorkbook.Worksheets.Add(After: ThisAddIn.app.ActiveWorkbook.Worksheets[ThisAddIn.app.ActiveWorkbook.Worksheets.Count]);
-                    totelsheet.Name = shtname + Convert.ToString(i);
-                }
-                Excel.Worksheet originalWorksheet = (Excel.Worksheet)ThisAddIn.app.ActiveWorkbook.Sheets[activated_sheet_name];
-                originalWorksheet.Activate();
-                Excel.Range selectrange = ThisAddIn.app.ActiveSheet.Range["A1"];
-                selectrange.Select();
-                ThisAddIn.app.ActiveWorkbook.Save();
-                ThisAddIn.app.DisplayAlerts = true;
+            }
+            catch(Exception ex)
+            {
+                ShowLabel(run_result_label, true, ex.Message);
+            }
+            finally
+            {
+                //左侧按钮状态改变
+                tabControl1.Enabled = true;
+                move_sheet_button.Enabled = true;
+                add_sheet_button.Enabled = true;
+                transposition_button.Enabled = true;
+                regex_button.Enabled = true;
+                payslip_button.Enabled = true;
+                contents_button.Enabled = true;
                 ThisAddIn.app.ScreenUpdating = true;
-                ShowLabel(run_result_label, true, "新建表完成");
-                StartTimer();
-            }
-            else
-            {
-                ShowLabel(run_result_label, true, "未正确输入新建表数量");
-                StartTimer();
-            }
-
-            //左侧按钮状态改变
-            tabControl1.Enabled = true;
-            move_sheet_button.Enabled = true;
-            add_sheet_button.Enabled = true;
-            transposition_button.Enabled = true;
-            regex_button.Enabled = true;
-            payslip_button.Enabled = true;
-            contents_button.Enabled = true;
-            ThisAddIn.app.ScreenUpdating = true;
-            ThisAddIn.app.DisplayAlerts = true;
+                ThisAddIn.app.DisplayAlerts = true;
+            }       
         }
 
         //转置工作表(UI主线程）
@@ -1207,148 +1223,169 @@ namespace ExcelAddIn
             ThisAddIn.app.ScreenUpdating = false;
             ThisAddIn.app.DisplayAlerts = false;
 
-            int result = 0;
-            Task.Run(() =>
+            try
             {
-                // 启动多线程执行长时间任务
-                result = transTask();
 
-            }).ContinueWith((task) =>
-            {
-                // 长时间任务完成后启动定时器
-                switch (result)
+                int result = 0;
+                Task.Run(() =>
                 {
-                    case 0:
-                        ShowLabel(run_result_label, true, "转置完成");
-                        StartTimer();
-                        break;
-                    case -1:
-                        ShowLabel(run_result_label, true, "转置开始列数字输入错误");
-                        StartTimer();
-                        break;
-                    case 1:
-                        ShowLabel(run_result_label, true, "新建字段的名称输入错误，不能为空或“False”关键字");
-                        StartTimer();
-                        break;
+                    // 启动多线程执行长时间任务
+                    result = transTask();
 
-                }
-            }, TaskScheduler.FromCurrentSynchronizationContext());
-
-            //左侧按钮状态改变
-            tabControl1.Enabled = true;
-            move_sheet_button.Enabled = true;
-            add_sheet_button.Enabled = true;
-            transposition_button.Enabled = true;
-            regex_button.Enabled = true;
-            payslip_button.Enabled = true;
-            contents_button.Enabled = true;
-            ThisAddIn.app.DisplayAlerts = true;
-            ThisAddIn.app.ScreenUpdating = true;
+                }).ContinueWith((task) =>
+                {
+                    // 长时间任务完成后启动定时器
+                    switch (result)
+                    {
+                        case 0:
+                            ShowLabel(run_result_label, true, "转置完成");
+                            StartTimer();
+                            break;
+                        case -1:
+                            ShowLabel(run_result_label, true, "转置开始列数字输入错误");
+                            StartTimer();
+                            break;
+                        case 1:
+                            ShowLabel(run_result_label, true, "新建字段的名称输入错误，不能为空或“False”关键字");
+                            StartTimer();
+                            break;
+                        case -2:
+                            ShowLabel(run_result_label, true, "程序运行出现错误，可能转置表已存在，出现表名冲突");
+                            StartTimer();
+                            break;
+                    }
+                }, TaskScheduler.FromCurrentSynchronizationContext());
+            }
+            catch (Exception ex)
+            {
+                ShowLabel(run_result_label, true, ex.Message);
+                StartTimer();
+            }
+            finally
+            {
+                //左侧按钮状态改变
+                tabControl1.Enabled = true;
+                move_sheet_button.Enabled = true;
+                add_sheet_button.Enabled = true;
+                transposition_button.Enabled = true;
+                regex_button.Enabled = true;
+                payslip_button.Enabled = true;
+                contents_button.Enabled = true;
+                ThisAddIn.app.DisplayAlerts = true;
+                ThisAddIn.app.ScreenUpdating = true;
+            }
         }
 
         //转置工作表（程序执行线程）
         private int transTask()
         {
 
-            Excel.Worksheet worksheet = ThisAddIn.app.ActiveSheet;
-            //获取当前表名称
-            string active_sheet_name = worksheet.Name;
-            //获取当前表全部行数
-            long row_count = worksheet.Rows.Count;
-            //获取当前表全部列数
-            //long column_count = worksheet.Columns.Count;
-            //获取最后数据行数
-            long used_row_count = worksheet.UsedRange.Rows.Count;
-            //获取最后数据列数
-            long used_column_count = worksheet.UsedRange.Columns.Count;
-            string trans_sheet_name = active_sheet_name + "转置表";
-
-            //设置转置开始列
-            string translation_start_column = Convert.ToString(ThisAddIn.app.InputBox("请输入从第几列（不小于2的数字）开始转置：", "注意"));
-            string pat = @"^[1-9]\d*$";
-            if (ContainsSpecialChars(translation_start_column, pat) == false || Convert.ToUInt32(translation_start_column) > used_column_count || translation_start_column == "False")
+            try
             {
-                return -1;
-            }
+                Excel.Worksheet worksheet = ThisAddIn.app.ActiveSheet;
+                //获取当前表名称
+                string active_sheet_name = worksheet.Name;
+                //获取当前表全部行数
+                long row_count = worksheet.Rows.Count;
+                //获取当前表全部列数
+                //long column_count = worksheet.Columns.Count;
+                //获取最后数据行数
+                long used_row_count = worksheet.UsedRange.Rows.Count;
+                //获取最后数据列数
+                long used_column_count = worksheet.UsedRange.Columns.Count;
+                string trans_sheet_name = active_sheet_name + "转置表";
 
-            //设置转置后字段名
-            string field_name = Convert.ToString(ThisAddIn.app.InputBox("请输入转置列的字段名称：", "注意"));
-            if (string.IsNullOrEmpty(field_name) || field_name == "False")
-            {
-                return 1;
-            }
-
-            ThisAddIn.app.DisplayAlerts = false;
-            ThisAddIn.app.ScreenUpdating = false;
-
-            //将表中空值补为0
-            foreach (Excel.Range range in ThisAddIn.app.ActiveSheet.Range(ThisAddIn.app.ActiveSheet.Cells(1, 1), ThisAddIn.app.ActiveSheet.Cells(used_row_count, used_column_count)))
-            {
-                object value = range.Value;
-                if (string.IsNullOrEmpty(value.ToString()))
+                //设置转置开始列
+                string translation_start_column = Convert.ToString(ThisAddIn.app.InputBox("请输入从第几列（不小于2的数字）开始转置：", "注意"));
+                string pat = @"^[1-9]\d*$";
+                if (ContainsSpecialChars(translation_start_column, pat) == false || Convert.ToUInt32(translation_start_column) > used_column_count || translation_start_column == "False")
                 {
-                    range.Value = 0;
+                    return -1;
                 }
-            }
 
-            int translation_start_column1 = Convert.ToInt32(translation_start_column); //将转置起始列转为数值
-            //新建“转置表”
-            Excel.Worksheet trans_sheet = ThisAddIn.app.ActiveWorkbook.Worksheets.Add(Before: worksheet);
-            trans_sheet.Name = trans_sheet_name;
-            for (int s = 1; s < translation_start_column1; s++)
-            {
-                trans_sheet.Cells[1, s] = ThisAddIn.app.ActiveWorkbook.Worksheets[active_sheet_name].Cells[1, s];
-            }
-            trans_sheet.Cells[1, Convert.ToInt32(translation_start_column)] = "数值";
-            string pattern = @"^[-+]?[0-9]*\.?[0-9]+$";
-            if (ContainsSpecialChars(ThisAddIn.app.ActiveWorkbook.Worksheets[active_sheet_name].Cells[1, translation_start_column1].value, pattern))
-            {
-                trans_sheet.Columns[translation_start_column1].NumberFormatLocal = "#,##0.00";
-            }
-            trans_sheet.Cells[1, translation_start_column1 + 1] = field_name;
-            if (field_name == "日期")
-            {
-                trans_sheet.Columns[Convert.ToInt32(translation_start_column) + 1].NumberFormatLocal = "yyyy-m-d";
-            }
-            trans_sheet.Activate();
+                //设置转置后字段名
+                string field_name = Convert.ToString(ThisAddIn.app.InputBox("请输入转置列的字段名称：", "注意"));
+                if (string.IsNullOrEmpty(field_name) || field_name == "False")
+                {
+                    return 1;
+                }
 
+                ThisAddIn.app.DisplayAlerts = false;
+                ThisAddIn.app.ScreenUpdating = false;
 
-            //复制粘贴转置内容
-            for (int n = translation_start_column1; n <= used_column_count; n++) //循环重复数据列次
-            {
-                //复制粘贴固定字段
-                worksheet.Activate();
-                worksheet.Range[worksheet.Cells[2, 1], worksheet.Cells[used_row_count, translation_start_column1 - 1]].Select();
-                ThisAddIn.app.Selection.Copy();
+                //将表中空值补为0
+                foreach (Excel.Range range in ThisAddIn.app.ActiveSheet.Range(ThisAddIn.app.ActiveSheet.Cells(1, 1), ThisAddIn.app.ActiveSheet.Cells(used_row_count, used_column_count)))
+                {
+                    object value = range.Value;
+                    if (string.IsNullOrEmpty(value.ToString()))
+                    {
+                        range.Value = 0;
+                    }
+                }
+
+                int translation_start_column1 = Convert.ToInt32(translation_start_column); //将转置起始列转为数值
+                                                                                           //新建“转置表”
+                Excel.Worksheet trans_sheet = ThisAddIn.app.ActiveWorkbook.Worksheets.Add(Before: worksheet);
+                trans_sheet.Name = trans_sheet_name;
+                for (int s = 1; s < translation_start_column1; s++)
+                {
+                    trans_sheet.Cells[1, s] = ThisAddIn.app.ActiveWorkbook.Worksheets[active_sheet_name].Cells[1, s];
+                }
+                trans_sheet.Cells[1, Convert.ToInt32(translation_start_column)] = "数值";
+                string pattern = @"^[-+]?[0-9]*\.?[0-9]+$";
+                if (ContainsSpecialChars(ThisAddIn.app.ActiveWorkbook.Worksheets[active_sheet_name].Cells[1, translation_start_column1].value, pattern))
+                {
+                    trans_sheet.Columns[translation_start_column1].NumberFormatLocal = "#,##0.00";
+                }
+                trans_sheet.Cells[1, translation_start_column1 + 1] = field_name;
+                if (field_name == "日期")
+                {
+                    trans_sheet.Columns[Convert.ToInt32(translation_start_column) + 1].NumberFormatLocal = "yyyy-m-d";
+                }
                 trans_sheet.Activate();
-                ThisAddIn.app.ActiveSheet.Cells[row_count, 1].End(Excel.XlDirection.xlUp).Offset(1, 0).Select();
-                ThisAddIn.app.ActiveSheet.PasteSpecial();
-                ThisAddIn.app.Application.CutCopyMode = Excel.XlCutCopyMode.xlCopy;
 
-                ////复制粘贴转置字段
-                worksheet.Activate();
-                worksheet.Range[worksheet.Cells[2, n], worksheet.Cells[used_row_count, n]].Select();
-                ThisAddIn.app.Selection.Copy();
-                trans_sheet.Activate();
-                ThisAddIn.app.ActiveSheet.Cells[row_count, translation_start_column1].End(Excel.XlDirection.xlUp).Offset(1, 0).Select();
-                ThisAddIn.app.Selection.PasteSpecial();
-                ThisAddIn.app.Application.CutCopyMode = Excel.XlCutCopyMode.xlCopy;
 
-                //复制粘贴新建字段
-                worksheet.Activate();
-                worksheet.Cells[1, n].Copy();
+                //复制粘贴转置内容
+                for (int n = translation_start_column1; n <= used_column_count; n++) //循环重复数据列次
+                {
+                    //复制粘贴固定字段
+                    worksheet.Activate();
+                    worksheet.Range[worksheet.Cells[2, 1], worksheet.Cells[used_row_count, translation_start_column1 - 1]].Select();
+                    ThisAddIn.app.Selection.Copy();
+                    trans_sheet.Activate();
+                    ThisAddIn.app.ActiveSheet.Cells[row_count, 1].End(Excel.XlDirection.xlUp).Offset(1, 0).Select();
+                    ThisAddIn.app.ActiveSheet.PasteSpecial();
+                    ThisAddIn.app.Application.CutCopyMode = Excel.XlCutCopyMode.xlCopy;
+
+                    ////复制粘贴转置字段
+                    worksheet.Activate();
+                    worksheet.Range[worksheet.Cells[2, n], worksheet.Cells[used_row_count, n]].Select();
+                    ThisAddIn.app.Selection.Copy();
+                    trans_sheet.Activate();
+                    ThisAddIn.app.ActiveSheet.Cells[row_count, translation_start_column1].End(Excel.XlDirection.xlUp).Offset(1, 0).Select();
+                    ThisAddIn.app.Selection.PasteSpecial();
+                    ThisAddIn.app.Application.CutCopyMode = Excel.XlCutCopyMode.xlCopy;
+
+                    //复制粘贴新建字段
+                    worksheet.Activate();
+                    worksheet.Cells[1, n].Copy();
+                    trans_sheet.Activate();
+                    ThisAddIn.app.ActiveSheet.Range[ThisAddIn.app.ActiveSheet.Cells[row_count, translation_start_column1 + 1].End(Excel.XlDirection.xlUp).Offset(1, 0), ThisAddIn.app.ActiveSheet.Cells[ThisAddIn.app.ActiveSheet.UsedRange.Rows.count, translation_start_column1 + 1]].Select();
+                    ThisAddIn.app.Selection.PasteSpecial();
+                    ThisAddIn.app.Application.CutCopyMode = Excel.XlCutCopyMode.xlCopy;
+                }
+                worksheet.Select();
+                worksheet.Range["A1"].Select();
                 trans_sheet.Activate();
-                ThisAddIn.app.ActiveSheet.Range[ThisAddIn.app.ActiveSheet.Cells[row_count, translation_start_column1 + 1].End(Excel.XlDirection.xlUp).Offset(1, 0), ThisAddIn.app.ActiveSheet.Cells[ThisAddIn.app.ActiveSheet.UsedRange.Rows.count, translation_start_column1 + 1]].Select();
-                ThisAddIn.app.Selection.PasteSpecial();
-                ThisAddIn.app.Application.CutCopyMode = Excel.XlCutCopyMode.xlCopy;
+                trans_sheet.Range["A1"].Select();
+                ThisAddIn.app.ScreenUpdating = true;
+                ThisAddIn.app.DisplayAlerts = true;
+                return 0;
             }
-            worksheet.Select();
-            worksheet.Range["A1"].Select();
-            trans_sheet.Activate();
-            trans_sheet.Range["A1"].Select();
-            ThisAddIn.app.ScreenUpdating = true;
-            ThisAddIn.app.DisplayAlerts = true;
-            return 0;
+            catch(Exception ex)
+            {
+                return -2;
+            }
         }
 
         //正则表达式功能激活
@@ -1714,27 +1751,86 @@ namespace ExcelAddIn
                     ThisAddIn.app.ScreenUpdating = true;
                     break;
 
+                case 3:
+                    /*该功能为根据工作簿已有工作表建立带链接的目录页
+                     *新建目录表命名为“_目录”，链接表内容位于表内“表目录”字段下
+                     *建成后可对目录页加工添加其他内容，只要不破坏“表目录”字段内容即可
+                     *如原工作簿已有“_目录”表，会自动更名为“_目录+当前日期时间字符串”的表
+                     */
 
-                /*case 3 功能尚未完全写完
-                 * 暂不可用，近日内完成后升级打包安装程序版本
-                 */
+                    //左侧按钮状态改变
+                    tabControl1.Enabled = false;
+                    move_sheet_button.Enabled = false;
+                    add_sheet_button.Enabled = false;
+                    transposition_button.Enabled = false;
+                    regex_button.Enabled = false;
+                    payslip_button.Enabled = false;
+                    contents_button.Enabled = false;
 
-                //case 3:
-                //    //左侧按钮状态改变
-                //    tabControl1.Enabled = false;
-                //    move_sheet_button.Enabled = false;
-                //    add_sheet_button.Enabled = false;
-                //    transposition_button.Enabled = false;
-                //    regex_button.Enabled = false;
-                //    payslip_button.Enabled = false;
-                //    contents_button.Enabled = false;
+                    List<string> shtsName = new List<string>();
+                    foreach (Excel.Worksheet worksheet in workbook.Worksheets)
+                    {
+                        shtsName.Add(worksheet.Name);
+                    }
+                    if (shtsName.Contains("_目录"))
+                    {
+                        Excel.Worksheet repeatingSheet = workbook.Worksheets["_目录"];
+                        string dt = DateTime.Now.Year.ToString() +DateTime.Now.Month.ToString("00")+DateTime.Now.Day.ToString("00")+DateTime.Now.Hour.ToString("00")+ DateTime.Now.Minute.ToString("00")+ DateTime.Now.Second.ToString("00");
+                        repeatingSheet.Name = "_目录" + dt;
+                        int index = shtsName.IndexOf("_目录");
+                        shtsName[index] = repeatingSheet.Name;
+                    }
+                    Excel.Worksheet addSheet = workbook.Worksheets.Add(Before: workbook.Worksheets[1]);
+                    addSheet.Name = "_目录";
+                    addSheet.Range["A1"].Value = "表目录";
+                    Task.Run(() =>
+                    {
+                        ThisAddIn.app.ScreenUpdating = false;
+                        ThisAddIn.app.DisplayAlerts = false;
+                        for (int i = 0; i < shtsName.Count; i++)
+                        {
+                            addSheet.Cells[i + 2, 1].value = shtsName[i];
+                            addSheet.Hyperlinks.Add(addSheet.Cells[i + 2, 1], "", Convert.ToString(addSheet.Cells[i + 2, 1].value) + "!A1", Convert.ToString(addSheet.Cells[i + 2, 1].value));
+                            addSheet.Cells[i + 2, 1].Font.Name = "微软雅黑";
+                            addSheet.Cells[i + 2, 1].Font.Size = 12;
+                            addSheet.Cells[i + 2, 1].HorizontalAlignment = Excel.XlHAlign.xlHAlignCenter;
+                            addSheet.Cells[i + 2, 1].VerticalAlignment = Excel.XlVAlign.xlVAlignCenter;
+                        }
+                        addSheet.Range["A1"].Font.Name = "微软雅黑";
+                        addSheet.Range["A1"].Font.Bold = true;
+                        addSheet.UsedRange.Font.Size = 12;
+                        addSheet.UsedRange.HorizontalAlignment = Excel.XlHAlign.xlHAlignCenter;
+                        addSheet.UsedRange.VerticalAlignment = Excel.XlVAlign.xlVAlignCenter;
+                        ThisAddIn.app.DisplayAlerts = true;
+                        ThisAddIn.app.ScreenUpdating = true;
 
-                //    List<string> shtsName = new List<string>();
-                //    foreach (Excel.Worksheet worksheet in workbook.Worksheets)
-                //    {
-                //        shtsName.Add(worksheet.Name);
-                //    }
-                //    break;
+                        // 更新界面
+                        this.Invoke((MethodInvoker)delegate
+                        {
+                            ShowLabel(run_result_label, true, "创建目录页完成");
+                            StartTimer();
+                            tabControl1.Enabled = true;
+                            move_sheet_button.Enabled = true;
+                            add_sheet_button.Enabled = true;
+                            transposition_button.Enabled = true;
+                            regex_button.Enabled = true;
+                            payslip_button.Enabled = true;
+                            contents_button.Enabled = true;
+                            ThisAddIn.app.DisplayAlerts = true;
+                            ThisAddIn.app.ScreenUpdating = true;
+                        });
+                    });
+                    //左侧按钮状态改变
+                    tabControl1.Enabled = true;
+                    move_sheet_button.Enabled = true;
+                    add_sheet_button.Enabled = true;
+                    transposition_button.Enabled = true;
+                    regex_button.Enabled = true;
+                    payslip_button.Enabled = true;
+                    contents_button.Enabled = true;
+                    ThisAddIn.app.DisplayAlerts = true;
+                    ThisAddIn.app.ScreenUpdating = true;
+                    break;
             }
         }
 
@@ -2047,6 +2143,5 @@ namespace ExcelAddIn
             }
             return 0;
         }
-
     }
 }

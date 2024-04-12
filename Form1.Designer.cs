@@ -583,10 +583,10 @@
             this.sheet_to_contents_radioButton.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.sheet_to_contents_radioButton.Location = new System.Drawing.Point(485, 252);
             this.sheet_to_contents_radioButton.Name = "sheet_to_contents_radioButton";
-            this.sheet_to_contents_radioButton.Size = new System.Drawing.Size(125, 24);
+            this.sheet_to_contents_radioButton.Size = new System.Drawing.Size(139, 24);
             this.sheet_to_contents_radioButton.TabIndex = 11;
             this.sheet_to_contents_radioButton.TabStop = true;
-            this.sheet_to_contents_radioButton.Text = "子表生成目录表";
+            this.sheet_to_contents_radioButton.Text = "所有表生成目录页";
             this.sheet_to_contents_radioButton.UseVisualStyleBackColor = true;
             this.sheet_to_contents_radioButton.CheckedChanged += new System.EventHandler(this.sheet_to_contents_radioButton_CheckedChanged);
             // 
