@@ -65,6 +65,11 @@
             this.all_select_checkbox = new System.Windows.Forms.CheckBox();
             this.tabPage4 = new System.Windows.Forms.TabPage();
             this.panel4 = new System.Windows.Forms.Panel();
+            this.QR_radioButton = new System.Windows.Forms.RadioButton();
+            this.BC_radioButton = new System.Windows.Forms.RadioButton();
+            this.QR_label = new System.Windows.Forms.Label();
+            this.QR_listBox = new System.Windows.Forms.ListBox();
+            this.QR_button = new System.Windows.Forms.Button();
             this.sheet_to_contents_radioButton = new System.Windows.Forms.RadioButton();
             this.contents_to_sheet_radioButton = new System.Windows.Forms.RadioButton();
             this.run_result_label = new System.Windows.Forms.Label();
@@ -553,6 +558,11 @@
             // panel4
             // 
             this.panel4.AutoSize = true;
+            this.panel4.Controls.Add(this.QR_radioButton);
+            this.panel4.Controls.Add(this.BC_radioButton);
+            this.panel4.Controls.Add(this.QR_label);
+            this.panel4.Controls.Add(this.QR_listBox);
+            this.panel4.Controls.Add(this.QR_button);
             this.panel4.Controls.Add(this.sheet_to_contents_radioButton);
             this.panel4.Controls.Add(this.contents_to_sheet_radioButton);
             this.panel4.Controls.Add(this.run_result_label);
@@ -577,11 +587,74 @@
             this.panel4.Size = new System.Drawing.Size(675, 392);
             this.panel4.TabIndex = 1;
             // 
+            // QR_radioButton
+            // 
+            this.QR_radioButton.AutoSize = true;
+            this.QR_radioButton.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.QR_radioButton.Location = new System.Drawing.Point(575, 260);
+            this.QR_radioButton.Name = "QR_radioButton";
+            this.QR_radioButton.Size = new System.Drawing.Size(69, 24);
+            this.QR_radioButton.TabIndex = 16;
+            this.QR_radioButton.TabStop = true;
+            this.QR_radioButton.Text = "二维码";
+            this.QR_radioButton.UseVisualStyleBackColor = true;
+            this.QR_radioButton.CheckedChanged += new System.EventHandler(this.QR_radioButton_CheckedChanged);
+            // 
+            // BC_radioButton
+            // 
+            this.BC_radioButton.AutoSize = true;
+            this.BC_radioButton.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.BC_radioButton.Location = new System.Drawing.Point(574, 288);
+            this.BC_radioButton.Name = "BC_radioButton";
+            this.BC_radioButton.Size = new System.Drawing.Size(69, 24);
+            this.BC_radioButton.TabIndex = 15;
+            this.BC_radioButton.TabStop = true;
+            this.BC_radioButton.Text = "条形码";
+            this.BC_radioButton.UseVisualStyleBackColor = true;
+            this.BC_radioButton.CheckedChanged += new System.EventHandler(this.BC_radioButton_CheckedChanged);
+            // 
+            // QR_label
+            // 
+            this.QR_label.AutoSize = true;
+            this.QR_label.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.QR_label.Location = new System.Drawing.Point(336, 261);
+            this.QR_label.Name = "QR_label";
+            this.QR_label.Size = new System.Drawing.Size(51, 20);
+            this.QR_label.TabIndex = 14;
+            this.QR_label.Text = "内容列";
+            // 
+            // QR_listBox
+            // 
+            this.QR_listBox.FormattingEnabled = true;
+            this.QR_listBox.ItemHeight = 20;
+            this.QR_listBox.Location = new System.Drawing.Point(393, 261);
+            this.QR_listBox.Name = "QR_listBox";
+            this.QR_listBox.SelectionMode = System.Windows.Forms.SelectionMode.MultiExtended;
+            this.QR_listBox.Size = new System.Drawing.Size(175, 44);
+            this.QR_listBox.TabIndex = 13;
+            this.QR_listBox.VisibleChanged += new System.EventHandler(this.QR_listBox_VisibleChanged);
+            // 
+            // QR_button
+            // 
+            this.QR_button.FlatAppearance.BorderSize = 0;
+            this.QR_button.FlatAppearance.MouseDownBackColor = System.Drawing.SystemColors.ButtonShadow;
+            this.QR_button.FlatAppearance.MouseOverBackColor = System.Drawing.SystemColors.ButtonFace;
+            this.QR_button.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
+            this.QR_button.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.QR_button.ForeColor = System.Drawing.Color.SeaGreen;
+            this.QR_button.Location = new System.Drawing.Point(35, 312);
+            this.QR_button.Name = "QR_button";
+            this.QR_button.Size = new System.Drawing.Size(90, 57);
+            this.QR_button.TabIndex = 12;
+            this.QR_button.Text = "生成二维码";
+            this.QR_button.UseVisualStyleBackColor = true;
+            this.QR_button.Click += new System.EventHandler(this.QR_button_Click);
+            // 
             // sheet_to_contents_radioButton
             // 
             this.sheet_to_contents_radioButton.AutoSize = true;
             this.sheet_to_contents_radioButton.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.sheet_to_contents_radioButton.Location = new System.Drawing.Point(485, 252);
+            this.sheet_to_contents_radioButton.Location = new System.Drawing.Point(485, 234);
             this.sheet_to_contents_radioButton.Name = "sheet_to_contents_radioButton";
             this.sheet_to_contents_radioButton.Size = new System.Drawing.Size(139, 24);
             this.sheet_to_contents_radioButton.TabIndex = 11;
@@ -594,7 +667,7 @@
             // 
             this.contents_to_sheet_radioButton.AutoSize = true;
             this.contents_to_sheet_radioButton.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.contents_to_sheet_radioButton.Location = new System.Drawing.Point(326, 252);
+            this.contents_to_sheet_radioButton.Location = new System.Drawing.Point(326, 234);
             this.contents_to_sheet_radioButton.Name = "contents_to_sheet_radioButton";
             this.contents_to_sheet_radioButton.Size = new System.Drawing.Size(139, 24);
             this.contents_to_sheet_radioButton.TabIndex = 10;
@@ -607,9 +680,9 @@
             // 
             this.run_result_label.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Italic, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.run_result_label.ForeColor = System.Drawing.Color.SaddleBrown;
-            this.run_result_label.Location = new System.Drawing.Point(326, 292);
+            this.run_result_label.Location = new System.Drawing.Point(326, 311);
             this.run_result_label.Name = "run_result_label";
-            this.run_result_label.Size = new System.Drawing.Size(242, 44);
+            this.run_result_label.Size = new System.Drawing.Size(338, 44);
             this.run_result_label.TabIndex = 9;
             this.run_result_label.Text = "运行结果";
             // 
@@ -634,7 +707,7 @@
             // 
             this.regex_clear_button.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.regex_clear_button.ForeColor = System.Drawing.Color.SeaGreen;
-            this.regex_clear_button.Location = new System.Drawing.Point(508, 339);
+            this.regex_clear_button.Location = new System.Drawing.Point(508, 352);
             this.regex_clear_button.Name = "regex_clear_button";
             this.regex_clear_button.Size = new System.Drawing.Size(60, 30);
             this.regex_clear_button.TabIndex = 8;
@@ -646,7 +719,7 @@
             // 
             this.regex_run_button.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.regex_run_button.ForeColor = System.Drawing.Color.SeaGreen;
-            this.regex_run_button.Location = new System.Drawing.Point(326, 339);
+            this.regex_run_button.Location = new System.Drawing.Point(326, 352);
             this.regex_run_button.Name = "regex_run_button";
             this.regex_run_button.Size = new System.Drawing.Size(60, 30);
             this.regex_run_button.TabIndex = 7;
@@ -674,7 +747,7 @@
             // regex_rule_textbox
             // 
             this.regex_rule_textbox.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.regex_rule_textbox.Location = new System.Drawing.Point(393, 203);
+            this.regex_rule_textbox.Location = new System.Drawing.Point(393, 191);
             this.regex_rule_textbox.Name = "regex_rule_textbox";
             this.regex_rule_textbox.Size = new System.Drawing.Size(175, 26);
             this.regex_rule_textbox.TabIndex = 6;
@@ -700,7 +773,7 @@
             // 
             this.regex_rule_label.AutoSize = true;
             this.regex_rule_label.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.regex_rule_label.Location = new System.Drawing.Point(322, 206);
+            this.regex_rule_label.Location = new System.Drawing.Point(322, 194);
             this.regex_rule_label.Name = "regex_rule_label";
             this.regex_rule_label.Size = new System.Drawing.Size(65, 20);
             this.regex_rule_label.TabIndex = 5;
@@ -738,7 +811,7 @@
             "电话号码",
             "IP地址",
             "自定义"});
-            this.what_type_combobox.Location = new System.Drawing.Point(393, 150);
+            this.what_type_combobox.Location = new System.Drawing.Point(393, 138);
             this.what_type_combobox.Name = "what_type_combobox";
             this.what_type_combobox.Size = new System.Drawing.Size(175, 28);
             this.what_type_combobox.TabIndex = 4;
@@ -765,7 +838,7 @@
             // 
             this.what_type_label.AutoSize = true;
             this.what_type_label.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.what_type_label.Location = new System.Drawing.Point(322, 153);
+            this.what_type_label.Location = new System.Drawing.Point(322, 141);
             this.what_type_label.Name = "what_type_label";
             this.what_type_label.Size = new System.Drawing.Size(65, 20);
             this.what_type_label.TabIndex = 3;
@@ -793,7 +866,7 @@
             this.which_field_combobox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.which_field_combobox.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.which_field_combobox.FormattingEnabled = true;
-            this.which_field_combobox.Location = new System.Drawing.Point(393, 85);
+            this.which_field_combobox.Location = new System.Drawing.Point(393, 73);
             this.which_field_combobox.Name = "which_field_combobox";
             this.which_field_combobox.Size = new System.Drawing.Size(175, 28);
             this.which_field_combobox.TabIndex = 2;
@@ -818,7 +891,7 @@
             // 
             this.which_field_label.AutoSize = true;
             this.which_field_label.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.which_field_label.Location = new System.Drawing.Point(322, 88);
+            this.which_field_label.Location = new System.Drawing.Point(322, 76);
             this.which_field_label.Name = "which_field_label";
             this.which_field_label.Size = new System.Drawing.Size(65, 20);
             this.which_field_label.TabIndex = 1;
@@ -898,7 +971,7 @@
             this.label7.Name = "label7";
             this.label7.Size = new System.Drawing.Size(90, 16);
             this.label7.TabIndex = 3;
-            this.label7.Text = "Version  2.2.7";
+            this.label7.Text = "Version  2.2.9";
             // 
             // Form1
             // 
@@ -1003,5 +1076,10 @@
         private System.Windows.Forms.Panel panel4;
         private System.Windows.Forms.RadioButton sheet_to_contents_radioButton;
         private System.Windows.Forms.RadioButton contents_to_sheet_radioButton;
+        private System.Windows.Forms.Button QR_button;
+        private System.Windows.Forms.ListBox QR_listBox;
+        private System.Windows.Forms.Label QR_label;
+        private System.Windows.Forms.RadioButton QR_radioButton;
+        private System.Windows.Forms.RadioButton BC_radioButton;
     }
 }
