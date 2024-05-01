@@ -971,7 +971,7 @@ namespace ExcelAddIn
             this.label7.Name = "label7";
             this.label7.Size = new System.Drawing.Size(90, 16);
             this.label7.TabIndex = 3;
-            this.label7.Text = "Version  2.2.7";
+            this.label7.Text = "Version  2.2.9";
             // 
             // Form1
             // 
