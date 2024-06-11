@@ -212,6 +212,7 @@ namespace ExcelAddIn
                 {
                     workbook.Worksheets["_rename_备份"].Name = "_rename";
                 }
+                workbook.RefreshAll();
                 MessageBox.Show("文件名修改完毕");
                 if (Directory.Exists(get_directory_path))
                 {
@@ -224,6 +225,7 @@ namespace ExcelAddIn
                 MessageBox.Show("没有选择文件夹，请先使用批读文件名功能后再使用该功能");
                 readFile = 0;
             }
+
             ThisAddIn.app.DisplayAlerts = true;
             ThisAddIn.app.ScreenUpdating = true;
         }
