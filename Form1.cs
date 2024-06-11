@@ -10,6 +10,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Timers;
 using System.Windows.Forms;
+using System.Configuration;
 using ZXing;
 using ZXing.Common;
 using ZXing.QrCode;
@@ -57,6 +58,7 @@ namespace ExcelAddIn
             split_sheet_result_label.Text = "";
             split_sheet_progressBar.Visible = false;
             splitProgressBar_label.Visible = false;
+            version_label.Text = ConfigurationManager.AppSettings["version"].ToString();
 
             if (active_sheet_names.Count > 0)
             {

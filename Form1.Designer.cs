@@ -96,7 +96,7 @@ namespace ExcelAddIn
             this.merge_sheet_timer = new System.Windows.Forms.Timer(this.components);
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
             this.label4 = new System.Windows.Forms.Label();
-            this.label7 = new System.Windows.Forms.Label();
+            this.version_label = new System.Windows.Forms.Label();
             this.tabControl1.SuspendLayout();
             this.tabPage1.SuspendLayout();
             this.panel1.SuspendLayout();
@@ -961,24 +961,24 @@ namespace ExcelAddIn
             this.label4.TabIndex = 2;
             this.label4.Text = "Copyright © He Kun.  All rights reserved";
             // 
-            // label7
+            // version_label
             // 
-            this.label7.AutoSize = true;
-            this.label7.BackColor = System.Drawing.Color.DarkGreen;
-            this.label7.Font = new System.Drawing.Font("Franklin Gothic Medium", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label7.ForeColor = System.Drawing.Color.Transparent;
-            this.label7.Location = new System.Drawing.Point(12, 419);
-            this.label7.Name = "label7";
-            this.label7.Size = new System.Drawing.Size(90, 16);
-            this.label7.TabIndex = 3;
-            this.label7.Text = "Version  2.2.9";
+            this.version_label.AutoSize = true;
+            this.version_label.BackColor = System.Drawing.Color.DarkGreen;
+            this.version_label.Font = new System.Drawing.Font("Franklin Gothic Medium", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.version_label.ForeColor = System.Drawing.Color.Transparent;
+            this.version_label.Location = new System.Drawing.Point(12, 419);
+            this.version_label.Name = "version_label";
+            this.version_label.Size = new System.Drawing.Size(49, 16);
+            this.version_label.TabIndex = 3;
+            this.version_label.Text = "version";
             // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
             this.ClientSize = new System.Drawing.Size(800, 450);
-            this.Controls.Add(this.label7);
+            this.Controls.Add(this.version_label);
             this.Controls.Add(this.label4);
             this.Controls.Add(this.pictureBox1);
             this.Controls.Add(this.tabControl1);
@@ -1060,7 +1060,7 @@ namespace ExcelAddIn
         private System.Windows.Forms.Label splitProgressBar_label;
         private System.Windows.Forms.PictureBox pictureBox1;
         private System.Windows.Forms.Label label4;
-        private System.Windows.Forms.Label label7;
+        private System.Windows.Forms.Label version_label;
         private System.Windows.Forms.Panel panel1;
         private System.Windows.Forms.Panel panel2;
         private System.Windows.Forms.Label mergeProgressBar_label;
