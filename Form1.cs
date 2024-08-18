@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
+using System.Data;
+using System.Data.SqlClient;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -16,6 +18,8 @@ using ZXing.Common;
 using ZXing.QrCode;
 using ZXing.QrCode.Internal;
 using Excel = Microsoft.Office.Interop.Excel;
+using MySql.Data.MySqlClient;
+using System.Runtime.InteropServices;
 
 
 
@@ -169,9 +173,14 @@ namespace ExcelAddIn
                     function_title_label.Text = "请选择所需使用的功能";
                     break;
                 case 4:
+                    this.database_result_label.Visible = false;
+                    database_result_label.Text = "";
+                    dbsheet_comboBox.Items.Clear();
                     break;
                 case 5:
                     this.Dispose();
+                    break;
+                case 6:
                     break;
             }
         }
@@ -2419,6 +2428,271 @@ namespace ExcelAddIn
             return 0;
         }
 
+        private void dbrun_button_Click(object sender, EventArgs e)
+        {
+            dbsheet_comboBox.Items.Clear();
+            switch (dbtype_comboBox.SelectedIndex)
+            {
+                case 0:
+                    break;
+                case 1:
+                
+   
+                    break;
+                case 2:
+                    string connectionString = "server=" + dbaddress_textBox.Text + ";user=" + dbuser_textBox.Text + ";database=" + dbname_textBox.Text + ";port=" + dbport_textBox.Text + ";password=" + dbpwd_textBox.Text;
+
+                    // 连接到数据库并获取表名列表
+                    List<string> tableNames = MysqlDB.GetTableNames(connectionString);
+
+                    if (tableNames.Count == 1 && tableNames[0].Contains(":"))
+                    {
+                        // 处理错误情况
+                        database_result_label.Text = "数据库连接失败}";
+                        database_result_label.Visible = true;
+                    }
+                    else
+                    {
+                        database_result_label.Text = "数据库连接成功，数据库中包含" + tableNames.Count + "张表";
+                        database_result_label.Visible = true;
+                        // 将表名添加到 ComboBox
+                        foreach (var tableName in tableNames)
+                        {
+                            dbsheet_comboBox.Items.Add(tableName);
+                        }
+
+                        // 默认选择第一个表
+                        if (dbsheet_comboBox.Items.Count > 0)
+                        {
+                            dbsheet_comboBox.SelectedIndex = 0;
+                        }
+
+                        // 更新 DataGridView
+                        UpdateDataGridView(dbsheet_comboBox.SelectedItem.ToString());
+                    }
+                    break;
+                case 3:
+                    break;
+                case 4:
+                    break;
+                case 5:
+                    break;
+                case 6:
+                    break;
+                case 7:
+                    break;
+                case 8:
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        private void UpdateDataGridView(string tableName)
+        {
+            var dataTable = GetDataTable(tableName);
+            dbsheet_dataGridView.DataSource = dataTable;
+        }
+
+        private DataTable GetDataTable(string tableName)
+        {
+            string connectionString = "server=" + dbaddress_textBox.Text + ";user=" + dbuser_textBox.Text + ";database=" + dbname_textBox.Text + ";port=" + dbport_textBox.Text + ";password=" + dbpwd_textBox.Text;
+            using (var connection = new MySqlConnection(connectionString))
+            {
+                connection.Open();
+                using (var command = new MySqlCommand($"SELECT * FROM {tableName}", connection))
+                {
+                    using (var adapter = new MySqlDataAdapter(command))
+                    {
+                        var dataTable = new DataTable();
+                        adapter.Fill(dataTable);
+                        return dataTable;
+                    }
+                }
+            }
+        }
+
+        private void dbsheet_comboBox_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            string selectedTableName = dbsheet_comboBox.SelectedItem.ToString();
+            UpdateDataGridView(selectedTableName);
+        }
+
+        private void dbtype_comboBox_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            switch (dbtype_comboBox.SelectedIndex)
+            {
+                case 0:
+                    break;
+                case 1:
+                    break;
+                case 2:
+                    dbport_textBox.Text = "3306";
+                    break;
+                case 3:
+                    break;
+                case 4:
+                    break;
+                case 5:
+                    break;
+                case 6:
+                    break;
+                case 7:
+                    break;
+                case 8:
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        private void dbclear_button_Click(object sender, EventArgs e)
+        {
+            dbaddress_textBox.Text = "";
+            dbuser_textBox.Text = "";
+            dbname_textBox.Text = "";
+            dbpwd_textBox.Text = "";
+            database_result_label.Visible = false;
+            dbsheet_comboBox.Items.Clear();
+            dbsheet_dataGridView.DataSource = null;
+        }
+
+        private void dbexport_button_Click(object sender, EventArgs e)
+        {
+            ExportDataGridViewToExcel(dbsheet_dataGridView);
+            MessageBox.Show("导出成功！");
+        }
+
+        public void ExportDataGridViewToExcel(DataGridView dataGridView)
+        {
+            ThisAddIn.app.DisplayAlerts = false;
+            ThisAddIn.app.ScreenUpdating = false;
+
+            workbook = ThisAddIn.app.ActiveWorkbook;
+            Excel.Worksheet worksheet=workbook.Worksheets.Add();
+            worksheet.Name = dbname_textBox.Text+"."+dbsheet_comboBox.Text;
+            worksheet.Activate();
+            try
+            {
+                // 写入标题
+                for (int i = 0; i < dataGridView.ColumnCount; i++)
+                {
+                    worksheet.Cells[1, i + 1] = dataGridView.Columns[i].HeaderText;
+                }
+
+                // 写入数据
+                for (int rowIndex = 0; rowIndex < dataGridView.Rows.Count; rowIndex++)
+                {
+                    for (int colIndex = 0; colIndex < dataGridView.Columns.Count; colIndex++)
+                    {
+                        // 获取单元格的值
+                        var cellValue = dataGridView.Rows[rowIndex].Cells[colIndex].Value?.ToString() ?? "";
+
+                        // 将值写入 Excel 单元格
+                        worksheet.Cells[rowIndex + 2, colIndex + 1] = cellValue; // +2 因为第一行是标题行
+                    }
+                }
+
+                // 刷新 Excel 表格
+                worksheet.Cells.EntireColumn.AutoFit();
+                worksheet.Activate();
+            }
+            catch (Exception ex)
+            {
+                // 处理异常
+                MessageBox.Show($"Error: {ex.Message}");
+            }
+            finally
+            {
+                ThisAddIn.app.DisplayAlerts = true;
+                ThisAddIn.app.ScreenUpdating = true;
+            }
+        }
+    }
+
+    //public class OracleDB
+    //{
+
+    //}
+
+    //public class SQLServerDB
+    //{
+
+    //}
+
+    public class MysqlDB
+    {
+        public static List<string> GetTableNames(string connString)
+        {
+            using (var connection = new MySqlConnection(connString))
+            {
+                try
+                {
+                    connection.Open();
+                    using (var command = new MySqlCommand("SHOW TABLES", connection))
+                    {
+                        using (var reader = command.ExecuteReader())
+                        {
+                            List<string> tableNames = new List<string>();
+                            while (reader.Read())
+                            {
+                                tableNames.Add(reader.GetString(0));
+                            }
+                            return tableNames;
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("数据库连接失败：" + ex.Message);
+                    return new List<string>() { ex.Message };
+                }
+            }
+        }
+    }
+
+    public class AccessDB
+    {
 
     }
+
+    public class SqliteDB
+    {
+
+    }
+
+    //public class PostgreSqlDB
+    //{
+
+    //}
+
+    //public class MongoDB
+    //{
+
+    //}
+
+    //public class RedisDB
+    //{
+
+    //}
+
+    //public class Db2DB
+    //{
+
+    //}
+
+    //public class SybaseDB
+    //{
+
+    //}
+
+    //public class InformixDB
+    //{
+
+    //}
+
+    //public class FirebirdDB
+    //{
+
+    //}
 }

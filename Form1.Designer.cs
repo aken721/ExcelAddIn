@@ -89,8 +89,29 @@ namespace ExcelAddIn
             this.function_title_label = new System.Windows.Forms.Label();
             this.which_field_label = new System.Windows.Forms.Label();
             this.tabPage5 = new System.Windows.Forms.TabPage();
-            this.richTextBox1 = new System.Windows.Forms.RichTextBox();
+            this.dbport_textBox = new System.Windows.Forms.TextBox();
+            this.dbport_label = new System.Windows.Forms.Label();
+            this.dbpwd_textBox = new System.Windows.Forms.TextBox();
+            this.dbpwd_label = new System.Windows.Forms.Label();
+            this.dbexport_button = new System.Windows.Forms.Button();
+            this.dbclear_button = new System.Windows.Forms.Button();
+            this.dbrun_button = new System.Windows.Forms.Button();
+            this.dbsheet_comboBox = new System.Windows.Forms.ComboBox();
+            this.dbsheet_dataGridView = new System.Windows.Forms.DataGridView();
+            this.database_result_label = new System.Windows.Forms.Label();
+            this.dbsheet_label = new System.Windows.Forms.Label();
+            this.dbuser_textBox = new System.Windows.Forms.TextBox();
+            this.dbname_textBox = new System.Windows.Forms.TextBox();
+            this.dbaddress_textBox = new System.Windows.Forms.TextBox();
+            this.dbtype_comboBox = new System.Windows.Forms.ComboBox();
+            this.dbuser_label = new System.Windows.Forms.Label();
+            this.dbname_label = new System.Windows.Forms.Label();
+            this.dbaddress_label = new System.Windows.Forms.Label();
+            this.dbtype_label = new System.Windows.Forms.Label();
+            this.label7 = new System.Windows.Forms.Label();
             this.tabPage6 = new System.Windows.Forms.TabPage();
+            this.richTextBox1 = new System.Windows.Forms.RichTextBox();
+            this.tabPage7 = new System.Windows.Forms.TabPage();
             this.split_sheet_timer = new System.Windows.Forms.Timer(this.components);
             this.folderBrowserDialog1 = new System.Windows.Forms.FolderBrowserDialog();
             this.merge_sheet_timer = new System.Windows.Forms.Timer(this.components);
@@ -107,6 +128,8 @@ namespace ExcelAddIn
             this.tabPage4.SuspendLayout();
             this.panel4.SuspendLayout();
             this.tabPage5.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.dbsheet_dataGridView)).BeginInit();
+            this.tabPage6.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.SuspendLayout();
             // 
@@ -119,6 +142,7 @@ namespace ExcelAddIn
             this.tabControl1.Controls.Add(this.tabPage4);
             this.tabControl1.Controls.Add(this.tabPage5);
             this.tabControl1.Controls.Add(this.tabPage6);
+            this.tabControl1.Controls.Add(this.tabPage7);
             this.tabControl1.Cursor = System.Windows.Forms.Cursors.Hand;
             this.tabControl1.DrawMode = System.Windows.Forms.TabDrawMode.OwnerDrawFixed;
             this.tabControl1.Font = new System.Drawing.Font("微软雅黑", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
@@ -899,16 +923,246 @@ namespace ExcelAddIn
             // 
             // tabPage5
             // 
-            this.tabPage5.Controls.Add(this.richTextBox1);
-            this.tabPage5.Cursor = System.Windows.Forms.Cursors.Arrow;
-            this.tabPage5.Font = new System.Drawing.Font("微软雅黑", 10.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.tabPage5.Controls.Add(this.dbport_textBox);
+            this.tabPage5.Controls.Add(this.dbport_label);
+            this.tabPage5.Controls.Add(this.dbpwd_textBox);
+            this.tabPage5.Controls.Add(this.dbpwd_label);
+            this.tabPage5.Controls.Add(this.dbexport_button);
+            this.tabPage5.Controls.Add(this.dbclear_button);
+            this.tabPage5.Controls.Add(this.dbrun_button);
+            this.tabPage5.Controls.Add(this.dbsheet_comboBox);
+            this.tabPage5.Controls.Add(this.dbsheet_dataGridView);
+            this.tabPage5.Controls.Add(this.database_result_label);
+            this.tabPage5.Controls.Add(this.dbsheet_label);
+            this.tabPage5.Controls.Add(this.dbuser_textBox);
+            this.tabPage5.Controls.Add(this.dbname_textBox);
+            this.tabPage5.Controls.Add(this.dbaddress_textBox);
+            this.tabPage5.Controls.Add(this.dbtype_comboBox);
+            this.tabPage5.Controls.Add(this.dbuser_label);
+            this.tabPage5.Controls.Add(this.dbname_label);
+            this.tabPage5.Controls.Add(this.dbaddress_label);
+            this.tabPage5.Controls.Add(this.dbtype_label);
+            this.tabPage5.Controls.Add(this.label7);
+            this.tabPage5.Font = new System.Drawing.Font("微软雅黑", 10.8F);
             this.tabPage5.ForeColor = System.Drawing.Color.DarkSlateBlue;
             this.tabPage5.Location = new System.Drawing.Point(124, 4);
             this.tabPage5.Name = "tabPage5";
             this.tabPage5.Size = new System.Drawing.Size(675, 392);
-            this.tabPage5.TabIndex = 4;
-            this.tabPage5.Text = "五、使用帮助";
+            this.tabPage5.TabIndex = 7;
+            this.tabPage5.Text = "五、数据库连接";
             this.tabPage5.UseVisualStyleBackColor = true;
+            // 
+            // dbport_textBox
+            // 
+            this.dbport_textBox.Location = new System.Drawing.Point(261, 188);
+            this.dbport_textBox.Name = "dbport_textBox";
+            this.dbport_textBox.Size = new System.Drawing.Size(47, 27);
+            this.dbport_textBox.TabIndex = 7;
+            // 
+            // dbport_label
+            // 
+            this.dbport_label.AutoSize = true;
+            this.dbport_label.Location = new System.Drawing.Point(221, 188);
+            this.dbport_label.Name = "dbport_label";
+            this.dbport_label.Size = new System.Drawing.Size(39, 20);
+            this.dbport_label.TabIndex = 15;
+            this.dbport_label.Text = "端口";
+            // 
+            // dbpwd_textBox
+            // 
+            this.dbpwd_textBox.Location = new System.Drawing.Point(208, 233);
+            this.dbpwd_textBox.Name = "dbpwd_textBox";
+            this.dbpwd_textBox.Size = new System.Drawing.Size(100, 27);
+            this.dbpwd_textBox.TabIndex = 4;
+            this.dbpwd_textBox.UseSystemPasswordChar = true;
+            // 
+            // dbpwd_label
+            // 
+            this.dbpwd_label.AutoSize = true;
+            this.dbpwd_label.Location = new System.Drawing.Point(171, 233);
+            this.dbpwd_label.Name = "dbpwd_label";
+            this.dbpwd_label.Size = new System.Drawing.Size(39, 20);
+            this.dbpwd_label.TabIndex = 17;
+            this.dbpwd_label.Text = "密码";
+            // 
+            // dbexport_button
+            // 
+            this.dbexport_button.Font = new System.Drawing.Font("微软雅黑", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.dbexport_button.ForeColor = System.Drawing.Color.SeaGreen;
+            this.dbexport_button.Location = new System.Drawing.Point(590, 159);
+            this.dbexport_button.Name = "dbexport_button";
+            this.dbexport_button.Size = new System.Drawing.Size(74, 32);
+            this.dbexport_button.TabIndex = 9;
+            this.dbexport_button.Text = "导入excel";
+            this.dbexport_button.UseVisualStyleBackColor = true;
+            this.dbexport_button.Click += new System.EventHandler(this.dbexport_button_Click);
+            // 
+            // dbclear_button
+            // 
+            this.dbclear_button.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.dbclear_button.ForeColor = System.Drawing.Color.SeaGreen;
+            this.dbclear_button.Location = new System.Drawing.Point(183, 331);
+            this.dbclear_button.Name = "dbclear_button";
+            this.dbclear_button.Size = new System.Drawing.Size(78, 34);
+            this.dbclear_button.TabIndex = 6;
+            this.dbclear_button.Text = "清空";
+            this.dbclear_button.UseVisualStyleBackColor = true;
+            this.dbclear_button.Click += new System.EventHandler(this.dbclear_button_Click);
+            // 
+            // dbrun_button
+            // 
+            this.dbrun_button.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.dbrun_button.ForeColor = System.Drawing.Color.SeaGreen;
+            this.dbrun_button.Location = new System.Drawing.Point(43, 332);
+            this.dbrun_button.Name = "dbrun_button";
+            this.dbrun_button.Size = new System.Drawing.Size(81, 33);
+            this.dbrun_button.TabIndex = 5;
+            this.dbrun_button.Text = "连接";
+            this.dbrun_button.UseVisualStyleBackColor = true;
+            this.dbrun_button.Click += new System.EventHandler(this.dbrun_button_Click);
+            // 
+            // dbsheet_comboBox
+            // 
+            this.dbsheet_comboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.dbsheet_comboBox.FormattingEnabled = true;
+            this.dbsheet_comboBox.Location = new System.Drawing.Point(426, 108);
+            this.dbsheet_comboBox.Name = "dbsheet_comboBox";
+            this.dbsheet_comboBox.Size = new System.Drawing.Size(210, 28);
+            this.dbsheet_comboBox.TabIndex = 8;
+            this.dbsheet_comboBox.SelectedIndexChanged += new System.EventHandler(this.dbsheet_comboBox_SelectedIndexChanged);
+            // 
+            // dbsheet_dataGridView
+            // 
+            this.dbsheet_dataGridView.AllowUserToAddRows = false;
+            this.dbsheet_dataGridView.AllowUserToDeleteRows = false;
+            this.dbsheet_dataGridView.BackgroundColor = System.Drawing.Color.WhiteSmoke;
+            this.dbsheet_dataGridView.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.dbsheet_dataGridView.Location = new System.Drawing.Point(342, 197);
+            this.dbsheet_dataGridView.Name = "dbsheet_dataGridView";
+            this.dbsheet_dataGridView.ReadOnly = true;
+            this.dbsheet_dataGridView.RowTemplate.Height = 23;
+            this.dbsheet_dataGridView.Size = new System.Drawing.Size(322, 137);
+            this.dbsheet_dataGridView.TabIndex = 10;
+            // 
+            // database_result_label
+            // 
+            this.database_result_label.AutoSize = true;
+            this.database_result_label.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Italic, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.database_result_label.ForeColor = System.Drawing.Color.SaddleBrown;
+            this.database_result_label.Location = new System.Drawing.Point(39, 283);
+            this.database_result_label.Name = "database_result_label";
+            this.database_result_label.Size = new System.Drawing.Size(65, 20);
+            this.database_result_label.TabIndex = 18;
+            this.database_result_label.Text = "连接结果";
+            // 
+            // dbsheet_label
+            // 
+            this.dbsheet_label.AutoSize = true;
+            this.dbsheet_label.Location = new System.Drawing.Point(336, 108);
+            this.dbsheet_label.Name = "dbsheet_label";
+            this.dbsheet_label.Size = new System.Drawing.Size(84, 20);
+            this.dbsheet_label.TabIndex = 19;
+            this.dbsheet_label.Text = "数据库内表";
+            // 
+            // dbuser_textBox
+            // 
+            this.dbuser_textBox.Location = new System.Drawing.Point(89, 233);
+            this.dbuser_textBox.Name = "dbuser_textBox";
+            this.dbuser_textBox.Size = new System.Drawing.Size(76, 27);
+            this.dbuser_textBox.TabIndex = 3;
+            // 
+            // dbname_textBox
+            // 
+            this.dbname_textBox.Location = new System.Drawing.Point(125, 186);
+            this.dbname_textBox.Name = "dbname_textBox";
+            this.dbname_textBox.Size = new System.Drawing.Size(85, 27);
+            this.dbname_textBox.TabIndex = 2;
+            // 
+            // dbaddress_textBox
+            // 
+            this.dbaddress_textBox.Location = new System.Drawing.Point(125, 146);
+            this.dbaddress_textBox.Name = "dbaddress_textBox";
+            this.dbaddress_textBox.Size = new System.Drawing.Size(183, 27);
+            this.dbaddress_textBox.TabIndex = 1;
+            // 
+            // dbtype_comboBox
+            // 
+            this.dbtype_comboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.dbtype_comboBox.FormattingEnabled = true;
+            this.dbtype_comboBox.Items.AddRange(new object[] {
+            "Oracle",
+            "SQL Server",
+            "MySQL",
+            "Microsoft Access",
+            "SQLite",
+            "PostgreSQL",
+            "MongoDB",
+            "Redis",
+            "DB2"});
+            this.dbtype_comboBox.Location = new System.Drawing.Point(125, 104);
+            this.dbtype_comboBox.Name = "dbtype_comboBox";
+            this.dbtype_comboBox.Size = new System.Drawing.Size(183, 28);
+            this.dbtype_comboBox.TabIndex = 0;
+            this.dbtype_comboBox.SelectedIndexChanged += new System.EventHandler(this.dbtype_comboBox_SelectedIndexChanged);
+            // 
+            // dbuser_label
+            // 
+            this.dbuser_label.AutoSize = true;
+            this.dbuser_label.Location = new System.Drawing.Point(39, 233);
+            this.dbuser_label.Name = "dbuser_label";
+            this.dbuser_label.Size = new System.Drawing.Size(54, 20);
+            this.dbuser_label.TabIndex = 16;
+            this.dbuser_label.Text = "用户名";
+            // 
+            // dbname_label
+            // 
+            this.dbname_label.AutoSize = true;
+            this.dbname_label.Location = new System.Drawing.Point(39, 188);
+            this.dbname_label.Name = "dbname_label";
+            this.dbname_label.Size = new System.Drawing.Size(84, 20);
+            this.dbname_label.TabIndex = 14;
+            this.dbname_label.Text = "数据库名称";
+            // 
+            // dbaddress_label
+            // 
+            this.dbaddress_label.AutoSize = true;
+            this.dbaddress_label.Location = new System.Drawing.Point(39, 148);
+            this.dbaddress_label.Name = "dbaddress_label";
+            this.dbaddress_label.Size = new System.Drawing.Size(84, 20);
+            this.dbaddress_label.TabIndex = 13;
+            this.dbaddress_label.Text = "数据库地址";
+            // 
+            // dbtype_label
+            // 
+            this.dbtype_label.AutoSize = true;
+            this.dbtype_label.Location = new System.Drawing.Point(39, 104);
+            this.dbtype_label.Name = "dbtype_label";
+            this.dbtype_label.Size = new System.Drawing.Size(84, 20);
+            this.dbtype_label.TabIndex = 12;
+            this.dbtype_label.Text = "数据库类型";
+            // 
+            // label7
+            // 
+            this.label7.AutoSize = true;
+            this.label7.Font = new System.Drawing.Font("微软雅黑", 15.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.label7.Location = new System.Drawing.Point(280, 35);
+            this.label7.Name = "label7";
+            this.label7.Size = new System.Drawing.Size(138, 28);
+            this.label7.TabIndex = 11;
+            this.label7.Text = "数据库表导入";
+            // 
+            // tabPage6
+            // 
+            this.tabPage6.Controls.Add(this.richTextBox1);
+            this.tabPage6.Cursor = System.Windows.Forms.Cursors.Arrow;
+            this.tabPage6.Font = new System.Drawing.Font("微软雅黑", 10.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.tabPage6.ForeColor = System.Drawing.Color.DarkSlateBlue;
+            this.tabPage6.Location = new System.Drawing.Point(124, 4);
+            this.tabPage6.Name = "tabPage6";
+            this.tabPage6.Size = new System.Drawing.Size(675, 392);
+            this.tabPage6.TabIndex = 4;
+            this.tabPage6.Text = "六、使用帮助";
+            this.tabPage6.UseVisualStyleBackColor = true;
             // 
             // richTextBox1
             // 
@@ -920,16 +1174,16 @@ namespace ExcelAddIn
             this.richTextBox1.TabIndex = 0;
             this.richTextBox1.Text = resources.GetString("richTextBox1.Text");
             // 
-            // tabPage6
+            // tabPage7
             // 
-            this.tabPage6.Font = new System.Drawing.Font("微软雅黑", 10.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.tabPage6.ForeColor = System.Drawing.Color.DarkSlateBlue;
-            this.tabPage6.Location = new System.Drawing.Point(124, 4);
-            this.tabPage6.Name = "tabPage6";
-            this.tabPage6.Size = new System.Drawing.Size(675, 392);
-            this.tabPage6.TabIndex = 5;
-            this.tabPage6.Text = "六、退出工具";
-            this.tabPage6.UseVisualStyleBackColor = true;
+            this.tabPage7.Font = new System.Drawing.Font("微软雅黑", 10.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.tabPage7.ForeColor = System.Drawing.Color.DarkSlateBlue;
+            this.tabPage7.Location = new System.Drawing.Point(124, 4);
+            this.tabPage7.Name = "tabPage7";
+            this.tabPage7.Size = new System.Drawing.Size(675, 392);
+            this.tabPage7.TabIndex = 5;
+            this.tabPage7.Text = "七、退出工具";
+            this.tabPage7.UseVisualStyleBackColor = true;
             // 
             // split_sheet_timer
             // 
@@ -1006,6 +1260,9 @@ namespace ExcelAddIn
             this.panel4.ResumeLayout(false);
             this.panel4.PerformLayout();
             this.tabPage5.ResumeLayout(false);
+            this.tabPage5.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.dbsheet_dataGridView)).EndInit();
+            this.tabPage6.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
@@ -1018,8 +1275,8 @@ namespace ExcelAddIn
         private System.Windows.Forms.TabPage tabPage1;
         private System.Windows.Forms.TabPage tabPage2;
         private System.Windows.Forms.TabPage tabPage3;
-        private System.Windows.Forms.TabPage tabPage5;
         private System.Windows.Forms.TabPage tabPage6;
+        private System.Windows.Forms.TabPage tabPage7;
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.Label label1;
@@ -1081,5 +1338,26 @@ namespace ExcelAddIn
         private System.Windows.Forms.Label QR_label;
         private System.Windows.Forms.RadioButton QR_radioButton;
         private System.Windows.Forms.RadioButton BC_radioButton;
+        private System.Windows.Forms.TabPage tabPage5;
+        private System.Windows.Forms.Label label7;
+        private System.Windows.Forms.Label dbtype_label;
+        private System.Windows.Forms.Label dbaddress_label;
+        private System.Windows.Forms.TextBox dbaddress_textBox;
+        private System.Windows.Forms.ComboBox dbtype_comboBox;
+        private System.Windows.Forms.Label dbuser_label;
+        private System.Windows.Forms.Label dbname_label;
+        private System.Windows.Forms.Label database_result_label;
+        private System.Windows.Forms.Label dbsheet_label;
+        private System.Windows.Forms.TextBox dbuser_textBox;
+        private System.Windows.Forms.TextBox dbname_textBox;
+        private System.Windows.Forms.DataGridView dbsheet_dataGridView;
+        private System.Windows.Forms.Button dbexport_button;
+        private System.Windows.Forms.Button dbclear_button;
+        private System.Windows.Forms.Button dbrun_button;
+        private System.Windows.Forms.ComboBox dbsheet_comboBox;
+        private System.Windows.Forms.Label dbpwd_label;
+        private System.Windows.Forms.TextBox dbpwd_textBox;
+        private System.Windows.Forms.TextBox dbport_textBox;
+        private System.Windows.Forms.Label dbport_label;
     }
 }
