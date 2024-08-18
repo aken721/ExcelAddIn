@@ -175,12 +175,14 @@ namespace ExcelAddIn
                 case 4:
                     this.database_result_label.Visible = false;
                     database_result_label.Text = "";
+                    dbtype_comboBox.SelectedIndex = 2;
+                    dbtype_comboBox.Enabled=false;
                     dbsheet_comboBox.Items.Clear();
                     break;
                 case 5:
-                    this.Dispose();
                     break;
                 case 6:
+                    this.Dispose();
                     break;
             }
         }
