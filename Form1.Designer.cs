@@ -118,6 +118,7 @@ namespace ExcelAddIn
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
             this.label4 = new System.Windows.Forms.Label();
             this.version_label = new System.Windows.Forms.Label();
+            this.openFileDialog1 = new System.Windows.Forms.OpenFileDialog();
             this.tabControl1.SuspendLayout();
             this.tabPage1.SuspendLayout();
             this.panel1.SuspendLayout();
@@ -1084,6 +1085,8 @@ namespace ExcelAddIn
             this.dbaddress_textBox.Name = "dbaddress_textBox";
             this.dbaddress_textBox.Size = new System.Drawing.Size(183, 27);
             this.dbaddress_textBox.TabIndex = 1;
+            this.dbaddress_textBox.TextChanged += new System.EventHandler(this.dbaddress_textBox_TextChanged);
+            this.dbaddress_textBox.DoubleClick += new System.EventHandler(this.dbaddress_textBox_DoubleClick);
             // 
             // dbtype_comboBox
             // 
@@ -1093,11 +1096,9 @@ namespace ExcelAddIn
             "Oracle",
             "SQL Server",
             "MySQL",
-            "Microsoft Access",
+            "Access",
             "SQLite",
             "PostgreSQL",
-            "MongoDB",
-            "Redis",
             "DB2"});
             this.dbtype_comboBox.Location = new System.Drawing.Point(125, 104);
             this.dbtype_comboBox.Name = "dbtype_comboBox";
@@ -1226,6 +1227,10 @@ namespace ExcelAddIn
             this.version_label.Size = new System.Drawing.Size(49, 16);
             this.version_label.TabIndex = 3;
             this.version_label.Text = "version";
+            // 
+            // openFileDialog1
+            // 
+            this.openFileDialog1.FileName = "openFileDialog1";
             // 
             // Form1
             // 
@@ -1359,5 +1364,6 @@ namespace ExcelAddIn
         private System.Windows.Forms.TextBox dbpwd_textBox;
         private System.Windows.Forms.TextBox dbport_textBox;
         private System.Windows.Forms.Label dbport_label;
+        private System.Windows.Forms.OpenFileDialog openFileDialog1;
     }
 }
