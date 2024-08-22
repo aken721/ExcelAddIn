@@ -119,6 +119,7 @@ namespace ExcelAddIn
             this.label4 = new System.Windows.Forms.Label();
             this.version_label = new System.Windows.Forms.Label();
             this.openFileDialog1 = new System.Windows.Forms.OpenFileDialog();
+            this.dbexport_result_label = new System.Windows.Forms.Label();
             this.tabControl1.SuspendLayout();
             this.tabPage1.SuspendLayout();
             this.panel1.SuspendLayout();
@@ -924,6 +925,7 @@ namespace ExcelAddIn
             // 
             // tabPage5
             // 
+            this.tabPage5.Controls.Add(this.dbexport_result_label);
             this.tabPage5.Controls.Add(this.dbport_textBox);
             this.tabPage5.Controls.Add(this.dbport_label);
             this.tabPage5.Controls.Add(this.dbpwd_textBox);
@@ -1232,6 +1234,17 @@ namespace ExcelAddIn
             // 
             this.openFileDialog1.FileName = "openFileDialog1";
             // 
+            // dbexport_result_label
+            // 
+            this.dbexport_result_label.AutoSize = true;
+            this.dbexport_result_label.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Italic, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.dbexport_result_label.ForeColor = System.Drawing.Color.SaddleBrown;
+            this.dbexport_result_label.Location = new System.Drawing.Point(352, 159);
+            this.dbexport_result_label.Name = "dbexport_result_label";
+            this.dbexport_result_label.Size = new System.Drawing.Size(46, 20);
+            this.dbexport_result_label.TabIndex = 20;
+            this.dbexport_result_label.Text = "result";
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
@@ -1365,5 +1378,6 @@ namespace ExcelAddIn
         private System.Windows.Forms.TextBox dbport_textBox;
         private System.Windows.Forms.Label dbport_label;
         private System.Windows.Forms.OpenFileDialog openFileDialog1;
+        private System.Windows.Forms.Label dbexport_result_label;
     }
 }
