@@ -2982,6 +2982,7 @@ namespace ExcelAddIn
             }
             catch(Exception ex)
             {
+                MessageBox.Show(ex.Message);
                 dbexport_result_label.Text = "导出失败，原因为："+ex.Message; 
             }
         }
