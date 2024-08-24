@@ -24,7 +24,7 @@ using Npgsql;
 using System.Data.SQLite;
 using System.Runtime.InteropServices;
 using Oracle.ManagedDataAccess.Client;
-using IBM.Data.DB2.iSeries;
+
 
 
 
@@ -1446,6 +1446,7 @@ namespace ExcelAddIn
             }
             catch(Exception ex)
             {
+                MessageBox.Show("转置出错：" + ex.Message);
                 return -2;
             }
         }
@@ -2443,7 +2444,7 @@ namespace ExcelAddIn
             {
                 //Oracle
                 case 0:
-                    string connectionString0 = "Data Source=(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(HOST=" + dbaddress_textBox.Text+ ")(PORT="+dbport_textBox.Text+"))(CONNECT_DATA=(SERVER=DEDICATED)(SERVICE_NAME="+dbname_textBox.Text+"))); User Id="+dbuser_textBox.Text+";Password="+dbpwd_textBox.Text+";";
+                    string connectionString0 = $"Data Source=(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(HOST={dbaddress_textBox.Text})(PORT={dbport_textBox.Text}))(CONNECT_DATA=(SERVER=DEDICATED)(SERVICE_NAME={dbname_textBox.Text})));User Id={dbuser_textBox.Text};Password={dbpwd_textBox.Text};";
 
                     // 连接到数据库并获取表名列表
                     List<string> tableNames0 = OracleDB.GetTableNames(connectionString0);
@@ -2481,7 +2482,7 @@ namespace ExcelAddIn
 
                 //SQL Server
                 case 1:
-                    string connectionString1 = "Data Source=" + dbaddress_textBox.Text + ";Initial Catalog="+dbname_textBox.Text+";User ID="+dbuser_textBox.Text+";Password="+dbpwd_textBox.Text;
+                    string connectionString1 = $"Data Source={dbaddress_textBox.Text};Initial Catalog={dbname_textBox.Text};User ID={dbuser_textBox.Text};Password={dbpwd_textBox.Text}";
 
                     // 连接到数据库并获取表名列表
                     List<string> tableNames1 = SQLServerDB.GetTableNames(connectionString1);
@@ -2519,8 +2520,8 @@ namespace ExcelAddIn
 
                 //MySQL
                 case 2:
-                    string connectionString2 = "server=" + dbaddress_textBox.Text + ";user=" + dbuser_textBox.Text + ";database=" + dbname_textBox.Text + ";port=" + dbport_textBox.Text + ";password=" + dbpwd_textBox.Text;
-
+                    string connectionString2 = $"server={dbaddress_textBox.Text};user={dbuser_textBox.Text};database={dbname_textBox.Text};port={dbport_textBox.Text};password={dbpwd_textBox.Text}";
+                    
                     // 连接到数据库并获取表名列表
                     List<string> tableNames2 = MysqlDB.GetTableNames(connectionString2);
 
@@ -2560,11 +2561,11 @@ namespace ExcelAddIn
                     string connectionString3 = null;
                     if(string.IsNullOrEmpty(dbpwd_textBox.Text))
                     {
-                        connectionString3 = @"Provider=Microsoft.ACE.OLEDB.12.0;Data Source=" + dbaddress_textBox.Text + ";Persist Security Info=False;";
+                        connectionString3 = $"Provider=Microsoft.ACE.OLEDB.12.0;Data Source={dbaddress_textBox.Text};Persist Security Info=False;";
                     }
                     else
                     {
-                        connectionString3 = @"Provider=Microsoft.ACE.OLEDB.12.0;Data Source=" + dbaddress_textBox.Text + ";Persist Security Info=False;Jet OLEDB:Database Password="+dbpwd_textBox.Text+ ";";
+                        connectionString3 = $"Provider=Microsoft.ACE.OLEDB.12.0;Data Source={dbaddress_textBox.Text};Persist Security Info=False;Jet OLEDB:Database Password={dbpwd_textBox.Text};";
                     }
                     List<string> tableNames3 = AccessDB.GetTableNames(connectionString3);
                     if (tableNames3.Count == 1 && tableNames3[0].Contains(":"))
@@ -2604,11 +2605,11 @@ namespace ExcelAddIn
                     string connectionString4 = null;
                     if (string.IsNullOrEmpty(dbpwd_textBox.Text))
                     {
-                        connectionString4 = "Data Source=" + dbaddress_textBox.Text +";Version=3;";
+                        connectionString4 = $"Data Source={dbaddress_textBox.Text};Version=3;";
                     }
                     else
                     {
-                        connectionString4 = "Data Source=" + dbaddress_textBox.Text + ";Version=3;Password=" + dbpwd_textBox.Text + ";";
+                        connectionString4 = $"Data Source={dbaddress_textBox.Text};Version=3;Password={dbpwd_textBox.Text};";
                     }
                     List<string> tableNames4 = SqliteDB.GetTableNames(connectionString4);
                     if (tableNames4.Count == 1 && tableNames4[0].Contains(":"))
@@ -2645,7 +2646,7 @@ namespace ExcelAddIn
 
                 //PostgreSQL
                 case 5:
-                    string connectionString5 ="Host="+ dbaddress_textBox.Text + ";Port="+dbport_textBox.Text+";Username="+ dbuser_textBox.Text + ";Password="+dbpwd_textBox.Text+";Database="+dbname_textBox.Text;
+                    string connectionString5 =$"Host={dbaddress_textBox.Text};Port={dbport_textBox.Text};Username={dbuser_textBox.Text};Password={dbpwd_textBox.Text};Database={dbname_textBox.Text}";
                     // 连接到数据库并获取表名列表
                     List<string> tableNames5 = PostgreSqlDB.GetTableNames(connectionString5);
 
@@ -2682,7 +2683,8 @@ namespace ExcelAddIn
 
                 //DB2
                 case 6:
-                    string connectionString6 = "Provider=IBMDADB2;Database=" + dbname_textBox.Text+";Hostname="+dbaddress_textBox.Text+";Port="+dbport_textBox.Text+";Protocol=TCPIP;UID="+dbuser_textBox.Text+";PWD="+dbpwd_textBox.Text+";";
+                    string connectionString6 = $"Server={dbaddress_textBox.Text}:{dbport_textBox.Text};Database={dbname_textBox.Text};UID={dbuser_textBox.Text};PWD={dbpwd_textBox.Text};";
+
 
                     // 连接到数据库并获取表名列表
                     List<string> tableNames6 = Db2DB.GetTableNames(connectionString6);
@@ -2738,7 +2740,7 @@ namespace ExcelAddIn
             {
                 //Oracle
                 case 0:
-                    connectionString= "Data Source=(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(HOST=" + dbaddress_textBox.Text + ")(PORT=" + dbport_textBox.Text + "))(CONNECT_DATA=(SERVER=DEDICATED)(SERVICE_NAME=" + dbname_textBox.Text + "))); User Id=" + dbuser_textBox.Text + ";Password=" + dbpwd_textBox.Text + ";";
+                    connectionString= $"Data Source=(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(HOST={dbaddress_textBox.Text})(PORT={dbport_textBox.Text}))(CONNECT_DATA=(SERVER=DEDICATED)(SERVICE_NAME={dbname_textBox.Text})));User Id={dbuser_textBox.Text};Password={dbpwd_textBox.Text};";
                     using (var connection = new OracleConnection(connectionString))
                     {
                         connection.Open();
@@ -2755,7 +2757,7 @@ namespace ExcelAddIn
 
                 //SQL Server
                 case 1:                                            
-                    connectionString= "Data Source=" + dbaddress_textBox.Text + ";Initial Catalog=" + dbname_textBox.Text + ";User ID=" + dbuser_textBox.Text + ";Password=" + dbpwd_textBox.Text;
+                    connectionString= $"Data Source={dbaddress_textBox.Text};Initial Catalog={dbname_textBox.Text};User ID={dbuser_textBox.Text};Password={dbpwd_textBox.Text}";
                     using (var connection = new SqlConnection(connectionString))
                     {
                         connection.Open();
@@ -2772,7 +2774,7 @@ namespace ExcelAddIn
 
                 //MySQL
                 case 2:                                           
-                    connectionString = "server=" + dbaddress_textBox.Text + ";user=" + dbuser_textBox.Text + ";database=" + dbname_textBox.Text + ";port=" + dbport_textBox.Text + ";password=" + dbpwd_textBox.Text;
+                    connectionString = $"server={dbaddress_textBox.Text};user={dbuser_textBox.Text};database={dbname_textBox.Text};port={dbport_textBox.Text};password={dbpwd_textBox.Text}";
                     using (var connection = new MySqlConnection(connectionString))
                     {
                         connection.Open();
@@ -2791,11 +2793,11 @@ namespace ExcelAddIn
                 case 3:                                            
                     if (string.IsNullOrEmpty(dbpwd_textBox.Text))
                     {
-                        connectionString = @"Provider=Microsoft.ACE.OLEDB.12.0;Data Source=" + dbaddress_textBox.Text + ";Persist Security Info=False;";
+                        connectionString = $"Provider=Microsoft.ACE.OLEDB.12.0;Data Source={dbaddress_textBox.Text};Persist Security Info=False;";
                     }
                     else
                     {
-                        connectionString = @"Provider=Microsoft.ACE.OLEDB.12.0;Data Source=" + dbaddress_textBox.Text + ";Persist Security Info=False;Jet OLEDB:Database Password=" + dbpwd_textBox.Text + ";";
+                        connectionString = $"Provider=Microsoft.ACE.OLEDB.12.0;Data Source={dbaddress_textBox.Text};Persist Security Info=False;Jet OLEDB:Database Password={dbpwd_textBox.Text};";
                     }
 
                     using (var connection = new  OleDbConnection(connectionString))
@@ -2816,11 +2818,11 @@ namespace ExcelAddIn
                 case 4:                                           
                     if (string.IsNullOrEmpty(dbpwd_textBox.Text))
                     {
-                        connectionString = "Data Source=" + dbaddress_textBox.Text + ";Version=3;";
+                        connectionString = $"Data Source={dbaddress_textBox.Text};Version=3;";
                     }
                     else
                     {
-                        connectionString = "Data Source=" + dbaddress_textBox.Text + ";Version=3;Password=" + dbpwd_textBox.Text + ";";
+                        connectionString = $"Data Source={dbaddress_textBox.Text};Version=3;Password={dbpwd_textBox.Text};";
                     }
 
                     using (var connection = new SQLiteConnection(connectionString))
@@ -2839,7 +2841,7 @@ namespace ExcelAddIn
 
                 //PostgreSQL
                 case 5:                                           
-                    connectionString = "Host=" + dbaddress_textBox.Text + ";Port=" + dbport_textBox.Text + ";Username=" + dbuser_textBox.Text + ";Password=" + dbpwd_textBox.Text + ";Database=" + dbname_textBox.Text;
+                    connectionString = $"Host={dbaddress_textBox.Text};Port={dbport_textBox.Text};Username={dbuser_textBox.Text};Password={dbpwd_textBox.Text};Database={dbname_textBox.Text}";
                     using (var connection = new NpgsqlConnection(connectionString))
                     {
                         connection.Open();
@@ -2856,13 +2858,13 @@ namespace ExcelAddIn
 
                 //DB2
                 case 6:
-                    connectionString = "Provider=IBMDADB2;Database=" + dbname_textBox.Text + ";Hostname=" + dbaddress_textBox.Text + ";Port=" + dbport_textBox.Text + ";Protocol=TCPIP;UID=" + dbuser_textBox.Text + ";PWD=" + dbpwd_textBox.Text + ";";
-                    using (var connection = new iDB2Connection(connectionString))
+                    connectionString = $"Server={dbaddress_textBox.Text}:{dbport_textBox.Text};Database={dbname_textBox.Text};UID={dbuser_textBox.Text};PWD={dbpwd_textBox.Text};";
+                    using (var connection = new DB2Connection(connectionString))
                     {
                         connection.Open();
-                        using (var command = new iDB2Command($"SELECT * FROM {tableName}", connection))
+                        using (var command = new DB2Command($"SELECT * FROM {tableName}", connection))
                         {
-                            using (var adapter = new iDB2DataAdapter(command))
+                            using (var adapter = new DB2DataAdapter(command))
                             {
                                 var dataTable = new DataTable();
                                 adapter.Fill(dataTable);
@@ -3305,15 +3307,17 @@ namespace ExcelAddIn
     {
         internal static List<string> GetTableNames(string connString)
         {
-            using (IBM.Data.DB2.iSeries.iDB2Connection connection = new iDB2Connection(connString))
+            using (IBM.Data.DB2.DB2Connection connection = new DB2Connection(connString))
             {
                 try
                 {
                     connection.Open();
+
                     // 获取当前用户下的所有表名
-                    using (iDB2Command command = new iDB2Command("SELECT TABLE_NAME FROM SYSCAT.TABLES WHERE TABLETYPE = 'T'", connection))
+                    string query = @"SELECT TABNAME FROM SYSCAT.TABLES WHERE TABSCHEMA NOT IN ('SYSIBM', 'SYSSPATIAL', 'SYSSTAT', 'SYSCAT', 'SYSSQL', 'SYSBAR', 'SYSLIB', 'SYSPUBLIC','IBMCONSOLE','SYSTOOLS') AND TYPE = 'T' AND OWNERTYPE='U'";
+                    using (DB2Command command = new DB2Command(query, connection))
                     {
-                        using (iDB2DataReader reader = command.ExecuteReader())
+                        using (DB2DataReader reader = command.ExecuteReader())
                         {
                             List<string> tableNames = new List<string>();
                             while (reader.Read())
@@ -3331,6 +3335,5 @@ namespace ExcelAddIn
                 }
             }
         }
-
     }
 }

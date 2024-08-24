@@ -116,9 +116,6 @@
     <Reference Include="Google.Protobuf, Version=3.27.3.0, Culture=neutral, PublicKeyToken=a7d26565bac4d604, processorArchitecture=MSIL">
       <HintPath>packages\Google.Protobuf.3.27.3\lib\net45\Google.Protobuf.dll</HintPath>
     </Reference>
-    <Reference Include="IBM.Data.DB2.iSeries, Version=12.0.0.0, Culture=neutral, PublicKeyToken=9cdb2ebfb1f93a26, processorArchitecture=MSIL">
-      <HintPath>packages\IBM.Data.DB2.iSeries.7.1.0\lib\IBM.Data.DB2.iSeries.dll</HintPath>
-    </Reference>
     <Reference Include="K4os.Compression.LZ4, Version=1.3.8.0, Culture=neutral, PublicKeyToken=2186fa9121ef231d, processorArchitecture=MSIL">
       <HintPath>packages\K4os.Compression.LZ4.1.3.8\lib\net462\K4os.Compression.LZ4.dll</HintPath>
     </Reference>
