@@ -89,6 +89,10 @@ namespace ExcelAddIn
             this.function_title_label = new System.Windows.Forms.Label();
             this.which_field_label = new System.Windows.Forms.Label();
             this.tabPage5 = new System.Windows.Forms.TabPage();
+            this.find_keyword_label = new System.Windows.Forms.Label();
+            this.find_keywordbutton_pictureBox = new System.Windows.Forms.PictureBox();
+            this.find_keyword_textBox = new System.Windows.Forms.TextBox();
+            this.dbexport_result_label = new System.Windows.Forms.Label();
             this.dbport_textBox = new System.Windows.Forms.TextBox();
             this.dbport_label = new System.Windows.Forms.Label();
             this.dbpwd_textBox = new System.Windows.Forms.TextBox();
@@ -115,11 +119,10 @@ namespace ExcelAddIn
             this.split_sheet_timer = new System.Windows.Forms.Timer(this.components);
             this.folderBrowserDialog1 = new System.Windows.Forms.FolderBrowserDialog();
             this.merge_sheet_timer = new System.Windows.Forms.Timer(this.components);
-            this.pictureBox1 = new System.Windows.Forms.PictureBox();
             this.label4 = new System.Windows.Forms.Label();
             this.version_label = new System.Windows.Forms.Label();
             this.openFileDialog1 = new System.Windows.Forms.OpenFileDialog();
-            this.dbexport_result_label = new System.Windows.Forms.Label();
+            this.pictureBox1 = new System.Windows.Forms.PictureBox();
             this.tabControl1.SuspendLayout();
             this.tabPage1.SuspendLayout();
             this.panel1.SuspendLayout();
@@ -130,6 +133,7 @@ namespace ExcelAddIn
             this.tabPage4.SuspendLayout();
             this.panel4.SuspendLayout();
             this.tabPage5.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.find_keywordbutton_pictureBox)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.dbsheet_dataGridView)).BeginInit();
             this.tabPage6.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
@@ -177,6 +181,7 @@ namespace ExcelAddIn
             // panel1
             // 
             this.panel1.AutoSize = true;
+            this.panel1.BackColor = System.Drawing.SystemColors.Window;
             this.panel1.Controls.Add(this.label1);
             this.panel1.Controls.Add(this.splitProgressBar_label);
             this.panel1.Controls.Add(this.label2);
@@ -354,6 +359,7 @@ namespace ExcelAddIn
             // panel2
             // 
             this.panel2.AutoSize = true;
+            this.panel2.BackColor = System.Drawing.SystemColors.Window;
             this.panel2.Controls.Add(this.mergeProgressBar_label);
             this.panel2.Controls.Add(this.single_merge_button);
             this.panel2.Controls.Add(this.merge_sheet_progressBar);
@@ -492,6 +498,7 @@ namespace ExcelAddIn
             // panel3
             // 
             this.panel3.AutoSize = true;
+            this.panel3.BackColor = System.Drawing.SystemColors.Window;
             this.panel3.Controls.Add(this.sheet_listbox);
             this.panel3.Controls.Add(this.batch_delete_button);
             this.panel3.Controls.Add(this.label6);
@@ -584,6 +591,7 @@ namespace ExcelAddIn
             // panel4
             // 
             this.panel4.AutoSize = true;
+            this.panel4.BackColor = System.Drawing.SystemColors.Window;
             this.panel4.Controls.Add(this.QR_radioButton);
             this.panel4.Controls.Add(this.BC_radioButton);
             this.panel4.Controls.Add(this.QR_label);
@@ -925,6 +933,10 @@ namespace ExcelAddIn
             // 
             // tabPage5
             // 
+            this.tabPage5.BackColor = System.Drawing.SystemColors.Window;
+            this.tabPage5.Controls.Add(this.find_keyword_label);
+            this.tabPage5.Controls.Add(this.find_keywordbutton_pictureBox);
+            this.tabPage5.Controls.Add(this.find_keyword_textBox);
             this.tabPage5.Controls.Add(this.dbexport_result_label);
             this.tabPage5.Controls.Add(this.dbport_textBox);
             this.tabPage5.Controls.Add(this.dbport_label);
@@ -953,13 +965,54 @@ namespace ExcelAddIn
             this.tabPage5.Size = new System.Drawing.Size(675, 392);
             this.tabPage5.TabIndex = 7;
             this.tabPage5.Text = "五、数据库连接";
-            this.tabPage5.UseVisualStyleBackColor = true;
+            // 
+            // find_keyword_label
+            // 
+            this.find_keyword_label.AutoSize = true;
+            this.find_keyword_label.Font = new System.Drawing.Font("微软雅黑", 9F);
+            this.find_keyword_label.Location = new System.Drawing.Point(340, 99);
+            this.find_keyword_label.Name = "find_keyword_label";
+            this.find_keyword_label.Size = new System.Drawing.Size(80, 17);
+            this.find_keyword_label.TabIndex = 23;
+            this.find_keyword_label.Text = "查找需导出表";
+            // 
+            // find_keywordbutton_pictureBox
+            // 
+            this.find_keywordbutton_pictureBox.Image = global::ExcelAddIn.Properties.Resources.search;
+            this.find_keywordbutton_pictureBox.Location = new System.Drawing.Point(609, 89);
+            this.find_keywordbutton_pictureBox.Name = "find_keywordbutton_pictureBox";
+            this.find_keywordbutton_pictureBox.Size = new System.Drawing.Size(27, 27);
+            this.find_keywordbutton_pictureBox.TabIndex = 22;
+            this.find_keywordbutton_pictureBox.TabStop = false;
+            this.find_keywordbutton_pictureBox.Click += new System.EventHandler(this.find_keywordbutton_pictureBox_Click);
+            // 
+            // find_keyword_textBox
+            // 
+            this.find_keyword_textBox.Font = new System.Drawing.Font("微软雅黑", 8F);
+            this.find_keyword_textBox.Location = new System.Drawing.Point(426, 89);
+            this.find_keyword_textBox.Multiline = true;
+            this.find_keyword_textBox.Name = "find_keyword_textBox";
+            this.find_keyword_textBox.Size = new System.Drawing.Size(185, 27);
+            this.find_keyword_textBox.TabIndex = 21;
+            this.find_keyword_textBox.TextChanged += new System.EventHandler(this.find_keyword_textBox_TextChanged);
+            // 
+            // dbexport_result_label
+            // 
+            this.dbexport_result_label.AutoSize = true;
+            this.dbexport_result_label.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Italic, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.dbexport_result_label.ForeColor = System.Drawing.Color.SaddleBrown;
+            this.dbexport_result_label.Location = new System.Drawing.Point(352, 192);
+            this.dbexport_result_label.Name = "dbexport_result_label";
+            this.dbexport_result_label.Size = new System.Drawing.Size(46, 20);
+            this.dbexport_result_label.TabIndex = 20;
+            this.dbexport_result_label.Text = "result";
             // 
             // dbport_textBox
             // 
+            this.dbport_textBox.Font = new System.Drawing.Font("微软雅黑", 10.5F);
             this.dbport_textBox.Location = new System.Drawing.Point(261, 188);
             this.dbport_textBox.Name = "dbport_textBox";
-            this.dbport_textBox.Size = new System.Drawing.Size(47, 27);
+            this.dbport_textBox.Size = new System.Drawing.Size(47, 26);
             this.dbport_textBox.TabIndex = 7;
             // 
             // dbport_label
@@ -973,9 +1026,10 @@ namespace ExcelAddIn
             // 
             // dbpwd_textBox
             // 
+            this.dbpwd_textBox.Font = new System.Drawing.Font("微软雅黑", 10.5F);
             this.dbpwd_textBox.Location = new System.Drawing.Point(208, 233);
             this.dbpwd_textBox.Name = "dbpwd_textBox";
-            this.dbpwd_textBox.Size = new System.Drawing.Size(100, 27);
+            this.dbpwd_textBox.Size = new System.Drawing.Size(100, 26);
             this.dbpwd_textBox.TabIndex = 4;
             this.dbpwd_textBox.UseSystemPasswordChar = true;
             // 
@@ -992,7 +1046,7 @@ namespace ExcelAddIn
             // 
             this.dbexport_button.Font = new System.Drawing.Font("微软雅黑", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.dbexport_button.ForeColor = System.Drawing.Color.SeaGreen;
-            this.dbexport_button.Location = new System.Drawing.Point(590, 159);
+            this.dbexport_button.Location = new System.Drawing.Point(590, 192);
             this.dbexport_button.Name = "dbexport_button";
             this.dbexport_button.Size = new System.Drawing.Size(74, 32);
             this.dbexport_button.TabIndex = 9;
@@ -1004,7 +1058,7 @@ namespace ExcelAddIn
             // 
             this.dbclear_button.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.dbclear_button.ForeColor = System.Drawing.Color.SeaGreen;
-            this.dbclear_button.Location = new System.Drawing.Point(183, 331);
+            this.dbclear_button.Location = new System.Drawing.Point(207, 331);
             this.dbclear_button.Name = "dbclear_button";
             this.dbclear_button.Size = new System.Drawing.Size(78, 34);
             this.dbclear_button.TabIndex = 6;
@@ -1016,7 +1070,7 @@ namespace ExcelAddIn
             // 
             this.dbrun_button.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.dbrun_button.ForeColor = System.Drawing.Color.SeaGreen;
-            this.dbrun_button.Location = new System.Drawing.Point(43, 332);
+            this.dbrun_button.Location = new System.Drawing.Point(67, 332);
             this.dbrun_button.Name = "dbrun_button";
             this.dbrun_button.Size = new System.Drawing.Size(81, 33);
             this.dbrun_button.TabIndex = 5;
@@ -1027,8 +1081,9 @@ namespace ExcelAddIn
             // dbsheet_comboBox
             // 
             this.dbsheet_comboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.dbsheet_comboBox.Font = new System.Drawing.Font("微软雅黑", 10.5F);
             this.dbsheet_comboBox.FormattingEnabled = true;
-            this.dbsheet_comboBox.Location = new System.Drawing.Point(426, 108);
+            this.dbsheet_comboBox.Location = new System.Drawing.Point(426, 133);
             this.dbsheet_comboBox.Name = "dbsheet_comboBox";
             this.dbsheet_comboBox.Size = new System.Drawing.Size(210, 28);
             this.dbsheet_comboBox.TabIndex = 8;
@@ -1040,7 +1095,7 @@ namespace ExcelAddIn
             this.dbsheet_dataGridView.AllowUserToDeleteRows = false;
             this.dbsheet_dataGridView.BackgroundColor = System.Drawing.Color.WhiteSmoke;
             this.dbsheet_dataGridView.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.dbsheet_dataGridView.Location = new System.Drawing.Point(342, 197);
+            this.dbsheet_dataGridView.Location = new System.Drawing.Point(342, 231);
             this.dbsheet_dataGridView.Name = "dbsheet_dataGridView";
             this.dbsheet_dataGridView.ReadOnly = true;
             this.dbsheet_dataGridView.RowTemplate.Height = 23;
@@ -1061,7 +1116,7 @@ namespace ExcelAddIn
             // dbsheet_label
             // 
             this.dbsheet_label.AutoSize = true;
-            this.dbsheet_label.Location = new System.Drawing.Point(336, 108);
+            this.dbsheet_label.Location = new System.Drawing.Point(336, 133);
             this.dbsheet_label.Name = "dbsheet_label";
             this.dbsheet_label.Size = new System.Drawing.Size(84, 20);
             this.dbsheet_label.TabIndex = 19;
@@ -1069,23 +1124,26 @@ namespace ExcelAddIn
             // 
             // dbuser_textBox
             // 
+            this.dbuser_textBox.Font = new System.Drawing.Font("微软雅黑", 10.5F);
             this.dbuser_textBox.Location = new System.Drawing.Point(89, 233);
             this.dbuser_textBox.Name = "dbuser_textBox";
-            this.dbuser_textBox.Size = new System.Drawing.Size(76, 27);
+            this.dbuser_textBox.Size = new System.Drawing.Size(76, 26);
             this.dbuser_textBox.TabIndex = 3;
             // 
             // dbname_textBox
             // 
+            this.dbname_textBox.Font = new System.Drawing.Font("微软雅黑", 10.5F);
             this.dbname_textBox.Location = new System.Drawing.Point(125, 186);
             this.dbname_textBox.Name = "dbname_textBox";
-            this.dbname_textBox.Size = new System.Drawing.Size(85, 27);
+            this.dbname_textBox.Size = new System.Drawing.Size(85, 26);
             this.dbname_textBox.TabIndex = 2;
             // 
             // dbaddress_textBox
             // 
+            this.dbaddress_textBox.Font = new System.Drawing.Font("微软雅黑", 10.5F);
             this.dbaddress_textBox.Location = new System.Drawing.Point(125, 146);
             this.dbaddress_textBox.Name = "dbaddress_textBox";
-            this.dbaddress_textBox.Size = new System.Drawing.Size(183, 27);
+            this.dbaddress_textBox.Size = new System.Drawing.Size(183, 26);
             this.dbaddress_textBox.TabIndex = 1;
             this.dbaddress_textBox.TextChanged += new System.EventHandler(this.dbaddress_textBox_TextChanged);
             this.dbaddress_textBox.DoubleClick += new System.EventHandler(this.dbaddress_textBox_DoubleClick);
@@ -1093,14 +1151,15 @@ namespace ExcelAddIn
             // dbtype_comboBox
             // 
             this.dbtype_comboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.dbtype_comboBox.Font = new System.Drawing.Font("微软雅黑", 10.5F);
             this.dbtype_comboBox.FormattingEnabled = true;
             this.dbtype_comboBox.Items.AddRange(new object[] {
-            "Oracle",
-            "SQL Server",
             "MySQL",
+            "SQL Server",
             "Access",
             "SQLite",
             "PostgreSQL",
+            "Oracle",
             "DB2"});
             this.dbtype_comboBox.Location = new System.Drawing.Point(125, 104);
             this.dbtype_comboBox.Name = "dbtype_comboBox";
@@ -1156,6 +1215,7 @@ namespace ExcelAddIn
             // 
             // tabPage6
             // 
+            this.tabPage6.BackColor = System.Drawing.SystemColors.Window;
             this.tabPage6.Controls.Add(this.richTextBox1);
             this.tabPage6.Cursor = System.Windows.Forms.Cursors.Arrow;
             this.tabPage6.Font = new System.Drawing.Font("微软雅黑", 10.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
@@ -1165,7 +1225,6 @@ namespace ExcelAddIn
             this.tabPage6.Size = new System.Drawing.Size(675, 392);
             this.tabPage6.TabIndex = 4;
             this.tabPage6.Text = "六、使用帮助";
-            this.tabPage6.UseVisualStyleBackColor = true;
             // 
             // richTextBox1
             // 
@@ -1179,6 +1238,7 @@ namespace ExcelAddIn
             // 
             // tabPage7
             // 
+            this.tabPage7.BackColor = System.Drawing.SystemColors.Window;
             this.tabPage7.Font = new System.Drawing.Font("微软雅黑", 10.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.tabPage7.ForeColor = System.Drawing.Color.DarkSlateBlue;
             this.tabPage7.Location = new System.Drawing.Point(124, 4);
@@ -1186,7 +1246,6 @@ namespace ExcelAddIn
             this.tabPage7.Size = new System.Drawing.Size(675, 392);
             this.tabPage7.TabIndex = 5;
             this.tabPage7.Text = "七、退出工具";
-            this.tabPage7.UseVisualStyleBackColor = true;
             // 
             // split_sheet_timer
             // 
@@ -1195,15 +1254,6 @@ namespace ExcelAddIn
             // merge_sheet_timer
             // 
             this.merge_sheet_timer.Tick += new System.EventHandler(this.merge_sheet_timer_Tick);
-            // 
-            // pictureBox1
-            // 
-            this.pictureBox1.BackColor = System.Drawing.Color.DarkGreen;
-            this.pictureBox1.Location = new System.Drawing.Point(0, 400);
-            this.pictureBox1.Name = "pictureBox1";
-            this.pictureBox1.Size = new System.Drawing.Size(799, 50);
-            this.pictureBox1.TabIndex = 1;
-            this.pictureBox1.TabStop = false;
             // 
             // label4
             // 
@@ -1234,16 +1284,14 @@ namespace ExcelAddIn
             // 
             this.openFileDialog1.FileName = "openFileDialog1";
             // 
-            // dbexport_result_label
+            // pictureBox1
             // 
-            this.dbexport_result_label.AutoSize = true;
-            this.dbexport_result_label.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Italic, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.dbexport_result_label.ForeColor = System.Drawing.Color.SaddleBrown;
-            this.dbexport_result_label.Location = new System.Drawing.Point(352, 159);
-            this.dbexport_result_label.Name = "dbexport_result_label";
-            this.dbexport_result_label.Size = new System.Drawing.Size(46, 20);
-            this.dbexport_result_label.TabIndex = 20;
-            this.dbexport_result_label.Text = "result";
+            this.pictureBox1.BackColor = System.Drawing.Color.DarkGreen;
+            this.pictureBox1.Location = new System.Drawing.Point(0, 400);
+            this.pictureBox1.Name = "pictureBox1";
+            this.pictureBox1.Size = new System.Drawing.Size(799, 50);
+            this.pictureBox1.TabIndex = 1;
+            this.pictureBox1.TabStop = false;
             // 
             // Form1
             // 
@@ -1279,6 +1327,7 @@ namespace ExcelAddIn
             this.panel4.PerformLayout();
             this.tabPage5.ResumeLayout(false);
             this.tabPage5.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.find_keywordbutton_pictureBox)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.dbsheet_dataGridView)).EndInit();
             this.tabPage6.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
@@ -1379,5 +1428,8 @@ namespace ExcelAddIn
         private System.Windows.Forms.Label dbport_label;
         private System.Windows.Forms.OpenFileDialog openFileDialog1;
         private System.Windows.Forms.Label dbexport_result_label;
+        private System.Windows.Forms.TextBox find_keyword_textBox;
+        private System.Windows.Forms.PictureBox find_keywordbutton_pictureBox;
+        private System.Windows.Forms.Label find_keyword_label;
     }
 }

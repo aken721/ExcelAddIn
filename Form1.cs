@@ -24,6 +24,7 @@ using Npgsql;
 using System.Data.SQLite;
 using System.Runtime.InteropServices;
 using Oracle.ManagedDataAccess.Client;
+//using IBM.Data.DB2;
 
 
 
@@ -121,7 +122,8 @@ namespace ExcelAddIn
         {
             switch (tabControl1.SelectedIndex)
             {
-                case 0:                                             //分表
+                //分表
+                case 0:                                             
                     sheet_name_combobox.Items.Clear();
                     field_name_combobox.Items.Clear();
                     foreach (Excel.Worksheet worksheet in workbook.Worksheets)
@@ -135,14 +137,18 @@ namespace ExcelAddIn
                     split_sheet_progressBar.Visible = false;
                     splitProgressBar_label.Visible = false;
                     break;
-                case 1:                                           //并表
+
+                //并表
+                case 1:                                           
                     merge_sheet_result_label.Visible = false;
                     merge_sheet_result_label.Text = "";
                     mergeProgressBar_label.Visible = false;
                     mergeProgressBar_label.Text = "";
                     merge_sheet_progressBar.Visible = false;
                     break;
-                case 2:                                         //批量导、删表
+
+                //批量导、删表
+                case 2:                                         
                     sheet_listbox.Items.Clear();
                     await Task.Run(() =>
                     {
@@ -157,7 +163,9 @@ namespace ExcelAddIn
                     });
                     sheet_listbox.Refresh();
                     break;
-                case 3:                                      //实用功能汇总
+
+                //实用功能汇总
+                case 3:                                      
                     which_field_label.Visible = false;
                     which_field_combobox.Visible = false;
                     what_type_label.Visible = false;
@@ -177,16 +185,22 @@ namespace ExcelAddIn
                     BC_radioButton.Checked = false;
                     function_title_label.Text = "请选择所需使用的功能";
                     break;
-                case 4:                                           //数据库表提取
+
+                //数据库表提取
+                case 4:                                           
                     this.database_result_label.Visible = false;
                     database_result_label.Text = "";
                     dbsheet_comboBox.Items.Clear();
                     dbexport_result_label.Visible = false;
                     dbexport_result_label.Text = "";
                     break;
-                case 5:                                         //帮助
+
+                //帮助
+                case 5:                                         
                     break;
-                case 6:                                        //退出
+
+                //退出
+                case 6:                                        
                     this.Dispose();
                     break;
             }
@@ -2436,292 +2450,316 @@ namespace ExcelAddIn
             return 0;
         }
 
+        List<string> tableNames = new List<string>();
+
         //DataBase模块 运行按钮点击事件（读取数据库表，并在DataGridView中显示）
         private void dbrun_button_Click(object sender, EventArgs e)
         {
             dbsheet_comboBox.Items.Clear();
-            switch (dbtype_comboBox.SelectedIndex)
+            tableNames.Clear();
+            if (string.IsNullOrEmpty(dbaddress_textBox.Text))
             {
-                //Oracle
-                case 0:
-                    string connectionString0 = $"Data Source=(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(HOST={dbaddress_textBox.Text})(PORT={dbport_textBox.Text}))(CONNECT_DATA=(SERVER=DEDICATED)(SERVICE_NAME={dbname_textBox.Text})));User Id={dbuser_textBox.Text};Password={dbpwd_textBox.Text};";
+                MessageBox.Show("数据库地址不能为空！", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            else 
+            {
+                switch (dbtype_comboBox.SelectedIndex)
+                {
+                    //MySQL
+                    case 0:
+                        string connectionString0 = $"server={dbaddress_textBox.Text};user={dbuser_textBox.Text};database={dbname_textBox.Text};port={dbport_textBox.Text};password={dbpwd_textBox.Text}";
 
-                    // 连接到数据库并获取表名列表
-                    List<string> tableNames0 = OracleDB.GetTableNames(connectionString0);
+                        // 连接到数据库并获取表名列表
+                        tableNames = MysqlDB.GetTableNames(connectionString0);
 
-                    if (tableNames0.Count == 1 && tableNames0[0].Contains(":"))
-                    {
-                        // 处理错误情况
-                        database_result_label.Text = "数据库连接失败";
-                        database_result_label.Visible = true;
-                    }
-                    else
-                    {
-                        database_result_label.Text = "数据库连接成功，数据库中包含" + tableNames0.Count + "张表";
-                        database_result_label.Visible = true;
-                        // 将表名添加到 ComboBox
-                        foreach (var tableName in tableNames0)
+                        if (tableNames.Count == 1 && tableNames[0].Contains(":"))
                         {
-                            dbsheet_comboBox.Items.Add(tableName);
-                        }
-
-                        // 默认选择第一个表
-                        if (dbsheet_comboBox.Items.Count > 0)
-                        {
-                            dbsheet_comboBox.SelectedIndex = 0;
-                            // 更新 DataGridView
-                            UpdateDataGridView(dbsheet_comboBox.SelectedItem.ToString());
+                            // 处理错误情况
+                            database_result_label.Text = "数据库连接失败";
+                            database_result_label.Visible = true;
                         }
                         else
                         {
-                            MessageBox.Show("数据库中没有表");
-                            dbsheet_dataGridView.DataSource = null;
+                            database_result_label.Text = "数据库连接成功，数据库中包含" + tableNames.Count + "张表";
+                            database_result_label.Visible = true;
+
+                            // 将表名添加到 ComboBox
+                            dbsheet_comboBox.DataSource=tableNames;
+                            //foreach (var tableName in tableNames)
+                            //{
+                            //    dbsheet_comboBox.Items.Add(tableName);
+                            //}
+
+                            // 默认选择第一个表
+                            if (dbsheet_comboBox.Items.Count > 0)
+                            {
+                                dbsheet_comboBox.SelectedIndex = 0;
+                                // 更新 DataGridView
+                                UpdateDataGridView(dbsheet_comboBox.SelectedItem.ToString());
+                            }
+                            else
+                            {
+                                MessageBox.Show("数据库中没有表");
+                                dbsheet_dataGridView.DataSource = null;
+                            }
                         }
-                    }
-                    break;
+                        break;
 
-                //SQL Server
-                case 1:
-                    string connectionString1 = $"Data Source={dbaddress_textBox.Text};Initial Catalog={dbname_textBox.Text};User ID={dbuser_textBox.Text};Password={dbpwd_textBox.Text}";
+                    //SQL Server
+                    case 1:
+                        string connectionString1 = $"Data Source={dbaddress_textBox.Text};Initial Catalog={dbname_textBox.Text};User ID={dbuser_textBox.Text};Password={dbpwd_textBox.Text}";
 
-                    // 连接到数据库并获取表名列表
-                    List<string> tableNames1 = SQLServerDB.GetTableNames(connectionString1);
+                        // 连接到数据库并获取表名列表
+                        tableNames = SQLServerDB.GetTableNames(connectionString1);
 
-                    if (tableNames1.Count == 1 && tableNames1[0].Contains(":"))
-                    {
-                        // 处理错误情况
-                        database_result_label.Text = "数据库连接失败";
-                        database_result_label.Visible = true;
-                    }
-                    else
-                    {
-                        database_result_label.Text = "数据库连接成功，数据库中包含" + tableNames1.Count + "张表";
-                        database_result_label.Visible = true;
-                        // 将表名添加到 ComboBox
-                        foreach (var tableName in tableNames1)
+                        if (tableNames.Count == 1 && tableNames[0].Contains(":"))
                         {
-                            dbsheet_comboBox.Items.Add(tableName);
-                        }
-
-                        // 默认选择第一个表
-                        if (dbsheet_comboBox.Items.Count > 0)
-                        {
-                            dbsheet_comboBox.SelectedIndex = 0;
-                            // 更新 DataGridView
-                            UpdateDataGridView(dbsheet_comboBox.SelectedItem.ToString());
+                            // 处理错误情况
+                            database_result_label.Text = "数据库连接失败";
+                            database_result_label.Visible = true;
                         }
                         else
                         {
-                            MessageBox.Show("数据库中没有表");
-                            dbsheet_dataGridView.DataSource = null;
+                            database_result_label.Text = "数据库连接成功，数据库中包含" + tableNames.Count + "张表";
+                            database_result_label.Visible = true;
+
+                            // 将表名添加到 ComboBox
+                            dbsheet_comboBox.DataSource = tableNames;
+                            //foreach (var tableName in tableNames)
+                            //{
+                            //    dbsheet_comboBox.Items.Add(tableName);
+                            //}
+
+                            // 默认选择第一个表
+                            if (dbsheet_comboBox.Items.Count > 0)
+                            {
+                                dbsheet_comboBox.SelectedIndex = 0;
+                                // 更新 DataGridView
+                                UpdateDataGridView(dbsheet_comboBox.SelectedItem.ToString());
+                            }
+                            else
+                            {
+                                MessageBox.Show("数据库中没有表");
+                                dbsheet_dataGridView.DataSource = null;
+                            }
                         }
-                    }
-                    break;
+                        break;
 
-                //MySQL
-                case 2:
-                    string connectionString2 = $"server={dbaddress_textBox.Text};user={dbuser_textBox.Text};database={dbname_textBox.Text};port={dbport_textBox.Text};password={dbpwd_textBox.Text}";
-                    
-                    // 连接到数据库并获取表名列表
-                    List<string> tableNames2 = MysqlDB.GetTableNames(connectionString2);
-
-                    if (tableNames2.Count == 1 && tableNames2[0].Contains(":"))
-                    {
-                        // 处理错误情况
-                        database_result_label.Text = "数据库连接失败";
-                        database_result_label.Visible = true;
-                    }
-                    else
-                    {
-                        database_result_label.Text = "数据库连接成功，数据库中包含" + tableNames2.Count + "张表";
-                        database_result_label.Visible = true;
-                        // 将表名添加到 ComboBox
-                        foreach (var tableName in tableNames2)
+                    //Access
+                    case 2:
+                        string connectionString2 = null;
+                        if (string.IsNullOrEmpty(dbpwd_textBox.Text))
                         {
-                            dbsheet_comboBox.Items.Add(tableName);
-                        }
-
-                        // 默认选择第一个表
-                        if (dbsheet_comboBox.Items.Count > 0)
-                        {
-                            dbsheet_comboBox.SelectedIndex = 0;
-                            // 更新 DataGridView
-                            UpdateDataGridView(dbsheet_comboBox.SelectedItem.ToString());
+                            connectionString2 = $"Provider=Microsoft.ACE.OLEDB.12.0;Data Source={dbaddress_textBox.Text};Persist Security Info=False;";
                         }
                         else
                         {
-                            MessageBox.Show("数据库中没有表");
-                            dbsheet_dataGridView.DataSource = null;
+                            connectionString2 = $"Provider=Microsoft.ACE.OLEDB.12.0;Data Source={dbaddress_textBox.Text};Persist Security Info=False;Jet OLEDB:Database Password={dbpwd_textBox.Text};";
                         }
-                    }
-                    break;
-
-                //Access
-                case 3: 
-                    string connectionString3 = null;
-                    if(string.IsNullOrEmpty(dbpwd_textBox.Text))
-                    {
-                        connectionString3 = $"Provider=Microsoft.ACE.OLEDB.12.0;Data Source={dbaddress_textBox.Text};Persist Security Info=False;";
-                    }
-                    else
-                    {
-                        connectionString3 = $"Provider=Microsoft.ACE.OLEDB.12.0;Data Source={dbaddress_textBox.Text};Persist Security Info=False;Jet OLEDB:Database Password={dbpwd_textBox.Text};";
-                    }
-                    List<string> tableNames3 = AccessDB.GetTableNames(connectionString3);
-                    if (tableNames3.Count == 1 && tableNames3[0].Contains(":"))
-                    {
-                        // 处理错误情况
-                        database_result_label.Text = "数据库连接失败";
-                        database_result_label.Visible = true;
-                    }
-                    else
-                    {
-                        database_result_label.Text = "数据库连接成功，数据库中包含" + tableNames3.Count + "张表";
-                        database_result_label.Visible = true;
-                        dbname_textBox.Text= Path.GetFileNameWithoutExtension(dbaddress_textBox.Text); 
-                        // 将表名添加到 ComboBox
-                        foreach (var tableName in tableNames3)
+                         tableNames = AccessDB.GetTableNames(connectionString2);
+                        if (tableNames.Count == 1 && tableNames[0].Contains(":"))
                         {
-                            dbsheet_comboBox.Items.Add(tableName);
-                        }
-
-                        // 默认选择第一个表
-                        if (dbsheet_comboBox.Items.Count > 0)
-                        {
-                            dbsheet_comboBox.SelectedIndex = 0;
-                            // 更新 DataGridView
-                            UpdateDataGridView(dbsheet_comboBox.SelectedItem.ToString());
+                            // 处理错误情况
+                            database_result_label.Text = "数据库连接失败";
+                            database_result_label.Visible = true;
                         }
                         else
                         {
-                            MessageBox.Show("数据库中没有表");
-                            dbsheet_dataGridView.DataSource = null;
-                        }
-                    }
-                    break;
+                            database_result_label.Text = "数据库连接成功，数据库中包含" + tableNames.Count + "张表";
+                            database_result_label.Visible = true;
+                            dbname_textBox.Text = Path.GetFileNameWithoutExtension(dbaddress_textBox.Text);
 
-                //SQLite
-                case 4:
-                    string connectionString4 = null;
-                    if (string.IsNullOrEmpty(dbpwd_textBox.Text))
-                    {
-                        connectionString4 = $"Data Source={dbaddress_textBox.Text};Version=3;";
-                    }
-                    else
-                    {
-                        connectionString4 = $"Data Source={dbaddress_textBox.Text};Version=3;Password={dbpwd_textBox.Text};";
-                    }
-                    List<string> tableNames4 = SqliteDB.GetTableNames(connectionString4);
-                    if (tableNames4.Count == 1 && tableNames4[0].Contains(":"))
-                    {
-                        // 处理错误情况
-                        database_result_label.Text = "数据库连接失败";
-                        database_result_label.Visible = true;
-                    }
-                    else
-                    {
-                        database_result_label.Text = "数据库连接成功，数据库中包含" + tableNames4.Count + "张表";
-                        database_result_label.Visible = true;
-                        dbname_textBox.Text = Path.GetFileNameWithoutExtension(dbaddress_textBox.Text);
-                        // 将表名添加到 ComboBox
-                        foreach (var tableName in tableNames4)
-                        {
-                            dbsheet_comboBox.Items.Add(tableName);
-                        }
+                            // 将表名添加到 ComboBox
+                            dbsheet_comboBox.DataSource = tableNames;
+                            //foreach (var tableName in tableNames)
+                            //{
+                            //    dbsheet_comboBox.Items.Add(tableName);
+                            //}
 
-                        // 默认选择第一个表
-                        if (dbsheet_comboBox.Items.Count > 0)
+                            // 默认选择第一个表
+                            if (dbsheet_comboBox.Items.Count > 0)
+                            {
+                                dbsheet_comboBox.SelectedIndex = 0;
+                                // 更新 DataGridView
+                                UpdateDataGridView(dbsheet_comboBox.SelectedItem.ToString());
+                            }
+                            else
+                            {
+                                MessageBox.Show("数据库中没有表");
+                                dbsheet_dataGridView.DataSource = null;
+                            }
+                        }
+                        break;
+
+                    //SQLite
+                    case 3:
+                        string connectionString3 = null;
+                        if (string.IsNullOrEmpty(dbpwd_textBox.Text))
                         {
-                            dbsheet_comboBox.SelectedIndex = 0;
-                            // 更新 DataGridView
-                            UpdateDataGridView(dbsheet_comboBox.SelectedItem.ToString());
+                            connectionString3 = $"Data Source={dbaddress_textBox.Text};Version=3;";
                         }
                         else
                         {
-                            MessageBox.Show("数据库中没有表");
-                            dbsheet_dataGridView.DataSource = null;
+                            connectionString3 = $"Data Source={dbaddress_textBox.Text};Version=3;Password={dbpwd_textBox.Text};";
                         }
-                    }
-                    break;
-
-                //PostgreSQL
-                case 5:
-                    string connectionString5 =$"Host={dbaddress_textBox.Text};Port={dbport_textBox.Text};Username={dbuser_textBox.Text};Password={dbpwd_textBox.Text};Database={dbname_textBox.Text}";
-                    // 连接到数据库并获取表名列表
-                    List<string> tableNames5 = PostgreSqlDB.GetTableNames(connectionString5);
-
-                    if (tableNames5.Count == 1 && tableNames5[0].Contains(":"))
-                    {
-                        // 处理错误情况
-                        database_result_label.Text = "数据库连接失败";
-                        database_result_label.Visible = true;
-                    }
-                    else
-                    {
-                        database_result_label.Text = "数据库连接成功，数据库中包含" + tableNames5.Count + "张表";
-                        database_result_label.Visible = true;
-                        // 将表名添加到 ComboBox
-                        foreach (var tableName in tableNames5)
+                        tableNames = SqliteDB.GetTableNames(connectionString3);
+                        if (tableNames.Count == 1 && tableNames[0].Contains(":"))
                         {
-                            dbsheet_comboBox.Items.Add(tableName);
-                        }
-
-                        // 默认选择第一个表
-                        if (dbsheet_comboBox.Items.Count > 0)
-                        {
-                            dbsheet_comboBox.SelectedIndex = 0;
-                            // 更新 DataGridView
-                            UpdateDataGridView(dbsheet_comboBox.SelectedItem.ToString());
+                            // 处理错误情况
+                            database_result_label.Text = "数据库连接失败";
+                            database_result_label.Visible = true;
                         }
                         else
                         {
-                            MessageBox.Show("数据库中没有表");
-                            dbsheet_dataGridView.DataSource = null;
+                            database_result_label.Text = "数据库连接成功，数据库中包含" + tableNames.Count + "张表";
+                            database_result_label.Visible = true;
+                            dbname_textBox.Text = Path.GetFileNameWithoutExtension(dbaddress_textBox.Text);
+
+                            // 将表名添加到 ComboBox
+                            dbsheet_comboBox.DataSource = tableNames;
+                            //foreach (var tableName in tableNames)
+                            //{
+                            //    dbsheet_comboBox.Items.Add(tableName);
+                            //}
+
+                            // 默认选择第一个表
+                            if (dbsheet_comboBox.Items.Count > 0)
+                            {
+                                dbsheet_comboBox.SelectedIndex = 0;
+                                // 更新 DataGridView
+                                UpdateDataGridView(dbsheet_comboBox.SelectedItem.ToString());
+                            }
+                            else
+                            {
+                                MessageBox.Show("数据库中没有表");
+                                dbsheet_dataGridView.DataSource = null;
+                            }
                         }
-                    }
-                    break;
+                        break;
 
-                //DB2
-                case 6:
-                    string connectionString6 = $"Server={dbaddress_textBox.Text}:{dbport_textBox.Text};Database={dbname_textBox.Text};UID={dbuser_textBox.Text};PWD={dbpwd_textBox.Text};";
+                    //PostgreSQL
+                    case 4:
+                        string connectionString4 = $"Host={dbaddress_textBox.Text};Port={dbport_textBox.Text};Username={dbuser_textBox.Text};Password={dbpwd_textBox.Text};Database={dbname_textBox.Text}";
+                        // 连接到数据库并获取表名列表
+                        tableNames = PostgreSqlDB.GetTableNames(connectionString4);
 
-
-                    // 连接到数据库并获取表名列表
-                    List<string> tableNames6 = Db2DB.GetTableNames(connectionString6);
-
-                    if (tableNames6.Count == 1 && tableNames6[0].Contains(":"))
-                    {
-                        // 处理错误情况
-                        database_result_label.Text = "数据库连接失败";
-                        database_result_label.Visible = true;
-                    }
-                    else
-                    {
-                        database_result_label.Text = "数据库连接成功，数据库中包含" + tableNames6.Count + "张表";
-                        database_result_label.Visible = true;
-                        // 将表名添加到 ComboBox
-                        foreach (var tableName in tableNames6)
+                        if (tableNames.Count == 1 && tableNames[0].Contains(":"))
                         {
-                            dbsheet_comboBox.Items.Add(tableName);
-                        }
-
-                        // 默认选择第一个表
-                        if (dbsheet_comboBox.Items.Count > 0)
-                        {
-                            dbsheet_comboBox.SelectedIndex = 0;
-                            // 更新 DataGridView
-                            UpdateDataGridView(dbsheet_comboBox.SelectedItem.ToString());
+                            // 处理错误情况
+                            database_result_label.Text = "数据库连接失败";
+                            database_result_label.Visible = true;
                         }
                         else
                         {
-                            MessageBox.Show("数据库中没有表");
-                            dbsheet_dataGridView.DataSource = null;
-                        }
-                    }
-                    break;
+                            database_result_label.Text = "数据库连接成功，数据库中包含" + tableNames.Count + "张表";
+                            database_result_label.Visible = true;
 
-                default:
-                    break;
+                            // 将表名添加到 ComboBox
+                            dbsheet_comboBox.DataSource = tableNames;
+                            //foreach (var tableName in tableNames)
+                            //{
+                            //    dbsheet_comboBox.Items.Add(tableName);
+                            //}
+
+                            // 默认选择第一个表
+                            if (dbsheet_comboBox.Items.Count > 0)
+                            {
+                                dbsheet_comboBox.SelectedIndex = 0;
+                                // 更新 DataGridView
+                                UpdateDataGridView(dbsheet_comboBox.SelectedItem.ToString());
+                            }
+                            else
+                            {
+                                MessageBox.Show("数据库中没有表");
+                                dbsheet_dataGridView.DataSource = null;
+                            }
+                        }
+                        break;
+
+                    //Oracle
+                    case 5:
+                        string connectionString5 = $"Data Source=(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(HOST={dbaddress_textBox.Text})(PORT={dbport_textBox.Text}))(CONNECT_DATA=(SERVER=DEDICATED)(SERVICE_NAME={dbname_textBox.Text})));User Id={dbuser_textBox.Text};Password={dbpwd_textBox.Text};";
+
+                        // 连接到数据库并获取表名列表
+                        tableNames = OracleDB.GetTableNames(connectionString5);
+
+                        if (tableNames.Count == 1 && tableNames[0].Contains(":"))
+                        {
+                            // 处理错误情况
+                            database_result_label.Text = "数据库连接失败";
+                            database_result_label.Visible = true;
+                        }
+                        else
+                        {
+                            database_result_label.Text = "数据库连接成功，数据库中包含" + tableNames.Count + "张表";
+                            database_result_label.Visible = true;
+
+                            // 将表名添加到 ComboBox
+                            dbsheet_comboBox.DataSource = tableNames;
+                            //foreach (var tableName in tableNames)
+                            //{
+                            //    dbsheet_comboBox.Items.Add(tableName);
+                            //}
+
+                            // 默认选择第一个表
+                            if (dbsheet_comboBox.Items.Count > 0)
+                            {
+                                dbsheet_comboBox.SelectedIndex = 0;
+                                // 更新 DataGridView
+                                UpdateDataGridView(dbsheet_comboBox.SelectedItem.ToString());
+                            }
+                            else
+                            {
+                                MessageBox.Show("数据库中没有表");
+                                dbsheet_dataGridView.DataSource = null;
+                            }
+                        }
+                        break;
+
+                    //DB2
+                    case 6:
+                        //string connectionString6 = $"Server={dbaddress_textBox.Text}:{dbport_textBox.Text};Database={dbname_textBox.Text};UID={dbuser_textBox.Text};PWD={dbpwd_textBox.Text};";
+
+
+                        //// 连接到数据库并获取表名列表
+                        //tableNames = Db2DB.GetTableNames(connectionString6);
+
+                        //if (tableNames.Count == 1 && tableNames[0].Contains(":"))
+                        //{
+                        //    // 处理错误情况
+                        //    database_result_label.Text = "数据库连接失败";
+                        //    database_result_label.Visible = true;
+                        //}
+                        //else
+                        //{
+                        //    database_result_label.Text = "数据库连接成功，数据库中包含" + tableNames.Count + "张表";
+                        //    database_result_label.Visible = true;
+
+                        //    // 将表名添加到 ComboBox
+                        //    dbsheet_comboBox.DataSource = tableNames;
+                        ////    foreach (var tableName in tableNames)
+                        ////    {
+                        ////        dbsheet_comboBox.Items.Add(tableName);
+                        ////    }
+
+                        //    // 默认选择第一个表
+                        //    if (dbsheet_comboBox.Items.Count > 0)
+                        //    {
+                        //        dbsheet_comboBox.SelectedIndex = 0;
+                        //        // 更新 DataGridView
+                        //        UpdateDataGridView(dbsheet_comboBox.SelectedItem.ToString());
+                        //    }
+                        //    else
+                        //    {
+                        //        MessageBox.Show("数据库中没有表");
+                        //        dbsheet_dataGridView.DataSource = null;
+                        //    }
+                        //}
+                        break;
+
+                    default:
+                        break;
+                }            
             }
         }
 
@@ -2738,15 +2776,15 @@ namespace ExcelAddIn
             string connectionString = null;
             switch (dbtype_comboBox.SelectedIndex)
             {
-                //Oracle
+                //MySQL
                 case 0:
-                    connectionString= $"Data Source=(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(HOST={dbaddress_textBox.Text})(PORT={dbport_textBox.Text}))(CONNECT_DATA=(SERVER=DEDICATED)(SERVICE_NAME={dbname_textBox.Text})));User Id={dbuser_textBox.Text};Password={dbpwd_textBox.Text};";
-                    using (var connection = new OracleConnection(connectionString))
+                    connectionString = $"server={dbaddress_textBox.Text};user={dbuser_textBox.Text};database={dbname_textBox.Text};port={dbport_textBox.Text};password={dbpwd_textBox.Text}";
+                    using (var connection = new MySqlConnection(connectionString))
                     {
                         connection.Open();
-                        using (var command = new OracleCommand($"SELECT * FROM {tableName}", connection))
+                        using (var command = new MySqlCommand($"SELECT * FROM {tableName}", connection))
                         {
-                            using (var adapter = new OracleDataAdapter(command))
+                            using (var adapter = new MySqlDataAdapter(command))
                             {
                                 var dataTable = new DataTable();
                                 adapter.Fill(dataTable);
@@ -2772,25 +2810,8 @@ namespace ExcelAddIn
                         }
                     }
 
-                //MySQL
-                case 2:                                           
-                    connectionString = $"server={dbaddress_textBox.Text};user={dbuser_textBox.Text};database={dbname_textBox.Text};port={dbport_textBox.Text};password={dbpwd_textBox.Text}";
-                    using (var connection = new MySqlConnection(connectionString))
-                    {
-                        connection.Open();
-                        using (var command = new MySqlCommand($"SELECT * FROM {tableName}", connection))
-                        {
-                            using (var adapter = new MySqlDataAdapter(command))
-                            {
-                                var dataTable = new DataTable();
-                                adapter.Fill(dataTable);
-                                return dataTable;
-                            }
-                        }
-                    }
-
                 //Access
-                case 3:                                            
+                case 2:                                            
                     if (string.IsNullOrEmpty(dbpwd_textBox.Text))
                     {
                         connectionString = $"Provider=Microsoft.ACE.OLEDB.12.0;Data Source={dbaddress_textBox.Text};Persist Security Info=False;";
@@ -2815,7 +2836,7 @@ namespace ExcelAddIn
                     }
 
                 //SQLite
-                case 4:                                           
+                case 3:                                           
                     if (string.IsNullOrEmpty(dbpwd_textBox.Text))
                     {
                         connectionString = $"Data Source={dbaddress_textBox.Text};Version=3;";
@@ -2840,7 +2861,7 @@ namespace ExcelAddIn
                     }
 
                 //PostgreSQL
-                case 5:                                           
+                case 4:                                           
                     connectionString = $"Host={dbaddress_textBox.Text};Port={dbport_textBox.Text};Username={dbuser_textBox.Text};Password={dbpwd_textBox.Text};Database={dbname_textBox.Text}";
                     using (var connection = new NpgsqlConnection(connectionString))
                     {
@@ -2856,15 +2877,15 @@ namespace ExcelAddIn
                         }
                     }
 
-                //DB2
-                case 6:
-                    connectionString = $"Server={dbaddress_textBox.Text}:{dbport_textBox.Text};Database={dbname_textBox.Text};UID={dbuser_textBox.Text};PWD={dbpwd_textBox.Text};";
-                    using (var connection = new DB2Connection(connectionString))
+                //Oracle
+                case 5:
+                    connectionString = $"Data Source=(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(HOST={dbaddress_textBox.Text})(PORT={dbport_textBox.Text}))(CONNECT_DATA=(SERVER=DEDICATED)(SERVICE_NAME={dbname_textBox.Text})));User Id={dbuser_textBox.Text};Password={dbpwd_textBox.Text};";
+                    using (var connection = new OracleConnection(connectionString))
                     {
                         connection.Open();
-                        using (var command = new DB2Command($"SELECT * FROM {tableName}", connection))
+                        using (var command = new OracleCommand($"SELECT * FROM {tableName}", connection))
                         {
-                            using (var adapter = new DB2DataAdapter(command))
+                            using (var adapter = new OracleDataAdapter(command))
                             {
                                 var dataTable = new DataTable();
                                 adapter.Fill(dataTable);
@@ -2872,6 +2893,25 @@ namespace ExcelAddIn
                             }
                         }
                     }
+
+                //DB2
+                case 6:
+                    //connectionString = $"Server={dbaddress_textBox.Text}:{dbport_textBox.Text};Database={dbname_textBox.Text};UID={dbuser_textBox.Text};PWD={dbpwd_textBox.Text};";
+
+                    //using (var connection = new DB2Connection(connectionString))
+                    //{
+                    //    connection.Open();
+                    //    using (var command = new DB2Command($"SELECT * FROM {tableName}", connection))
+                    //    {
+                    //        using (var adapter = new DB2DataAdapter(command))
+                    //        {
+                    //            var dataTable = new DataTable();
+                    //            adapter.Fill(dataTable);
+                    //            return dataTable;
+                    //        }
+                    //    }
+                    //}
+                    return null;
 
                 default:
                     return null;
@@ -2881,8 +2921,15 @@ namespace ExcelAddIn
         //数据库表选择改变事件
         private void dbsheet_comboBox_SelectedIndexChanged(object sender, EventArgs e)
         {
-            string selectedTableName = dbsheet_comboBox.SelectedItem.ToString();
-            UpdateDataGridView(selectedTableName);
+            if(dbsheet_comboBox.SelectedIndex == -1)
+            {
+                dbsheet_dataGridView.DataSource=null;
+            }
+            else
+            {
+                string selectedTableName = dbsheet_comboBox.SelectedItem.ToString();
+                UpdateDataGridView(selectedTableName);
+            }
         }
 
         //数据库类型选择改变事件
@@ -2891,36 +2938,36 @@ namespace ExcelAddIn
             Tab5Clear();
             switch (dbtype_comboBox.SelectedIndex)
             {
-                //Oracle
-                case 0:                                
-                    dbport_textBox.Text = "1521";
-                    break;
-
-                //SQL Server
-                case 1:                               
-                    dbport_textBox.Text = "1433";
-                    break;
-
                 //MySQL
-                case 2:                               
+                case 0:
                     dbport_textBox.Text = "3306";
                     break;
 
+                //SQL Server
+                case 1:
+                    dbport_textBox.Text = "1433";
+                    break;
+
                 //Access
-                case 3:                               
+                case 2:
                     dbport_textBox.Text = "";
-                    dbaddress_textBox.Text = "请双击本框选择Access数据库文件";    
+                    dbaddress_textBox.Text = "请双击本框选择Access数据库文件";
                     break;
 
                 //Sqlite
-                case 4:                               
+                case 3:
                     dbport_textBox.Text = "";
                     dbaddress_textBox.Text = "请双击本框选择SQLite数据库文件";
                     break;
 
                 //PostgreSQL
-                case 5:                               
+                case 4:
                     dbport_textBox.Text = "5432";
+                    break;
+
+                //Oracle
+                case 5:                                
+                    dbport_textBox.Text = "1521";
                     break;
 
                 //DB2
@@ -2941,7 +2988,7 @@ namespace ExcelAddIn
         //功能5页面统清空
         private void Tab5Clear()
         {
-            if (dbtype_comboBox.SelectedIndex == 3 || dbtype_comboBox.SelectedIndex == 4)            {
+            if (dbtype_comboBox.SelectedIndex == 2 || dbtype_comboBox.SelectedIndex == 3)            {
                 dbaddress_textBox.Text = "请双击本框选择Access数据库文件";
                 dbname_textBox.ReadOnly = true;
                 dbport_textBox.ReadOnly = true;
@@ -2949,8 +2996,10 @@ namespace ExcelAddIn
                 dbuser_textBox.Text = "";
                 dbname_textBox.Text = "";
                 dbpwd_textBox.Text = "";
+                tableNames.Clear();
+                find_keyword_textBox.Text="";
                 database_result_label.Visible = false;
-                dbsheet_comboBox.Items.Clear();
+                dbsheet_comboBox.DataSource=null;
                 dbsheet_dataGridView.DataSource = null;
                 dbexport_result_label.Visible = false;
             }
@@ -2963,8 +3012,10 @@ namespace ExcelAddIn
                 dbuser_textBox.Text = "";
                 dbname_textBox.Text = "";
                 dbpwd_textBox.Text = "";
+                tableNames.Clear();
+                find_keyword_textBox.Text = "";
                 database_result_label.Visible = false;
-                dbsheet_comboBox.Items.Clear();
+                dbsheet_comboBox.DataSource=null;
                 dbsheet_dataGridView.DataSource = null;
                 dbexport_result_label.Visible = false;
             }
@@ -2976,8 +3027,8 @@ namespace ExcelAddIn
             string newsheetname = dbname_textBox.Text + "." + dbsheet_comboBox.Text;
             try
             {
-                dbexport_result_label.Visible = true;
-                dbexport_result_label.Text = "正在导出......";                
+                dbexport_result_label.Text = "正在导出......";
+                dbexport_result_label.Visible = true;                               
                 ExportDataGridViewToExcel(dbsheet_dataGridView, newsheetname);
                 dbexport_result_label.Text = "导出完成！";
                 MessageBox.Show("导出成功！");
@@ -3042,7 +3093,7 @@ namespace ExcelAddIn
 
             switch (dbtype_comboBox.SelectedIndex)
             {
-                case 3:
+                case 2:
                     using (OpenFileDialog openFileDialog1 = new OpenFileDialog())
                     {
                         openFileDialog1.Title = "请选择要打开的Access数据库文件";
@@ -3055,7 +3106,7 @@ namespace ExcelAddIn
                         }
                     }
                     break;
-                case 4:
+                case 3:
                     using (OpenFileDialog openFileDialog1 = new OpenFileDialog())
                     {
                         openFileDialog1.Title = "请选择要打开的SQLite数据库文件";
@@ -3084,24 +3135,68 @@ namespace ExcelAddIn
             else
             {
                 dbaddress_textBox.ForeColor = SystemColors.WindowText;
-                dbaddress_textBox.Font = new Font(dbaddress_textBox.Font.FontFamily, 10.8f, FontStyle.Regular);
+                dbaddress_textBox.Font = new Font(dbaddress_textBox.Font.FontFamily, 10.5f, FontStyle.Regular);
+            }
+        }
+
+        private List<string> FindComboBoxItems(string searchText)
+        {
+            // 获取 ComboBox 的原始数据源
+            List<string> items = new List<string>();
+            foreach (string item in tableNames)
+            {
+                if (item.Contains(searchText))
+                {
+                    items.Add(item);
+                }
+            }
+            return items; 
+        }
+
+        private void find_keywordbutton_pictureBox_Click(object sender, EventArgs e)
+        {
+            if (find_keyword_textBox.Text != "")
+            {
+                List<string> resultItems = new List<string>();
+                resultItems = FindComboBoxItems(find_keyword_textBox.Text);
+                if (resultItems.Count == 0 || resultItems.Count == tableNames.Count)
+                {
+                    dbsheet_comboBox.DataSource = tableNames;
+                }
+                else
+                {
+                    dbsheet_comboBox.DataSource = resultItems;
+                }
+
+            }
+            else
+            {
+                dbsheet_comboBox.DataSource = tableNames;
+            }
+        }
+
+        private void find_keyword_textBox_TextChanged(object sender, EventArgs e)
+        {
+            if(find_keyword_textBox.Text== "")
+            {
+                dbsheet_comboBox.DataSource = tableNames;
             }
         }
     }
 
-    internal class OracleDB
+    internal class MysqlDB
     {
         internal static List<string> GetTableNames(string connString)
         {
-            using (OracleConnection connection = new OracleConnection(connString))
+            using (var connection = new MySqlConnection(connString))
             {
                 try
                 {
                     connection.Open();
-                    // 获取当前用户下的所有表名
-                    using (OracleCommand command = new OracleCommand("SELECT table_name FROM user_tables", connection))
+                    using (var command = new MySqlCommand("SHOW TABLES", connection))             //"SHOW TABLES"
                     {
-                        using (OracleDataReader reader = command.ExecuteReader())
+
+                        using (var reader = command.ExecuteReader())
                         {
                             List<string> tableNames = new List<string>();
                             while (reader.Read())
@@ -3156,46 +3251,14 @@ namespace ExcelAddIn
                 catch (Exception ex)
                 {
                     MessageBox.Show("数据库连接失败：" + ex.Message);
-                    return new List<string>() { ex.Message+":"};
-                }
-            }
-        }
-    }
-
-    internal class MysqlDB
-    {
-        internal static List<string> GetTableNames(string connString)
-        {
-            using (var connection = new MySqlConnection(connString))
-            {
-                try
-                {
-                    connection.Open();
-                    using (var command = new MySqlCommand("SHOW TABLES", connection))             //"SHOW TABLES"
-                    {
-
-                        using (var reader = command.ExecuteReader())
-                        {
-                            List<string> tableNames = new List<string>();
-                            while (reader.Read())
-                            {
-                                tableNames.Add(reader.GetString(0));
-                            }
-                            return tableNames;
-                        }
-                    }
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show("数据库连接失败：" + ex.Message);
-                    return new List<string>() { ex.Message+":" };
+                    return new List<string>() { ex.Message + ":" };
                 }
             }
         }
     }
 
     internal class AccessDB
-    { 
+    {
         internal static List<string> GetTableNames(string connString)
         {
             using (var connection = new OleDbConnection(connString))
@@ -3218,13 +3281,13 @@ namespace ExcelAddIn
                     }
                     else
                     {
-                        return new List<string>() {"没有找到任何表"};
+                        return new List<string>() { "没有找到任何表" };
                     }
                 }
                 catch (Exception ex)
                 {
                     MessageBox.Show("数据库连接失败：" + ex.Message);
-                    return new List<string>() { ex.Message+":" };
+                    return new List<string>() { ex.Message + ":" };
                 }
             }
         }
@@ -3303,21 +3366,19 @@ namespace ExcelAddIn
         }
     }
 
-    public class Db2DB
+    internal class OracleDB
     {
         internal static List<string> GetTableNames(string connString)
         {
-            using (IBM.Data.DB2.DB2Connection connection = new DB2Connection(connString))
+            using (OracleConnection connection = new OracleConnection(connString))
             {
                 try
                 {
                     connection.Open();
-
                     // 获取当前用户下的所有表名
-                    string query = @"SELECT TABNAME FROM SYSCAT.TABLES WHERE TABSCHEMA NOT IN ('SYSIBM', 'SYSSPATIAL', 'SYSSTAT', 'SYSCAT', 'SYSSQL', 'SYSBAR', 'SYSLIB', 'SYSPUBLIC','IBMCONSOLE','SYSTOOLS') AND TYPE = 'T' AND OWNERTYPE='U'";
-                    using (DB2Command command = new DB2Command(query, connection))
+                    using (OracleCommand command = new OracleCommand("SELECT table_name FROM user_tables", connection))
                     {
-                        using (DB2DataReader reader = command.ExecuteReader())
+                        using (OracleDataReader reader = command.ExecuteReader())
                         {
                             List<string> tableNames = new List<string>();
                             while (reader.Read())
@@ -3336,4 +3397,38 @@ namespace ExcelAddIn
             }
         }
     }
+
+    //public class Db2DB
+    //{
+    //    internal static List<string> GetTableNames(string connString)
+    //    {
+    //        using (DB2Connection connection = new DB2Connection(connString))
+    //        {
+    //            try
+    //            {
+    //                connection.Open();
+
+    //                // 获取当前用户下的所有表名
+    //                string query = @"SELECT TABNAME FROM SYSCAT.TABLES WHERE TABSCHEMA NOT IN ('SYSIBM', 'SYSSPATIAL', 'SYSSTAT', 'SYSCAT', 'SYSSQL', 'SYSBAR', 'SYSLIB', 'SYSPUBLIC','IBMCONSOLE','SYSTOOLS') AND TYPE = 'T' AND OWNERTYPE='U'";
+    //                using (DB2Command command = new(query, connection))
+    //                {
+    //                    using (DB2DataReader reader = command.ExecuteReader())
+    //                    {
+    //                        List<string> tableNames = new List<string>();
+    //                        while (reader.Read())
+    //                        {
+    //                            tableNames.Add(reader.GetString(0));
+    //                        }
+    //                        return tableNames;
+    //                    }
+    //                }
+    //            }
+    //            catch (Exception ex)
+    //            {
+    //                MessageBox.Show("数据库连接失败：" + ex.Message);
+    //                return new List<string>() { ex.Message + ":" };
+    //            }
+    //        }
+    //    }
+    //}
 }
