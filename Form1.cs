@@ -190,11 +190,10 @@ namespace ExcelAddIn
 
                 //数据库表提取
                 case 4:                                           
-                    this.database_result_label.Visible = false;
-                    database_result_label.Text = "";
+                    database_result_label.Text = string.Empty;
                     dbsheet_comboBox.Items.Clear();
-                    dbexport_result_label.Visible = false;
-                    dbexport_result_label.Text = "";
+                    dbexport_result_label.Text = string.Empty;
+                    dbexport_result_label.Text = string.Empty;
                     find_keywordclear_pictureBox.Visible = false;
                     break;
 
@@ -2415,7 +2414,6 @@ namespace ExcelAddIn
             HideLabel(run_result_label, false, "");
         }
 
-
         //自建函数
 
 
@@ -2479,12 +2477,10 @@ namespace ExcelAddIn
                         {
                             // 处理错误情况
                             database_result_label.Text = "数据库连接失败";
-                            database_result_label.Visible = true;
                         }
                         else
                         {
                             database_result_label.Text = "数据库连接成功，数据库中包含" + tableNames.Count + "张表";
-                            database_result_label.Visible = true;
 
                             // 将表名添加到 ComboBox
                             dbsheet_comboBox.DataSource=tableNames;
@@ -2519,12 +2515,12 @@ namespace ExcelAddIn
                         {
                             // 处理错误情况
                             database_result_label.Text = "数据库连接失败";
-                            database_result_label.Visible = true;
+
                         }
                         else
                         {
                             database_result_label.Text = "数据库连接成功，数据库中包含" + tableNames.Count + "张表";
-                            database_result_label.Visible = true;
+
 
                             // 将表名添加到 ComboBox
                             dbsheet_comboBox.DataSource = tableNames;
@@ -2564,12 +2560,10 @@ namespace ExcelAddIn
                         {
                             // 处理错误情况
                             database_result_label.Text = "数据库连接失败";
-                            database_result_label.Visible = true;
                         }
                         else
                         {
                             database_result_label.Text = "数据库连接成功，数据库中包含" + tableNames.Count + "张表";
-                            database_result_label.Visible = true;
                             dbname_textBox.Text = Path.GetFileNameWithoutExtension(dbaddress_textBox.Text);
 
                             // 将表名添加到 ComboBox
@@ -2610,12 +2604,10 @@ namespace ExcelAddIn
                         {
                             // 处理错误情况
                             database_result_label.Text = "数据库连接失败";
-                            database_result_label.Visible = true;
                         }
                         else
                         {
                             database_result_label.Text = "数据库连接成功，数据库中包含" + tableNames.Count + "张表";
-                            database_result_label.Visible = true;
                             dbname_textBox.Text = Path.GetFileNameWithoutExtension(dbaddress_textBox.Text);
 
                             // 将表名添加到 ComboBox
@@ -2650,12 +2642,10 @@ namespace ExcelAddIn
                         {
                             // 处理错误情况
                             database_result_label.Text = "数据库连接失败";
-                            database_result_label.Visible = true;
                         }
                         else
                         {
                             database_result_label.Text = "数据库连接成功，数据库中包含" + tableNames.Count + "张表";
-                            database_result_label.Visible = true;
 
                             // 将表名添加到 ComboBox
                             dbsheet_comboBox.DataSource = tableNames;
@@ -2690,12 +2680,10 @@ namespace ExcelAddIn
                         {
                             // 处理错误情况
                             database_result_label.Text = "数据库连接失败";
-                            database_result_label.Visible = true;
                         }
                         else
                         {
                             database_result_label.Text = "数据库连接成功，数据库中包含" + tableNames.Count + "张表";
-                            database_result_label.Visible = true;
 
                             // 将表名添加到 ComboBox
                             dbsheet_comboBox.DataSource = tableNames;
@@ -2731,12 +2719,10 @@ namespace ExcelAddIn
                     //    {
                     //        // 处理错误情况
                     //        database_result_label.Text = "数据库连接失败";
-                    //        database_result_label.Visible = true;
                     //    }
                     //    else
                     //    {
                     //        database_result_label.Text = "数据库连接成功，数据库中包含" + tableNames.Count + "张表";
-                    //        database_result_label.Visible = true;
 
                     //        // 将表名添加到 ComboBox
                     //        dbsheet_comboBox.DataSource = tableNames;
@@ -3000,10 +2986,10 @@ namespace ExcelAddIn
                 dbpwd_textBox.Text = "";
                 tableNames.Clear();
                 find_keyword_textBox.Text="";
-                database_result_label.Visible = false;
                 dbsheet_comboBox.DataSource=null;
                 dbsheet_dataGridView.DataSource = null;
-                dbexport_result_label.Visible = false;
+                database_result_label.Text = string.Empty;
+                dbexport_result_label.Text = string.Empty;
             }
             else
             {
@@ -3016,10 +3002,10 @@ namespace ExcelAddIn
                 dbpwd_textBox.Text = "";
                 tableNames.Clear();
                 find_keyword_textBox.Text = "";
-                database_result_label.Visible = false;
                 dbsheet_comboBox.DataSource=null;
                 dbsheet_dataGridView.DataSource = null;
-                dbexport_result_label.Visible = false;
+                database_result_label.Text = string.Empty;
+                dbexport_result_label.Text = string.Empty;
             }
         }
 
@@ -3030,7 +3016,6 @@ namespace ExcelAddIn
             try
             {
                 dbexport_result_label.Text = "正在导出......";
-                dbexport_result_label.Visible = true;                               
                 ExportDataGridViewToExcel(dbsheet_dataGridView, newsheetname);
                 dbexport_result_label.Text = "导出完成！";
                 MessageBox.Show("导出成功！");
@@ -3141,6 +3126,7 @@ namespace ExcelAddIn
             }
         }
 
+        //关键字查找数据库中需导出表名
         private List<string> FindComboBoxItems(string searchText)
         {
             // 获取 ComboBox 的原始数据源
@@ -3155,6 +3141,7 @@ namespace ExcelAddIn
             return items; 
         }
 
+        //模糊查找按钮点击事件
         private void find_keywordbutton_pictureBox_Click(object sender, EventArgs e)
         {
             if (find_keyword_textBox.Text != "")
@@ -3164,10 +3151,14 @@ namespace ExcelAddIn
                 if (resultItems.Count == 0 || resultItems.Count == tableNames.Count)
                 {
                     dbsheet_comboBox.DataSource = tableNames;
+                    dbexport_result_label.Text="未找到表";
                 }
                 else
                 {
                     dbsheet_comboBox.DataSource = resultItems;
+                    ShowLabel(dbexport_result_label, true, $"找到{resultItems.Count.ToString()}个表");
+                    StartTimer();
+
                 }
 
             }
@@ -3177,20 +3168,24 @@ namespace ExcelAddIn
             }
         }
 
+        //关键字文本框改变事件
         private void find_keyword_textBox_TextChanged(object sender, EventArgs e)
         {
             if(find_keyword_textBox.Text== "")
             {
                 dbsheet_comboBox.DataSource = tableNames;
                 find_keywordclear_pictureBox.Visible = false;
+                dbexport_result_label.Text=string.Empty;
             }
             else
             {
                 find_keywordclear_pictureBox.Visible = true;
+                dbexport_result_label.Text=string.Empty;
             }
             
         }
 
+        //清空关键字查找框内容事件
         private void find_keywordclear_pictureBox_Click(object sender, EventArgs e)
         {
             if(find_keyword_textBox.Text != "")
