@@ -89,6 +89,7 @@ namespace ExcelAddIn
             this.function_title_label = new System.Windows.Forms.Label();
             this.which_field_label = new System.Windows.Forms.Label();
             this.tabPage5 = new System.Windows.Forms.TabPage();
+            this.find_keywordclear_pictureBox = new System.Windows.Forms.PictureBox();
             this.find_keyword_label = new System.Windows.Forms.Label();
             this.find_keywordbutton_pictureBox = new System.Windows.Forms.PictureBox();
             this.find_keyword_textBox = new System.Windows.Forms.TextBox();
@@ -133,6 +134,7 @@ namespace ExcelAddIn
             this.tabPage4.SuspendLayout();
             this.panel4.SuspendLayout();
             this.tabPage5.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.find_keywordclear_pictureBox)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.find_keywordbutton_pictureBox)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.dbsheet_dataGridView)).BeginInit();
             this.tabPage6.SuspendLayout();
@@ -934,6 +936,7 @@ namespace ExcelAddIn
             // tabPage5
             // 
             this.tabPage5.BackColor = System.Drawing.SystemColors.Window;
+            this.tabPage5.Controls.Add(this.find_keywordclear_pictureBox);
             this.tabPage5.Controls.Add(this.find_keyword_label);
             this.tabPage5.Controls.Add(this.find_keywordbutton_pictureBox);
             this.tabPage5.Controls.Add(this.find_keyword_textBox);
@@ -965,6 +968,16 @@ namespace ExcelAddIn
             this.tabPage5.Size = new System.Drawing.Size(675, 392);
             this.tabPage5.TabIndex = 7;
             this.tabPage5.Text = "五、数据库连接";
+            // 
+            // find_keywordclear_pictureBox
+            // 
+            this.find_keywordclear_pictureBox.Image = global::ExcelAddIn.Properties.Resources.clear;
+            this.find_keywordclear_pictureBox.Location = new System.Drawing.Point(582, 94);
+            this.find_keywordclear_pictureBox.Name = "find_keywordclear_pictureBox";
+            this.find_keywordclear_pictureBox.Size = new System.Drawing.Size(18, 18);
+            this.find_keywordclear_pictureBox.TabIndex = 24;
+            this.find_keywordclear_pictureBox.TabStop = false;
+            this.find_keywordclear_pictureBox.Click += new System.EventHandler(this.find_keywordclear_pictureBox_Click);
             // 
             // find_keyword_label
             // 
@@ -1159,8 +1172,7 @@ namespace ExcelAddIn
             "Access",
             "SQLite",
             "PostgreSQL",
-            "Oracle",
-            "DB2"});
+            "Oracle"});
             this.dbtype_comboBox.Location = new System.Drawing.Point(125, 104);
             this.dbtype_comboBox.Name = "dbtype_comboBox";
             this.dbtype_comboBox.Size = new System.Drawing.Size(183, 28);
@@ -1327,6 +1339,7 @@ namespace ExcelAddIn
             this.panel4.PerformLayout();
             this.tabPage5.ResumeLayout(false);
             this.tabPage5.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.find_keywordclear_pictureBox)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.find_keywordbutton_pictureBox)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.dbsheet_dataGridView)).EndInit();
             this.tabPage6.ResumeLayout(false);
@@ -1431,5 +1444,6 @@ namespace ExcelAddIn
         private System.Windows.Forms.TextBox find_keyword_textBox;
         private System.Windows.Forms.PictureBox find_keywordbutton_pictureBox;
         private System.Windows.Forms.Label find_keyword_label;
+        private System.Windows.Forms.PictureBox find_keywordclear_pictureBox;
     }
 }

@@ -6,6 +6,7 @@ using System.IO;
 using System.Data;
 using System.Data.SqlClient;
 using System.Data.OleDb;
+using System.Data.Odbc;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -25,6 +26,7 @@ using System.Data.SQLite;
 using System.Runtime.InteropServices;
 using Oracle.ManagedDataAccess.Client;
 //using IBM.Data.DB2;
+
 
 
 
@@ -193,6 +195,7 @@ namespace ExcelAddIn
                     dbsheet_comboBox.Items.Clear();
                     dbexport_result_label.Visible = false;
                     dbexport_result_label.Text = "";
+                    find_keywordclear_pictureBox.Visible = false;
                     break;
 
                 //帮助
@@ -2716,46 +2719,46 @@ namespace ExcelAddIn
                         }
                         break;
 
-                    //DB2
-                    case 6:
-                        //string connectionString6 = $"Server={dbaddress_textBox.Text}:{dbport_textBox.Text};Database={dbname_textBox.Text};UID={dbuser_textBox.Text};PWD={dbpwd_textBox.Text};";
+                    ////DB2
+                    //case 6:
+                    //    string connectionString6 = $"Server={dbaddress_textBox.Text}:{dbport_textBox.Text};Database={dbname_textBox.Text};UID={dbuser_textBox.Text};PWD={dbpwd_textBox.Text};";
 
 
-                        //// 连接到数据库并获取表名列表
-                        //tableNames = Db2DB.GetTableNames(connectionString6);
+                    //    // 连接到数据库并获取表名列表
+                    //    tableNames = Db2DB.GetTableNames(connectionString6);
 
-                        //if (tableNames.Count == 1 && tableNames[0].Contains(":"))
-                        //{
-                        //    // 处理错误情况
-                        //    database_result_label.Text = "数据库连接失败";
-                        //    database_result_label.Visible = true;
-                        //}
-                        //else
-                        //{
-                        //    database_result_label.Text = "数据库连接成功，数据库中包含" + tableNames.Count + "张表";
-                        //    database_result_label.Visible = true;
+                    //    if (tableNames.Count == 1 && tableNames[0].Contains(":"))
+                    //    {
+                    //        // 处理错误情况
+                    //        database_result_label.Text = "数据库连接失败";
+                    //        database_result_label.Visible = true;
+                    //    }
+                    //    else
+                    //    {
+                    //        database_result_label.Text = "数据库连接成功，数据库中包含" + tableNames.Count + "张表";
+                    //        database_result_label.Visible = true;
 
-                        //    // 将表名添加到 ComboBox
-                        //    dbsheet_comboBox.DataSource = tableNames;
-                        ////    foreach (var tableName in tableNames)
-                        ////    {
-                        ////        dbsheet_comboBox.Items.Add(tableName);
-                        ////    }
+                    //        // 将表名添加到 ComboBox
+                    //        dbsheet_comboBox.DataSource = tableNames;
+                    //        //    foreach (var tableName in tableNames)
+                    //        //    {
+                    //        //        dbsheet_comboBox.Items.Add(tableName);
+                    //        //    }
 
-                        //    // 默认选择第一个表
-                        //    if (dbsheet_comboBox.Items.Count > 0)
-                        //    {
-                        //        dbsheet_comboBox.SelectedIndex = 0;
-                        //        // 更新 DataGridView
-                        //        UpdateDataGridView(dbsheet_comboBox.SelectedItem.ToString());
-                        //    }
-                        //    else
-                        //    {
-                        //        MessageBox.Show("数据库中没有表");
-                        //        dbsheet_dataGridView.DataSource = null;
-                        //    }
-                        //}
-                        break;
+                    //        // 默认选择第一个表
+                    //        if (dbsheet_comboBox.Items.Count > 0)
+                    //        {
+                    //            dbsheet_comboBox.SelectedIndex = 0;
+                    //            // 更新 DataGridView
+                    //            UpdateDataGridView(dbsheet_comboBox.SelectedItem.ToString());
+                    //        }
+                    //        else
+                    //        {
+                    //            MessageBox.Show("数据库中没有表");
+                    //            dbsheet_dataGridView.DataSource = null;
+                    //        }
+                    //    }
+                    //    break;
 
                     default:
                         break;
@@ -2894,24 +2897,23 @@ namespace ExcelAddIn
                         }
                     }
 
-                //DB2
-                case 6:
-                    //connectionString = $"Server={dbaddress_textBox.Text}:{dbport_textBox.Text};Database={dbname_textBox.Text};UID={dbuser_textBox.Text};PWD={dbpwd_textBox.Text};";
+                ////DB2
+                //case 6:
+                //    connectionString = $"Server={dbaddress_textBox.Text}:{dbport_textBox.Text};Database={dbname_textBox.Text};UID={dbuser_textBox.Text};PWD={dbpwd_textBox.Text};";
 
-                    //using (var connection = new DB2Connection(connectionString))
-                    //{
-                    //    connection.Open();
-                    //    using (var command = new DB2Command($"SELECT * FROM {tableName}", connection))
-                    //    {
-                    //        using (var adapter = new DB2DataAdapter(command))
-                    //        {
-                    //            var dataTable = new DataTable();
-                    //            adapter.Fill(dataTable);
-                    //            return dataTable;
-                    //        }
-                    //    }
-                    //}
-                    return null;
+                //    using (var connection = new DB2Connection(connectionString))
+                //    {
+                //        connection.Open();
+                //        using (var command = new DB2Command($"SELECT * FROM {tableName}", connection))
+                //        {
+                //            using (var adapter = new DB2DataAdapter(command))
+                //            {
+                //                var dataTable = new DataTable();
+                //                adapter.Fill(dataTable);
+                //                return dataTable;
+                //            }
+                //        }
+                //    }
 
                 default:
                     return null;
@@ -2970,10 +2972,10 @@ namespace ExcelAddIn
                     dbport_textBox.Text = "1521";
                     break;
 
-                //DB2
-                case 6:                               
-                    dbport_textBox.Text = "50000";
-                    break;
+                ////DB2
+                //case 6:                               
+                //    dbport_textBox.Text = "50000";
+                //    break;
 
                 default:
                     break;
@@ -3145,7 +3147,7 @@ namespace ExcelAddIn
             List<string> items = new List<string>();
             foreach (string item in tableNames)
             {
-                if (item.Contains(searchText))
+                if (item.ToLower().Contains(searchText.ToLower()))
                 {
                     items.Add(item);
                 }
@@ -3180,6 +3182,21 @@ namespace ExcelAddIn
             if(find_keyword_textBox.Text== "")
             {
                 dbsheet_comboBox.DataSource = tableNames;
+                find_keywordclear_pictureBox.Visible = false;
+            }
+            else
+            {
+                find_keywordclear_pictureBox.Visible = true;
+            }
+            
+        }
+
+        private void find_keywordclear_pictureBox_Click(object sender, EventArgs e)
+        {
+            if(find_keyword_textBox.Text != "")
+            {
+                find_keyword_textBox.Text=string.Empty;
+                find_keywordclear_pictureBox.Visible = false;
             }
         }
     }
