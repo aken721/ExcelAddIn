@@ -84,12 +84,6 @@ namespace ExcelAddIn
 
             if (!string.IsNullOrEmpty(get_directory_path))
             {
-                string bat_name = get_directory_path + "\\run.bat";
-                FileInfo run_file = new FileInfo(bat_name);
-                if (run_file.Exists)
-                {
-                    run_file.Delete();
-                }
                 foreach (Excel.Worksheet sheet in workbook.Worksheets)
                 {
                     if (sheet.Name == "_rename")
