@@ -6,7 +6,10 @@ using System.IO;
 using System.Data;
 using System.Data.SqlClient;
 using System.Data.OleDb;
-using System.Data.Odbc;
+using MySql.Data.MySqlClient;
+using Npgsql;
+using System.Data.SQLite;
+using Oracle.ManagedDataAccess.Client;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -16,19 +19,8 @@ using System.Timers;
 using System.Windows.Forms;
 using System.Configuration;
 using ZXing;
-using ZXing.Common;
 using ZXing.QrCode;
-using ZXing.QrCode.Internal;
 using Excel = Microsoft.Office.Interop.Excel;
-using MySql.Data.MySqlClient;
-using Npgsql;
-using System.Data.SQLite;
-using System.Runtime.InteropServices;
-using Oracle.ManagedDataAccess.Client;
-//using IBM.Data.DB2;
-
-
-
 
 
 namespace ExcelAddIn
@@ -2369,9 +2361,9 @@ namespace ExcelAddIn
             }
         }
 
-
         //时间控件，控制完成提示标签显示3秒后消失
         private System.Timers.Timer aTimer = new System.Timers.Timer();
+
         private delegate void SafeCallDelegate(Label label, bool Visible, string Text);
 
         private void ShowLabel(Label label, bool Visible, string Text)

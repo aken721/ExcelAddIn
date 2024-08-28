@@ -100,47 +100,58 @@ namespace ExcelAddIn
                 Excel.Worksheet worksheet = workbook.Worksheets.Add();
                 worksheet.Name = "_rename";
                 worksheet.Activate();
-                switch (Select_f_or_d.Checked)
+                try
                 {
-                    case false:
-                        worksheet.Cells[1, 1] = "路径";
-                        worksheet.Cells[1, 2] = "旧文件名";
-                        worksheet.Cells[1, 3] = "新文件名";
-                        List<string> files = new List<string>(Directory.GetFiles(get_directory_path, "*.*", SearchOption.AllDirectories));
-                        files.RemoveAll(file => (File.GetAttributes(file) & FileAttributes.Hidden) == FileAttributes.Hidden);
-                        if (files.Count > 0)
-                        {
-                            for (int i = 1; i <= files.Count; i++)
+                    switch (Select_f_or_d.Checked)
+                    {
+                        case false:
+                            worksheet.Cells[1, 1] = "路径";
+                            worksheet.Cells[1, 2] = "旧文件名";
+                            worksheet.Cells[1, 3] = "新文件名";
+                            List<string> files = new List<string>(Directory.GetFiles(get_directory_path, "*.*", SearchOption.AllDirectories));
+                            files.RemoveAll(file => (File.GetAttributes(file) & FileAttributes.Hidden) == FileAttributes.Hidden);
+                            if (files.Count > 0)
                             {
-                                string file_name = Path.GetFileName(files[i - 1]);
-                                string file_path = Path.GetDirectoryName(files[i - 1]);
-                                workbook.ActiveSheet.Cells[i + 1, 1] = file_path;
-                                workbook.ActiveSheet.Cells[i + 1, 2] = file_name;
-                                workbook.ActiveSheet.Cells[i + 1, 3] = file_name;
-                            }
-                        }
-                        worksheet.Range["C2"].Select();
-                        break;
-                    case true:
-                        worksheet.Cells[1, 1] = "文件夹路径";
-                        worksheet.Cells[1, 2] = "旧文件夹名";
-                        worksheet.Cells[1, 3] = "新文件夹名";
-                        string[] directorys = Directory.GetDirectories(get_directory_path, "*", SearchOption.AllDirectories);
-                        if (directorys.Length > 0)
-                        {
-                            for (int i = 1; i <= directorys.Length; i++)
-                            {
-                                string[] directory = directorys[i - 1].Split('\\');
-                                string directory_name = directory[directory.Length - 1];
-                                Array.Resize(ref directory, directory.Length - 1);
-                                string directory_path = string.Join("\\", directory);
-                                workbook.ActiveSheet.Cells[i + 1, 1] = directory_path;
-                                workbook.ActiveSheet.Cells[i + 1, 2] = directory_name;
-                                workbook.ActiveSheet.Cells[i + 1, 3] = directory_name;
+                                for (int i = 1; i <= files.Count; i++)
+                                {
+                                    string file_name = Path.GetFileName(files[i - 1]);
+                                    string file_path = Path.GetDirectoryName(files[i - 1]);
+                                    workbook.ActiveSheet.Cells[i + 1, 1] = file_path;
+                                    workbook.ActiveSheet.Hyperlinks.Add(workbook.ActiveSheet.Cells[i + 1, 1], file_path, Type.Missing, Type.Missing, file_path);
+                                    workbook.ActiveSheet.Cells[i + 1, 2] = file_name;
+                                    workbook.ActiveSheet.Hyperlinks.Add(workbook.ActiveSheet.Cells[i + 1, 2], file_path + "\\" + file_name, Type.Missing, Type.Missing, file_name);
+                                    workbook.ActiveSheet.Cells[i + 1, 3] = file_name;
+                                }
                             }
                             worksheet.Range["C2"].Select();
-                        }
-                        break;
+                            break;
+                        case true:
+                            worksheet.Cells[1, 1] = "文件夹路径";
+                            worksheet.Cells[1, 2] = "旧文件夹名";
+                            worksheet.Cells[1, 3] = "新文件夹名";
+                            string[] directorys = Directory.GetDirectories(get_directory_path, "*", SearchOption.AllDirectories);
+                            if (directorys.Length > 0)
+                            {
+                                for (int i = 1; i <= directorys.Length; i++)
+                                {
+                                    string[] directory = directorys[i - 1].Split('\\');
+                                    string directory_name = directory[directory.Length - 1];
+                                    Array.Resize(ref directory, directory.Length - 1);
+                                    string directory_path = string.Join("\\", directory);
+                                    workbook.ActiveSheet.Cells[i + 1, 1] = directory_path;
+                                    workbook.ActiveSheet.Hyperlinks.Add(workbook.ActiveSheet.Cells[i + 1, 1], directory_path, Type.Missing, Type.Missing, directory_path);
+                                    workbook.ActiveSheet.Cells[i + 1, 2] = directory_name;
+                                    workbook.ActiveSheet.Hyperlinks.Add(workbook.ActiveSheet.Cells[i + 1, 2], directory_path+"\\"+directory_name, Type.Missing, Type.Missing, directory_name);
+                                    workbook.ActiveSheet.Cells[i + 1, 3] = directory_name;
+                                }
+                                worksheet.Range["C2"].Select();
+                            }
+                            break;
+                    }
+                }
+                catch(Exception ex)
+                {
+                    MessageBox.Show(ex.Message);
                 }
             }
             else
