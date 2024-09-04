@@ -44,6 +44,7 @@
             this.group3 = this.Factory.CreateRibbonGroup();
             this.Files_read = this.Factory.CreateRibbonButton();
             this.File_rename = this.Factory.CreateRibbonButton();
+            this.delandmove_button = this.Factory.CreateRibbonButton();
             this.Select_f_or_d = this.Factory.CreateRibbonToggleButton();
             this.switch_FD_label = this.Factory.CreateRibbonLabel();
             this.group4 = this.Factory.CreateRibbonGroup();
@@ -124,6 +125,7 @@
             // 
             this.group3.Items.Add(this.Files_read);
             this.group3.Items.Add(this.File_rename);
+            this.group3.Items.Add(this.delandmove_button);
             this.group3.Items.Add(this.Select_f_or_d);
             this.group3.Items.Add(this.switch_FD_label);
             this.group3.Label = "文件/文件夹工具";
@@ -146,6 +148,15 @@
             this.File_rename.Name = "File_rename";
             this.File_rename.ShowImage = true;
             this.File_rename.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.File_rename_Click);
+            // 
+            // delandmove_button
+            // 
+            this.delandmove_button.ControlSize = Microsoft.Office.Core.RibbonControlSize.RibbonControlSizeLarge;
+            this.delandmove_button.Image = global::ExcelAddIn.Properties.Resources.移动文件;
+            this.delandmove_button.Label = "批量删或移";
+            this.delandmove_button.Name = "delandmove_button";
+            this.delandmove_button.ShowImage = true;
+            this.delandmove_button.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.delandmove_button_Click);
             // 
             // Select_f_or_d
             // 
@@ -320,6 +331,7 @@
         private Microsoft.Office.Tools.Ribbon.RibbonBox box1;
         private System.Windows.Forms.Timer timer1;
         internal Microsoft.Office.Tools.Ribbon.RibbonToggleButton confirm_spotlight;
+        internal Microsoft.Office.Tools.Ribbon.RibbonButton delandmove_button;
     }
 
     partial class ThisRibbonCollection

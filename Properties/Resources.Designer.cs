@@ -63,6 +63,16 @@ namespace ExcelAddIn.Properties {
         /// <summary>
         ///   查找 System.Drawing.Bitmap 类型的本地化资源。
         /// </summary>
+        internal static System.Drawing.Bitmap add {
+            get {
+                object obj = ResourceManager.GetObject("add", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   查找 System.Drawing.Bitmap 类型的本地化资源。
+        /// </summary>
         internal static System.Drawing.Bitmap addin {
             get {
                 object obj = ResourceManager.GetObject("addin", resourceCulture);
@@ -263,6 +273,16 @@ namespace ExcelAddIn.Properties {
         /// <summary>
         ///   查找 System.Drawing.Bitmap 类型的本地化资源。
         /// </summary>
+        internal static System.Drawing.Bitmap reduce {
+            get {
+                object obj = ResourceManager.GetObject("reduce", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   查找 System.Drawing.Bitmap 类型的本地化资源。
+        /// </summary>
         internal static System.Drawing.Bitmap search {
             get {
                 object obj = ResourceManager.GetObject("search", resourceCulture);
@@ -316,6 +336,16 @@ namespace ExcelAddIn.Properties {
         internal static System.Drawing.Bitmap write {
             get {
                 object obj = ResourceManager.GetObject("write", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   查找 System.Drawing.Bitmap 类型的本地化资源。
+        /// </summary>
+        internal static System.Drawing.Bitmap 移动文件 {
+            get {
+                object obj = ResourceManager.GetObject("移动文件", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }

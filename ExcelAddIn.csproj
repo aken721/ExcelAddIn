@@ -137,6 +137,7 @@
     <Reference Include="Microsoft.Extensions.Logging.Abstractions, Version=8.0.0.1, Culture=neutral, PublicKeyToken=adb9793829ddae60, processorArchitecture=MSIL">
       <HintPath>packages\Microsoft.Extensions.Logging.Abstractions.8.0.1\lib\net462\Microsoft.Extensions.Logging.Abstractions.dll</HintPath>
     </Reference>
+    <Reference Include="Microsoft.VisualBasic" />
     <Reference Include="Microsoft.Win32.Registry, Version=5.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
       <HintPath>packages\Microsoft.Win32.Registry.5.0.0\lib\net461\Microsoft.Win32.Registry.dll</HintPath>
     </Reference>
@@ -255,6 +256,7 @@
     <Reference Include="System.Core" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Xml" />
     <Reference Include="WindowsBase" />
     <Reference Include="ZstdSharp, Version=0.8.1.0, Culture=neutral, PublicKeyToken=8d151af33a4ad5cf, processorArchitecture=MSIL">
       <HintPath>packages\ZstdSharp.Port.0.8.1\lib\net462\ZstdSharp.dll</HintPath>
@@ -330,6 +332,12 @@
     <Compile Include="Form3.Designer.cs">
       <DependentUpon>Form3.cs</DependentUpon>
     </Compile>
+    <Compile Include="Form4.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Form4.Designer.cs">
+      <DependentUpon>Form4.cs</DependentUpon>
+    </Compile>
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>
@@ -341,6 +349,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Form3.resx">
       <DependentUpon>Form3.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Form4.resx">
+      <DependentUpon>Form4.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
@@ -480,6 +491,30 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="Properties\Resources\clear.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Properties\Resources\移动文件.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Properties\Resources\email.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Properties\Resources\excel表格.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Properties\Resources\MP3.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Properties\Resources\插件功能.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Properties\Resources\移动文件.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Properties\Resources\add.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Properties\Resources\reduce.png" />
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>

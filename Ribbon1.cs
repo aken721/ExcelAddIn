@@ -1,4 +1,6 @@
-﻿using Microsoft.Office.Tools.Ribbon;
+﻿using Microsoft.Office.Interop.Excel;
+using Microsoft.Office.Tools.Excel;
+using Microsoft.Office.Tools.Ribbon;
 using NAudio.Wave;
 using System;
 using System.Collections.Generic;
@@ -11,13 +13,11 @@ using Excel = Microsoft.Office.Interop.Excel;
 
 namespace ExcelAddIn
 {
-
-
     public partial class Ribbon1
-    {
+    {       
 
-        //是否执行读文件名功能标识
-        private int readFile;
+        //文件还是目录判断标识变量
+        public static string runcommand = "";
 
         private void Ribbon1_Load(object sender, RibbonUIEventArgs e)
         {
@@ -25,7 +25,7 @@ namespace ExcelAddIn
             Select_f_or_d.Label = "改文件名";
             Select_f_or_d.ShowLabel = false;
             switch_FD_label.Label = "文件名";
-            readFile = 0;
+            Globle.readFile = 0;
             confirm_spotlight.Checked = false;
             playbackMode = PlaybackMode.Sequential;
             Mode_button.Label = "顺序播放";
@@ -50,6 +50,53 @@ namespace ExcelAddIn
             form2.ShowDialog();
         }
 
+        //MP3批量改名按钮
+        private void Rename_mp3_Click(object sender, RibbonControlEventArgs e)
+        {
+            Form3 form3 = new Form3();
+            form3.ShowDialog();
+        }
+
+        //文件删除或移动按钮
+        private void delandmove_button_Click(object sender, RibbonControlEventArgs e)
+        {
+            Excel.Workbook workbook = ThisAddIn.app.ActiveWorkbook;
+
+            if (Globle.readFile == 1 && IsSheetExist(workbook, "_rename"))
+            {
+                if (Select_f_or_d.Checked == false)
+                {
+                    runcommand = "file";
+                }
+                else
+                {
+                    runcommand = "folder";
+                }
+                Form form4 = new Form4();
+                form4.FormClosed += new FormClosedEventHandler(form4_FormClosed);
+                form4.Show();
+            }            
+        }
+
+        //窗体4关闭事件
+        private async void form4_FormClosed(object sender, FormClosedEventArgs e)
+        {
+            await Task.Run(() =>
+            {
+                int runClick_form4 = Form4.runButtonClicked;
+                int resetClick_form4 = Form4.resetButtonClicked;
+                if (runClick_form4 > 0 || resetClick_form4 > 0)
+                {
+                    RefreshRenameTable();
+                    MessageBox.Show("删除或移动文件窗口已关闭，_rename表已更新，如不再需要进行重命名操作，可手工删除_rename表即可");
+                }
+                else
+                {
+                    return;
+                }
+            }); 
+        }
+
         //指定字段名所处的列
         private int GetUsedRangeColumn(string targetColumn)
         {
@@ -68,93 +115,117 @@ namespace ExcelAddIn
         //批读文件名
         private void Files_read_Click(object sender, RibbonControlEventArgs e)
         {
-            Excel.Workbook workbook = ThisAddIn.app.ActiveWorkbook;
-            ThisAddIn.app.DisplayAlerts = false;
-            ThisAddIn.app.ScreenUpdating = false;
-
-            folderBrowserDialog1.Description = "请选择文件所在文件夹";
-            if (folderBrowserDialog1.ShowDialog() == DialogResult.OK)
+            if (Globle.readFile == 1 && get_directory_path.Length > 0)
             {
-                get_directory_path = folderBrowserDialog1.SelectedPath;
+                ThisAddIn.app.Application.StatusBar = "正在刷新_rename表";
+                RefreshRenameTable();
+                ThisAddIn.app.Application.StatusBar = false; 
             }
             else
             {
-                return;
-            }
+                Excel.Workbook workbook = ThisAddIn.app.ActiveWorkbook;
+                ThisAddIn.app.DisplayAlerts = false;
+                ThisAddIn.app.ScreenUpdating = false;
 
-            if (!string.IsNullOrEmpty(get_directory_path))
-            {
-                foreach (Excel.Worksheet sheet in workbook.Worksheets)
+                folderBrowserDialog1.Description = "请选择文件所在文件夹";
+                if (folderBrowserDialog1.ShowDialog() == DialogResult.OK)
                 {
-                    if (sheet.Name == "_rename")
-                    {
-                        sheet.Name = "_rename_备份";
-                    }
+                    get_directory_path = folderBrowserDialog1.SelectedPath;
                 }
-                Excel.Worksheet worksheet = workbook.Worksheets.Add();
-                worksheet.Name = "_rename";
-                worksheet.Activate();
-                try
+                else
                 {
-                    switch (Select_f_or_d.Checked)
+
+                    ThisAddIn.app.DisplayAlerts = true;
+                    ThisAddIn.app.ScreenUpdating = true;
+                    return;
+                }
+
+                if (!string.IsNullOrEmpty(get_directory_path))
+                {
+                ThisAddIn.app.Application.StatusBar = "_rename表正在读取生成中，请稍等......";
+
+                    foreach (Excel.Worksheet sheet in workbook.Worksheets)
                     {
-                        case false:
-                            worksheet.Cells[1, 1] = "路径";
-                            worksheet.Cells[1, 2] = "旧文件名";
-                            worksheet.Cells[1, 3] = "新文件名";
-                            List<string> files = new List<string>(Directory.GetFiles(get_directory_path, "*.*", SearchOption.AllDirectories));
-                            files.RemoveAll(file => (File.GetAttributes(file) & FileAttributes.Hidden) == FileAttributes.Hidden);
-                            if (files.Count > 0)
-                            {
-                                for (int i = 1; i <= files.Count; i++)
+                        if (sheet.Name == "_rename")
+                        {
+                            sheet.Name = "_rename_备份";
+                        }
+                    }
+                    Excel.Worksheet worksheet = workbook.Worksheets.Add();
+                    worksheet.Name = "_rename";
+                    //worksheet.Activate();
+                    try
+                    {
+                        switch (Select_f_or_d.Checked)
+                        {
+                            case false:
+                                worksheet.Cells[1, 1] = "路径";
+                                worksheet.Cells[1, 2] = "旧文件名";
+                                worksheet.Cells[1, 3] = "新文件名";
+                                List<string> files = new List<string>(Directory.GetFiles(get_directory_path, "*.*", SearchOption.AllDirectories));
+                                files.RemoveAll(file => (File.GetAttributes(file) & FileAttributes.Hidden) == FileAttributes.Hidden);
+                                if (files.Count > 0)
                                 {
-                                    string file_name = Path.GetFileName(files[i - 1]);
-                                    string file_path = Path.GetDirectoryName(files[i - 1]);
-                                    workbook.ActiveSheet.Cells[i + 1, 1] = file_path;
-                                    workbook.ActiveSheet.Hyperlinks.Add(workbook.ActiveSheet.Cells[i + 1, 1], file_path, Type.Missing, Type.Missing, file_path);
-                                    workbook.ActiveSheet.Cells[i + 1, 2] = file_name;
-                                    workbook.ActiveSheet.Hyperlinks.Add(workbook.ActiveSheet.Cells[i + 1, 2], file_path + "\\" + file_name, Type.Missing, Type.Missing, file_name);
-                                    workbook.ActiveSheet.Cells[i + 1, 3] = file_name;
-                                }
-                            }
-                            worksheet.Range["C2"].Select();
-                            break;
-                        case true:
-                            worksheet.Cells[1, 1] = "文件夹路径";
-                            worksheet.Cells[1, 2] = "旧文件夹名";
-                            worksheet.Cells[1, 3] = "新文件夹名";
-                            string[] directorys = Directory.GetDirectories(get_directory_path, "*", SearchOption.AllDirectories);
-                            if (directorys.Length > 0)
-                            {
-                                for (int i = 1; i <= directorys.Length; i++)
-                                {
-                                    string[] directory = directorys[i - 1].Split('\\');
-                                    string directory_name = directory[directory.Length - 1];
-                                    Array.Resize(ref directory, directory.Length - 1);
-                                    string directory_path = string.Join("\\", directory);
-                                    workbook.ActiveSheet.Cells[i + 1, 1] = directory_path;
-                                    workbook.ActiveSheet.Hyperlinks.Add(workbook.ActiveSheet.Cells[i + 1, 1], directory_path, Type.Missing, Type.Missing, directory_path);
-                                    workbook.ActiveSheet.Cells[i + 1, 2] = directory_name;
-                                    workbook.ActiveSheet.Hyperlinks.Add(workbook.ActiveSheet.Cells[i + 1, 2], directory_path+"\\"+directory_name, Type.Missing, Type.Missing, directory_name);
-                                    workbook.ActiveSheet.Cells[i + 1, 3] = directory_name;
+                                    for (int i = 1; i <= files.Count; i++)
+                                    {
+                                        string file_name = Path.GetFileName(files[i - 1]);
+                                        string file_path = Path.GetDirectoryName(files[i - 1]);
+                                        worksheet.Cells[i + 1, 1] = file_path;
+                                        worksheet.Hyperlinks.Add(worksheet.Cells[i + 1, 1], file_path, Type.Missing, Type.Missing, file_path);
+                                        worksheet.Cells[i + 1, 2] = file_name;
+                                        worksheet.Hyperlinks.Add(worksheet.Cells[i + 1, 2], file_path + "\\" + file_name, Type.Missing, Type.Missing, file_name);
+                                        worksheet.Cells[i + 1, 3] = file_name;
+                                    }
                                 }
                                 worksheet.Range["C2"].Select();
-                            }
-                            break;
+                                break;
+                            case true:
+                                worksheet.Cells[1, 1] = "文件夹路径";
+                                worksheet.Cells[1, 2] = "旧文件夹名";
+                                worksheet.Cells[1, 3] = "新文件夹名";
+                                string[] directorys = Directory.GetDirectories(get_directory_path, "*", SearchOption.AllDirectories);
+                                if (directorys.Length > 0)
+                                {
+                                    for (int i = 1; i <= directorys.Length; i++)
+                                    {
+                                        string[] directory = directorys[i - 1].Split('\\');
+                                        string directory_name = directory[directory.Length - 1];
+                                        Array.Resize(ref directory, directory.Length - 1);
+                                        string directory_path = string.Join("\\", directory);
+                                        worksheet.Cells[i + 1, 1] = directory_path;
+                                        worksheet.Hyperlinks.Add(worksheet.Cells[i + 1, 1], directory_path, Type.Missing, Type.Missing, directory_path);
+                                        worksheet.Cells[i + 1, 2] = directory_name;
+                                        worksheet.Hyperlinks.Add(worksheet.Cells[i + 1, 2], directory_path + "\\" + directory_name, Type.Missing, Type.Missing, directory_name);
+                                        worksheet.Cells[i + 1, 3] = directory_name;
+                                    }
+                                    worksheet.Range["C2"].Select();
+                                }
+                                break;
+                        }
+                        Globle.readFile = 1;
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show(ex.Message);
+                    }
+                    finally
+                    {
+                        ThisAddIn.app.DisplayAlerts = true;
+                        ThisAddIn.app.ScreenUpdating = true;
+                        ThisAddIn.app.Application.StatusBar = false;
                     }
                 }
-                catch(Exception ex)
+                else
                 {
-                    MessageBox.Show(ex.Message);
-                }
-            }
-            else
-            {
-                MessageBox.Show("未选择文件夹");
-            }
-            readFile = 1;
-            ThisAddIn.app.DisplayAlerts = true;
-            ThisAddIn.app.ScreenUpdating = true;
+                    MessageBox.Show("未选择文件夹");
+                    ThisAddIn.app.DisplayAlerts = true;
+                    ThisAddIn.app.ScreenUpdating = true;
+                }              
+
+                workbook.Worksheets["_rename"].Activate();
+                workbook.RefreshAll();
+                ThisAddIn.app.Application.StatusBar = false;
+            }           
         }
 
         //批量重命名
@@ -163,15 +234,18 @@ namespace ExcelAddIn
             Excel.Workbook workbook = ThisAddIn.app.ActiveWorkbook;
             ThisAddIn.app.ScreenUpdating = false;
             ThisAddIn.app.DisplayAlerts = false;
+            Excel.Worksheet worksheet = workbook.Worksheets["_rename"];
 
-            if (!string.IsNullOrEmpty(get_directory_path) && readFile == 1 && IsSheetExist(workbook, "_rename"))
+            if (!string.IsNullOrEmpty(get_directory_path) && Globle.readFile == 1 && IsSheetExist(workbook, "_rename"))
             {
                 //调用file.move或direction.move修改名
+                ThisAddIn.app.Application.StatusBar="文件正在重命名中，请稍后...";
+
                 for (int i = 2; i <= workbook.ActiveSheet.UsedRange.Rows.Count; i++)
                 {
-                    string cell1 = workbook.Worksheets["_rename"].Cells[i, 1].Value;
-                    string cell2 = workbook.Worksheets["_rename"].Cells[i, 2].Value;
-                    string cell3 = workbook.Worksheets["_rename"].Cells[i, 3].Value;
+                    string cell1 = worksheet.Cells[i, 1].Value;
+                    string cell2 = worksheet.Cells[i, 2].Value;
+                    string cell3 = worksheet.Cells[i, 3].Value;
                     if (string.IsNullOrEmpty(cell1) || string.IsNullOrEmpty(cell2) || string.IsNullOrEmpty(cell3))
                     {
                         MessageBox.Show($"第{i}行有空格，请检查！该行对应文件将不被改名");
@@ -211,6 +285,7 @@ namespace ExcelAddIn
                     }
                 }
 
+
                 //删除_rename表，并显示完成结果
                 workbook.Worksheets["_rename"].Delete();
                 if (IsSheetExist(workbook, "_rename_备份"))
@@ -223,16 +298,16 @@ namespace ExcelAddIn
                 {
                     Process.Start(get_directory_path);
                 }
-                readFile = 0;
+                Globle.readFile = 0;
             }
             else
             {
                 MessageBox.Show("没有选择文件夹，请先使用批读文件名功能后再使用该功能");
-                readFile = 0;
+                Globle.readFile = 0;
             }
-
             ThisAddIn.app.DisplayAlerts = true;
             ThisAddIn.app.ScreenUpdating = true;
+            ThisAddIn.app.Application.StatusBar=false;
         }
   
 
@@ -255,11 +330,6 @@ namespace ExcelAddIn
             }
         }
 
-        private void Rename_mp3_Click(object sender, RibbonControlEventArgs e)
-        {
-            Form3 form3 = new Form3();
-            form3.ShowDialog();
-        }
 
         //判断指定工作簿中指定工作表名是否存在
         public static bool IsSheetExist(Excel.Workbook workbook, string sheetName)
@@ -686,6 +756,75 @@ namespace ExcelAddIn
                 }
             }
             return cellColorDict;
+        }
+
+        //刷新_rename表
+        private void RefreshRenameTable()
+        {
+            Excel.Worksheet worksheet = ThisAddIn.app.ActiveWorkbook.Worksheets["_rename"];
+            ThisAddIn.app.ScreenUpdating = false;
+            ThisAddIn.app.DisplayAlerts = false;
+            worksheet.Rows.Clear();
+
+            try
+            {
+                switch (Select_f_or_d.Checked)
+                {
+                    case false:
+                        worksheet.Cells[1, 1] = "路径";
+                        worksheet.Cells[1, 2] = "旧文件名";
+                        worksheet.Cells[1, 3] = "新文件名";
+                        List<string> files = new List<string>(Directory.GetFiles(get_directory_path, "*.*", SearchOption.AllDirectories));
+                        files.RemoveAll(file => (File.GetAttributes(file) & FileAttributes.Hidden) == FileAttributes.Hidden);
+                        if (files.Count > 0)
+                        {
+                            for (int i = 1; i <= files.Count; i++)
+                            {
+                                string file_name = Path.GetFileName(files[i - 1]);
+                                string file_path = Path.GetDirectoryName(files[i - 1]);
+                                worksheet.Cells[i + 1, 1] = file_path;
+                                worksheet.Hyperlinks.Add(worksheet.Cells[i + 1, 1], file_path, Type.Missing, Type.Missing, file_path);
+                                worksheet.Cells[i + 1, 2] = file_name;
+                                worksheet.Hyperlinks.Add(worksheet.Cells[i + 1, 2], file_path + "\\" + file_name, Type.Missing, Type.Missing, file_name);
+                                worksheet.Cells[i + 1, 3] = file_name;
+                            }
+                        }
+                        worksheet.Range["C2"].Select();                        
+                        break;
+                    case true:
+                        worksheet.Cells[1, 1] = "文件夹路径";
+                        worksheet.Cells[1, 2] = "旧文件夹名";
+                        worksheet.Cells[1, 3] = "新文件夹名";
+                        string[] directorys = Directory.GetDirectories(get_directory_path, "*", SearchOption.AllDirectories);
+                        if (directorys.Length > 0)
+                        {
+                            for (int i = 1; i <= directorys.Length; i++)
+                            {
+                                string[] directory = directorys[i - 1].Split('\\');
+                                string directory_name = directory[directory.Length - 1];
+                                Array.Resize(ref directory, directory.Length - 1);
+                                string directory_path = string.Join("\\", directory);
+                                worksheet.Cells[i + 1, 1] = directory_path;
+                                worksheet.Hyperlinks.Add(worksheet.Cells[i + 1, 1], directory_path, Type.Missing, Type.Missing, directory_path);
+                                worksheet.Cells[i + 1, 2] = directory_name;
+                                worksheet.Hyperlinks.Add(worksheet.Cells[i + 1, 2], directory_path + "\\" + directory_name, Type.Missing, Type.Missing, directory_name);
+                                worksheet.Cells[i + 1, 3] = directory_name;
+                            }
+                            worksheet.Range["C2"].Select();
+                        }
+                        break;
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+            finally
+            {
+                ThisAddIn.app.DisplayAlerts = true;
+                ThisAddIn.app.ScreenUpdating=true;
+                ThisAddIn.app.ActiveWorkbook.RefreshAll();
+            }
         }
     }
 }

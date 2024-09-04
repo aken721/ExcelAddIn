@@ -7,7 +7,12 @@ namespace ExcelAddIn
     {
         public static class Globle
         {
-            public static int spotlight;             //聚光灯功能开关标识，0为关闭，1为打开
+            //是否执行重命名、删除、移动文件等功能标识,0为关闭，1为打开
+            public static int readFile;
+
+            //聚光灯功能开关标识，0为关闭，1为打开
+            public static int spotlight;             
+
         }
 
         public static Excel.Application app;         //声明一个excel变量
@@ -18,6 +23,8 @@ namespace ExcelAddIn
 
             //监听选定单元格变化所触发事件
             app.SheetSelectionChange += app_SheetSelectionChange;
+            
+            app.SheetBeforeDelete += new Excel.AppEvents_SheetBeforeDeleteEventHandler(Application_SheetBeforeDelete);
 
         }
 
@@ -48,9 +55,20 @@ namespace ExcelAddIn
             }
         }
 
+        //监听删除表事件
+        private void Application_SheetBeforeDelete(object Sh)
+        {
+            Excel.Workbook wb = Globals.ThisAddIn.Application.ActiveWorkbook;
+            Excel.Worksheet ws = Globals.ThisAddIn.Application.ActiveSheet;
+            if (ws.Name == "_rename")
+            {
+                Globle.readFile = 0;    
+            }
+        }
+
         private void ThisAddIn_Shutdown(object sender, System.EventArgs e)
         {
-
+            
 
         }
         #region VSTO 生成的代码
