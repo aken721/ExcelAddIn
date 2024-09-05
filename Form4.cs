@@ -1,18 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Documents;
 using Microsoft.VisualBasic.FileIO;
 using System.Windows.Forms;
-using Microsoft.Office.Interop.Excel;
 using Excel=Microsoft.Office.Interop.Excel;
-using Microsoft.Office.Tools.Excel;
+using System.Threading.Tasks;
+
 
 namespace ExcelAddIn
 {
@@ -22,23 +16,28 @@ namespace ExcelAddIn
         internal  int regulation_number = 1;
         public static int runButtonClicked = 0;
         public static int  resetButtonClicked= 0;
-
         private string command=Ribbon1.runcommand;
+        private bool isCheckedAll = false;
 
         public Form4()
         {
             InitializeComponent();
         }
 
-        private void Form4_Load(object sender, EventArgs e)
+        private async void Form4_Load(object sender, EventArgs e)
         {
             if (command == "file")
             {
-                ListBoxItemsLoad();
+                BeginInvoke(new MethodInvoker(() => ListBoxItemsLoad()));
             }
             else
             {
-                file_type_checkedListBox.Enabled = false;  
+                Invoke(new MethodInvoker(() => 
+                {
+                    file_type_checkedListBox.Enabled = false;
+                    select_all_checkBox.Visible = false;
+                }));
+                
             }
             
             file_type_checkedListBox.CheckOnClick = true;
@@ -85,6 +84,11 @@ namespace ExcelAddIn
                 {
                     file_type_checkedListBox.Items.Add(item);                
                 }
+                select_all_checkBox.Visible = true;
+            }
+            else
+            {
+                select_all_checkBox.Visible = false;
             }
         }
 
@@ -550,7 +554,50 @@ namespace ExcelAddIn
                     }
                     break;
             }            
-        }    
+        }
+
+        private void file_type_checkedListBox_ItemCheck(object sender, ItemCheckEventArgs e)
+        {
+            if (isCheckedAll) return;
+            
+            if (e.NewValue == CheckState.Unchecked)
+            {
+                select_all_checkBox.Checked = false;
+            }
+            else
+            {
+                // 使用BeginInvoke来延迟执行状态检查和更新
+                this.BeginInvoke(new MethodInvoker(() =>
+                {
+                    bool allChecked = true;
+                    for (int i = 0; i < file_type_checkedListBox.Items.Count; i++)
+                    {
+                        if (file_type_checkedListBox.GetItemCheckState(i) != CheckState.Checked)
+                        {
+                            allChecked = false;
+                            break;
+                        }
+                    }
+                    if (allChecked)
+                    {
+                        // 全选时联动select_all_checkBox被选中
+                        select_all_checkBox.Checked = true;
+                    }
+                }));
+            }
+        }
+
+        //全选/取消全选
+        private void select_all_checkBox_Click(object sender, EventArgs e)
+        {
+            isCheckedAll = true;
+            for (int i = 0; i < file_type_checkedListBox.Items.Count; i++)
+            {
+                file_type_checkedListBox.SetItemChecked(i, select_all_checkBox.Checked);
+
+            }
+            isCheckedAll = false;
+        }
     }
 
 

@@ -1,6 +1,4 @@
-﻿using Microsoft.Office.Interop.Excel;
-using Microsoft.Office.Tools.Excel;
-using Microsoft.Office.Tools.Ribbon;
+﻿using Microsoft.Office.Tools.Ribbon;
 using NAudio.Wave;
 using System;
 using System.Collections.Generic;
@@ -343,7 +341,6 @@ namespace ExcelAddIn
             }
             return false;
         }
-
 
         //音乐播放模式
         private enum PlaybackMode

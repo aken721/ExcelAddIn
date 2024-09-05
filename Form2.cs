@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Drawing;
 using System.Net.Mail;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 using Excel = Microsoft.Office.Interop.Excel;
 
@@ -21,7 +22,7 @@ namespace ExcelAddIn
         private List<string> errRecord = new List<string>();
         private Dictionary<string, List<string>> address_attachment = new Dictionary<string, List<string>>();
 
-        private void Form2_Load(object sender, EventArgs e)
+        private async void Form2_Load(object sender, EventArgs e)
         {
             this.MaximizeBox = false;
             send_progress_label.Visible = false;
@@ -31,10 +32,10 @@ namespace ExcelAddIn
             attachment_checkBox.Visible = false;
             mailpassword_textBox.UseSystemPasswordChar = true;
             pictureType = "hide";
-            for (int i = 1; i <= ThisAddIn.app.ActiveSheet.UsedRange.Columns.Count; i++)
-            {
-                mailto_comboBox.Items.Add(ThisAddIn.app.ActiveSheet.Cells[1, i].Text);
-            }
+
+            // 使用异步方法加载数据
+            await LoadMailToComboBoxAsync();
+
             foreach (Control control in this.Controls)
             {
                 if (control is Label)
@@ -42,6 +43,29 @@ namespace ExcelAddIn
                     control.TabStop = false;
                 }
             }
+        }
+
+        //异步加载数据
+        private async Task LoadMailToComboBoxAsync()
+        {
+            List<string> mailAddresses = new List<string>();
+            int columnCount = ThisAddIn.app.ActiveSheet.UsedRange.Columns.Count;
+
+            for (int i = 1; i <= columnCount; i++)
+            {
+                // 异步获取单元格文本
+                string mailAddress = await Task.Run(() => ThisAddIn.app.ActiveSheet.Cells[1, i].Text);
+                mailAddresses.Add(mailAddress);
+            }
+
+            // 在UI线程上更新ComboBox
+            this.Invoke(new MethodInvoker(() =>
+            {
+                foreach (string mailAddress in mailAddresses)
+                {
+                    mailto_comboBox.Items.Add(mailAddress);
+                }
+            }));
         }
 
         //发送附件radioButton选中或未选中

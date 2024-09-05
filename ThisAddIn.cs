@@ -1,5 +1,4 @@
-﻿using System.Windows.Media.Media3D;
-using Excel = Microsoft.Office.Interop.Excel;
+﻿using Excel = Microsoft.Office.Interop.Excel;
 
 namespace ExcelAddIn
 {
