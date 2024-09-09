@@ -5,8 +5,6 @@ using System.Linq;
 using Microsoft.VisualBasic.FileIO;
 using System.Windows.Forms;
 using Excel=Microsoft.Office.Interop.Excel;
-using System.Threading.Tasks;
-
 
 namespace ExcelAddIn
 {
