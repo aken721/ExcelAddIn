@@ -35,32 +35,58 @@
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
+            Microsoft.Office.Tools.Ribbon.RibbonDropDownItem ribbonDropDownItemImpl5 = this.Factory.CreateRibbonDropDownItem();
+            Microsoft.Office.Tools.Ribbon.RibbonDropDownItem ribbonDropDownItemImpl6 = this.Factory.CreateRibbonDropDownItem();
+            Microsoft.Office.Tools.Ribbon.RibbonDropDownItem ribbonDropDownItemImpl7 = this.Factory.CreateRibbonDropDownItem();
+            Microsoft.Office.Tools.Ribbon.RibbonDropDownItem ribbonDropDownItemImpl8 = this.Factory.CreateRibbonDropDownItem();
+            Microsoft.Office.Tools.Ribbon.RibbonDropDownItem ribbonDropDownItemImpl9 = this.Factory.CreateRibbonDropDownItem();
+            Microsoft.Office.Tools.Ribbon.RibbonDropDownItem ribbonDropDownItemImpl10 = this.Factory.CreateRibbonDropDownItem();
+            Microsoft.Office.Tools.Ribbon.RibbonDropDownItem ribbonDropDownItemImpl11 = this.Factory.CreateRibbonDropDownItem();
+            Microsoft.Office.Tools.Ribbon.RibbonDropDownItem ribbonDropDownItemImpl12 = this.Factory.CreateRibbonDropDownItem();
+            Microsoft.Office.Tools.Ribbon.RibbonDropDownItem ribbonDropDownItemImpl13 = this.Factory.CreateRibbonDropDownItem();
+            Microsoft.Office.Tools.Ribbon.RibbonDropDownItem ribbonDropDownItemImpl14 = this.Factory.CreateRibbonDropDownItem();
+            Microsoft.Office.Tools.Ribbon.RibbonDropDownItem ribbonDropDownItemImpl1 = this.Factory.CreateRibbonDropDownItem();
+            Microsoft.Office.Tools.Ribbon.RibbonDropDownItem ribbonDropDownItemImpl2 = this.Factory.CreateRibbonDropDownItem();
+            Microsoft.Office.Tools.Ribbon.RibbonDropDownItem ribbonDropDownItemImpl3 = this.Factory.CreateRibbonDropDownItem();
+            Microsoft.Office.Tools.Ribbon.RibbonDropDownItem ribbonDropDownItemImpl4 = this.Factory.CreateRibbonDropDownItem();
             this.tab1 = this.Factory.CreateRibbonTab();
             this.group1 = this.Factory.CreateRibbonGroup();
+            this.group2 = this.Factory.CreateRibbonGroup();
+            this.group3 = this.Factory.CreateRibbonGroup();
+            this.separator1 = this.Factory.CreateRibbonSeparator();
+            this.separator3 = this.Factory.CreateRibbonSeparator();
+            this.switch_FD_label = this.Factory.CreateRibbonLabel();
+            this.group4 = this.Factory.CreateRibbonGroup();
+            this.separator2 = this.Factory.CreateRibbonSeparator();
+            this.box1 = this.Factory.CreateRibbonBox();
+            this.buttonGroup1 = this.Factory.CreateRibbonButtonGroup();
+            this.buttonGroup2 = this.Factory.CreateRibbonButtonGroup();
+            this.group5 = this.Factory.CreateRibbonGroup();
+            this.page_orientation_comboBox = this.Factory.CreateRibbonComboBox();
+            this.paper_size_comboBox = this.Factory.CreateRibbonComboBox();
+            this.folderBrowserDialog1 = new System.Windows.Forms.FolderBrowserDialog();
+            this.timer1 = new System.Windows.Forms.Timer(this.components);
+            this.saveFileDialog1 = new System.Windows.Forms.SaveFileDialog();
+            this.page_zoom_comboBox = this.Factory.CreateRibbonComboBox();
             this.Excel_extend = this.Factory.CreateRibbonButton();
             this.confirm_spotlight = this.Factory.CreateRibbonToggleButton();
-            this.group2 = this.Factory.CreateRibbonGroup();
             this.Send_mail = this.Factory.CreateRibbonButton();
-            this.group3 = this.Factory.CreateRibbonGroup();
             this.Files_read = this.Factory.CreateRibbonButton();
             this.File_rename = this.Factory.CreateRibbonButton();
             this.delandmove_button = this.Factory.CreateRibbonButton();
             this.Select_f_or_d = this.Factory.CreateRibbonToggleButton();
-            this.switch_FD_label = this.Factory.CreateRibbonLabel();
-            this.group4 = this.Factory.CreateRibbonGroup();
             this.Rename_mp3 = this.Factory.CreateRibbonButton();
-            this.separator2 = this.Factory.CreateRibbonSeparator();
-            this.box1 = this.Factory.CreateRibbonBox();
-            this.buttonGroup1 = this.Factory.CreateRibbonButtonGroup();
             this.Select_mp3_button = this.Factory.CreateRibbonButton();
             this.Mode_button = this.Factory.CreateRibbonButton();
-            this.buttonGroup2 = this.Factory.CreateRibbonButtonGroup();
             this.Play_button = this.Factory.CreateRibbonButton();
             this.Stop_button = this.Factory.CreateRibbonButton();
             this.Next_button = this.Factory.CreateRibbonButton();
             this.Previous_button = this.Factory.CreateRibbonButton();
-            this.folderBrowserDialog1 = new System.Windows.Forms.FolderBrowserDialog();
-            this.timer1 = new System.Windows.Forms.Timer(this.components);
+            this.to_pdf_button = this.Factory.CreateRibbonButton();
+            this.sheet_export_comboBox = this.Factory.CreateRibbonComboBox();
+            this.box2 = this.Factory.CreateRibbonBox();
+            this.box3 = this.Factory.CreateRibbonBox();
+            this.export_type_comboBox = this.Factory.CreateRibbonComboBox();
             this.tab1.SuspendLayout();
             this.group1.SuspendLayout();
             this.group2.SuspendLayout();
@@ -69,6 +95,9 @@
             this.box1.SuspendLayout();
             this.buttonGroup1.SuspendLayout();
             this.buttonGroup2.SuspendLayout();
+            this.group5.SuspendLayout();
+            this.box2.SuspendLayout();
+            this.box3.SuspendLayout();
             this.SuspendLayout();
             // 
             // tab1
@@ -78,6 +107,7 @@
             this.tab1.Groups.Add(this.group2);
             this.tab1.Groups.Add(this.group3);
             this.tab1.Groups.Add(this.group4);
+            this.tab1.Groups.Add(this.group5);
             this.tab1.Label = "工具箱";
             this.tab1.Name = "tab1";
             // 
@@ -87,6 +117,122 @@
             this.group1.Items.Add(this.confirm_spotlight);
             this.group1.Label = "表工具";
             this.group1.Name = "group1";
+            // 
+            // group2
+            // 
+            this.group2.Items.Add(this.Send_mail);
+            this.group2.Label = "群发工具";
+            this.group2.Name = "group2";
+            // 
+            // group3
+            // 
+            this.group3.Items.Add(this.Files_read);
+            this.group3.Items.Add(this.separator1);
+            this.group3.Items.Add(this.File_rename);
+            this.group3.Items.Add(this.separator3);
+            this.group3.Items.Add(this.delandmove_button);
+            this.group3.Items.Add(this.Select_f_or_d);
+            this.group3.Items.Add(this.switch_FD_label);
+            this.group3.Label = "文件/文件夹工具";
+            this.group3.Name = "group3";
+            // 
+            // separator1
+            // 
+            this.separator1.Name = "separator1";
+            // 
+            // separator3
+            // 
+            this.separator3.Name = "separator3";
+            // 
+            // switch_FD_label
+            // 
+            this.switch_FD_label.Label = "文件名";
+            this.switch_FD_label.Name = "switch_FD_label";
+            // 
+            // group4
+            // 
+            this.group4.Items.Add(this.Rename_mp3);
+            this.group4.Items.Add(this.separator2);
+            this.group4.Items.Add(this.box1);
+            this.group4.Label = "音乐工具";
+            this.group4.Name = "group4";
+            // 
+            // separator2
+            // 
+            this.separator2.Name = "separator2";
+            // 
+            // box1
+            // 
+            this.box1.BoxStyle = Microsoft.Office.Tools.Ribbon.RibbonBoxStyle.Vertical;
+            this.box1.Items.Add(this.buttonGroup1);
+            this.box1.Items.Add(this.buttonGroup2);
+            this.box1.Name = "box1";
+            // 
+            // buttonGroup1
+            // 
+            this.buttonGroup1.Items.Add(this.Select_mp3_button);
+            this.buttonGroup1.Items.Add(this.Mode_button);
+            this.buttonGroup1.Name = "buttonGroup1";
+            // 
+            // buttonGroup2
+            // 
+            this.buttonGroup2.Items.Add(this.Play_button);
+            this.buttonGroup2.Items.Add(this.Stop_button);
+            this.buttonGroup2.Items.Add(this.Next_button);
+            this.buttonGroup2.Items.Add(this.Previous_button);
+            this.buttonGroup2.Name = "buttonGroup2";
+            // 
+            // group5
+            // 
+            this.group5.Items.Add(this.to_pdf_button);
+            this.group5.Items.Add(this.box2);
+            this.group5.Items.Add(this.box3);
+            this.group5.Label = "PDF工具";
+            this.group5.Name = "group5";
+            // 
+            // page_orientation_comboBox
+            // 
+            ribbonDropDownItemImpl5.Label = "纵向";
+            ribbonDropDownItemImpl6.Label = "横向";
+            this.page_orientation_comboBox.Items.Add(ribbonDropDownItemImpl5);
+            this.page_orientation_comboBox.Items.Add(ribbonDropDownItemImpl6);
+            this.page_orientation_comboBox.Label = "页面方向";
+            this.page_orientation_comboBox.Name = "page_orientation_comboBox";
+            this.page_orientation_comboBox.Text = null;
+            this.page_orientation_comboBox.TextChanged += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.page_orientation_comboBox_TextChanged);
+            // 
+            // paper_size_comboBox
+            // 
+            ribbonDropDownItemImpl7.Label = "A4";
+            ribbonDropDownItemImpl8.Label = "A3";
+            ribbonDropDownItemImpl9.Label = "A5";
+            ribbonDropDownItemImpl10.Label = "B5";
+            this.paper_size_comboBox.Items.Add(ribbonDropDownItemImpl7);
+            this.paper_size_comboBox.Items.Add(ribbonDropDownItemImpl8);
+            this.paper_size_comboBox.Items.Add(ribbonDropDownItemImpl9);
+            this.paper_size_comboBox.Items.Add(ribbonDropDownItemImpl10);
+            this.paper_size_comboBox.Label = "页面大小";
+            this.paper_size_comboBox.Name = "paper_size_comboBox";
+            this.paper_size_comboBox.Text = null;
+            this.paper_size_comboBox.TextChanged += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.paper_size_comboBox_TextChanged);
+            // 
+            // timer1
+            // 
+            this.timer1.Tick += new System.EventHandler(this.timer1_Tick);
+            // 
+            // page_zoom_comboBox
+            // 
+            ribbonDropDownItemImpl11.Label = "无缩放";
+            ribbonDropDownItemImpl12.Label = "表自适应";
+            ribbonDropDownItemImpl13.Label = "行自适应";
+            ribbonDropDownItemImpl14.Label = "列自适应";
+            this.page_zoom_comboBox.Items.Add(ribbonDropDownItemImpl11);
+            this.page_zoom_comboBox.Items.Add(ribbonDropDownItemImpl12);
+            this.page_zoom_comboBox.Items.Add(ribbonDropDownItemImpl13);
+            this.page_zoom_comboBox.Items.Add(ribbonDropDownItemImpl14);
+            this.page_zoom_comboBox.Label = "页面缩放";
+            this.page_zoom_comboBox.Name = "page_zoom_comboBox";
+            this.page_zoom_comboBox.TextChanged += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.page_zoom_comboBox_TextChanged);
             // 
             // Excel_extend
             // 
@@ -106,12 +252,6 @@
             this.confirm_spotlight.ShowImage = true;
             this.confirm_spotlight.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.confirm_spotlight_Click);
             // 
-            // group2
-            // 
-            this.group2.Items.Add(this.Send_mail);
-            this.group2.Label = "群发工具";
-            this.group2.Name = "group2";
-            // 
             // Send_mail
             // 
             this.Send_mail.ControlSize = Microsoft.Office.Core.RibbonControlSize.RibbonControlSizeLarge;
@@ -120,16 +260,6 @@
             this.Send_mail.Name = "Send_mail";
             this.Send_mail.ShowImage = true;
             this.Send_mail.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.Send_mail_Click);
-            // 
-            // group3
-            // 
-            this.group3.Items.Add(this.Files_read);
-            this.group3.Items.Add(this.File_rename);
-            this.group3.Items.Add(this.delandmove_button);
-            this.group3.Items.Add(this.Select_f_or_d);
-            this.group3.Items.Add(this.switch_FD_label);
-            this.group3.Label = "文件/文件夹工具";
-            this.group3.Name = "group3";
             // 
             // Files_read
             // 
@@ -167,19 +297,6 @@
             this.Select_f_or_d.ShowLabel = false;
             this.Select_f_or_d.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.Select_f_or_d_Click);
             // 
-            // switch_FD_label
-            // 
-            this.switch_FD_label.Label = "文件名";
-            this.switch_FD_label.Name = "switch_FD_label";
-            // 
-            // group4
-            // 
-            this.group4.Items.Add(this.Rename_mp3);
-            this.group4.Items.Add(this.separator2);
-            this.group4.Items.Add(this.box1);
-            this.group4.Label = "音乐工具";
-            this.group4.Name = "group4";
-            // 
             // Rename_mp3
             // 
             this.Rename_mp3.ControlSize = Microsoft.Office.Core.RibbonControlSize.RibbonControlSizeLarge;
@@ -188,23 +305,6 @@
             this.Rename_mp3.Name = "Rename_mp3";
             this.Rename_mp3.ShowImage = true;
             this.Rename_mp3.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.Rename_mp3_Click);
-            // 
-            // separator2
-            // 
-            this.separator2.Name = "separator2";
-            // 
-            // box1
-            // 
-            this.box1.BoxStyle = Microsoft.Office.Tools.Ribbon.RibbonBoxStyle.Vertical;
-            this.box1.Items.Add(this.buttonGroup1);
-            this.box1.Items.Add(this.buttonGroup2);
-            this.box1.Name = "box1";
-            // 
-            // buttonGroup1
-            // 
-            this.buttonGroup1.Items.Add(this.Select_mp3_button);
-            this.buttonGroup1.Items.Add(this.Mode_button);
-            this.buttonGroup1.Name = "buttonGroup1";
             // 
             // Select_mp3_button
             // 
@@ -225,14 +325,6 @@
             this.Mode_button.ShowImage = true;
             this.Mode_button.ShowLabel = false;
             this.Mode_button.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.Mode_button_Click);
-            // 
-            // buttonGroup2
-            // 
-            this.buttonGroup2.Items.Add(this.Play_button);
-            this.buttonGroup2.Items.Add(this.Stop_button);
-            this.buttonGroup2.Items.Add(this.Next_button);
-            this.buttonGroup2.Items.Add(this.Previous_button);
-            this.buttonGroup2.Name = "buttonGroup2";
             // 
             // Play_button
             // 
@@ -274,9 +366,49 @@
             this.Previous_button.ShowLabel = false;
             this.Previous_button.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.Previous_button_Click);
             // 
-            // timer1
+            // to_pdf_button
             // 
-            this.timer1.Tick += new System.EventHandler(this.timer1_Tick);
+            this.to_pdf_button.ControlSize = Microsoft.Office.Core.RibbonControlSize.RibbonControlSizeLarge;
+            this.to_pdf_button.Image = global::ExcelAddIn.Properties.Resources.pdf;
+            this.to_pdf_button.Label = "转为PDF";
+            this.to_pdf_button.Name = "to_pdf_button";
+            this.to_pdf_button.ShowImage = true;
+            this.to_pdf_button.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.to_pdf_button_Click);
+            // 
+            // sheet_export_comboBox
+            // 
+            ribbonDropDownItemImpl1.Label = "当前表";
+            ribbonDropDownItemImpl2.Label = "全部表";
+            this.sheet_export_comboBox.Items.Add(ribbonDropDownItemImpl1);
+            this.sheet_export_comboBox.Items.Add(ribbonDropDownItemImpl2);
+            this.sheet_export_comboBox.Label = "导出表集";
+            this.sheet_export_comboBox.Name = "sheet_export_comboBox";
+            this.sheet_export_comboBox.TextChanged += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.sheet_export_comboBox_TextChanged);
+            // 
+            // box2
+            // 
+            this.box2.BoxStyle = Microsoft.Office.Tools.Ribbon.RibbonBoxStyle.Vertical;
+            this.box2.Items.Add(this.sheet_export_comboBox);
+            this.box2.Items.Add(this.export_type_comboBox);
+            this.box2.Name = "box2";
+            // 
+            // box3
+            // 
+            this.box3.BoxStyle = Microsoft.Office.Tools.Ribbon.RibbonBoxStyle.Vertical;
+            this.box3.Items.Add(this.page_orientation_comboBox);
+            this.box3.Items.Add(this.paper_size_comboBox);
+            this.box3.Items.Add(this.page_zoom_comboBox);
+            this.box3.Name = "box3";
+            // 
+            // export_type_comboBox
+            // 
+            ribbonDropDownItemImpl3.Label = "多表单文件";
+            ribbonDropDownItemImpl4.Label = "多表多文件";
+            this.export_type_comboBox.Items.Add(ribbonDropDownItemImpl3);
+            this.export_type_comboBox.Items.Add(ribbonDropDownItemImpl4);
+            this.export_type_comboBox.Label = "导出方式";
+            this.export_type_comboBox.Name = "export_type_comboBox";
+            this.export_type_comboBox.TextChanged += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.export_type_comboBox_TextChanged);
             // 
             // Ribbon1
             // 
@@ -300,6 +432,12 @@
             this.buttonGroup1.PerformLayout();
             this.buttonGroup2.ResumeLayout(false);
             this.buttonGroup2.PerformLayout();
+            this.group5.ResumeLayout(false);
+            this.group5.PerformLayout();
+            this.box2.ResumeLayout(false);
+            this.box2.PerformLayout();
+            this.box3.ResumeLayout(false);
+            this.box3.PerformLayout();
             this.ResumeLayout(false);
 
         }
@@ -332,6 +470,18 @@
         private System.Windows.Forms.Timer timer1;
         internal Microsoft.Office.Tools.Ribbon.RibbonToggleButton confirm_spotlight;
         internal Microsoft.Office.Tools.Ribbon.RibbonButton delandmove_button;
+        internal Microsoft.Office.Tools.Ribbon.RibbonSeparator separator1;
+        internal Microsoft.Office.Tools.Ribbon.RibbonSeparator separator3;
+        internal Microsoft.Office.Tools.Ribbon.RibbonGroup group5;
+        internal Microsoft.Office.Tools.Ribbon.RibbonButton to_pdf_button;
+        internal Microsoft.Office.Tools.Ribbon.RibbonComboBox page_orientation_comboBox;
+        private System.Windows.Forms.SaveFileDialog saveFileDialog1;
+        internal Microsoft.Office.Tools.Ribbon.RibbonComboBox paper_size_comboBox;
+        internal Microsoft.Office.Tools.Ribbon.RibbonComboBox page_zoom_comboBox;
+        internal Microsoft.Office.Tools.Ribbon.RibbonComboBox sheet_export_comboBox;
+        internal Microsoft.Office.Tools.Ribbon.RibbonBox box2;
+        internal Microsoft.Office.Tools.Ribbon.RibbonBox box3;
+        internal Microsoft.Office.Tools.Ribbon.RibbonComboBox export_type_comboBox;
     }
 
     partial class ThisRibbonCollection

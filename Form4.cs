@@ -24,7 +24,7 @@ namespace ExcelAddIn
             InitializeComponent();
         }
 
-        private async void Form4_Load(object sender, EventArgs e)
+        private void Form4_Load(object sender, EventArgs e)
         {
             if (command == "file")
             {

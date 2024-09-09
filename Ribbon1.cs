@@ -4,10 +4,14 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using static ExcelAddIn.ThisAddIn;
 using Excel = Microsoft.Office.Interop.Excel;
+using MySqlX.XDevAPI.Relational;
+using Microsoft.Win32;
+using Microsoft.Office.Interop.Excel;
 
 namespace ExcelAddIn
 {
@@ -31,6 +35,12 @@ namespace ExcelAddIn
             currentPlayState = PlaybackState.Stopped;
             Select_mp3_button.Image = Properties.Resources.no_open_fold;
             musicFiles.Clear();
+            page_orientation_comboBox.Text = "横向";
+            paper_size_comboBox.Text = "A4";
+            page_zoom_comboBox.Text = "无缩放";
+            sheet_export_comboBox.Text = "当前表";
+            export_type_comboBox.Text = "多表单文件";
+            export_type_comboBox.Visible=false;
         }
 
 
@@ -821,6 +831,335 @@ namespace ExcelAddIn
                 ThisAddIn.app.DisplayAlerts = true;
                 ThisAddIn.app.ScreenUpdating=true;
                 ThisAddIn.app.ActiveWorkbook.RefreshAll();
+                
+            }
+        }
+
+        private void to_pdf_button_Click(object sender, RibbonControlEventArgs e)
+        {
+            Excel.Workbook workbook = ThisAddIn.app.ActiveWorkbook;
+
+            switch (sheet_export_comboBox.Text)
+            {
+                case "当前表":
+                    ThisAddIn.app.ScreenUpdating = false;
+                    ThisAddIn.app.DisplayAlerts= false;
+                    Excel.Worksheet worksheet = workbook.ActiveSheet;
+                    string sheetName = worksheet.Name;
+                    saveFileDialog1.Filter = "PDF Files|*.pdf";
+                    saveFileDialog1.Title = "保存PDF文件";
+                    saveFileDialog1.FileName = $"{sheetName}.pdf";
+                    saveFileDialog1.AddExtension = true;
+                    DialogResult result = saveFileDialog1.ShowDialog();
+                    Excel.PageSetup pageSetup = worksheet.PageSetup;
+
+                    if (result == DialogResult.OK)
+                    {
+                        // 设置页面
+                        pageSetup.PrintArea = worksheet.UsedRange.Address; //设置打印区域
+                        pageSetup.LeftMargin = 0.5; // 左边距，单位为英寸
+                        pageSetup.RightMargin = 0.5; // 右边距
+                        pageSetup.TopMargin = 0.5; // 上边距
+                        pageSetup.BottomMargin = 0.5; // 下边距
+                        pageSetup.CenterHorizontally = true;
+                        pageSetup.CenterVertically = true;
+
+                        switch (page_orientation_comboBox.Text)
+                        {
+                            case "纵向":
+                                worksheet.PageSetup.Orientation = Excel.XlPageOrientation.xlPortrait;
+                                break;
+                            case "横向":
+                                worksheet.PageSetup.Orientation = Excel.XlPageOrientation.xlLandscape;
+                                break;
+                            default:
+                                worksheet.PageSetup.Orientation = Excel.XlPageOrientation.xlPortrait;
+                                break;
+                        }
+                        switch (paper_size_comboBox.Text)
+                        {
+                            case "A4":
+                                worksheet.PageSetup.PaperSize = Excel.XlPaperSize.xlPaperA4;
+                                break;
+                            case "A3":
+                                worksheet.PageSetup.PaperSize = Excel.XlPaperSize.xlPaperA3;
+                                break;
+                            case "B5":
+                                worksheet.PageSetup.PaperSize = Excel.XlPaperSize.xlPaperB5;
+                                break;
+                            default:
+                                worksheet.PageSetup.PaperSize = Excel.XlPaperSize.xlPaperA4;
+                                break;
+                        }
+                        switch (page_zoom_comboBox.Text)
+                        {
+                            case "无缩放":
+                                pageSetup.Zoom = 100;
+                                break;
+                            case "表自适应":
+                                pageSetup.Zoom = false;
+                                pageSetup.FitToPagesWide = 1;
+                                pageSetup.FitToPagesTall = 1;
+                                break;
+                            case "行自适应":
+                                pageSetup.Zoom = false;
+                                pageSetup.FitToPagesTall = 1;
+                                break;
+                            case "列自适应":
+                                pageSetup.Zoom = false;
+                                pageSetup.FitToPagesTall = 1;
+                                break;
+                        }
+                        worksheet.ExportAsFixedFormat(Excel.XlFixedFormatType.xlTypePDF, saveFileDialog1.FileName, Excel.XlFixedFormatQuality.xlQualityStandard, Type.Missing, false);
+                        MessageBox.Show("PDF已转换完成！");
+                    }
+                    ThisAddIn.app.ScreenUpdating = true;
+                    ThisAddIn.app.DisplayAlerts = true;
+                    break;
+                case "全部表":
+                    ThisAddIn.app.ScreenUpdating = false;
+                    ThisAddIn.app.DisplayAlerts = false;
+                    string get_pdf_path;
+                    string output_pdf_name;
+                    string output_pdf_path;
+                    folderBrowserDialog1.Description = "请选择保存PDF的文件夹";
+                    if (folderBrowserDialog1.ShowDialog() == DialogResult.OK)
+                    {
+                        get_pdf_path = folderBrowserDialog1.SelectedPath;
+                    }
+                    else
+                    {
+                        return;
+                    }
+
+                    switch (export_type_comboBox.Text)
+                    {
+                        case "多表单文件":
+                            
+                            foreach (Excel.Worksheet sheet in workbook.Worksheets)
+                            {
+                                // 设置页面
+                                Excel.PageSetup pagesSetup = sheet.PageSetup;
+
+                                pagesSetup.PrintArea = sheet.UsedRange.Address; //设置打印区域
+                                pagesSetup.LeftMargin = 0.5; // 左边距，单位为英寸
+                                pagesSetup.RightMargin = 0.5; // 右边距
+                                pagesSetup.TopMargin = 0.5; // 上边距
+                                pagesSetup.BottomMargin = 0.5; // 下边距
+                                pagesSetup.CenterHorizontally = true;
+                                pagesSetup.CenterVertically = true;
+
+                                switch (page_orientation_comboBox.Text)
+                                {
+                                    case "纵向":
+                                        sheet.PageSetup.Orientation = Excel.XlPageOrientation.xlPortrait;
+                                        break;
+                                    case "横向":
+                                        sheet.PageSetup.Orientation = Excel.XlPageOrientation.xlLandscape;
+                                        break;
+                                    default:
+                                        sheet.PageSetup.Orientation = Excel.XlPageOrientation.xlPortrait;
+                                        break;
+                                }
+                                switch (paper_size_comboBox.Text)
+                                {
+                                    case "A4":
+                                        sheet.PageSetup.PaperSize = Excel.XlPaperSize.xlPaperA4;
+                                        break;
+                                    case "A3":
+                                        sheet.PageSetup.PaperSize = Excel.XlPaperSize.xlPaperA3;
+                                        break;
+                                    case "B5":
+                                        sheet.PageSetup.PaperSize = Excel.XlPaperSize.xlPaperB5;
+                                        break;
+                                    default:
+                                        sheet.PageSetup.PaperSize = Excel.XlPaperSize.xlPaperA4;
+                                        break;
+                                }
+                                switch (page_zoom_comboBox.Text)
+                                {
+                                    case "无缩放":
+                                        pagesSetup.Zoom = 100;
+                                        break;
+                                    case "表自适应":
+                                        pagesSetup.Zoom = false;
+                                        pagesSetup.FitToPagesWide = 1;
+                                        pagesSetup.FitToPagesTall = 1;
+                                        break;
+                                    case "行自适应":
+                                        pagesSetup.Zoom = false;
+                                        pagesSetup.FitToPagesTall = 1;
+                                        break;
+                                    case "列自适应":
+                                        pagesSetup.Zoom = false;
+                                        pagesSetup.FitToPagesTall = 1;
+                                        break;
+                                }
+                            }
+                            output_pdf_name=workbook.Name;
+                            output_pdf_path = Path.Combine(get_pdf_path, output_pdf_name + ".pdf");
+                            workbook.ExportAsFixedFormat(Excel.XlFixedFormatType.xlTypePDF, saveFileDialog1.FileName, Excel.XlFixedFormatQuality.xlQualityStandard, Type.Missing, false);
+                            MessageBox.Show("PDF已转换完成！");
+                            break;
+                        case "多表多文件":
+                            ThisAddIn.app.ScreenUpdating = false;
+                            ThisAddIn.app.DisplayAlerts = false;
+                            foreach (Excel.Worksheet sheet in workbook.Worksheets)
+                            {
+                                // 设置页面
+                                Excel.PageSetup pagesSetup = sheet.PageSetup;
+
+                                pagesSetup.PrintArea = sheet.UsedRange.Address; //设置打印区域
+                                pagesSetup.LeftMargin = 0.5; // 左边距，单位为英寸
+                                pagesSetup.RightMargin = 0.5; // 右边距
+                                pagesSetup.TopMargin = 0.5; // 上边距
+                                pagesSetup.BottomMargin = 0.5; // 下边距
+                                pagesSetup.CenterHorizontally = true;
+                                pagesSetup.CenterVertically = true;
+
+                                switch (page_orientation_comboBox.Text)
+                                {
+                                    case "纵向":
+                                        sheet.PageSetup.Orientation = Excel.XlPageOrientation.xlPortrait;
+                                        break;
+                                    case "横向":
+                                        sheet.PageSetup.Orientation = Excel.XlPageOrientation.xlLandscape;
+                                        break;
+                                    default:
+                                        sheet.PageSetup.Orientation = Excel.XlPageOrientation.xlPortrait;
+                                        break;
+                                }
+                                switch (paper_size_comboBox.Text)
+                                {
+                                    case "A4":
+                                        sheet.PageSetup.PaperSize = Excel.XlPaperSize.xlPaperA4;
+                                        break;
+                                    case "A3":
+                                        sheet.PageSetup.PaperSize = Excel.XlPaperSize.xlPaperA3;
+                                        break;
+                                    case "B5":
+                                        sheet.PageSetup.PaperSize = Excel.XlPaperSize.xlPaperB5;
+                                        break;
+                                    default:
+                                        sheet.PageSetup.PaperSize = Excel.XlPaperSize.xlPaperA4;
+                                        break;
+                                }
+                                switch (page_zoom_comboBox.Text)
+                                {
+                                    case "无缩放":
+                                        pagesSetup.Zoom = 100;
+                                        break;
+                                    case "表自适应":
+                                        pagesSetup.Zoom = false;
+                                        pagesSetup.FitToPagesWide = 1;
+                                        pagesSetup.FitToPagesTall = 1;
+                                        break;
+                                    case "行自适应":
+                                        pagesSetup.Zoom = false;
+                                        pagesSetup.FitToPagesTall = 1;
+                                        break;
+                                    case "列自适应":
+                                        pagesSetup.Zoom = false;
+                                        pagesSetup.FitToPagesTall = 1;
+                                        break;
+                                }
+                                output_pdf_name = sheet.Name;
+                                output_pdf_path = Path.Combine(get_pdf_path, output_pdf_name + ".pdf");
+                                sheet.ExportAsFixedFormat(Excel.XlFixedFormatType.xlTypePDF, saveFileDialog1.FileName, Excel.XlFixedFormatQuality.xlQualityStandard, Type.Missing, false);
+                                MessageBox.Show("PDF已转换完成！");
+                            }
+                            break;
+                    }
+                    ThisAddIn.app.ScreenUpdating = true;
+                    ThisAddIn.app.DisplayAlerts = true;
+                    break;
+            }            
+        }
+
+        /// <summary>
+        /// 以下代码均为RibbonComboBox中的限制手工输入逻辑。
+        /// 因RibbonComboBox不支持readonly属性，所以在判断手工输入内容为非可选内容时，自动会改为默认可选内容
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void sheet_export_comboBox_TextChanged(object sender, RibbonControlEventArgs e)
+        {
+            if (sheet_export_comboBox.Text == "全部表")
+            {
+                export_type_comboBox.Visible = true;
+            }
+            else if(sheet_export_comboBox.Text =="当前表")
+            {
+                export_type_comboBox.Visible = false;
+            }
+            else
+            {       
+
+                if (MessageBox.Show("该选项只能是“当前表”或“全部表”")==DialogResult.OK)
+                {
+                    export_type_comboBox.Visible = false;
+                    sheet_export_comboBox.Text = "当前表";
+                }
+            }
+        }
+
+        private void export_type_comboBox_TextChanged(object sender, RibbonControlEventArgs e)
+        {
+            if(export_type_comboBox.Text =="多表多文件" || export_type_comboBox.Text == "多表单文件")
+            {
+                return;
+            }
+            else
+            {
+                if (MessageBox.Show("该选项只能是“多表单文件”或“多表多文件”") == DialogResult.OK)
+                {
+                    export_type_comboBox.Text = "多表单文件";
+                }
+            }
+        }
+
+        private void page_orientation_comboBox_TextChanged(object sender, RibbonControlEventArgs e)
+        {
+            if (page_orientation_comboBox.Text == "纵向" || page_orientation_comboBox.Text == "横向")
+            {
+                return;
+            }
+            else
+            {
+                if (MessageBox.Show("该选项只能是“纵向”或“横向”") == DialogResult.OK)
+                {
+                    page_orientation_comboBox.Text = "横向";
+                }
+            }
+        }
+
+        private void paper_size_comboBox_TextChanged(object sender, RibbonControlEventArgs e)
+        {
+            if (paper_size_comboBox.Text == "A4" || paper_size_comboBox.Text == "A3" || paper_size_comboBox.Text == "A5" || paper_size_comboBox.Text == "B5")
+            {
+                return;
+            }
+            else
+            {
+                if (MessageBox.Show("该选项只能下拉选择") == DialogResult.OK)
+                {
+                    paper_size_comboBox.Text = "A4";
+                }
+            }
+        }
+
+        private void page_zoom_comboBox_TextChanged(object sender, RibbonControlEventArgs e)
+        {
+            if (page_zoom_comboBox.Text == "无缩放" || page_zoom_comboBox.Text == "表自适应" || page_zoom_comboBox.Text == "行自适应" || page_zoom_comboBox.Text == "列自适应")
+            {
+                return;
+            }
+            else
+            {
+                if (MessageBox.Show("该选项只能下拉选择") == DialogResult.OK)
+                {
+                    page_zoom_comboBox.Text = "无缩放";
+                }
             }
         }
     }
