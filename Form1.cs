@@ -23,6 +23,7 @@ using ZXing.QrCode;
 using Excel = Microsoft.Office.Interop.Excel;
 
 
+
 namespace ExcelAddIn
 {
     public partial class Form1 : Form
@@ -93,6 +94,8 @@ namespace ExcelAddIn
             QR_listBox.Visible = false;
             QR_radioButton.Visible = false;
             QR_radioButton.Checked = false;
+            QR_logo_label.Visible = false;
+            QR_logo_pictureBox.Visible = false;
             BC_radioButton.Visible = false;
             BC_radioButton.Checked = false;
 
@@ -175,8 +178,12 @@ namespace ExcelAddIn
                     QR_listBox.Visible = false;
                     QR_radioButton.Visible = false;
                     QR_radioButton.Checked = false;
+                    QR_logo_label.Visible = false;
+                    QR_logo_pictureBox.Visible = false;
+                    QR_logo_pictureBox.Image = ExcelAddIn.Properties.Resources.pic_logo;
                     BC_radioButton.Visible = false;
                     BC_radioButton.Checked = false;
+
                     function_title_label.Text = "请选择所需使用的功能";
                     break;
 
@@ -1020,6 +1027,8 @@ namespace ExcelAddIn
             QR_listBox.Visible = false;
             QR_radioButton.Visible = false;
             QR_radioButton.Checked = false;
+            QR_logo_label.Visible= false;
+            QR_logo_pictureBox.Visible = false;
             BC_radioButton.Visible = false;
             BC_radioButton.Checked = false;
             ThisAddIn.app.ScreenUpdating = false;
@@ -1169,6 +1178,8 @@ namespace ExcelAddIn
             QR_listBox.Visible = false;
             QR_radioButton.Visible = false;
             QR_radioButton.Checked = false;
+            QR_logo_label.Visible = false;
+            QR_logo_pictureBox.Visible = false;
             BC_radioButton.Visible = false;
             BC_radioButton.Checked = false;
 
@@ -1275,6 +1286,8 @@ namespace ExcelAddIn
             QR_listBox.Visible = false;
             QR_radioButton.Visible = false;
             QR_radioButton.Checked = false;
+            QR_logo_label.Visible = false;
+            QR_logo_pictureBox.Visible = false;
             BC_radioButton.Visible = false;
             BC_radioButton.Checked = false;
             contents_to_sheet_radioButton.Visible = false;
@@ -1920,8 +1933,8 @@ namespace ExcelAddIn
                             items.Add(selectitem, TargetField(sheet,selectitem));
                         }
 
-                        
-                        if (QR_radioButton.Checked == true)             //生成二维码
+                        //生成二维码
+                        if (QR_radioButton.Checked == true)
                         {
                             BarcodeWriter writer = new BarcodeWriter
                             {
@@ -1930,13 +1943,16 @@ namespace ExcelAddIn
                                 {
                                     Height = 100,
                                     Width = 100,
-                                    CharacterSet = "UTF-8"
+                                    CharacterSet = "UTF-8",
+                                    ErrorCorrection = ZXing.QrCode.Internal.ErrorCorrectionLevel.H // 设置纠错等级为H
                                 }
                             };
 
                             for (int i = 2; i <= sheet.UsedRange.Rows.Count; i++)
                             {
                                 string data = "";
+
+                                //如果二维码有多列，则将多列数据合并，以key:value的形式返回，用分号分割
                                 if (items.Count > 1)
                                 {
                                     foreach (var item in items)
@@ -1947,9 +1963,10 @@ namespace ExcelAddIn
                                         data += $"{key}:{value};";
                                     }
                                 }
+                                //如果二维码只有一列，则直接取值
                                 else
                                 {
-                                    string key=items.Keys.First();
+                                    string key = items.Keys.First();
                                     int colindex = items.Values.First();
                                     string value = sheet.Cells[i, colindex].Text;
                                     data = value;
@@ -1958,9 +1975,31 @@ namespace ExcelAddIn
                                 byte[] utf8Bytes = Encoding.UTF8.GetBytes(data);
 
                                 Bitmap qrCode = writer.Write(Encoding.UTF8.GetString(utf8Bytes));
-                                //Bitmap qrCode = writer.Write(data);
 
-                                string tempImagePath = Path.GetTempFileName() + ".png";
+                                // 如果提供了Logo图片路径，则在二维码中间添加Logo
+                                if (!string.IsNullOrEmpty(qr_logo_path)&& QR_logo_pictureBox.Image!=ExcelAddIn.Properties.Resources.pic_logo)
+                                {
+                                    using (Bitmap logo = new Bitmap(qr_logo_path))
+                                    {
+                                        // 调整Logo大小为二维码的1/4
+                                        int adjustedLogoWidth = (int)(qrCode.Width / 4);
+                                        int adjustedLogoHeight = (int)(qrCode.Height / 4);
+                                        using (Bitmap resizedLogo = new Bitmap(logo, new Size(adjustedLogoWidth, adjustedLogoHeight)))
+                                        {
+                                            using (Graphics g = Graphics.FromImage(qrCode))
+                                            {
+                                                // 计算Logo的位置
+                                                float x = (qrCode.Width - adjustedLogoWidth) / 2;
+                                                float y = (qrCode.Height - adjustedLogoHeight) / 2;
+
+                                                // 绘制Logo
+                                                g.DrawImage(resizedLogo, new RectangleF(x, y, adjustedLogoWidth, adjustedLogoHeight));
+                                            }
+                                        }
+                                    }
+                                }
+
+                                string tempImagePath = System.IO.Path.GetTempFileName() + ".png";
                                 qrCode.Save(tempImagePath, ImageFormat.Png);
 
                                 Excel.Range cellForImage = sheet.Cells[i, usedColumn + 1];
@@ -1971,7 +2010,6 @@ namespace ExcelAddIn
                                 Excel.Shape shape = sheet.Shapes.AddPicture(tempImagePath, Microsoft.Office.Core.MsoTriState.msoFalse, Microsoft.Office.Core.MsoTriState.msoTrue,
                                     cellForImage.Left, cellForImage.Top, -1, -1);
                                 shape.LockAspectRatio = Microsoft.Office.Core.MsoTriState.msoTrue;
-
 
                                 File.Delete(tempImagePath); // 删除临时文件
                             }
@@ -2003,7 +2041,7 @@ namespace ExcelAddIn
                                     if (Regex.IsMatch(value, asciiPattern))  //判断生成二维码的内容是否符合Code128条形码编码规则
                                     {
                                         Bitmap qrCode = writer.Write(value);
-                                        string tempImagePath = Path.GetTempFileName() + ".png";
+                                        string tempImagePath = System.IO.Path.GetTempFileName() + ".png";
                                         qrCode.Save(tempImagePath, ImageFormat.Png);
                                         Excel.Range cellForImage = sheet.Cells[i, usedColumn + 1];
                                         cellForImage.Rows.RowHeight = 50; // 或根据实际需要调整行高
@@ -2087,6 +2125,8 @@ namespace ExcelAddIn
             QR_listBox.Visible = false;
             QR_radioButton.Visible = false;
             QR_radioButton.Checked = false;
+            QR_logo_label.Visible = false;
+            QR_logo_pictureBox.Visible = false;
             BC_radioButton.Visible = false;
             BC_radioButton.Checked = false;
 
@@ -2163,6 +2203,8 @@ namespace ExcelAddIn
             QR_listBox.Visible = false;
             QR_radioButton.Visible = false;
             QR_radioButton.Checked = false;
+            QR_logo_label.Visible = false;
+            QR_logo_pictureBox.Visible = false;
             BC_radioButton.Visible = false;
             BC_radioButton.Checked = false;
             selectfunction = 0;
@@ -2216,9 +2258,28 @@ namespace ExcelAddIn
             QR_listBox.Visible = true;
             QR_radioButton.Visible = true;
             QR_radioButton.Checked = true;
+            QR_logo_label.Visible = true;
+            QR_logo_pictureBox.Visible = true;
+            QR_logo_pictureBox.Image = ExcelAddIn.Properties.Resources.pic_logo;
+            qr_logo_path = "";
             BC_radioButton.Visible = true;
             BC_radioButton.Checked = false;
             selectfunction = 4;
+        }
+
+        //二维码图标选择
+        private string qr_logo_path = "";
+        private void QR_logo_pictureBox_DoubleClick(object sender, EventArgs e)
+        {
+            openFileDialog1.Filter = "图片文件|*.jpg;*.png;*.bmp;*.gif|All files (*.*)|*.*";
+            openFileDialog1.Title = "请选择要添加的二维码图标图片";
+            openFileDialog1.AddExtension=true;
+            openFileDialog1.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
+            if (openFileDialog1.ShowDialog() == DialogResult.OK)
+            {
+                QR_logo_pictureBox.Image = Image.FromFile(openFileDialog1.FileName);
+                qr_logo_path = openFileDialog1.FileName;
+            }
         }
 
         //二维码数据列选择框可见时
@@ -2229,10 +2290,14 @@ namespace ExcelAddIn
                 Excel.Worksheet sheet = ThisAddIn.app.ActiveWorkbook.ActiveSheet;
                 QR_listBox.Items.Clear();
 
-                foreach(Excel.Range cell in sheet.Range[sheet.Cells[1, 1], sheet.Cells[1, sheet.UsedRange.Columns.Count]])
+                if (sheet.UsedRange.Rows.Count > 1 && !string.IsNullOrEmpty(sheet.Cells[1,1].Value))
                 {
-                    QR_listBox.Items.Add(cell.Value);
+                    foreach (Excel.Range cell in sheet.Range[sheet.Cells[1, 1], sheet.Cells[1, sheet.UsedRange.Columns.Count]])
+                    {
+                        QR_listBox.Items.Add(cell.Value);
+                    }
                 }
+                else QR_listBox.Items.Add("空表");
             }
         }
 
@@ -2242,6 +2307,8 @@ namespace ExcelAddIn
             if (BC_radioButton.Checked == true)
             {
                 QR_listBox.SelectionMode = SelectionMode.One;
+                QR_logo_label.Visible = false;
+                QR_logo_pictureBox.Visible = false;
             }
         }
 
@@ -2250,6 +2317,8 @@ namespace ExcelAddIn
             if (QR_radioButton.Checked == true)
             {
                 QR_listBox.SelectionMode = SelectionMode.MultiExtended;
+                QR_logo_label.Visible = true;
+                QR_logo_pictureBox.Visible = true;
             }
         }
 
@@ -2556,7 +2625,7 @@ namespace ExcelAddIn
                         else
                         {
                             database_result_label.Text = "数据库连接成功，数据库中包含" + tableNames.Count + "张表";
-                            dbname_textBox.Text = Path.GetFileNameWithoutExtension(dbaddress_textBox.Text);
+                            dbname_textBox.Text = System.IO.Path.GetFileNameWithoutExtension(dbaddress_textBox.Text);
 
                             // 将表名添加到 ComboBox
                             dbsheet_comboBox.DataSource = tableNames;
@@ -2600,7 +2669,7 @@ namespace ExcelAddIn
                         else
                         {
                             database_result_label.Text = "数据库连接成功，数据库中包含" + tableNames.Count + "张表";
-                            dbname_textBox.Text = Path.GetFileNameWithoutExtension(dbaddress_textBox.Text);
+                            dbname_textBox.Text = System.IO.Path.GetFileNameWithoutExtension(dbaddress_textBox.Text);
 
                             // 将表名添加到 ComboBox
                             dbsheet_comboBox.DataSource = tableNames;

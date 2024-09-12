@@ -65,6 +65,7 @@ namespace ExcelAddIn
             this.all_select_checkbox = new System.Windows.Forms.CheckBox();
             this.tabPage4 = new System.Windows.Forms.TabPage();
             this.panel4 = new System.Windows.Forms.Panel();
+            this.QR_logo_label = new System.Windows.Forms.Label();
             this.QR_radioButton = new System.Windows.Forms.RadioButton();
             this.BC_radioButton = new System.Windows.Forms.RadioButton();
             this.QR_label = new System.Windows.Forms.Label();
@@ -89,9 +90,7 @@ namespace ExcelAddIn
             this.function_title_label = new System.Windows.Forms.Label();
             this.which_field_label = new System.Windows.Forms.Label();
             this.tabPage5 = new System.Windows.Forms.TabPage();
-            this.find_keywordclear_pictureBox = new System.Windows.Forms.PictureBox();
             this.find_keyword_label = new System.Windows.Forms.Label();
-            this.find_keywordbutton_pictureBox = new System.Windows.Forms.PictureBox();
             this.find_keyword_textBox = new System.Windows.Forms.TextBox();
             this.dbexport_result_label = new System.Windows.Forms.Label();
             this.dbport_textBox = new System.Windows.Forms.TextBox();
@@ -124,6 +123,9 @@ namespace ExcelAddIn
             this.version_label = new System.Windows.Forms.Label();
             this.openFileDialog1 = new System.Windows.Forms.OpenFileDialog();
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
+            this.QR_logo_pictureBox = new System.Windows.Forms.PictureBox();
+            this.find_keywordclear_pictureBox = new System.Windows.Forms.PictureBox();
+            this.find_keywordbutton_pictureBox = new System.Windows.Forms.PictureBox();
             this.tabControl1.SuspendLayout();
             this.tabPage1.SuspendLayout();
             this.panel1.SuspendLayout();
@@ -134,11 +136,12 @@ namespace ExcelAddIn
             this.tabPage4.SuspendLayout();
             this.panel4.SuspendLayout();
             this.tabPage5.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.find_keywordclear_pictureBox)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.find_keywordbutton_pictureBox)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.dbsheet_dataGridView)).BeginInit();
             this.tabPage6.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.QR_logo_pictureBox)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.find_keywordclear_pictureBox)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.find_keywordbutton_pictureBox)).BeginInit();
             this.SuspendLayout();
             // 
             // tabControl1
@@ -594,6 +597,8 @@ namespace ExcelAddIn
             // 
             this.panel4.AutoSize = true;
             this.panel4.BackColor = System.Drawing.SystemColors.Window;
+            this.panel4.Controls.Add(this.QR_logo_pictureBox);
+            this.panel4.Controls.Add(this.QR_logo_label);
             this.panel4.Controls.Add(this.QR_radioButton);
             this.panel4.Controls.Add(this.BC_radioButton);
             this.panel4.Controls.Add(this.QR_label);
@@ -622,6 +627,16 @@ namespace ExcelAddIn
             this.panel4.Name = "panel4";
             this.panel4.Size = new System.Drawing.Size(675, 392);
             this.panel4.TabIndex = 1;
+            // 
+            // QR_logo_label
+            // 
+            this.QR_logo_label.AutoSize = true;
+            this.QR_logo_label.Font = new System.Drawing.Font("微软雅黑", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.QR_logo_label.Location = new System.Drawing.Point(573, 114);
+            this.QR_logo_label.Name = "QR_logo_label";
+            this.QR_logo_label.Size = new System.Drawing.Size(92, 34);
+            this.QR_logo_label.TabIndex = 17;
+            this.QR_logo_label.Text = "双击图片框添加\r\n   二维码图标";
             // 
             // QR_radioButton
             // 
@@ -783,7 +798,7 @@ namespace ExcelAddIn
             // regex_rule_textbox
             // 
             this.regex_rule_textbox.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.regex_rule_textbox.Location = new System.Drawing.Point(393, 191);
+            this.regex_rule_textbox.Location = new System.Drawing.Point(393, 187);
             this.regex_rule_textbox.Name = "regex_rule_textbox";
             this.regex_rule_textbox.Size = new System.Drawing.Size(175, 26);
             this.regex_rule_textbox.TabIndex = 6;
@@ -809,7 +824,7 @@ namespace ExcelAddIn
             // 
             this.regex_rule_label.AutoSize = true;
             this.regex_rule_label.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.regex_rule_label.Location = new System.Drawing.Point(322, 194);
+            this.regex_rule_label.Location = new System.Drawing.Point(322, 190);
             this.regex_rule_label.Name = "regex_rule_label";
             this.regex_rule_label.Size = new System.Drawing.Size(65, 20);
             this.regex_rule_label.TabIndex = 5;
@@ -847,7 +862,7 @@ namespace ExcelAddIn
             "电话号码",
             "IP地址",
             "自定义"});
-            this.what_type_combobox.Location = new System.Drawing.Point(393, 138);
+            this.what_type_combobox.Location = new System.Drawing.Point(393, 134);
             this.what_type_combobox.Name = "what_type_combobox";
             this.what_type_combobox.Size = new System.Drawing.Size(175, 28);
             this.what_type_combobox.TabIndex = 4;
@@ -874,7 +889,7 @@ namespace ExcelAddIn
             // 
             this.what_type_label.AutoSize = true;
             this.what_type_label.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.what_type_label.Location = new System.Drawing.Point(322, 141);
+            this.what_type_label.Location = new System.Drawing.Point(322, 137);
             this.what_type_label.Name = "what_type_label";
             this.what_type_label.Size = new System.Drawing.Size(65, 20);
             this.what_type_label.TabIndex = 3;
@@ -938,7 +953,6 @@ namespace ExcelAddIn
             this.tabPage5.BackColor = System.Drawing.SystemColors.Window;
             this.tabPage5.Controls.Add(this.find_keywordclear_pictureBox);
             this.tabPage5.Controls.Add(this.find_keyword_label);
-            this.tabPage5.Controls.Add(this.find_keywordbutton_pictureBox);
             this.tabPage5.Controls.Add(this.find_keyword_textBox);
             this.tabPage5.Controls.Add(this.dbexport_result_label);
             this.tabPage5.Controls.Add(this.dbport_textBox);
@@ -961,6 +975,7 @@ namespace ExcelAddIn
             this.tabPage5.Controls.Add(this.dbaddress_label);
             this.tabPage5.Controls.Add(this.dbtype_label);
             this.tabPage5.Controls.Add(this.label7);
+            this.tabPage5.Controls.Add(this.find_keywordbutton_pictureBox);
             this.tabPage5.Font = new System.Drawing.Font("微软雅黑", 10.8F);
             this.tabPage5.ForeColor = System.Drawing.Color.DarkSlateBlue;
             this.tabPage5.Location = new System.Drawing.Point(124, 4);
@@ -968,16 +983,6 @@ namespace ExcelAddIn
             this.tabPage5.Size = new System.Drawing.Size(675, 392);
             this.tabPage5.TabIndex = 7;
             this.tabPage5.Text = "五、数据库连接";
-            // 
-            // find_keywordclear_pictureBox
-            // 
-            this.find_keywordclear_pictureBox.Image = global::ExcelAddIn.Properties.Resources.clear;
-            this.find_keywordclear_pictureBox.Location = new System.Drawing.Point(582, 94);
-            this.find_keywordclear_pictureBox.Name = "find_keywordclear_pictureBox";
-            this.find_keywordclear_pictureBox.Size = new System.Drawing.Size(18, 18);
-            this.find_keywordclear_pictureBox.TabIndex = 24;
-            this.find_keywordclear_pictureBox.TabStop = false;
-            this.find_keywordclear_pictureBox.Click += new System.EventHandler(this.find_keywordclear_pictureBox_Click);
             // 
             // find_keyword_label
             // 
@@ -988,16 +993,6 @@ namespace ExcelAddIn
             this.find_keyword_label.Size = new System.Drawing.Size(80, 17);
             this.find_keyword_label.TabIndex = 23;
             this.find_keyword_label.Text = "查找需导出表";
-            // 
-            // find_keywordbutton_pictureBox
-            // 
-            this.find_keywordbutton_pictureBox.Image = global::ExcelAddIn.Properties.Resources.search;
-            this.find_keywordbutton_pictureBox.Location = new System.Drawing.Point(609, 89);
-            this.find_keywordbutton_pictureBox.Name = "find_keywordbutton_pictureBox";
-            this.find_keywordbutton_pictureBox.Size = new System.Drawing.Size(27, 27);
-            this.find_keywordbutton_pictureBox.TabIndex = 22;
-            this.find_keywordbutton_pictureBox.TabStop = false;
-            this.find_keywordbutton_pictureBox.Click += new System.EventHandler(this.find_keywordbutton_pictureBox_Click);
             // 
             // find_keyword_textBox
             // 
@@ -1305,6 +1300,38 @@ namespace ExcelAddIn
             this.pictureBox1.TabIndex = 1;
             this.pictureBox1.TabStop = false;
             // 
+            // QR_logo_pictureBox
+            // 
+            this.QR_logo_pictureBox.Image = global::ExcelAddIn.Properties.Resources.pic_logo;
+            this.QR_logo_pictureBox.Location = new System.Drawing.Point(580, 151);
+            this.QR_logo_pictureBox.Name = "QR_logo_pictureBox";
+            this.QR_logo_pictureBox.Size = new System.Drawing.Size(80, 80);
+            this.QR_logo_pictureBox.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
+            this.QR_logo_pictureBox.TabIndex = 18;
+            this.QR_logo_pictureBox.TabStop = false;
+            this.QR_logo_pictureBox.WaitOnLoad = true;
+            this.QR_logo_pictureBox.DoubleClick += new System.EventHandler(this.QR_logo_pictureBox_DoubleClick);
+            // 
+            // find_keywordclear_pictureBox
+            // 
+            this.find_keywordclear_pictureBox.Image = global::ExcelAddIn.Properties.Resources.clear;
+            this.find_keywordclear_pictureBox.Location = new System.Drawing.Point(582, 94);
+            this.find_keywordclear_pictureBox.Name = "find_keywordclear_pictureBox";
+            this.find_keywordclear_pictureBox.Size = new System.Drawing.Size(18, 18);
+            this.find_keywordclear_pictureBox.TabIndex = 24;
+            this.find_keywordclear_pictureBox.TabStop = false;
+            this.find_keywordclear_pictureBox.Click += new System.EventHandler(this.find_keywordclear_pictureBox_Click);
+            // 
+            // find_keywordbutton_pictureBox
+            // 
+            this.find_keywordbutton_pictureBox.Image = global::ExcelAddIn.Properties.Resources.search;
+            this.find_keywordbutton_pictureBox.Location = new System.Drawing.Point(609, 89);
+            this.find_keywordbutton_pictureBox.Name = "find_keywordbutton_pictureBox";
+            this.find_keywordbutton_pictureBox.Size = new System.Drawing.Size(27, 27);
+            this.find_keywordbutton_pictureBox.TabIndex = 22;
+            this.find_keywordbutton_pictureBox.TabStop = false;
+            this.find_keywordbutton_pictureBox.Click += new System.EventHandler(this.find_keywordbutton_pictureBox_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
@@ -1339,11 +1366,12 @@ namespace ExcelAddIn
             this.panel4.PerformLayout();
             this.tabPage5.ResumeLayout(false);
             this.tabPage5.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.find_keywordclear_pictureBox)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.find_keywordbutton_pictureBox)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.dbsheet_dataGridView)).EndInit();
             this.tabPage6.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.QR_logo_pictureBox)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.find_keywordclear_pictureBox)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.find_keywordbutton_pictureBox)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -1445,5 +1473,7 @@ namespace ExcelAddIn
         private System.Windows.Forms.PictureBox find_keywordbutton_pictureBox;
         private System.Windows.Forms.Label find_keyword_label;
         private System.Windows.Forms.PictureBox find_keywordclear_pictureBox;
+        private System.Windows.Forms.PictureBox QR_logo_pictureBox;
+        private System.Windows.Forms.Label QR_logo_label;
     }
 }
