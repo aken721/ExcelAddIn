@@ -8,6 +8,11 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using static ExcelAddIn.ThisAddIn;
 using Excel = Microsoft.Office.Interop.Excel;
+using AForge.Video;
+using AForge.Video.DirectShow;
+using System.Drawing;
+using ZXing;
+using Microsoft.Office.Interop.Excel;
 
 
 
@@ -25,7 +30,7 @@ namespace ExcelAddIn
             Select_f_or_d.Label = "改文件名";
             Select_f_or_d.ShowLabel = false;
             switch_FD_label.Label = "文件名";
-            Globle.readFile = 0;
+            ThisAddIn.Global.readFile = 0;
             confirm_spotlight.Checked = false;
             playbackMode = PlaybackMode.Sequential;
             Mode_button.Label = "顺序播放";
@@ -68,7 +73,7 @@ namespace ExcelAddIn
         {
             Excel.Workbook workbook = ThisAddIn.app.ActiveWorkbook;
 
-            if (Globle.readFile == 1 && IsSheetExist(workbook, "_rename"))
+            if (ThisAddIn.Global.readFile == 1 && IsSheetExist(workbook, "_rename"))
             {
                 if (Select_f_or_d.Checked == false)
                 {
@@ -121,7 +126,7 @@ namespace ExcelAddIn
         //批读文件名
         private void Files_read_Click(object sender, RibbonControlEventArgs e)
         {
-            if (Globle.readFile == 1 && get_directory_path.Length > 0)
+            if (ThisAddIn.Global.readFile == 1 && get_directory_path.Length > 0)
             {
                 ThisAddIn.app.Application.StatusBar = "正在刷新_rename表";
                 RefreshRenameTable();
@@ -208,7 +213,7 @@ namespace ExcelAddIn
                                 }
                                 break;
                         }
-                        Globle.readFile = 1;
+                        ThisAddIn.Global.readFile = 1;
                     }
                     catch (Exception ex)
                     {
@@ -242,7 +247,7 @@ namespace ExcelAddIn
             ThisAddIn.app.DisplayAlerts = false;
             Excel.Worksheet worksheet = workbook.Worksheets["_rename"];
 
-            if (!string.IsNullOrEmpty(get_directory_path) && Globle.readFile == 1 && IsSheetExist(workbook, "_rename"))
+            if (!string.IsNullOrEmpty(get_directory_path) && ThisAddIn.Global.readFile == 1 && IsSheetExist(workbook, "_rename"))
             {
                 //调用file.move或direction.move修改名
                 ThisAddIn.app.Application.StatusBar="文件正在重命名中，请稍后...";
@@ -304,12 +309,12 @@ namespace ExcelAddIn
                 {
                     Process.Start(get_directory_path);
                 }
-                Globle.readFile = 0;
+                ThisAddIn.Global.readFile = 0;
             }
             else
             {
                 MessageBox.Show("没有选择文件夹，请先使用批读文件名功能后再使用该功能");
-                Globle.readFile = 0;
+                ThisAddIn.Global.readFile = 0;
             }
             ThisAddIn.app.DisplayAlerts = true;
             ThisAddIn.app.ScreenUpdating = true;
@@ -721,13 +726,13 @@ namespace ExcelAddIn
                 cellColor = GetColorDictionary(usedRange);
                 confirm_spotlight.Label = "关闭聚光灯";
                 confirm_spotlight.Image = ExcelAddIn.Properties.Resources.spotlight_open;
-                Globle.spotlight = 1;
+                ThisAddIn.Global.spotlight = 1;
             }
             else
             {
                 confirm_spotlight.Label = "打开聚光灯";
                 confirm_spotlight.Image = ExcelAddIn.Properties.Resources.spotlight_close;
-                Globle.spotlight = 0;
+                ThisAddIn.Global.spotlight = 0;
                 Excel.Range selectCell= ThisAddIn.app.ActiveCell;
                 ThisAddIn.app.ScreenUpdating = false;
                 selectCell.EntireRow.Interior.ColorIndex = 0;
@@ -1171,6 +1176,66 @@ namespace ExcelAddIn
                 }
             }
         }
+
+        private void scan_button_Click(object sender, RibbonControlEventArgs e)
+        {
+            Form form5 = new Form5();
+            form5.Show();
+        }
+
+        
+
+
+
+        //private void scan_button_Click(object sender, RibbonControlEventArgs e)
+        //{
+        //    // 初始化摄像头
+        //    VideoCaptureDevice videoSource = new VideoCaptureDevice(new FilterInfoCollection(FilterCategory.VideoInputDevice)[0].MonikerString);
+        //    videoSource.NewFrame += VideoSource_NewFrame;
+        //    videoSource.Start();
+
+        //    // 等待扫描结果
+        //    Console.WriteLine("Scanning QR Code. Press any key to stop...");
+        //    Console.ReadKey();
+
+        //    // 停止摄像头
+        //    videoSource.SignalToStop();
+        //    videoSource.WaitForStop();
+        //    videoSource.;
+
+        //    // 将扫描结果写入Excel
+        //    WriteToExcel(qrCodeContent);
+        //}
+
+
+        //private void VideoSource_NewFrame(object sender, NewFrameEventArgs eventArgs)
+        //{
+        //    Bitmap bitmap = (Bitmap)eventArgs.Frame.Clone();
+        //    BarcodeReader reader = new BarcodeReader();
+        //    Result result = reader.Decode(bitmap);
+        //    if (result != null)
+        //    {
+        //        // 二维码内容
+        //        qrCodeContent = result.Text;
+        //    }
+        //}
+
+        //private void WriteToExcel(string content)
+        //{
+        //    Excel.Workbook workbook = ThisAddIn.app.ActiveWorkbook;
+        //    foreach(Excel.Worksheet worksheet in workbook.Worksheets)
+        //    {
+
+
+        //    }
+
+        //    worksheet.Name = "_QRScanResult";
+        //    worksheet.Cells[1, 1] = content; // 将内容写入A1单元格
+        //    if (content.StartsWith("http"))
+        //    {
+        //        worksheet.Hyperlinks.Add(worksheet.Cells[1,1], content);
+        //    }
+        //}
     }
 }
 

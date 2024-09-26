@@ -4,21 +4,22 @@ namespace ExcelAddIn
 {
     public partial class ThisAddIn
     {
-        public static class Globle
+        public static class Global
         {
             //是否执行重命名、删除、移动文件等功能标识,0为关闭，1为打开
             public static int readFile;
 
             //聚光灯功能开关标识，0为关闭，1为打开
-            public static int spotlight;             
-
+            public static int spotlight;
+            
+            public static bool created_qr_sheet=false;
         }
 
-        public static Excel.Application app;         //声明一个excel变量
+        public static Excel.Application app;         //声明一个Excel的Application变量
         private void ThisAddIn_Startup(object sender, System.EventArgs e)
         {
             app = Globals.ThisAddIn.Application;
-            Globle.spotlight = 0;
+            Global.spotlight = 0;
 
             //监听选定单元格变化所触发事件
             app.SheetSelectionChange += app_SheetSelectionChange;
@@ -32,7 +33,7 @@ namespace ExcelAddIn
         private void app_SheetSelectionChange(object sh, Excel.Range Target)
         {
             //当聚光灯功能打开时，变更选定单元格即触发
-            if (Globle.spotlight == 1)
+            if (Global.spotlight == 1)
             {
                 Excel.Range selectedRange = Target;
                 Excel.Worksheet activesheet = ThisAddIn.app.ActiveSheet;
@@ -61,7 +62,11 @@ namespace ExcelAddIn
             Excel.Worksheet ws = Globals.ThisAddIn.Application.ActiveSheet;
             if (ws.Name == "_rename")
             {
-                Globle.readFile = 0;    
+                Global.readFile = 0;    
+            }
+            if(ws.Name== "_QR_Scan")
+            {
+                Global.created_qr_sheet=false;
             }
         }
 

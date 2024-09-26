@@ -1475,6 +1475,7 @@ namespace ExcelAddIn
         //正则表达式功能激活
         private void regex_button_Click(object sender, EventArgs e)
         {
+
             selectfunction = 1;
             if (which_field_label.Visible == true && which_field_combobox.Visible == true)
             {
@@ -1485,7 +1486,7 @@ namespace ExcelAddIn
             }
             contents_to_sheet_radioButton.Checked = false;
             sheet_to_contents_radioButton.Checked = false;
-            workbook.Worksheets[sheetindex].Activate();
+            //workbook.Worksheets[sheetindex].Activate();
             workbook.RefreshAll();
             function_title_label.Text = "正则表达式提取指定内容";
             which_field_label.Text = "提取哪列";
@@ -2240,7 +2241,7 @@ namespace ExcelAddIn
         private void QR_button_Click(object sender, EventArgs e)
         {
             //右侧功能区初始化
-            function_title_label.Text = "根据目录页新建空白表";
+            function_title_label.Text = "生成二维码/条形码";
             which_field_label.Visible = false;
             which_field_combobox.Visible = false;
             what_type_label.Visible = false;
@@ -2475,8 +2476,8 @@ namespace ExcelAddIn
             HideLabel(run_result_label, false, "");
         }
 
+        
         //自建函数
-
 
         //正则表达式函数，判断输入字符是否合规，如有不合规字符，返回true，否则返回false
         public static bool ContainsSpecialChars(string str, string reg_rule)
