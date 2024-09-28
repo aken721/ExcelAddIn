@@ -31,7 +31,6 @@
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form5));
             this.picture_radioButton = new System.Windows.Forms.RadioButton();
             this.webcam_radioButton = new System.Windows.Forms.RadioButton();
-            this.qr_image_listView = new System.Windows.Forms.ListView();
             this.scan_button = new System.Windows.Forms.Button();
             this.quit_button = new System.Windows.Forms.Button();
             this.qr_image_pictureBox = new System.Windows.Forms.PictureBox();
@@ -46,7 +45,7 @@
             this.picture_radioButton.AutoSize = true;
             this.picture_radioButton.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.picture_radioButton.ForeColor = System.Drawing.Color.DarkSlateBlue;
-            this.picture_radioButton.Location = new System.Drawing.Point(167, 68);
+            this.picture_radioButton.Location = new System.Drawing.Point(159, 68);
             this.picture_radioButton.Name = "picture_radioButton";
             this.picture_radioButton.Size = new System.Drawing.Size(83, 24);
             this.picture_radioButton.TabIndex = 0;
@@ -60,7 +59,7 @@
             this.webcam_radioButton.AutoSize = true;
             this.webcam_radioButton.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.webcam_radioButton.ForeColor = System.Drawing.Color.DarkSlateBlue;
-            this.webcam_radioButton.Location = new System.Drawing.Point(344, 68);
+            this.webcam_radioButton.Location = new System.Drawing.Point(364, 68);
             this.webcam_radioButton.Name = "webcam_radioButton";
             this.webcam_radioButton.Size = new System.Drawing.Size(83, 24);
             this.webcam_radioButton.TabIndex = 1;
@@ -68,17 +67,6 @@
             this.webcam_radioButton.Text = "扫描识别";
             this.webcam_radioButton.UseVisualStyleBackColor = true;
             this.webcam_radioButton.CheckedChanged += new System.EventHandler(this.webcam_radioButton_CheckedChanged);
-            // 
-            // qr_image_listView
-            // 
-            this.qr_image_listView.Font = new System.Drawing.Font("微软雅黑", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.qr_image_listView.HideSelection = false;
-            this.qr_image_listView.Location = new System.Drawing.Point(147, 205);
-            this.qr_image_listView.Name = "qr_image_listView";
-            this.qr_image_listView.Size = new System.Drawing.Size(310, 150);
-            this.qr_image_listView.TabIndex = 2;
-            this.qr_image_listView.UseCompatibleStateImageBehavior = false;
-            this.qr_image_listView.View = System.Windows.Forms.View.Details;
             // 
             // scan_button
             // 
@@ -131,10 +119,8 @@
             this.folder_path_label.ForeColor = System.Drawing.Color.SaddleBrown;
             this.folder_path_label.Location = new System.Drawing.Point(144, 183);
             this.folder_path_label.Name = "folder_path_label";
-            this.folder_path_label.Size = new System.Drawing.Size(80, 17);
+            this.folder_path_label.Size = new System.Drawing.Size(0, 17);
             this.folder_path_label.TabIndex = 7;
-            this.folder_path_label.Text = "已选文件夹：";
-            this.folder_path_label.Click += new System.EventHandler(this.folder_path_label_Click);
             // 
             // openFileDialog1
             // 
@@ -150,7 +136,6 @@
             this.Controls.Add(this.qr_image_pictureBox);
             this.Controls.Add(this.quit_button);
             this.Controls.Add(this.scan_button);
-            this.Controls.Add(this.qr_image_listView);
             this.Controls.Add(this.webcam_radioButton);
             this.Controls.Add(this.picture_radioButton);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
@@ -168,7 +153,6 @@
 
         private System.Windows.Forms.RadioButton picture_radioButton;
         private System.Windows.Forms.RadioButton webcam_radioButton;
-        private System.Windows.Forms.ListView qr_image_listView;
         private System.Windows.Forms.Button scan_button;
         private System.Windows.Forms.Button quit_button;
         private System.Windows.Forms.PictureBox qr_image_pictureBox;

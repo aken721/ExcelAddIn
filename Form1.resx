@@ -165,7 +165,7 @@
 
 五、数据库表导出
 
-    连接数据库后，可列出库内所有表的名称和预览表内数据，并可一键将预览数据导出到Excel中新建的以”数据库名.表名“命名的新表中。</value>
+    连接数据库后，可列出库内所有表的名称和预览表内数据，并可一键将预览数据导出到Excel中新建的以”数据库名.表名“命名的新表中。支持MySQL、SQL Server、Oracle、Access、SQLite、PostgreSQL等数据库。</value>
   </data>
   <metadata name="split_sheet_timer.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
     <value>17, 17</value>
@@ -178,6 +178,9 @@
   </metadata>
   <metadata name="openFileDialog1.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
     <value>511, 20</value>
+  </metadata>
+  <metadata name="colorDialog1.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+    <value>660, 20</value>
   </metadata>
   <assembly alias="System.Drawing" name="System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
   <data name="$this.Icon" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">

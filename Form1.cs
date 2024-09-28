@@ -21,6 +21,7 @@ using System.Configuration;
 using ZXing;
 using ZXing.QrCode;
 using Excel = Microsoft.Office.Interop.Excel;
+using ZXing.Rendering;
 
 
 
@@ -94,6 +95,7 @@ namespace ExcelAddIn
             QR_listBox.Visible = false;
             QR_radioButton.Visible = false;
             QR_radioButton.Checked = false;
+            color_select_button.Visible = false;
             QR_logo_label.Visible = false;
             QR_logo_pictureBox.Visible = false;
             BC_radioButton.Visible = false;
@@ -178,6 +180,7 @@ namespace ExcelAddIn
                     QR_listBox.Visible = false;
                     QR_radioButton.Visible = false;
                     QR_radioButton.Checked = false;
+                    color_select_button.Visible = false;
                     QR_logo_label.Visible = false;
                     QR_logo_pictureBox.Visible = false;
                     QR_logo_pictureBox.Image = ExcelAddIn.Properties.Resources.pic_logo;
@@ -1027,6 +1030,7 @@ namespace ExcelAddIn
             QR_listBox.Visible = false;
             QR_radioButton.Visible = false;
             QR_radioButton.Checked = false;
+            color_select_button.Visible = false;
             QR_logo_label.Visible= false;
             QR_logo_pictureBox.Visible = false;
             BC_radioButton.Visible = false;
@@ -1178,6 +1182,7 @@ namespace ExcelAddIn
             QR_listBox.Visible = false;
             QR_radioButton.Visible = false;
             QR_radioButton.Checked = false;
+            color_select_button.Visible = false;
             QR_logo_label.Visible = false;
             QR_logo_pictureBox.Visible = false;
             BC_radioButton.Visible = false;
@@ -1286,6 +1291,7 @@ namespace ExcelAddIn
             QR_listBox.Visible = false;
             QR_radioButton.Visible = false;
             QR_radioButton.Checked = false;
+            color_select_button.Visible = false;
             QR_logo_label.Visible = false;
             QR_logo_pictureBox.Visible = false;
             BC_radioButton.Visible = false;
@@ -1946,8 +1952,14 @@ namespace ExcelAddIn
                                     Width = 100,
                                     CharacterSet = "UTF-8",
                                     ErrorCorrection = ZXing.QrCode.Internal.ErrorCorrectionLevel.H // 设置纠错等级为H
+                                },
+                                Renderer = new BitmapRenderer
+                                {
+                                    Foreground = qrForeColor, // 前景色
+                                    Background = Color.White // 背景色
                                 }
                             };
+
 
                             for (int i = 2; i <= sheet.UsedRange.Rows.Count; i++)
                             {
@@ -1982,9 +1994,9 @@ namespace ExcelAddIn
                                 {
                                     using (Bitmap logo = new Bitmap(qr_logo_path))
                                     {
-                                        // 调整Logo大小为二维码的1/4
-                                        int adjustedLogoWidth = (int)(qrCode.Width / 4);
-                                        int adjustedLogoHeight = (int)(qrCode.Height / 4);
+                                        // 调整Logo大小为二维码的1/5
+                                        int adjustedLogoWidth = (int)(qrCode.Width / 5);
+                                        int adjustedLogoHeight = (int)(qrCode.Height / 5);
                                         using (Bitmap resizedLogo = new Bitmap(logo, new Size(adjustedLogoWidth, adjustedLogoHeight)))
                                         {
                                             using (Graphics g = Graphics.FromImage(qrCode))
@@ -2031,6 +2043,11 @@ namespace ExcelAddIn
                                         Margin = 1,
                                         PureBarcode = true,
                                         CharacterSet = "UTF-8"
+                                    },
+                                    Renderer = new BitmapRenderer
+                                    {
+                                        Foreground = qrForeColor,
+                                        Background=Color.White
                                     }
                                 };
 
@@ -2126,6 +2143,7 @@ namespace ExcelAddIn
             QR_listBox.Visible = false;
             QR_radioButton.Visible = false;
             QR_radioButton.Checked = false;
+            color_select_button.Visible = false;
             QR_logo_label.Visible = false;
             QR_logo_pictureBox.Visible = false;
             BC_radioButton.Visible = false;
@@ -2204,6 +2222,7 @@ namespace ExcelAddIn
             QR_listBox.Visible = false;
             QR_radioButton.Visible = false;
             QR_radioButton.Checked = false;
+            color_select_button.Visible = false;
             QR_logo_label.Visible = false;
             QR_logo_pictureBox.Visible = false;
             BC_radioButton.Visible = false;
@@ -2259,6 +2278,7 @@ namespace ExcelAddIn
             QR_listBox.Visible = true;
             QR_radioButton.Visible = true;
             QR_radioButton.Checked = true;
+            color_select_button.Visible = true;
             QR_logo_label.Visible = true;
             QR_logo_pictureBox.Visible = true;
             QR_logo_pictureBox.Image = ExcelAddIn.Properties.Resources.pic_logo;
@@ -3254,6 +3274,16 @@ namespace ExcelAddIn
             {
                 find_keyword_textBox.Text=string.Empty;
                 find_keywordclear_pictureBox.Visible = false;
+            }
+        }
+
+        Color qrForeColor = Color.Black;
+        private void color_select_button_Click(object sender, EventArgs e)
+        {
+            if (colorDialog1.ShowDialog()==DialogResult.OK)
+            {
+                color_select_button.BackColor = colorDialog1.Color;
+                qrForeColor = colorDialog1.Color;
             }
         }
     }
