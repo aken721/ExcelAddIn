@@ -99,7 +99,7 @@
             this.label1.AutoSize = true;
             this.label1.Font = new System.Drawing.Font("微软雅黑", 15F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.label1.ForeColor = System.Drawing.Color.DarkSlateBlue;
-            this.label1.Location = new System.Drawing.Point(205, 12);
+            this.label1.Location = new System.Drawing.Point(216, 19);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(192, 27);
             this.label1.TabIndex = 6;
@@ -150,7 +150,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(632, 375);
+            this.ClientSize = new System.Drawing.Size(627, 375);
             this.Controls.Add(this.cancel_button);
             this.Controls.Add(this.videoSourcePlayer1);
             this.Controls.Add(this.folder_path_label);

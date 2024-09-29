@@ -65,7 +65,7 @@ namespace ExcelAddIn
             this.all_select_checkbox = new System.Windows.Forms.CheckBox();
             this.tabPage4 = new System.Windows.Forms.TabPage();
             this.panel4 = new System.Windows.Forms.Panel();
-            this.color_select_button = new System.Windows.Forms.Button();
+            this.foreColor_select_button = new System.Windows.Forms.Button();
             this.QR_logo_pictureBox = new System.Windows.Forms.PictureBox();
             this.QR_logo_label = new System.Windows.Forms.Label();
             this.QR_radioButton = new System.Windows.Forms.RadioButton();
@@ -128,6 +128,9 @@ namespace ExcelAddIn
             this.openFileDialog1 = new System.Windows.Forms.OpenFileDialog();
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
             this.colorDialog1 = new System.Windows.Forms.ColorDialog();
+            this.backColor_select_button = new System.Windows.Forms.Button();
+            this.foreColor_label = new System.Windows.Forms.Label();
+            this.backColor_label = new System.Windows.Forms.Label();
             this.tabControl1.SuspendLayout();
             this.tabPage1.SuspendLayout();
             this.panel1.SuspendLayout();
@@ -599,7 +602,10 @@ namespace ExcelAddIn
             // 
             this.panel4.AutoSize = true;
             this.panel4.BackColor = System.Drawing.SystemColors.Window;
-            this.panel4.Controls.Add(this.color_select_button);
+            this.panel4.Controls.Add(this.backColor_label);
+            this.panel4.Controls.Add(this.foreColor_label);
+            this.panel4.Controls.Add(this.backColor_select_button);
+            this.panel4.Controls.Add(this.foreColor_select_button);
             this.panel4.Controls.Add(this.QR_logo_pictureBox);
             this.panel4.Controls.Add(this.QR_logo_label);
             this.panel4.Controls.Add(this.QR_radioButton);
@@ -631,15 +637,16 @@ namespace ExcelAddIn
             this.panel4.Size = new System.Drawing.Size(675, 392);
             this.panel4.TabIndex = 1;
             // 
-            // color_select_button
+            // foreColor_select_button
             // 
-            this.color_select_button.BackColor = System.Drawing.Color.Black;
-            this.color_select_button.Location = new System.Drawing.Point(591, 318);
-            this.color_select_button.Name = "color_select_button";
-            this.color_select_button.Size = new System.Drawing.Size(43, 22);
-            this.color_select_button.TabIndex = 19;
-            this.color_select_button.UseVisualStyleBackColor = false;
-            this.color_select_button.Click += new System.EventHandler(this.color_select_button_Click);
+            this.foreColor_select_button.BackColor = System.Drawing.Color.Black;
+            this.foreColor_select_button.FlatAppearance.BorderSize = 2;
+            this.foreColor_select_button.Location = new System.Drawing.Point(597, 318);
+            this.foreColor_select_button.Name = "foreColor_select_button";
+            this.foreColor_select_button.Size = new System.Drawing.Size(43, 22);
+            this.foreColor_select_button.TabIndex = 19;
+            this.foreColor_select_button.UseVisualStyleBackColor = false;
+            this.foreColor_select_button.Click += new System.EventHandler(this.foreColor_select_button_Click);
             // 
             // QR_logo_pictureBox
             // 
@@ -783,7 +790,7 @@ namespace ExcelAddIn
             // 
             this.regex_clear_button.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.regex_clear_button.ForeColor = System.Drawing.Color.SeaGreen;
-            this.regex_clear_button.Location = new System.Drawing.Point(508, 352);
+            this.regex_clear_button.Location = new System.Drawing.Point(472, 352);
             this.regex_clear_button.Name = "regex_clear_button";
             this.regex_clear_button.Size = new System.Drawing.Size(60, 30);
             this.regex_clear_button.TabIndex = 8;
@@ -795,7 +802,7 @@ namespace ExcelAddIn
             // 
             this.regex_run_button.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.regex_run_button.ForeColor = System.Drawing.Color.SeaGreen;
-            this.regex_run_button.Location = new System.Drawing.Point(326, 352);
+            this.regex_run_button.Location = new System.Drawing.Point(363, 352);
             this.regex_run_button.Name = "regex_run_button";
             this.regex_run_button.Size = new System.Drawing.Size(60, 30);
             this.regex_run_button.TabIndex = 7;
@@ -1345,6 +1352,37 @@ namespace ExcelAddIn
             this.pictureBox1.TabIndex = 1;
             this.pictureBox1.TabStop = false;
             // 
+            // backColor_select_button
+            // 
+            this.backColor_select_button.BackColor = System.Drawing.Color.White;
+            this.backColor_select_button.FlatAppearance.BorderSize = 2;
+            this.backColor_select_button.Location = new System.Drawing.Point(597, 347);
+            this.backColor_select_button.Name = "backColor_select_button";
+            this.backColor_select_button.Size = new System.Drawing.Size(43, 22);
+            this.backColor_select_button.TabIndex = 20;
+            this.backColor_select_button.UseVisualStyleBackColor = false;
+            this.backColor_select_button.Click += new System.EventHandler(this.backColor_select_button_Click);
+            // 
+            // foreColor_label
+            // 
+            this.foreColor_label.AutoSize = true;
+            this.foreColor_label.Font = new System.Drawing.Font("微软雅黑", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.foreColor_label.Location = new System.Drawing.Point(550, 322);
+            this.foreColor_label.Name = "foreColor_label";
+            this.foreColor_label.Size = new System.Drawing.Size(44, 17);
+            this.foreColor_label.TabIndex = 21;
+            this.foreColor_label.Text = "前景色";
+            // 
+            // backColor_label
+            // 
+            this.backColor_label.AutoSize = true;
+            this.backColor_label.Font = new System.Drawing.Font("微软雅黑", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.backColor_label.Location = new System.Drawing.Point(550, 350);
+            this.backColor_label.Name = "backColor_label";
+            this.backColor_label.Size = new System.Drawing.Size(44, 17);
+            this.backColor_label.TabIndex = 22;
+            this.backColor_label.Text = "背景色";
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
@@ -1489,6 +1527,9 @@ namespace ExcelAddIn
         private System.Windows.Forms.PictureBox QR_logo_pictureBox;
         private System.Windows.Forms.Label QR_logo_label;
         private System.Windows.Forms.ColorDialog colorDialog1;
-        private System.Windows.Forms.Button color_select_button;
+        private System.Windows.Forms.Button foreColor_select_button;
+        private System.Windows.Forms.Button backColor_select_button;
+        private System.Windows.Forms.Label backColor_label;
+        private System.Windows.Forms.Label foreColor_label;
     }
 }

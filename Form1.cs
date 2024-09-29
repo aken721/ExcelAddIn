@@ -95,7 +95,10 @@ namespace ExcelAddIn
             QR_listBox.Visible = false;
             QR_radioButton.Visible = false;
             QR_radioButton.Checked = false;
-            color_select_button.Visible = false;
+            foreColor_select_button.Visible = false;
+            foreColor_label.Visible = false;
+            backColor_select_button.Visible = false;
+            backColor_label.Visible = false;
             QR_logo_label.Visible = false;
             QR_logo_pictureBox.Visible = false;
             BC_radioButton.Visible = false;
@@ -180,7 +183,10 @@ namespace ExcelAddIn
                     QR_listBox.Visible = false;
                     QR_radioButton.Visible = false;
                     QR_radioButton.Checked = false;
-                    color_select_button.Visible = false;
+                    foreColor_select_button.Visible = false;
+                    foreColor_label.Visible = false;
+                    backColor_select_button.Visible = false;
+                    backColor_label.Visible = false;
                     QR_logo_label.Visible = false;
                     QR_logo_pictureBox.Visible = false;
                     QR_logo_pictureBox.Image = ExcelAddIn.Properties.Resources.pic_logo;
@@ -1030,7 +1036,10 @@ namespace ExcelAddIn
             QR_listBox.Visible = false;
             QR_radioButton.Visible = false;
             QR_radioButton.Checked = false;
-            color_select_button.Visible = false;
+            foreColor_select_button.Visible = false;
+            foreColor_label.Visible = false;
+            backColor_select_button.Visible = false;
+            backColor_label.Visible = false;
             QR_logo_label.Visible= false;
             QR_logo_pictureBox.Visible = false;
             BC_radioButton.Visible = false;
@@ -1182,7 +1191,10 @@ namespace ExcelAddIn
             QR_listBox.Visible = false;
             QR_radioButton.Visible = false;
             QR_radioButton.Checked = false;
-            color_select_button.Visible = false;
+            foreColor_select_button.Visible = false;
+            foreColor_label.Visible = false;
+            backColor_select_button.Visible = false;
+            backColor_label.Visible = false;
             QR_logo_label.Visible = false;
             QR_logo_pictureBox.Visible = false;
             BC_radioButton.Visible = false;
@@ -1291,7 +1303,10 @@ namespace ExcelAddIn
             QR_listBox.Visible = false;
             QR_radioButton.Visible = false;
             QR_radioButton.Checked = false;
-            color_select_button.Visible = false;
+            foreColor_select_button.Visible = false;
+            foreColor_label.Visible = false;
+            backColor_select_button.Visible = false;
+            backColor_label.Visible = false;
             QR_logo_label.Visible = false;
             QR_logo_pictureBox.Visible = false;
             BC_radioButton.Visible = false;
@@ -1931,6 +1946,17 @@ namespace ExcelAddIn
                      *可选择生成二维码或条形码
                      */
                     case 4:
+                        // 计算灰度值
+                        int foreGray = GetGrayScale(qrForeColor);
+                        int backGray = GetGrayScale(qrBackColor);
+                        // 计算对比值
+                        int contrast = Math.Abs(foreGray - backGray);
+                        if (contrast < 50)
+                        {
+                            MessageBox.Show("前景色与背景色差值过小，无法生成二维码！请重新选择前景与背景对比度差值较大的颜色");
+                            return;
+                        }
+
                         Excel.Worksheet sheet = workbook.ActiveSheet;
 
                         int usedColumn = sheet.UsedRange.Columns.Count;
@@ -1951,12 +1977,13 @@ namespace ExcelAddIn
                                     Height = 100,
                                     Width = 100,
                                     CharacterSet = "UTF-8",
-                                    ErrorCorrection = ZXing.QrCode.Internal.ErrorCorrectionLevel.H // 设置纠错等级为H
+                                    ErrorCorrection = ZXing.QrCode.Internal.ErrorCorrectionLevel.H,  // 设置纠错等级为H
+                                    Margin=0
                                 },
                                 Renderer = new BitmapRenderer
                                 {
                                     Foreground = qrForeColor, // 前景色
-                                    Background = Color.White // 背景色
+                                    Background = qrBackColor // 背景色
                                 }
                             };
 
@@ -2143,7 +2170,10 @@ namespace ExcelAddIn
             QR_listBox.Visible = false;
             QR_radioButton.Visible = false;
             QR_radioButton.Checked = false;
-            color_select_button.Visible = false;
+            foreColor_select_button.Visible = false;
+            foreColor_label.Visible=false;
+            backColor_select_button.Visible=false;
+            backColor_label.Visible = false;
             QR_logo_label.Visible = false;
             QR_logo_pictureBox.Visible = false;
             BC_radioButton.Visible = false;
@@ -2222,7 +2252,10 @@ namespace ExcelAddIn
             QR_listBox.Visible = false;
             QR_radioButton.Visible = false;
             QR_radioButton.Checked = false;
-            color_select_button.Visible = false;
+            foreColor_select_button.Visible = false;
+            foreColor_label.Visible = false;
+            backColor_select_button.Visible = false;
+            backColor_label.Visible = false;
             QR_logo_label.Visible = false;
             QR_logo_pictureBox.Visible = false;
             BC_radioButton.Visible = false;
@@ -2278,7 +2311,10 @@ namespace ExcelAddIn
             QR_listBox.Visible = true;
             QR_radioButton.Visible = true;
             QR_radioButton.Checked = true;
-            color_select_button.Visible = true;
+            foreColor_select_button.Visible = true;
+            foreColor_label.Visible = true;
+            backColor_select_button.Visible = true;
+            backColor_label.Visible = true;
             QR_logo_label.Visible = true;
             QR_logo_pictureBox.Visible = true;
             QR_logo_pictureBox.Image = ExcelAddIn.Properties.Resources.pic_logo;
@@ -2330,6 +2366,10 @@ namespace ExcelAddIn
                 QR_listBox.SelectionMode = SelectionMode.One;
                 QR_logo_label.Visible = false;
                 QR_logo_pictureBox.Visible = false;
+                foreColor_select_button.Visible = false;
+                foreColor_label.Visible = false;
+                backColor_select_button.Visible = false;
+                backColor_label.Visible = false;
             }
         }
 
@@ -2340,6 +2380,10 @@ namespace ExcelAddIn
                 QR_listBox.SelectionMode = SelectionMode.MultiExtended;
                 QR_logo_label.Visible = true;
                 QR_logo_pictureBox.Visible = true;
+                foreColor_select_button.Visible = true;
+                foreColor_label.Visible = true;
+                backColor_select_button.Visible = true;
+                backColor_label.Visible = true;
             }
         }
 
@@ -3278,14 +3322,32 @@ namespace ExcelAddIn
         }
 
         Color qrForeColor = Color.Black;
-        private void color_select_button_Click(object sender, EventArgs e)
+        Color qrBackColor = Color.White;
+        private void foreColor_select_button_Click(object sender, EventArgs e)
         {
             if (colorDialog1.ShowDialog()==DialogResult.OK)
             {
-                color_select_button.BackColor = colorDialog1.Color;
+                foreColor_select_button.BackColor = colorDialog1.Color;
                 qrForeColor = colorDialog1.Color;
             }
         }
+
+        private void backColor_select_button_Click(object sender, EventArgs e)
+        {
+            if (colorDialog1.ShowDialog() == DialogResult.OK)
+            {
+                backColor_select_button.BackColor = colorDialog1.Color;
+                qrBackColor = colorDialog1.Color;
+            }
+        }
+
+        private static int GetGrayScale(Color color)
+        {
+            // 计算灰度值
+            return (int)(0.299 * color.R + 0.587 * color.G + 0.114 * color.B);
+        }
+
+
     }
 
     internal class MysqlDB

@@ -1,24 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.ComponentModel;
 using System.Data;
 using System.Drawing;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using Excel=Microsoft.Office.Interop.Excel;
-using Microsoft.Office.Tools.Excel;
 using ZXing;
 using ZXing.Common;
-using AForge.Video;
 using AForge.Video.DirectShow;
-using ZXing.QrCode.Internal;
-using System.Windows.Media.Imaging;
-using AForge.Controls;
-using System.Diagnostics.Tracing;
-using System.Threading;
+
+
 
 
 namespace ExcelAddIn
@@ -135,17 +128,21 @@ namespace ExcelAddIn
                     videoSourcePlayer1.VideoSource = videoDevice;
                     videoDevice.Start();
                     videoSourcePlayer1.Start();
-                    videoDevice.NewFrame += new NewFrameEventHandler(videoDevice_NewFrame);
+                    //videoDevice.NewFrame += new NewFrameEventHandler(videoDevice_NewFrame);
                     timer1.Interval = 500;
                     timer1.Enabled = true;
+                }
+                else
+                {
+                    MessageBox.Show("未检测到摄像头设备！请使用图片识别方式扫描二维码");
                 }
             }
         }
 
-        private void videoDevice_NewFrame(object sender, NewFrameEventArgs eventArgs)
-        {
-            frame = (Bitmap)eventArgs.Frame.Clone(); // 使用frame变量
-        }
+        //private void videoDevice_NewFrame(object sender, NewFrameEventArgs eventArgs)
+        //{
+        //    frame = (Bitmap)eventArgs.Frame.Clone(); // 使用frame变量
+        //}
 
         private VideoCaptureDevice videoDevice;  // 新增摄像头扫码时，用于存储当前设备的变量
         private bool hasWrittenToExcel = false; // 新增摄像头扫码时是否已写入excel的判断变量
@@ -153,60 +150,62 @@ namespace ExcelAddIn
 
         private void timer1_Tick(object sender, EventArgs e)
         {
-            if (hasWrittenToExcel) return;
-            if (frame==null) return;
-
-            using (Bitmap gray_bitmap = PreprocessImage(frame))
+            Task.Run(() =>
             {
-                List<string> results = ReadQRCode(gray_bitmap);
-                if (results != null && results.Count > 0 && !hasWrittenToExcel) // 检查标志变量
-                {
-                    // 标记已经写入Excel，避免重复处理
-                    hasWrittenToExcel = true;
+                frame = videoSourcePlayer1.GetCurrentVideoFrame();
+                if (hasWrittenToExcel) return;
+                if (frame == null) return;
 
-                    foreach (var result in results)
+                using (Bitmap gray_bitmap = PreprocessImage(frame))
+                {
+                    List<string> results = ReadQRCode(gray_bitmap);
+                    if (results != null && results.Count > 0 && !hasWrittenToExcel) // 检查标志变量
                     {
-                        for (int i = 0; i < results.Count(); i++)
+                        // 标记已经写入Excel，避免重复处理
+                        hasWrittenToExcel = true;
+
+                        foreach (var result in results)
                         {
-                            string[] details = new string[4]
+                            for (int i = 0; i < results.Count(); i++)
                             {
+                                string[] details = new string[4]
+                                {
                                 "webcam",
                                 "webcam",
                                 (i + 1).ToString(),
                                 result.ToString()
-                            };
-                            dt.Rows.Add(details);
+                                };
+                                dt.Rows.Add(details);
+                            }
                         }
-                    }
-                    if (dt.Rows.Count > 0)
-                    {
-                        Task.Run(() =>
+                        if (dt.Rows.Count > 0)
                         {
                             WriteToExcel(dt);
-                            dt.Clear();                            
-                        });
+                            dt.Clear();
 
-                        // 在写入完成后停止摄像头和视频播放器
-                        this.Invoke((MethodInvoker)delegate
-                        {
-                            videoDevice.NewFrame -= videoDevice_NewFrame;
-                            videoDevice.SignalToStop();
-                            videoDevice.WaitForStop();
-                            videoSourcePlayer1.SignalToStop();
-                            videoSourcePlayer1.WaitForStop();
-                            timer1.Enabled = false;
 
-                            // 在主线程上恢复按钮状态
-                            picture_radioButton.Enabled = true;
-                            webcam_radioButton.Enabled = true;
-                            quit_button.Enabled = true;
-                            scan_button.Enabled = true;
-                            cancel_button.Enabled = false;
-                            folder_path_label.Text = "二维码读取完毕！";
-                        });
+                            // 在写入完成后停止摄像头和视频播放器
+                            this.Invoke((MethodInvoker)delegate
+                            {
+                                //videoDevice.NewFrame -= videoDevice_NewFrame;
+                                videoDevice.SignalToStop();
+                                videoDevice.WaitForStop();
+                                videoSourcePlayer1.SignalToStop();
+                                videoSourcePlayer1.WaitForStop();
+                                timer1.Enabled = false;
+
+                                // 在主线程上恢复按钮状态
+                                picture_radioButton.Enabled = true;
+                                webcam_radioButton.Enabled = true;
+                                quit_button.Enabled = true;
+                                scan_button.Enabled = true;
+                                cancel_button.Enabled = false;
+                                folder_path_label.Text = "二维码读取完毕！";
+                            });
+                        }
                     }
                 }
-            }
+            });            
         }
 
         //ZXing 二维码读取
@@ -332,13 +331,14 @@ namespace ExcelAddIn
         }
 
 
-        /*
-         * 写入当前打开的工作簿中的_QR_Scan工作表
-         * 1. 判断工作簿中是否有_QR_Scan工作表。
-         * 2. 如果是激活扫码功能前已经有，则重命名原有表，并新建一个，并激活。
-         * 3. 如果原先没有，则直接新建一个并激活。
-         * 4. 如果激活扫码功能后再次使用扫码功能，且已有表，则直接激活。
-         */
+        ///<summary>
+        /// 写入当前打开的工作簿中的_QR_Scan工作表
+        /// 1. 判断工作簿中是否有_QR_Scan工作表。
+        /// 2. 如果是激活扫码功能前已经有，则重命名原有表，并新建一个，并激活。
+        /// 3. 如果原先没有，则直接新建一个并激活。
+        /// 4. 如果激活扫码功能后再次使用扫码功能，且已有表，则直接激活。
+        /// </summary>
+
         Excel.Workbook workbook = Globals.ThisAddIn.Application.ActiveWorkbook;
 
         private void WriteToExcel(System.Data.DataTable data)
