@@ -12,19 +12,30 @@ using Excel=Microsoft.Office.Interop.Excel;
 using Microsoft.Office.Tools.Excel;
 using ZXing;
 using ZXing.Common;
+using AForge.Video;
+using AForge.Video.DirectShow;
 using ZXing.QrCode.Internal;
 using System.Windows.Media.Imaging;
+using AForge.Controls;
+using System.Diagnostics.Tracing;
+using System.Threading;
 
 
 namespace ExcelAddIn
 {
     public partial class Form5 : Form
     {
+        DataTable dt = new DataTable();
         public Form5()
         {
             InitializeComponent();
             picture_radioButton.Checked = true;
             folder_path_label.Text = string.Empty;
+            
+            dt.Columns.Add("fold_path", typeof(string));
+            dt.Columns.Add("file_name", typeof(string));
+            dt.Columns.Add("qr_sequence", typeof(string));
+            dt.Columns.Add("qr_content", typeof(string));
         }
 
 
@@ -59,12 +70,6 @@ namespace ExcelAddIn
                         folder_path_label.Text = $"已选文件夹：{folderPath}。正在读取中......";
                     });
 
-                    System.Data.DataTable dt = new System.Data.DataTable();
-                    dt.Columns.Add("fold_path", typeof(string));
-                    dt.Columns.Add("file_name", typeof(string));
-                    dt.Columns.Add("qr_sequence", typeof(string));
-                    dt.Columns.Add("qr_content", typeof(string));
-
                     await Task.Run(() =>
                     {
                         foreach (string item in files_fullname)
@@ -73,7 +78,7 @@ namespace ExcelAddIn
                             {
                                 Bitmap gray_bitmap = PreprocessImage(bitmap);
                                 
-                                if (ReadQRCode(gray_bitmap).Count > 0)
+                                if (ReadQRCode(gray_bitmap)!=null && ReadQRCode(gray_bitmap).Count > 0)
                                 {
                                     for (int i = 0; i < ReadQRCode(gray_bitmap).Count; i++)
                                     {
@@ -94,10 +99,11 @@ namespace ExcelAddIn
                     // 在主线程上更新 UI
                     this.Invoke((MethodInvoker)delegate
                     {
-                        folder_path_label.Text = "读取完成！";
+                        folder_path_label.Text = $"读取完成！成功读取{dt.Rows.Count.ToString()}个二维码";
                         if (dt.Rows.Count > 0)
                         {
                             WriteToExcel(dt);
+                            dt.Clear();
                         }
                     });
 
@@ -111,14 +117,102 @@ namespace ExcelAddIn
                     });
                 }
             }
+            else if (webcam_radioButton.Checked)
+            {
+                hasWrittenToExcel = false;
+                FilterInfoCollection videoDevices = new FilterInfoCollection(FilterCategory.VideoInputDevice);
+                if (videoDevices.Count > 0)
+                {
+                    frame = null;
+                    picture_radioButton.Enabled = false;
+                    webcam_radioButton.Enabled = false;
+                    quit_button.Enabled = false;
+                    scan_button.Enabled = false;
+                    cancel_button.Enabled = true;
+                    folder_path_label.Text = "开始扫描二维码......";
+                    videoDevice = new VideoCaptureDevice(videoDevices[0].MonikerString);
+                    videoDevice.VideoResolution =videoDevice.VideoCapabilities[0]; 
+                    videoSourcePlayer1.VideoSource = videoDevice;
+                    videoDevice.Start();
+                    videoSourcePlayer1.Start();
+                    videoDevice.NewFrame += new NewFrameEventHandler(videoDevice_NewFrame);
+                    timer1.Interval = 500;
+                    timer1.Enabled = true;
+                }
+            }
         }
 
+        private void videoDevice_NewFrame(object sender, NewFrameEventArgs eventArgs)
+        {
+            frame = (Bitmap)eventArgs.Frame.Clone(); // 使用frame变量
+        }
+
+        private VideoCaptureDevice videoDevice;  // 新增摄像头扫码时，用于存储当前设备的变量
+        private bool hasWrittenToExcel = false; // 新增摄像头扫码时是否已写入excel的判断变量
+        private Bitmap frame;                  // 新增摄像头扫码时，用于存储当前帧的变量
+
+        private void timer1_Tick(object sender, EventArgs e)
+        {
+            if (hasWrittenToExcel) return;
+            if (frame==null) return;
+
+            using (Bitmap gray_bitmap = PreprocessImage(frame))
+            {
+                List<string> results = ReadQRCode(gray_bitmap);
+                if (results != null && results.Count > 0 && !hasWrittenToExcel) // 检查标志变量
+                {
+                    // 标记已经写入Excel，避免重复处理
+                    hasWrittenToExcel = true;
+
+                    foreach (var result in results)
+                    {
+                        for (int i = 0; i < results.Count(); i++)
+                        {
+                            string[] details = new string[4]
+                            {
+                                "webcam",
+                                "webcam",
+                                (i + 1).ToString(),
+                                result.ToString()
+                            };
+                            dt.Rows.Add(details);
+                        }
+                    }
+                    if (dt.Rows.Count > 0)
+                    {
+                        Task.Run(() =>
+                        {
+                            WriteToExcel(dt);
+                            dt.Clear();                            
+                        });
+
+                        // 在写入完成后停止摄像头和视频播放器
+                        this.Invoke((MethodInvoker)delegate
+                        {
+                            videoDevice.NewFrame -= videoDevice_NewFrame;
+                            videoDevice.SignalToStop();
+                            videoDevice.WaitForStop();
+                            videoSourcePlayer1.SignalToStop();
+                            videoSourcePlayer1.WaitForStop();
+                            timer1.Enabled = false;
+
+                            // 在主线程上恢复按钮状态
+                            picture_radioButton.Enabled = true;
+                            webcam_radioButton.Enabled = true;
+                            quit_button.Enabled = true;
+                            scan_button.Enabled = true;
+                            cancel_button.Enabled = false;
+                            folder_path_label.Text = "二维码读取完毕！";
+                        });
+                    }
+                }
+            }
+        }
 
         //ZXing 二维码读取
         private List<string> ReadQRCode(Bitmap bitmap)
         {
-            List<string> qrCodeContents = new List<string>();
-
+            List<string> qrCodeContents = new List<string>();            
             // 创建专用的QRCodeReader
             BarcodeReader reader = new BarcodeReader()
             {
@@ -135,6 +229,10 @@ namespace ExcelAddIn
             {
                 // 解码图像中的多个二维码
                 var results = reader.DecodeMultiple(bitmap);
+                if (results == null)
+                {
+                    return null;
+                }
                 foreach (var result in results)
                 {
                     if (result != null && !string.IsNullOrEmpty(result.Text))
@@ -142,12 +240,15 @@ namespace ExcelAddIn
                         qrCodeContents.Add(result.Text);
                     }
                 }
+                return qrCodeContents;
             }
             catch (Exception ex)
             {
                 MessageBox.Show(ex.Message);
+                return null;
             }
-            return qrCodeContents;
+
+            
         }
 
         //ZXing判断一张图片中包含多少个二维码，该方法在功能实现中未使用
@@ -280,13 +381,14 @@ namespace ExcelAddIn
                     for (int j = 0; j < data.Columns.Count; j++)
                     {
                         string str = data.Rows[i][j].ToString();
+                        sheet.Cells[row + i, j + 1].NumberFormat = "@";
                         sheet.Cells[row + i, j + 1].Value = str;
-                        if (j == 1)
+                        if (j == 1 && sheet.Cells[row + i, j + 1].Value!="webcam")
                         {
                             sheet.Hyperlinks.Add(sheet.Cells[row + i, j + 1], Path.Combine(data.Rows[i][0].ToString(), str), Type.Missing, Type.Missing, str);
                         }
 
-                        if (str.StartsWith("http"))
+                        if (str.StartsWith("http") || str.StartsWith("mailto:"))
                         {
                             sheet.Hyperlinks.Add(sheet.Cells[row + i, j + 1], str, Type.Missing, Type.Missing, str);
                         }
@@ -308,8 +410,7 @@ namespace ExcelAddIn
         {
             if (webcam_radioButton.Checked)
             {
-                folder_path_label.Visible = false;
-                qr_image_pictureBox.Visible = true;
+                videoSourcePlayer1.Visible = true;
             }
         }
 
@@ -317,9 +418,39 @@ namespace ExcelAddIn
         {
             if (picture_radioButton.Checked)
             {
-                folder_path_label.Visible = true;
-                qr_image_pictureBox.Visible = false;
+                videoSourcePlayer1.Visible = false;
+                cancel_button.Enabled = false;
             }
         }
+
+        private void cancel_button_Click(object sender, EventArgs e)
+        {
+            // 停止 VideoSourcePlayer
+            if (videoSourcePlayer1.IsRunning)
+            {
+                videoSourcePlayer1.SignalToStop(); // 发出停止信号
+                videoSourcePlayer1.WaitForStop();   // 等待线程停止
+            }
+
+            // 停止 VideoCaptureDevice
+            if (videoDevice != null && videoDevice.IsRunning)
+            {
+                videoDevice.SignalToStop(); // 发出停止信号
+                videoDevice.WaitForStop();   // 等待线程停止
+            }
+
+            // 恢复按钮状态
+            scan_button.Enabled = true;
+            quit_button.Enabled = true;
+            cancel_button.Enabled = false;
+
+            // 清空文件夹路径标签
+            if (!string.IsNullOrEmpty(folder_path_label.Text))
+            {
+                folder_path_label.Text = "";
+            }
+        }
+
+
     }
 }

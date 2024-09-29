@@ -28,16 +28,18 @@
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form5));
             this.picture_radioButton = new System.Windows.Forms.RadioButton();
             this.webcam_radioButton = new System.Windows.Forms.RadioButton();
             this.scan_button = new System.Windows.Forms.Button();
             this.quit_button = new System.Windows.Forms.Button();
-            this.qr_image_pictureBox = new System.Windows.Forms.PictureBox();
             this.label1 = new System.Windows.Forms.Label();
             this.folder_path_label = new System.Windows.Forms.Label();
             this.openFileDialog1 = new System.Windows.Forms.OpenFileDialog();
-            ((System.ComponentModel.ISupportInitialize)(this.qr_image_pictureBox)).BeginInit();
+            this.videoSourcePlayer1 = new AForge.Controls.VideoSourcePlayer();
+            this.cancel_button = new System.Windows.Forms.Button();
+            this.timer1 = new System.Windows.Forms.Timer(this.components);
             this.SuspendLayout();
             // 
             // picture_radioButton
@@ -45,7 +47,7 @@
             this.picture_radioButton.AutoSize = true;
             this.picture_radioButton.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.picture_radioButton.ForeColor = System.Drawing.Color.DarkSlateBlue;
-            this.picture_radioButton.Location = new System.Drawing.Point(159, 68);
+            this.picture_radioButton.Location = new System.Drawing.Point(170, 68);
             this.picture_radioButton.Name = "picture_radioButton";
             this.picture_radioButton.Size = new System.Drawing.Size(83, 24);
             this.picture_radioButton.TabIndex = 0;
@@ -59,7 +61,7 @@
             this.webcam_radioButton.AutoSize = true;
             this.webcam_radioButton.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.webcam_radioButton.ForeColor = System.Drawing.Color.DarkSlateBlue;
-            this.webcam_radioButton.Location = new System.Drawing.Point(364, 68);
+            this.webcam_radioButton.Location = new System.Drawing.Point(375, 68);
             this.webcam_radioButton.Name = "webcam_radioButton";
             this.webcam_radioButton.Size = new System.Drawing.Size(83, 24);
             this.webcam_radioButton.TabIndex = 1;
@@ -72,7 +74,7 @@
             // 
             this.scan_button.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.scan_button.ForeColor = System.Drawing.Color.SeaGreen;
-            this.scan_button.Location = new System.Drawing.Point(143, 125);
+            this.scan_button.Location = new System.Drawing.Point(154, 125);
             this.scan_button.Name = "scan_button";
             this.scan_button.Size = new System.Drawing.Size(76, 32);
             this.scan_button.TabIndex = 3;
@@ -84,22 +86,13 @@
             // 
             this.quit_button.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.quit_button.ForeColor = System.Drawing.Color.SeaGreen;
-            this.quit_button.Location = new System.Drawing.Point(381, 125);
+            this.quit_button.Location = new System.Drawing.Point(392, 125);
             this.quit_button.Name = "quit_button";
             this.quit_button.Size = new System.Drawing.Size(76, 32);
             this.quit_button.TabIndex = 4;
             this.quit_button.Text = "退出";
             this.quit_button.UseVisualStyleBackColor = true;
             this.quit_button.Click += new System.EventHandler(this.quit_button_Click);
-            // 
-            // qr_image_pictureBox
-            // 
-            this.qr_image_pictureBox.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
-            this.qr_image_pictureBox.Location = new System.Drawing.Point(147, 216);
-            this.qr_image_pictureBox.Name = "qr_image_pictureBox";
-            this.qr_image_pictureBox.Size = new System.Drawing.Size(310, 150);
-            this.qr_image_pictureBox.TabIndex = 5;
-            this.qr_image_pictureBox.TabStop = false;
             // 
             // label1
             // 
@@ -117,7 +110,7 @@
             this.folder_path_label.AutoSize = true;
             this.folder_path_label.Font = new System.Drawing.Font("微软雅黑", 9F, System.Drawing.FontStyle.Italic, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.folder_path_label.ForeColor = System.Drawing.Color.SaddleBrown;
-            this.folder_path_label.Location = new System.Drawing.Point(144, 183);
+            this.folder_path_label.Location = new System.Drawing.Point(177, 101);
             this.folder_path_label.Name = "folder_path_label";
             this.folder_path_label.Size = new System.Drawing.Size(0, 17);
             this.folder_path_label.TabIndex = 7;
@@ -126,14 +119,42 @@
             // 
             this.openFileDialog1.FileName = "openFileDialog1";
             // 
+            // videoSourcePlayer1
+            // 
+            this.videoSourcePlayer1.Font = new System.Drawing.Font("微软雅黑", 9F, System.Drawing.FontStyle.Italic, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.videoSourcePlayer1.ForeColor = System.Drawing.Color.SaddleBrown;
+            this.videoSourcePlayer1.Location = new System.Drawing.Point(154, 171);
+            this.videoSourcePlayer1.Name = "videoSourcePlayer1";
+            this.videoSourcePlayer1.Size = new System.Drawing.Size(314, 195);
+            this.videoSourcePlayer1.TabIndex = 8;
+            this.videoSourcePlayer1.Text = "videoSourcePlayer1";
+            this.videoSourcePlayer1.VideoSource = null;
+            // 
+            // cancel_button
+            // 
+            this.cancel_button.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.cancel_button.ForeColor = System.Drawing.Color.SeaGreen;
+            this.cancel_button.Location = new System.Drawing.Point(276, 125);
+            this.cancel_button.Name = "cancel_button";
+            this.cancel_button.Size = new System.Drawing.Size(76, 32);
+            this.cancel_button.TabIndex = 9;
+            this.cancel_button.Text = "取消";
+            this.cancel_button.UseVisualStyleBackColor = true;
+            this.cancel_button.Click += new System.EventHandler(this.cancel_button_Click);
+            // 
+            // timer1
+            // 
+            this.timer1.Tick += new System.EventHandler(this.timer1_Tick);
+            // 
             // Form5
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(632, 375);
+            this.Controls.Add(this.cancel_button);
+            this.Controls.Add(this.videoSourcePlayer1);
             this.Controls.Add(this.folder_path_label);
             this.Controls.Add(this.label1);
-            this.Controls.Add(this.qr_image_pictureBox);
             this.Controls.Add(this.quit_button);
             this.Controls.Add(this.scan_button);
             this.Controls.Add(this.webcam_radioButton);
@@ -143,7 +164,6 @@
             this.Name = "Form5";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "Form5";
-            ((System.ComponentModel.ISupportInitialize)(this.qr_image_pictureBox)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -155,9 +175,11 @@
         private System.Windows.Forms.RadioButton webcam_radioButton;
         private System.Windows.Forms.Button scan_button;
         private System.Windows.Forms.Button quit_button;
-        private System.Windows.Forms.PictureBox qr_image_pictureBox;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Label folder_path_label;
         private System.Windows.Forms.OpenFileDialog openFileDialog1;
+        private AForge.Controls.VideoSourcePlayer videoSourcePlayer1;
+        private System.Windows.Forms.Button cancel_button;
+        private System.Windows.Forms.Timer timer1;
     }
 }
