@@ -1969,25 +1969,6 @@ namespace ExcelAddIn
                         //生成二维码
                         if (QR_radioButton.Checked == true)
                         {
-                            BarcodeWriter writer = new BarcodeWriter
-                            {
-                                Format = BarcodeFormat.QR_CODE,
-                                Options = new QrCodeEncodingOptions
-                                {
-                                    Height = 100,
-                                    Width = 100,
-                                    CharacterSet = "UTF-8",
-                                    ErrorCorrection = ZXing.QrCode.Internal.ErrorCorrectionLevel.H,  // 设置纠错等级为H
-                                    Margin=0
-                                },
-                                Renderer = new BitmapRenderer
-                                {
-                                    Foreground = qrForeColor, // 前景色
-                                    Background = qrBackColor // 背景色
-                                }
-                            };
-
-
                             for (int i = 2; i <= sheet.UsedRange.Rows.Count; i++)
                             {
                                 string data = "";
@@ -2012,8 +1993,26 @@ namespace ExcelAddIn
                                     data = value;
                                 }
 
-                                byte[] utf8Bytes = Encoding.UTF8.GetBytes(data);
+                                // 创建新的 BarcodeWriter 实例
+                                BarcodeWriter writer = new BarcodeWriter
+                                {
+                                    Format = BarcodeFormat.QR_CODE,
+                                    Options = new QrCodeEncodingOptions
+                                    {
+                                        Height = 100,
+                                        Width = 100,
+                                        CharacterSet = "UTF-8",
+                                        ErrorCorrection = ZXing.QrCode.Internal.ErrorCorrectionLevel.H,  // 设置纠错等级为H
+                                        Margin = 0
+                                    },
+                                    Renderer = new BitmapRenderer
+                                    {
+                                        Foreground = qrForeColor, // 前景色
+                                        Background = qrBackColor // 背景色
+                                    }
+                                };
 
+                                byte[] utf8Bytes = Encoding.UTF8.GetBytes(data);
                                 Bitmap qrCode = writer.Write(Encoding.UTF8.GetString(utf8Bytes));
 
                                 // 如果提供了Logo图片路径，则在二维码中间添加Logo

@@ -452,5 +452,22 @@ namespace ExcelAddIn
         }
 
 
+        private void Form5_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            // 停止 VideoSourcePlayer
+            if (videoSourcePlayer1.IsRunning)
+            {
+                videoSourcePlayer1.SignalToStop(); // 发出停止信号
+                videoSourcePlayer1.WaitForStop();   // 等待线程停止
+                videoSourcePlayer1.VideoSource = null;
+            }
+
+            // 停止 VideoCaptureDevice
+            if (videoDevice != null && videoDevice.IsRunning)
+            {
+                videoDevice.SignalToStop(); // 发出停止信号
+                videoDevice.WaitForStop();   // 等待线程停止
+            }
+        }
     }
 }
