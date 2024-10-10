@@ -551,6 +551,9 @@
   <ItemGroup>
     <None Include="Properties\Resources\QR.png" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Properties\Resources\scan.wav" />
+  </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
     <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>

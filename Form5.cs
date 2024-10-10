@@ -10,6 +10,13 @@ using Excel=Microsoft.Office.Interop.Excel;
 using ZXing;
 using ZXing.Common;
 using AForge.Video.DirectShow;
+using AForge.Controls;
+using AForge.Imaging;
+using System.Media;
+using ExcelAddIn.Properties;
+using AForge.Video;
+using System.Windows.Interop;
+using System.Windows.Media.Imaging;
 
 
 
@@ -112,7 +119,8 @@ namespace ExcelAddIn
             }
             else if (webcam_radioButton.Checked)
             {
-                hasWrittenToExcel = false;
+
+                isProcessing = false;
                 FilterInfoCollection videoDevices = new FilterInfoCollection(FilterCategory.VideoInputDevice);
                 if (videoDevices.Count > 0)
                 {
@@ -129,7 +137,7 @@ namespace ExcelAddIn
                     videoDevice.Start();
                     videoSourcePlayer1.Start();
                     //videoDevice.NewFrame += new NewFrameEventHandler(videoDevice_NewFrame);
-                    timer1.Interval = 500;
+                    timer1.Interval = 1000;
                     timer1.Enabled = true;
                 }
                 else
@@ -144,57 +152,68 @@ namespace ExcelAddIn
         //    frame = (Bitmap)eventArgs.Frame.Clone(); // 使用frame变量
         //}
 
-        private VideoCaptureDevice videoDevice;  // 新增摄像头扫码时，用于存储当前设备的变量
-        private bool hasWrittenToExcel = false; // 新增摄像头扫码时是否已写入excel的判断变量
+        private VideoCaptureDevice videoDevice;   // 新增摄像头扫码时，用于存储当前设备的变量
+        private bool isProcessing = false;      // 添加标志变量
         private Bitmap frame;                  // 新增摄像头扫码时，用于存储当前帧的变量
+        private readonly object _lockObject = new object();    // 锁对象，用于确保dt写入时现成安全
 
         private void timer1_Tick(object sender, EventArgs e)
         {
+            if (isProcessing) return;
+            isProcessing = true;
+            
             Task.Run(() =>
             {
                 frame = videoSourcePlayer1.GetCurrentVideoFrame();
-                if (hasWrittenToExcel) return;
-                if (frame == null) return;
+                if (frame == null) 
+                {
+                    isProcessing = false;
+                    return;
+                }
+                
 
                 using (Bitmap gray_bitmap = PreprocessImage(frame))
                 {
                     List<string> results = ReadQRCode(gray_bitmap);
-                    if (results != null && results.Count > 0 && !hasWrittenToExcel) // 检查标志变量
+                    if (results != null && results.Count > 0 ) // 检查标志变量
                     {
-                        // 标记已经写入Excel，避免重复处理
-                        hasWrittenToExcel = true;
+                        this.Invoke((MethodInvoker)delegate
+                        {
+                            //videoDevice.NewFrame -= videoDevice_NewFrame;
+                            using (SoundPlayer scan_player = new SoundPlayer(Resources.ScanSound))
+                            {
+                                scan_player.Play();
+                            }
+                            // 停止摄像头和视频播放器
+                            videoDevice.SignalToStop();
+                            videoDevice.WaitForStop();
+                            videoSourcePlayer1.SignalToStop();
+                            videoSourcePlayer1.WaitForStop();
+                            timer1.Enabled = false;
+                        });
 
                         foreach (var result in results)
                         {
-                            for (int i = 0; i < results.Count(); i++)
+                            lock (_lockObject) // Ensure thread safety when accessing shared resource 'dt'
                             {
                                 string[] details = new string[4]
-                                {
+                            {
                                 "webcam",
                                 "webcam",
-                                (i + 1).ToString(),
+                                (results.IndexOf(result) + 1).ToString(),
                                 result.ToString()
-                                };
+                            };
                                 dt.Rows.Add(details);
-                            }
+                            }                            
                         }
                         if (dt.Rows.Count > 0)
                         {
                             WriteToExcel(dt);
                             dt.Clear();
 
-
-                            // 在写入完成后停止摄像头和视频播放器
+                            // 写入完成后在主线程恢复按钮状态
                             this.Invoke((MethodInvoker)delegate
                             {
-                                //videoDevice.NewFrame -= videoDevice_NewFrame;
-                                videoDevice.SignalToStop();
-                                videoDevice.WaitForStop();
-                                videoSourcePlayer1.SignalToStop();
-                                videoSourcePlayer1.WaitForStop();
-                                timer1.Enabled = false;
-
-                                // 在主线程上恢复按钮状态
                                 picture_radioButton.Enabled = true;
                                 webcam_radioButton.Enabled = true;
                                 quit_button.Enabled = true;
@@ -205,6 +224,7 @@ namespace ExcelAddIn
                         }
                     }
                 }
+                isProcessing = false; // 处理完毕，重置标志
             });            
         }
 
@@ -443,6 +463,7 @@ namespace ExcelAddIn
             scan_button.Enabled = true;
             quit_button.Enabled = true;
             cancel_button.Enabled = false;
+            isProcessing=false;
 
             // 清空文件夹路径标签
             if (!string.IsNullOrEmpty(folder_path_label.Text))
