@@ -10,13 +10,9 @@ using Excel=Microsoft.Office.Interop.Excel;
 using ZXing;
 using ZXing.Common;
 using AForge.Video.DirectShow;
-using AForge.Controls;
-using AForge.Imaging;
 using System.Media;
 using ExcelAddIn.Properties;
-using AForge.Video;
-using System.Windows.Interop;
-using System.Windows.Media.Imaging;
+
 
 
 
