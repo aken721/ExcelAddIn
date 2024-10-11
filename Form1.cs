@@ -35,8 +35,8 @@ namespace ExcelAddIn
         private Int32 used_time_count = 0;
         private bool res = false;
         private Thread thread;
-        private List<string> active_sheet_names = new List<string>();
-        private List<string> new_sheet_names = new List<string>();
+        private List<string> active_sheet_names = new List<string>();     //当前工作簿中所有工作表名称，初始化时首次写入
+        private List<string> new_sheet_names = new List<string>();       //打开后新建表所有表名
 
         public Form1()
         {
@@ -54,6 +54,7 @@ namespace ExcelAddIn
             excelFilePath = workbook.FullName;
             sheet_name_combobox.Items.Clear();
             field_name_combobox.Items.Clear();
+            data_start_combobox.SelectedIndex = 1;
             foreach (Excel.Worksheet worksheet in workbook.Worksheets)
             {
                 sheet_name_combobox.Items.Add(worksheet.Name);
@@ -128,6 +129,7 @@ namespace ExcelAddIn
                 case 0:                                             
                     sheet_name_combobox.Items.Clear();
                     field_name_combobox.Items.Clear();
+                    data_start_combobox.SelectedIndex=1;
                     foreach (Excel.Worksheet worksheet in workbook.Worksheets)
                     {
                         sheet_name_combobox.Items.Add(worksheet.Name);
@@ -216,6 +218,21 @@ namespace ExcelAddIn
             }
         }
 
+        //限制指定数据起始行的ComboBox中只能输入数字
+        private void data_start_combobox_KeyPress(object sender, KeyPressEventArgs e)
+        {
+            // 如果输入的字符不是数字，也不是控制字符（如退格键），则阻止输入
+            if (!char.IsDigit(e.KeyChar) && !char.IsControl(e.KeyChar))
+            {
+                e.Handled = true;
+            }
+        }
+
+        private void data_start_combobox_TextChanged(object sender, EventArgs e)
+        {
+            this.sheet_name_combobox_TextChanged(sender,e);
+        }
+
         //更新分表功能中选中表的字段选项
         private void sheet_name_combobox_TextChanged(object sender, EventArgs e)
         {
@@ -230,53 +247,77 @@ namespace ExcelAddIn
             {
                 Excel.Worksheet worksheet = ThisAddIn.app.ActiveWorkbook.Worksheets[selectworksheet];
                 field_name_combobox.Items.Clear();
-                foreach (Excel.Range range in worksheet.Range[worksheet.Cells[1, 1], worksheet.Cells[1, worksheet.UsedRange.Columns.Count]])
+                int title_last_row = int.Parse(data_start_combobox.Text)-1;
+                if(title_last_row==0)
                 {
-                    string range_value = range.Value2;
-                    if (!string.IsNullOrEmpty(range_value))
+                    ShowLabel(split_sheet_result_label, true, "该表没有标题行！");
+                    StartTimer();
+                    for (int i = 1; i <= worksheet.UsedRange.Columns.Count; i++)
                     {
-                        field_name_combobox.Items.Add(range_value);
+                        field_name_combobox.Items.Add(Convert.ToString(i));
                     }
-                }
-                if (field_name_combobox.Items.Count > 0)
-                {
-                    field_name_combobox.Text = Convert.ToString(field_name_combobox.Items[0]);
                 }
                 else
                 {
-                    field_name_combobox.Text = "";
-                }
+                    foreach (Excel.Range range in worksheet.Range[worksheet.Cells[title_last_row, 1], worksheet.Cells[title_last_row, worksheet.UsedRange.Columns.Count]])
+                    {
+                        string range_value = range.Value;
+                        if (string.IsNullOrEmpty(range_value))
+                        {
+                                
+                            field_name_combobox.Items.Add(range.Column.ToString());
+                        }
+                        else
+                        {
+                            field_name_combobox.Items.Add(range.Column.ToString()+"."+range.Value);
+                        }
+                    }
+                    if (field_name_combobox.Items.Count > 0)
+                    {
+                        field_name_combobox.Text = Convert.ToString(field_name_combobox.Items[0]);
+                    }
+                    else
+                    {
+                        field_name_combobox.Text = "";
+                    }
+                }                
             }
             field_name_combobox.Refresh();
         }
+
+
 
         //分表功能中清空combobox内容
         private void clear_button_Click(object sender, EventArgs e)
         {
             sheet_name_combobox.Text = "";
             field_name_combobox.Text = "";
+            data_start_combobox.Text = "2";
         }
 
         //分表（UI主线程）
         private void split_button_Click(object sender, EventArgs e)
         {
-            if (string.IsNullOrEmpty(sheet_name_combobox.Text) && string.IsNullOrEmpty(field_name_combobox.Text))
+            if (string.IsNullOrEmpty(sheet_name_combobox.Text) && string.IsNullOrEmpty(field_name_combobox.Text)&&string.IsNullOrEmpty(data_start_combobox.Text))
             {
-                ShowLabel(split_sheet_result_label, true, "表和字段均不能为空！");
+                ShowLabel(split_sheet_result_label, true, "表、字段和数据起始行均不能为空！");
                 StartTimer();
                 return;
             }
             int field_column = 0;
-            foreach (Excel.Range range in workbook.Worksheets[sheet_name_combobox.Text].Range[workbook.Worksheets[sheet_name_combobox.Text].Cells[1, 1], workbook.Worksheets[sheet_name_combobox.Text].Cells[1, workbook.Worksheets[sheet_name_combobox.Text].UsedRange.Columns.Count]])
+            string field_name_selected = field_name_combobox.Text;
+
+            if (field_name_selected.Contains("."))
             {
-                if (range.Value == field_name_combobox.Text)
-                {
-                    field_column = range.Column;
-                    break;
-                }
+                field_column = int.Parse(field_name_selected.Split('.')[0]);
             }
-            string select_field = sheet_name_combobox.Text;
-            thread = new Thread(() => SplitTask(select_field, field_column));
+            else
+            {
+                field_column = int.Parse(field_name_selected);
+            }
+            string select_sheet = sheet_name_combobox.Text;
+            int dataStartRow = int.Parse(data_start_combobox.Text);
+            thread = new Thread(() => SplitTask(select_sheet, field_column,dataStartRow));
             thread.Start();
             split_sheet_result_label.Visible = true;
             split_sheet_timer.Interval = 1000;
@@ -286,17 +327,20 @@ namespace ExcelAddIn
         }
 
         //分表（程序执行线程）
-        private void SplitTask(string sheetName, int selectFieldsColumn)
+        private void SplitTask(string sheetName, int selectFieldsColumn,int selectDataStartRow)
         {
             res = false;
-            tabControl1.Enabled = false;
-            split_button.Enabled = false;
-            splitsheet_export_button.Enabled = false;
-            splitsheet_delete_button.Enabled = false;
-            clear_button.Enabled = false;
-            sheet_name_combobox.Enabled = false;
-            field_name_combobox.Enabled = false;
-            this.ControlBox = false;
+            this.Invoke(new Action(() => 
+            {
+                tabControl1.Enabled = false;
+                split_button.Enabled = false;
+                splitsheet_export_button.Enabled = false;
+                splitsheet_delete_button.Enabled = false;
+                clear_button.Enabled = false;
+                sheet_name_combobox.Enabled = false;
+                field_name_combobox.Enabled = false;
+                this.ControlBox = false;
+            }));
             ThisAddIn.app.ScreenUpdating = false;
             ThisAddIn.app.DisplayAlerts = false;
 
@@ -304,12 +348,11 @@ namespace ExcelAddIn
             {
                 //声明范围列数、范围行数、分表依据列数、筛选结果第一列数
                 List<string> records = new List<string>();
-                int record_row = workbook.Worksheets[sheetName].UsedRange.Rows.Count;
-                int current_record = 1;
-                int total_record = 0;
+                long record_row = workbook.Worksheets[sheetName].Cells[workbook.Worksheets[sheetName].Rows.Count, selectFieldsColumn].End(Excel.XlDirection.xlUp).Row;  //待分表中的数据行数
+                int current_record = 1;    
 
                 //将去重后的表名加入数组
-                foreach (Excel.Range range in workbook.Worksheets[sheetName].Range[workbook.Worksheets[sheetName].Cells[2, selectFieldsColumn], workbook.Worksheets[sheetName].Cells[record_row, selectFieldsColumn]])
+                foreach (Excel.Range range in workbook.Worksheets[sheetName].Range[workbook.Worksheets[sheetName].Cells[selectDataStartRow, selectFieldsColumn], workbook.Worksheets[sheetName].Cells[record_row, selectFieldsColumn]])
                 {
                     if (records.Contains(range.Value) || string.IsNullOrEmpty(range.Value))
                     {
@@ -317,11 +360,11 @@ namespace ExcelAddIn
                     }
                     else
                     {
-                        records.Add(range.Value);
+                        var rangeValue = range.Value;
+                        records.Add(Convert.ToString(rangeValue));
                     }
                 }
-
-                total_record = records.Count;
+                int total_record = records.Count;
 
                 //动态更新一个分表工作簿中所有表的名称
                 List<string> dynamic_sheet_name = new List<string>();
@@ -330,10 +373,10 @@ namespace ExcelAddIn
                 //新建分表，并通过关键字段筛选，筛出结果复制到相应分表中
                 foreach (string record in records)
                 {
-                    //更新进度条
+                     //更新进度条
                     UpdateProgressBar(split_sheet_progressBar, current_record, total_record, splitProgressBar_label, "分表进度");
-
-                    //分表
+                    
+                    //未分表前工作簿已有表登记
                     if (dynamic_sheet_name.Count > 0)
                     {
                         dynamic_sheet_name.Clear();
@@ -343,6 +386,7 @@ namespace ExcelAddIn
                         dynamic_sheet_name.Add(ws.Name);
                     }
 
+                    //新建名为record的分表
                     Excel.Worksheet add_sheet = workbook.Worksheets.Add(After: workbook.Worksheets[workbook.Worksheets.Count]);
                     if (!dynamic_sheet_name.Contains(record))
                     {
@@ -354,37 +398,41 @@ namespace ExcelAddIn
                         do { i++; } while (dynamic_sheet_name.Contains(record + i.ToString()));
                         add_sheet.Name = record + i.ToString();
                     }
-                    workbook.Worksheets[sheetName].select();
-                    ThisAddIn.app.ActiveSheet.Range[ThisAddIn.app.ActiveSheet.Cells[1, 1], ThisAddIn.app.ActiveSheet.Cells[1, ThisAddIn.app.ActiveSheet.UsedRange.Columns.Count]].Select();
-                    ThisAddIn.app.Selection.AutoFilter(selectFieldsColumn, record);
-                    ThisAddIn.app.ActiveSheet.Rows[1].Select();
-                    ThisAddIn.app.ActiveSheet.Range[ThisAddIn.app.Selection, ThisAddIn.app.Selection.End(Excel.XlDirection.xlDown)].Select();
-                    ThisAddIn.app.Selection.Copy(ThisAddIn.app.ActiveWorkbook.Worksheets[record].Range["A1"]);
-                    current_record++;
-                }
-                ThisAddIn.app.ActiveSheet.Range[ThisAddIn.app.ActiveSheet.Cells[1, 1], ThisAddIn.app.ActiveSheet.Cells[1, ThisAddIn.app.ActiveSheet.UsedRange.Columns.Count]].AutoFilter();
-                ThisAddIn.app.ActiveSheet.Range["A1"].Select();
+                    workbook.Worksheets[sheetName].Select();
 
-                //对有序号列的表中序号重排序
-                foreach (Excel.Worksheet worksheet in ThisAddIn.app.ActiveWorkbook.Worksheets)
-                {
-                    worksheet.Activate();
-                    foreach (Excel.Range rng in ThisAddIn.app.ActiveSheet.Range[ThisAddIn.app.ActiveSheet.Cells(1, 1), ThisAddIn.app.ActiveSheet.Cells(1, 1).End(Excel.XlDirection.xlToRight)])
+                    //定义筛选范围，前边已定义record_row(标题+数据总行数)、selectDataStartRow(数据起始行)、selectFieldsColumn(筛选关键字所在列)
+                    int record_column = workbook.Worksheets[sheetName].UsedRange.Columns.Count;
+                    int sheet_allRows = workbook.Worksheets[sheetName].Rows.Count;
+                    Excel.Worksheet activeSheet = ThisAddIn.app.ActiveSheet;
+
+                    activeSheet.Range[activeSheet.Cells[selectDataStartRow-1, 1], activeSheet.Cells[record_row, record_column]].Select();
+                    ThisAddIn.app.Selection.AutoFilter(selectFieldsColumn, record);
+                    int autofilter_row=activeSheet.Cells[sheet_allRows,selectFieldsColumn].End(Excel.XlDirection.xlUp).Row;
+                    activeSheet.Range[activeSheet.Cells[1,1], activeSheet.Cells[autofilter_row,record_column]].Select();
+                    ThisAddIn.app.Selection.Copy(ThisAddIn.app.ActiveWorkbook.Worksheets[record].Range["A1"]);
+
+                    //对有序号列的表数据重新排序
+                    add_sheet.Select();
+                    foreach (Excel.Range rng in ThisAddIn.app.ActiveSheet.Range[ThisAddIn.app.ActiveSheet.Cells(1, 1), ThisAddIn.app.ActiveSheet.Cells(selectDataStartRow - 1, ThisAddIn.app.ActiveSheet.UsedRange.Columns.Count)])
                     {
                         if (rng.Value == "序号")
                         {
-                            int tt = rng.Column;
-                            for (int number = 1; number < ThisAddIn.app.ActiveSheet.UsedRange.Rows.count; number++)
+                            int t_column = rng.Column;                                                                             //“序号”所在的列
+                            int data_row = add_sheet.Cells[add_sheet.Rows.Count,record_column].End(Excel.XlDirection.xlUp).Row;   //分后的表中最后一条数据所在行
+                            for (int number = 0; number <=data_row-selectDataStartRow; number++)
                             {
-                                ThisAddIn.app.ActiveSheet.Cells[number + 1, tt].Value = number;
+                                ThisAddIn.app.ActiveSheet.Cells[selectDataStartRow + number, t_column].Value = number + 1;
                             }
                             break;
                         }
                     }
+                    add_sheet.Range[add_sheet.Cells[1, 1], add_sheet.Cells[1, record_column]].EntireColumn.AutoFit();
+                    add_sheet.Range["A1"].Select();
+                    current_record++;
                 }
                 workbook.Worksheets[sheetName].Activate();
+                workbook.Worksheets[sheetName].Cells[record_row - 1, selectFieldsColumn].AutoFilter();
                 ThisAddIn.app.ActiveSheet.Range("A1").Select();
-                ThisAddIn.app.ScreenUpdating = true;
                 ThisAddIn.app.CutCopyMode = Excel.XlCutCopyMode.xlCopy;
             }
             catch (Exception ex)
@@ -404,17 +452,21 @@ namespace ExcelAddIn
                         new_sheet_names.Add(newsheet.Name);
                     }
                 }
-
-                tabControl1.Enabled = true;
-                split_button.Enabled = true;
-                splitsheet_export_button.Enabled = true;
-                splitsheet_delete_button.Enabled = true;
-                clear_button.Enabled = true;
-                sheet_name_combobox.Enabled = true;
-                field_name_combobox.Enabled = true;
-                this.ControlBox = true;
-                this.TopMost = false;
+                this.Invoke(new Action(() =>
+                {
+                    tabControl1.Enabled = true;
+                    split_button.Enabled = true;
+                    splitsheet_export_button.Enabled = true;
+                    splitsheet_delete_button.Enabled = true;
+                    clear_button.Enabled = true;
+                    sheet_name_combobox.Enabled = true;
+                    field_name_combobox.Enabled = true;
+                    this.ControlBox = true;
+                    this.TopMost = false;
+                }));              
                 res = true;
+                ThisAddIn.app.ScreenUpdating = true;
+                ThisAddIn.app.DisplayAlerts = true;
             }
         }
 
@@ -436,7 +488,6 @@ namespace ExcelAddIn
                 ShowLabel(split_sheet_result_label, true, "未找到本次分出的表，分表导出不成功。如确需导出表，请使用“批量导删”功能");
                 StartTimer();
             }
-
         }
 
         //分表导出（程序执行线程）
@@ -873,10 +924,13 @@ namespace ExcelAddIn
             // 计算进度百分比
             int progressPercentage = (int)((double)currentSheet / totalSheets * 100);
             // 更新进度条控件
-            progressBar.Value = progressPercentage;
-            progressBar.Update();
-            // 显示百分比数字
-            progressBar_result_label.Text = progressBar_result + progressPercentage.ToString() + "%";
+            this.Invoke(new Action(() =>
+            {
+                progressBar.Value = progressPercentage;
+                progressBar.Update();
+                // 显示百分比数字
+                progressBar_result_label.Text = progressBar_result + progressPercentage.ToString() + "%";
+            }));            
         }
 
         //获取指定文件夹符合要求文件的数量（包含子文件夹）
@@ -3345,8 +3399,6 @@ namespace ExcelAddIn
             // 计算灰度值
             return (int)(0.299 * color.R + 0.587 * color.G + 0.114 * color.B);
         }
-
-
     }
 
     internal class MysqlDB
