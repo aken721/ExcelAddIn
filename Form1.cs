@@ -264,8 +264,24 @@ namespace ExcelAddIn
                         string range_value = range.Value;
                         if (string.IsNullOrEmpty(range_value))
                         {
+                            if(range.MergeCells)
+                            {
+                                Excel.Range merge_range = range.MergeArea;
+                                string merge_range_value = ThisAddIn.app.ActiveSheet.Range[merge_range.Address.Split(':')[0]].Value;
+                                if (string.IsNullOrEmpty(merge_range_value))
+                                {
+                                    field_name_combobox.Items.Add(range.Column.ToString());
+                                }
+                                else
+                                {
+                                    field_name_combobox.Items.Add(range.Column.ToString() + "." + merge_range_value);
+                                }
                                 
-                            field_name_combobox.Items.Add(range.Column.ToString());
+                            }
+                            else
+                            {
+                                field_name_combobox.Items.Add(range.Column.ToString());
+                            }
                         }
                         else
                         {
@@ -405,14 +421,20 @@ namespace ExcelAddIn
                     int sheet_allRows = workbook.Worksheets[sheetName].Rows.Count;
                     Excel.Worksheet activeSheet = ThisAddIn.app.ActiveSheet;
 
-                    activeSheet.Range[activeSheet.Cells[selectDataStartRow-1, 1], activeSheet.Cells[record_row, record_column]].Select();
+                    activeSheet.Rows[selectDataStartRow].Insert(Shift: Excel.XlInsertShiftDirection.xlShiftDown, CopyOrigin: Excel.XlInsertFormatOrigin.xlFormatFromLeftOrAbove);
+                    activeSheet.Range[activeSheet.Cells[selectDataStartRow, 1], activeSheet.Cells[record_row, record_column]].Select();
                     ThisAddIn.app.Selection.AutoFilter(selectFieldsColumn, record);
                     int autofilter_row=activeSheet.Cells[sheet_allRows,selectFieldsColumn].End(Excel.XlDirection.xlUp).Row;
                     activeSheet.Range[activeSheet.Cells[1,1], activeSheet.Cells[autofilter_row,record_column]].Select();
                     ThisAddIn.app.Selection.Copy(ThisAddIn.app.ActiveWorkbook.Worksheets[record].Range["A1"]);
+                    activeSheet.Rows[selectDataStartRow].AutoFilter();
+                    activeSheet.Rows[selectDataStartRow].Delete(Excel.XlDeleteShiftDirection.xlShiftUp);
+
+
 
                     //对有序号列的表数据重新排序
                     add_sheet.Select();
+                    add_sheet.Rows[selectDataStartRow].Delete(Excel.XlDeleteShiftDirection.xlShiftUp);
                     foreach (Excel.Range rng in ThisAddIn.app.ActiveSheet.Range[ThisAddIn.app.ActiveSheet.Cells(1, 1), ThisAddIn.app.ActiveSheet.Cells(selectDataStartRow - 1, ThisAddIn.app.ActiveSheet.UsedRange.Columns.Count)])
                     {
                         if (rng.Value == "序号")
@@ -430,8 +452,7 @@ namespace ExcelAddIn
                     add_sheet.Range["A1"].Select();
                     current_record++;
                 }
-                workbook.Worksheets[sheetName].Activate();
-                workbook.Worksheets[sheetName].Cells[record_row - 1, selectFieldsColumn].AutoFilter();
+                workbook.Worksheets[sheetName].Activate();                
                 ThisAddIn.app.ActiveSheet.Range("A1").Select();
                 ThisAddIn.app.CutCopyMode = Excel.XlCutCopyMode.xlCopy;
             }
