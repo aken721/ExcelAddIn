@@ -52,6 +52,8 @@
             this.tab1 = this.Factory.CreateRibbonTab();
             this.group1 = this.Factory.CreateRibbonGroup();
             this.separator4 = this.Factory.CreateRibbonSeparator();
+            this.separator5 = this.Factory.CreateRibbonSeparator();
+            this.group5 = this.Factory.CreateRibbonGroup();
             this.group2 = this.Factory.CreateRibbonGroup();
             this.group3 = this.Factory.CreateRibbonGroup();
             this.separator1 = this.Factory.CreateRibbonSeparator();
@@ -73,15 +75,16 @@
             this.folderBrowserDialog1 = new System.Windows.Forms.FolderBrowserDialog();
             this.timer1 = new System.Windows.Forms.Timer(this.components);
             this.saveFileDialog1 = new System.Windows.Forms.SaveFileDialog();
+            this.fapiao_button = this.Factory.CreateRibbonButton();
             this.Excel_extend = this.Factory.CreateRibbonButton();
             this.confirm_spotlight = this.Factory.CreateRibbonToggleButton();
+            this.scan_button = this.Factory.CreateRibbonButton();
             this.Send_mail = this.Factory.CreateRibbonButton();
             this.Files_read = this.Factory.CreateRibbonButton();
             this.File_rename = this.Factory.CreateRibbonButton();
             this.delandmove_button = this.Factory.CreateRibbonButton();
             this.Select_f_or_d = this.Factory.CreateRibbonToggleButton();
             this.to_pdf_button = this.Factory.CreateRibbonButton();
-            this.scan_button = this.Factory.CreateRibbonButton();
             this.Rename_mp3 = this.Factory.CreateRibbonButton();
             this.Select_mp3_button = this.Factory.CreateRibbonButton();
             this.Mode_button = this.Factory.CreateRibbonButton();
@@ -89,9 +92,9 @@
             this.Stop_button = this.Factory.CreateRibbonButton();
             this.Next_button = this.Factory.CreateRibbonButton();
             this.Previous_button = this.Factory.CreateRibbonButton();
-            this.separator5 = this.Factory.CreateRibbonSeparator();
             this.tab1.SuspendLayout();
             this.group1.SuspendLayout();
+            this.group5.SuspendLayout();
             this.group2.SuspendLayout();
             this.group3.SuspendLayout();
             this.group4.SuspendLayout();
@@ -107,6 +110,7 @@
             // 
             this.tab1.ControlId.ControlIdType = Microsoft.Office.Tools.Ribbon.RibbonControlIdType.Office;
             this.tab1.Groups.Add(this.group1);
+            this.tab1.Groups.Add(this.group5);
             this.tab1.Groups.Add(this.group2);
             this.tab1.Groups.Add(this.group3);
             this.tab1.Groups.Add(this.group4);
@@ -127,6 +131,16 @@
             // separator4
             // 
             this.separator4.Name = "separator4";
+            // 
+            // separator5
+            // 
+            this.separator5.Name = "separator5";
+            // 
+            // group5
+            // 
+            this.group5.Items.Add(this.fapiao_button);
+            this.group5.Label = "财务工具";
+            this.group5.Name = "group5";
             // 
             // group2
             // 
@@ -282,6 +296,15 @@
             // 
             this.timer1.Tick += new System.EventHandler(this.timer1_Tick);
             // 
+            // fapiao_button
+            // 
+            this.fapiao_button.ControlSize = Microsoft.Office.Core.RibbonControlSize.RibbonControlSizeLarge;
+            this.fapiao_button.Image = global::ExcelAddIn.Properties.Resources.Fapiao;
+            this.fapiao_button.Label = "读XML发票";
+            this.fapiao_button.Name = "fapiao_button";
+            this.fapiao_button.ShowImage = true;
+            this.fapiao_button.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.fapiao_button_Click);
+            // 
             // Excel_extend
             // 
             this.Excel_extend.ControlSize = Microsoft.Office.Core.RibbonControlSize.RibbonControlSizeLarge;
@@ -299,6 +322,15 @@
             this.confirm_spotlight.Name = "confirm_spotlight";
             this.confirm_spotlight.ShowImage = true;
             this.confirm_spotlight.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.confirm_spotlight_Click);
+            // 
+            // scan_button
+            // 
+            this.scan_button.ControlSize = Microsoft.Office.Core.RibbonControlSize.RibbonControlSizeLarge;
+            this.scan_button.Image = global::ExcelAddIn.Properties.Resources.QR;
+            this.scan_button.Label = "识别二维码";
+            this.scan_button.Name = "scan_button";
+            this.scan_button.ShowImage = true;
+            this.scan_button.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.scan_button_Click);
             // 
             // Send_mail
             // 
@@ -353,15 +385,6 @@
             this.to_pdf_button.Name = "to_pdf_button";
             this.to_pdf_button.ShowImage = true;
             this.to_pdf_button.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.to_pdf_button_Click);
-            // 
-            // scan_button
-            // 
-            this.scan_button.ControlSize = Microsoft.Office.Core.RibbonControlSize.RibbonControlSizeLarge;
-            this.scan_button.Image = global::ExcelAddIn.Properties.Resources.QR;
-            this.scan_button.Label = "识别二维码";
-            this.scan_button.Name = "scan_button";
-            this.scan_button.ShowImage = true;
-            this.scan_button.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.scan_button_Click);
             // 
             // Rename_mp3
             // 
@@ -432,10 +455,6 @@
             this.Previous_button.ShowLabel = false;
             this.Previous_button.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.Previous_button_Click);
             // 
-            // separator5
-            // 
-            this.separator5.Name = "separator5";
-            // 
             // Ribbon1
             // 
             this.Name = "Ribbon1";
@@ -446,6 +465,8 @@
             this.tab1.PerformLayout();
             this.group1.ResumeLayout(false);
             this.group1.PerformLayout();
+            this.group5.ResumeLayout(false);
+            this.group5.PerformLayout();
             this.group2.ResumeLayout(false);
             this.group2.PerformLayout();
             this.group3.ResumeLayout(false);
@@ -511,6 +532,8 @@
         internal Microsoft.Office.Tools.Ribbon.RibbonSeparator separator4;
         internal Microsoft.Office.Tools.Ribbon.RibbonButton scan_button;
         internal Microsoft.Office.Tools.Ribbon.RibbonSeparator separator5;
+        internal Microsoft.Office.Tools.Ribbon.RibbonGroup group5;
+        internal Microsoft.Office.Tools.Ribbon.RibbonButton fapiao_button;
     }
 
     partial class ThisRibbonCollection

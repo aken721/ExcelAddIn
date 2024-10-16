@@ -1174,6 +1174,12 @@ namespace ExcelAddIn
             Form form5 = new Form5();
             form5.Show();
         }
+
+        private void fapiao_button_Click(object sender, RibbonControlEventArgs e)
+        {
+            Form form6 = new Form6();
+            form6.Show();
+        }
     }
 }
 
