@@ -8,7 +8,8 @@ using System.Windows.Forms;
 using System.Xml.Linq;
 using Excel=Microsoft.Office.Interop.Excel;
 using System.IO;
-using Microsoft.Office.Interop.Excel;
+using System.Threading;
+
 
 
 namespace ExcelAddIn
@@ -22,21 +23,18 @@ namespace ExcelAddIn
 
         private void Form6_Load(object sender, EventArgs e)
         {
+            version_label1.Text = ConfigurationManager.AppSettings["version"].ToString();
+
             //初始化tabcontrol控件
             tabControl1.SelectTab(0);
-            version_label1.Text=ConfigurationManager.AppSettings["version"].ToString();
-
-            begin_pictureBox.Visible = false;
-            begin_pictureBox.Enabled = false;            
-            preview_pictureBox.Visible = false;
-            preview_pictureBox.Enabled = false;
-            next_pictureBox.Visible = false;
-            next_pictureBox.Enabled = false;
-            last_pictureBox.Visible = false;
-            last_pictureBox.Enabled = false;
+            sequence_label.Text = string.Empty;
+            fileFullNames.Clear();
             clear_pictureBox.Visible = false;
-            sequence_label.Text = "";
+            timer1.Interval = 3000;
+            tabControl1.DrawItem += new DrawItemEventHandler(tabControl1_DrawItem);
         }
+
+
 
         //重绘选项页布局
         private void tabControl1_DrawItem(object sender, DrawItemEventArgs e)
@@ -47,6 +45,7 @@ namespace ExcelAddIn
             StringFormat _sf = new StringFormat();//封装文本布局格式信息
             _sf.LineAlignment = StringAlignment.Center;
             _sf.Alignment = StringAlignment.Center;
+            // 使用正确的方式获取TabPage的Text属性
             e.Graphics.DrawString(tabControl1.Controls[e.Index].Text, SystemInformation.MenuFont, _Brush, _TabTextArea, _sf);
         }
 
@@ -56,15 +55,16 @@ namespace ExcelAddIn
             switch (tabControl1.SelectedIndex)
             {
                 case 0:
-                    begin_pictureBox.Enabled = false;
-                    preview_pictureBox.Enabled = false;
-                    next_pictureBox.Enabled = false;
-                    last_pictureBox.Enabled = false;
-                    sequence_label.Text = "0";
+                    sequence_label.Text = string.Empty;
+                    xml_path_textBox.Text = string.Empty;
+                    single_result_label.Text = "";
+                    fileFullNames.Clear();
                     clear_pictureBox.Visible = false;
                     break;
                 case 1:
-                    tabControl1.SelectedIndex = 0;
+                    break;
+                case 2:
+                    this.Dispose();
                     break;
             }
         }
@@ -107,26 +107,60 @@ namespace ExcelAddIn
         private void sequence_label_TextChanged(object sender, EventArgs e)
         {
             int fileCount = fileFullNames.Count;
-            if (sequence_label.Text == "1")
+            if (sequence_label.Text == "1" && fileCount>1)
             {
-                begin_pictureBox.Enabled = false;   
+                begin_pictureBox.Enabled = false;
+                begin_pictureBox.Visible = false;
                 preview_pictureBox.Enabled = false;
+                preview_pictureBox.Visible = false;
                 next_pictureBox.Enabled = true;
+                next_pictureBox.Visible = true;
                 last_pictureBox.Enabled = true;
+                last_pictureBox.Visible = true;
             }
-            else if (sequence_label.Text == fileCount.ToString())
+            else if (sequence_label.Text == fileCount.ToString() && fileCount>1)
             {
                 begin_pictureBox.Enabled = true;
+                begin_pictureBox.Visible = true;
                 preview_pictureBox.Enabled = true;
+                preview_pictureBox.Visible = true;
                 next_pictureBox.Enabled = false;
+                next_pictureBox.Visible = false;
                 last_pictureBox.Enabled = false;
+                last_pictureBox.Visible = false;
+            }
+            else if(string.IsNullOrEmpty(sequence_label.Text))
+            {
+                begin_pictureBox.Enabled = false;
+                begin_pictureBox.Visible = false;
+                preview_pictureBox.Enabled = false;
+                preview_pictureBox.Visible = false;
+                next_pictureBox.Enabled = false;
+                next_pictureBox.Visible = false;
+                last_pictureBox.Enabled = false;
+                last_pictureBox.Visible = false;
+            }
+            else if(sequence_label.Text == fileCount.ToString() && fileCount == 1)
+            {
+                begin_pictureBox.Enabled = false;
+                begin_pictureBox.Visible = false;
+                preview_pictureBox.Enabled = false;
+                preview_pictureBox.Visible = false;
+                next_pictureBox.Enabled = false;
+                next_pictureBox.Visible = false;
+                last_pictureBox.Enabled = false;
+                last_pictureBox.Visible = false;
             }
             else
             {
                 begin_pictureBox.Enabled = true;
+                begin_pictureBox.Visible = true;
                 preview_pictureBox.Enabled = true;
+                preview_pictureBox.Visible = true;
                 next_pictureBox.Enabled = true;
+                next_pictureBox.Visible = true;
                 last_pictureBox.Enabled = true;
+                last_pictureBox.Visible = true;
             }
         }
 
@@ -176,24 +210,31 @@ namespace ExcelAddIn
                 AddNodes(xml_treeView.Nodes, root);
 
                 xml_treeView.ExpandAll(); // 展开所有节点
+
+                // 将TreeView的滚动条设置到最顶端
+                xml_treeView.SelectedNode = xml_treeView.Nodes[0]; // 选择第一个节点
+                xml_treeView.TopNode = xml_treeView.SelectedNode; // 将TopNode设置为选中的节点
+                xml_treeView.SelectedNode.EnsureVisible(); // 确保选中的节点是可见的
             }
             else
             {                
                 xml_treeView.Nodes.Clear();
                 if (fileFullNames.Count == 0)
                 {
-                    sequence_label.Text = "0";
+                    sequence_label.Text = string.Empty;
                     begin_pictureBox.Enabled = false;
+                    begin_pictureBox.Visible = false;
                     preview_pictureBox.Enabled = false;
+                    preview_pictureBox.Visible = false;
                     next_pictureBox.Enabled = false;
+                    next_pictureBox.Visible = false;
                     last_pictureBox.Enabled = false;
+                    last_pictureBox.Visible = false;
                 }
             }
         }
 
         List<string> fileFullNames=new List<string>();
-
-
 
         private void xml_path_textBox_DoubleClick(object sender, EventArgs e)
         {
@@ -202,6 +243,7 @@ namespace ExcelAddIn
             openFileDialog1.Multiselect = true;
             if (openFileDialog1.ShowDialog() == DialogResult.OK)
             {
+                sequence_label.Text = string.Empty;
                 fileFullNames.Clear();
                 fileFullNames= openFileDialog1.FileNames.ToList();
                 xml_path_textBox.Text= fileFullNames[0];
@@ -249,13 +291,18 @@ namespace ExcelAddIn
         private void run_button_Click(object sender, EventArgs e)
         {
             string xml_path = xml_path_textBox.Text;
+            if (string.IsNullOrEmpty(xml_path))
+            {
+                single_result_label.Text = "文件路径文本框不能为空，请确认后再试";
+                timer1.Enabled = true;
+                return;
+            }
             System.Data.DataTable dataTable= GetInvoiceDataFromXML(xml_path);
             if (dataTable.Rows.Count > 0)
             {
                 WriteToExcel(dataTable);
             }
             single_result_label.Text = "XML单文件数据导入已完成！";
-            timer1.Interval = 5000;
             timer1.Enabled = true;
         }
 
@@ -293,13 +340,11 @@ namespace ExcelAddIn
                     }
                 }
                 batch_result_label.Text = "xml数电票批量导入已完成！";
-                timer1.Interval = 5000;
                 timer1.Enabled = true;
             }
             else
             {
                 batch_result_label.Text = "文件夹内没有XML数电票文件，请核对！";
-                timer1.Interval = 5000;
                 timer1.Enabled = true;
             }
             
@@ -487,7 +532,15 @@ namespace ExcelAddIn
         {
             single_result_label.Text = "";
             xml_path_textBox.Text = "";
-            sequence_label.Text = "0";
+            begin_pictureBox.Visible = false;
+            begin_pictureBox.Enabled = false;
+            preview_pictureBox.Visible = false;
+            preview_pictureBox.Enabled = false;
+            next_pictureBox.Visible = false;
+            next_pictureBox.Enabled = false;
+            last_pictureBox.Visible = false;
+            last_pictureBox.Enabled = false;
+            sequence_label.Text = "";
             fileFullNames.Clear();
         }
     }
