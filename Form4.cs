@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -279,7 +279,7 @@ namespace ExcelAddIn
                                                     }
                                                     catch (Exception ex)
                                                     {
-                                                        result_dm_label.Text = "删除文件时发生错误: " + ex.Message;
+                                                        result_dm_label.Text = $"删除{item}文件时发生错误: " + ex.Message;
                                                         continue;
                                                     }
                                                 }else result_dm_label.Text = $"文件{item}不存在,继续删除下一个";                                                
