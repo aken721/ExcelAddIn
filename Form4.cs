@@ -5,16 +5,21 @@ using System.Linq;
 using Microsoft.VisualBasic.FileIO;
 using System.Windows.Forms;
 using Excel=Microsoft.Office.Interop.Excel;
+using System.Runtime.InteropServices;
+using System.Management;
+using Org.BouncyCastle.Bcpg.Sig;
+using System.Threading.Tasks;
+using System.Threading;
 
 namespace ExcelAddIn
 {
     public partial class Form4 : Form
     {
-        Excel.Worksheet worksheet = ThisAddIn.app.ActiveWorkbook.Worksheets["_rename"];
+        readonly Excel.Worksheet worksheet = ThisAddIn.app.ActiveWorkbook.Worksheets["_rename"];
         internal  int regulation_number = 1;
         public static int runButtonClicked = 0;
         public static int  resetButtonClicked= 0;
-        private string command=Ribbon1.runcommand;
+        private readonly string command=Ribbon1.runcommand;
         private bool isCheckedAll = false;
 
         public Form4()
@@ -216,6 +221,7 @@ namespace ExcelAddIn
                 {
                     switch (command)
                     {
+                        //选择操作文件
                         case "file":
                             List<string> file_list_all = new List<string>();                     //_rename表中的所有文件名
                             List<string> filter_list_ext = new List<string>();                //文件类型规则过滤出的结果
@@ -263,39 +269,102 @@ namespace ExcelAddIn
 
                             if (resultList.Count != 0)
                             {
+                                string driveType = DriveInfo(resultList[0]);
+                                DialogResult dialogResult = new DialogResult();
+                                
                                 switch (this.delete_select_radioButton.Checked)
                                 {
+                                    //选择删除文件
                                     case true:
-                                        if (MessageBox.Show($"删除文件是高风险操作，本次将移除{resultList.Count}个文件至回收站！", "警告", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) == DialogResult.Yes)
+                                        if(driveType== "Fixed")
                                         {
-                                            foreach (string item in resultList)
-                                            {
-                                                if (File.Exists(item))
+                                            dialogResult = MessageBox.Show($"删除文件是高风险操作，本次将移除{resultList.Count}个文件至回收站！", "警告", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+                                        }
+                                        else
+                                        {
+                                            dialogResult = MessageBox.Show($"该磁盘不支持回收站，本次将直接删除{resultList.Count}个文件！", "警告", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+                                        }
+                                        if (dialogResult == DialogResult.Yes)
+                                        {
+                                            int errorCount = 0;
+                                            int deleteCount = 0;
+                                            if (driveType== "Fixed")
+                                            {                                                
+                                                foreach (string item in resultList)
                                                 {
-                                                    try
+                                                    deleteCount++;
+                                                    result_dm_label.Text = $"正在删除第{deleteCount}个文件";
+                                                    if (File.Exists(item))
                                                     {
-                                                        // 将文件移动到回收站
-                                                        FileSystem.DeleteFile(item, UIOption.AllDialogs, RecycleOption.SendToRecycleBin);
+                                                        try
+                                                        {
+                                                            // 将文件移动到回收站
+                                                            FileSystem.DeleteFile(item, UIOption.AllDialogs, RecycleOption.SendToRecycleBin, UICancelOption.ThrowException);
+                                                        }
+                                                        catch (Exception ex)
+                                                        {
+                                                            result_dm_label.Text = $"删除{item}文件时发生错误: " + ex.Message;
+                                                            errorCount++;
+                                                            continue;
+                                                        }
                                                     }
-                                                    catch (Exception ex)
-                                                    {
-                                                        result_dm_label.Text = $"删除{item}文件时发生错误: " + ex.Message;
-                                                        continue;
-                                                    }
-                                                }else result_dm_label.Text = $"文件{item}不存在,继续删除下一个";                                                
+                                                    else result_dm_label.Text = $"文件{item}不存在,继续删除下一个";
+                                                }
+                                                if (errorCount == 0)
+                                                {
+                                                    result_dm_label.Text = "文件已移动到回收站";
+                                                }
+                                                else
+                                                {
+                                                    result_dm_label.Text = $"删除{errorCount}个文件至回收站时出错";
+                                                }
                                             }
-                                            result_dm_label.Text = "文件已移动到回收站";
+                                            else
+                                            {
+                                                foreach (string item in resultList)
+                                                {
+                                                    deleteCount++;
+                                                    result_dm_label.Text = $"正在删除第{deleteCount}个文件";
+                                                    if (File.Exists(item))
+                                                    {
+                                                        try
+                                                        {
+                                                            result_dm_label.Text = $"正在删除第{deleteCount}个文件";
+                                                            // 将文件直接删除
+                                                            FileSystem.DeleteFile(item, UIOption.OnlyErrorDialogs, RecycleOption.DeletePermanently, UICancelOption.ThrowException);
+                                                        }
+                                                        catch (Exception ex)
+                                                        {
+                                                            result_dm_label.Text = $"删除{item}文件时发生错误: " + ex.Message;
+                                                            errorCount++;
+                                                            continue;
+                                                        }
+                                                    }
+                                                    else result_dm_label.Text = $"文件{item}不存在,继续删除下一个";
+                                                }
+                                                if (errorCount == 0)
+                                                {
+                                                    result_dm_label.Text = "文件已删除";
+                                                }
+                                                else
+                                                {
+                                                    result_dm_label.Text = $"删除{errorCount}个文件时出错";
+                                                }
+                                            }                                                                        
                                         }
                                         else return;
                                         break;
+                                    //选择移动文件
                                     case false:
                                         if (folderBrowserDialog1.ShowDialog() == DialogResult.OK)
                                         {
-                                            if (MessageBox.Show($"本次将移除{resultList.Count}个文件至目标文件夹！如有文件名重复，将重命名移动文件", "警告", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) == DialogResult.Yes)
+                                            if (MessageBox.Show($"本次将移动{resultList.Count}个文件至目标文件夹！如有文件名重复，将重命名移动文件", "警告", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) == DialogResult.Yes)
                                             {
                                                 string destinationFolder = folderBrowserDialog1.SelectedPath;
+                                                result_dm_label.Text = $"开始移动文件到目标文件夹：{destinationFolder}......";
+                                                this.Refresh();
                                                 MoveFiles(resultList, destinationFolder, "file");
-                                                result_dm_label.Text = $"文件已移动到目标文件夹：{destinationFolder}";
+                                                result_dm_label.Text = $"移动到目标文件夹：{destinationFolder}，已完成";                                                
                                             }
                                             else return;
                                         }
@@ -303,6 +372,8 @@ namespace ExcelAddIn
                                 }
                             }
                             break;
+
+                        //选择操作文件夹
                         case "folder":
                             List<string> folder_list_all = new List<string>();                     //_rename表中的所有文件夹
                             List<string> filter_folderlist_startwith = new List<string>();             //第1次规则过滤出的结果（文件夹开头匹配））
@@ -337,40 +408,102 @@ namespace ExcelAddIn
 
                             if (resultList.Count != 0)
                             {
+                                string driveType = DriveInfo(resultList[0]);
+                                DialogResult dialogResult = new DialogResult();
+
                                 switch (this.delete_select_radioButton.Checked)
                                 {
+                                    //选择删除文件夹
                                     case true:
-                                        if (MessageBox.Show($"删除文件夹是高风险操作，文件夹内的文件将一并删除！本次将移除{resultList.Count}个文件夹至回收站！", "警告", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) == DialogResult.Yes)
+                                        if (driveType == "Fixed")
                                         {
-                                            foreach (string item in resultList)
+                                            dialogResult = MessageBox.Show($"删除文件夹是高风险操作，文件夹内的文件将一并删除！本次将移除{resultList.Count}个文件夹至回收站！", "警告", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+                                        }
+                                        else
+                                        {
+                                            dialogResult = MessageBox.Show($"该磁盘不支持回收站，本次将直接删除{resultList.Count}个文件夹，文件夹内的文件将一并删除！", "警告", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+                                        }
+                                        if (dialogResult == DialogResult.Yes)
+                                        {
+                                            int errorCount = 0;
+                                            int deleteCount = 0;
+                                            if (driveType == "Fixed")
                                             {
-                                                if (Directory.Exists(item))
+                                                foreach (string item in resultList)
                                                 {
-                                                    try
+                                                    deleteCount++;
+                                                    result_dm_label.Text = $"正在删除第{deleteCount}个文件夹";
+                                                    if (Directory.Exists(item))
                                                     {
-                                                        // 将文件移动到回收站
-                                                        FileSystem.DeleteDirectory(item, UIOption.AllDialogs, RecycleOption.SendToRecycleBin);
+                                                        try
+                                                        {
+                                                            // 将文件夹移动到回收站
+                                                            FileSystem.DeleteDirectory(item, UIOption.AllDialogs, RecycleOption.SendToRecycleBin);
+                                                        }
+                                                        catch (Exception ex)
+                                                        {
+                                                            result_dm_label.Text = $"删除文件夹{item}时发生错误: " + ex.Message;
+                                                            errorCount++;
+                                                            continue;
+                                                        }
                                                     }
-                                                    catch (Exception ex)
-                                                    {
-                                                        result_dm_label.Text = "删除文件夹时发生错误: " + ex.Message;
-                                                        continue;
-                                                    }
+                                                    else result_dm_label.Text = $"要删除的文件夹{item}不存在，继续删除下一个";
                                                 }
-                                                else result_dm_label.Text = $"要删除的文件夹{item}不存在，继续删除下一个";                                                
+                                                if (errorCount == 0)
+                                                {
+                                                    result_dm_label.Text = "文件夹已移动至回收站";
+                                                }
+                                                else
+                                                {
+                                                    result_dm_label.Text = $"删除{errorCount}个文件夹时出错";
+                                                }
                                             }
-                                            result_dm_label.Text = "文件夹已移动到回收站";
+                                            else
+                                            {
+                                                foreach (string item in resultList)
+                                                {
+                                                    deleteCount++;
+                                                    result_dm_label.Text = $"正在删除第{deleteCount}个文件夹";
+                                                    if (Directory.Exists(item))
+                                                    {
+                                                        try
+                                                        {
+                                                            // 将文件夹直接删除
+                                                            FileSystem.DeleteDirectory(item, UIOption.OnlyErrorDialogs, RecycleOption.DeletePermanently,UICancelOption.ThrowException);
+                                                        }
+                                                        catch (Exception ex)
+                                                        {
+                                                            result_dm_label.Text = $"删除文件夹{item}时发生错误: " + ex.Message;
+                                                            errorCount++;
+                                                            continue;
+                                                        }
+                                                    }
+                                                    else result_dm_label.Text = $"要删除的文件夹{item}不存在，继续删除下一个";
+                                                }
+                                                if (errorCount == 0)
+                                                {
+                                                    result_dm_label.Text = "文件夹已删除";
+                                                }
+                                                else
+                                                {
+                                                    result_dm_label.Text = $"删除{errorCount}个文件夹时出错";
+                                                }
+                                            }
                                         }
                                         else return;
                                         break;
+
+                                    //选择移动文件夹
                                     case false:
                                         if (folderBrowserDialog1.ShowDialog() == DialogResult.OK)
                                         {
                                             if (MessageBox.Show($"本次将移动{resultList.Count}个文件至目标文件夹！如有文件夹名重复，将重命名移动文件夹", "警告", MessageBoxButtons.YesNo, MessageBoxIcon.Warning) == DialogResult.Yes)
                                             {
                                                 string destinationFolder = folderBrowserDialog1.SelectedPath;
+                                                result_dm_label.Text = $"开始移动文件夹到目标文件夹：{destinationFolder}，......";
+                                                this.Refresh();
                                                 MoveFiles(resultList, destinationFolder, "folder");
-                                                result_dm_label.Text = $"文件夹已移动到目标文件夹：{destinationFolder}";
+                                                result_dm_label.Text = $"移动到目标文件夹：{destinationFolder}，已完成";
                                             }
                                             else return;
                                         }
@@ -516,10 +649,12 @@ namespace ExcelAddIn
                             }
                             catch (Exception ex)
                             {
-                                result_dm_label.Text = ex.Message;
+                                result_dm_label.Text = $"移动文件 {listFile} 时发生错误: {ex.Message}";
                                 continue;
                             }
-                        }else result_dm_label.Text = "源文件{listFile}不存在，继续移动下一个";
+                        }
+                        else result_dm_label.Text = $"源文件{listFile}不存在，继续移动下一个";
+                                                
                     }
                     break;
                 case "folder":
@@ -545,10 +680,11 @@ namespace ExcelAddIn
                             }
                             catch (Exception ex)
                             {
-                                result_dm_label.Text = ex.Message;
+                                result_dm_label.Text = $"移动文件夹 {listFile} 时发生错误: {ex.Message}";
                                 continue;
                             }
                         }
+                        else result_dm_label.Invoke(new Action(() => result_dm_label.Text = $"源文件夹{listFile}不存在，继续移动下一个"));                        
                     }
                     break;
             }            
@@ -596,9 +732,75 @@ namespace ExcelAddIn
             }
             isCheckedAll = false;
         }
+
+        private static string DriveInfo(string filePath)
+        {
+            string drive = Path.GetPathRoot(filePath);
+            DriveInfo driveInfo = new DriveInfo(drive);
+            return driveInfo.DriveType.ToString();
+           
+        }
+
+
     }
 
+    /// <summary>
+    /// 调用shell32.dll删除文件
+    /// 对于删除文件至回收站的选项，因涉及到网络映射存储或U盘问题，可能不支持文件移至回收站。
+    /// 因此该类下方法主要检查存储设备是否支持回收站，以便用户确认是否直接删除文件。
+    /// 本程序中未使用该类，仅供参考，方便其他功能调用
+    /// </summary>
+    public class FileInfoHelper
+    {
+        [DllImport("shell32.dll", CharSet = CharSet.Auto)]
+        public static extern int SHFileOperation(ref SHFILEOPSTRUCT FileOp);
 
+        [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Auto)]
+        public struct SHFILEOPSTRUCT
+        {
+            public IntPtr hwnd;
+            [MarshalAs(UnmanagedType.U4)]
+            public int wFunc;
+            public string pFrom;
+            public string pTo;
+            public short fFlags;
+            [MarshalAs(UnmanagedType.Bool)]
+            public bool fAnyOperationsAborted;
+            public IntPtr hNameMappings;
+            public string lpszProgressTitle;
+        }
+
+        public const int FO_DELETE = 3;
+        public const int FOF_ALLOWUNDO = 0x40;
+        public const int FOF_NOCONFIRMATION = 0x10;
+        public const int FOF_SILENT = 0x0004;
+
+        public static bool CanMoveToRecycleBin(string filePath)
+        {
+            SHFILEOPSTRUCT shFileOp = new SHFILEOPSTRUCT
+            {
+                hwnd = IntPtr.Zero,
+                wFunc = FO_DELETE,
+                pFrom = filePath + '\0' + '\0', // Double null-terminated string
+                fFlags = FOF_ALLOWUNDO | FOF_NOCONFIRMATION | FOF_SILENT
+            };
+
+            int result = SHFileOperation(ref shFileOp);
+            return result == 0;
+        }
+
+        public static bool IsFileSystemSupportRecycleBin(string filePath)
+        {
+            // 获取文件所在的驱动器
+            string drive = Path.GetPathRoot(filePath);
+
+            // 获取驱动器信息
+            DriveInfo driveInfo = new DriveInfo(drive);
+
+            // 检查驱动器是否支持回收站
+            return driveInfo.DriveType == DriveType.Fixed || driveInfo.DriveType == DriveType.Removable;
+        }
+    }
 
     /// <summary>
     /// 写了一个类，用来存储控件的信息和添加删除方法，本程序中未使用该类
@@ -645,7 +847,7 @@ namespace ExcelAddIn
 
         public static Control CreateControl(string controlName, ControlType controlType, System.Drawing.Point location)
         {
-            Control newControl = null;
+            Control newControl;
 
             // 根据控件类型创建控件
             switch (controlType)
