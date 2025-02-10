@@ -89,6 +89,8 @@
             this.Stop_button = this.Factory.CreateRibbonButton();
             this.Next_button = this.Factory.CreateRibbonButton();
             this.Previous_button = this.Factory.CreateRibbonButton();
+            this.group7 = this.Factory.CreateRibbonGroup();
+            this.deepseek_api_button = this.Factory.CreateRibbonButton();
             this.folderBrowserDialog1 = new System.Windows.Forms.FolderBrowserDialog();
             this.timer1 = new System.Windows.Forms.Timer(this.components);
             this.saveFileDialog1 = new System.Windows.Forms.SaveFileDialog();
@@ -104,6 +106,7 @@
             this.box1.SuspendLayout();
             this.buttonGroup1.SuspendLayout();
             this.buttonGroup2.SuspendLayout();
+            this.group7.SuspendLayout();
             this.SuspendLayout();
             // 
             // tab1
@@ -115,6 +118,7 @@
             this.tab1.Groups.Add(this.group3);
             this.tab1.Groups.Add(this.group4);
             this.tab1.Groups.Add(this.group6);
+            this.tab1.Groups.Add(this.group7);
             this.tab1.Label = "工具箱";
             this.tab1.Name = "tab1";
             // 
@@ -451,6 +455,21 @@
             this.Previous_button.ShowLabel = false;
             this.Previous_button.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.Previous_button_Click);
             // 
+            // group7
+            // 
+            this.group7.Items.Add(this.deepseek_api_button);
+            this.group7.Label = "AI工具";
+            this.group7.Name = "group7";
+            // 
+            // deepseek_api_button
+            // 
+            this.deepseek_api_button.ControlSize = Microsoft.Office.Core.RibbonControlSize.RibbonControlSizeLarge;
+            this.deepseek_api_button.Image = global::ExcelAddIn.Properties.Resources.deepseek;
+            this.deepseek_api_button.Label = "DeepSeek";
+            this.deepseek_api_button.Name = "deepseek_api_button";
+            this.deepseek_api_button.ShowImage = true;
+            this.deepseek_api_button.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.deepseek_api_button_Click);
+            // 
             // timer1
             // 
             this.timer1.Tick += new System.EventHandler(this.timer1_Tick);
@@ -485,6 +504,8 @@
             this.buttonGroup1.PerformLayout();
             this.buttonGroup2.ResumeLayout(false);
             this.buttonGroup2.PerformLayout();
+            this.group7.ResumeLayout(false);
+            this.group7.PerformLayout();
             this.ResumeLayout(false);
 
         }
@@ -534,6 +555,8 @@
         internal Microsoft.Office.Tools.Ribbon.RibbonSeparator separator5;
         internal Microsoft.Office.Tools.Ribbon.RibbonGroup group5;
         internal Microsoft.Office.Tools.Ribbon.RibbonButton fapiao_button;
+        internal Microsoft.Office.Tools.Ribbon.RibbonGroup group7;
+        internal Microsoft.Office.Tools.Ribbon.RibbonButton deepseek_api_button;
     }
 
     partial class ThisRibbonCollection

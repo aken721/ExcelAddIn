@@ -1258,6 +1258,12 @@ namespace ExcelAddIn
             Form form6 = new Form6();
             form6.Show();
         }
+
+        private void deepseek_api_button_Click(object sender, RibbonControlEventArgs e)
+        {
+            Form form7 = new Form7();
+            form7.Show();
+        }
     }
 }
 
