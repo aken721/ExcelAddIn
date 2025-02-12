@@ -1,4 +1,5 @@
-﻿using Microsoft.Office.Tools.Ribbon;
+﻿using Microsoft.Office.Tools.Excel;
+using Microsoft.Office.Tools.Ribbon;
 using NAudio.Wave;
 using System;
 using System.Collections.Generic;
@@ -37,7 +38,14 @@ namespace ExcelAddIn
             sheet_export_comboBox.Text = "当前表";
             export_type_comboBox.Text = "多表单文件";
             export_type_comboBox.Visible=false;
-        }
+
+            spotlightDropDown.SelectedItemIndex = 0;
+            spotlightDropDown.Image = Properties.Resources.green35;
+
+
+            //默认设置聚光灯颜色为浅绿色，colorIndex
+            ThisAddIn.Global.spotlightColorIndex = 35;
+        }      
 
 
         //表操作按钮
@@ -829,6 +837,31 @@ namespace ExcelAddIn
             return cellColorDict;
         }
 
+        private void spotlightDropDown_SelectionChanged(object sender, RibbonControlEventArgs e)
+        {
+            switch(spotlightDropDown.SelectedItemIndex)
+            {
+                case 0:
+                    ThisAddIn.Global.spotlightColorIndex = 35;  //浅绿
+                    break;
+                case 1:
+                    ThisAddIn.Global.spotlightColorIndex = 37;  //浅蓝
+                    break;
+                case 2:
+                    ThisAddIn.Global.spotlightColorIndex = 24;  //浅紫
+                    break;
+                case 3:
+                    ThisAddIn.Global.spotlightColorIndex = 36;  //浅黄
+                    break;
+                case 4:
+                    ThisAddIn.Global.spotlightColorIndex = 15;  //浅灰
+                    break;
+                case 5:
+                    ThisAddIn.Global.spotlightColorIndex = 44;  //浅橙
+                    break;
+            }
+        }
+
         //刷新_rename表
         private async void RefreshRenameTable()
         {
@@ -908,6 +941,7 @@ namespace ExcelAddIn
             });            
         }
 
+        //转pdf
         private void to_pdf_button_Click(object sender, RibbonControlEventArgs e)
         {
             Excel.Workbook workbook = ThisAddIn.app.ActiveWorkbook;
@@ -1247,18 +1281,21 @@ namespace ExcelAddIn
             }
         }
 
+        //扫二维码按钮
         private void scan_button_Click(object sender, RibbonControlEventArgs e)
         {
             Form form5 = new Form5();
             form5.Show();
         }
 
+        //读发票按钮
         private void fapiao_button_Click(object sender, RibbonControlEventArgs e)
         {
             Form form6 = new Form6();
             form6.Show();
         }
 
+        //deepseek按钮
         private void deepseek_api_button_Click(object sender, RibbonControlEventArgs e)
         {
             Form form7 = new Form7();

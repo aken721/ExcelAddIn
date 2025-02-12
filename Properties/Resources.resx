@@ -130,6 +130,9 @@
   <data name="begin" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>Resources\begin.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
+  <data name="blue37" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Resources\blue37.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
   <data name="clear" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>Resources\clear.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
@@ -160,6 +163,12 @@
   <data name="fold" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>Resources\文件夹.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
+  <data name="gray15" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Resources\gray15.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="green35" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Resources\green35.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
   <data name="last" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>Resources\last.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
@@ -177,6 +186,9 @@
   </data>
   <data name="no_open_fold" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>Resources\未打开的文件夹.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="orange44" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Resources\orange44.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="order_play" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>Resources\顺序播放.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
@@ -198,6 +210,9 @@
   </data>
   <data name="previous" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>Resources\上一首.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="purple24" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Resources\purple24.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="QR" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>Resources\QR.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
@@ -237,6 +252,9 @@
   </data>
   <data name="write" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>Resources\改文件名.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
+  <data name="yellow36" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Resources\yellow36.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
   <data name="移动文件" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>Resources\移动文件.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>

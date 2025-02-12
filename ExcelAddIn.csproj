@@ -629,6 +629,24 @@
   <ItemGroup>
     <None Include="Properties\Resources\deepseek.ico" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Properties\Resources\blue37.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Properties\Resources\gray15.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Properties\Resources\green35.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Properties\Resources\orange44.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Properties\Resources\purple24.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Properties\Resources\yellow36.png" />
+  </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">10.0</VisualStudioVersion>
     <VSToolsPath Condition="'$(VSToolsPath)' == ''">$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)</VSToolsPath>

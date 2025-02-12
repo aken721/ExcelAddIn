@@ -1,4 +1,5 @@
-﻿using Excel = Microsoft.Office.Interop.Excel;
+﻿using AForge.Imaging;
+using Excel = Microsoft.Office.Interop.Excel;
 
 namespace ExcelAddIn
 {
@@ -11,6 +12,7 @@ namespace ExcelAddIn
 
             //聚光灯功能开关标识，0为关闭，1为打开
             public static int spotlight;
+            public static int spotlightColorIndex;
             
             public static bool created_qr_sheet=false;
         }
@@ -48,8 +50,10 @@ namespace ExcelAddIn
 
                     activesheet.Cells.Interior.ColorIndex = 0;
                     ThisAddIn.app.ScreenUpdating = false;
-                    selectedRange.EntireRow.Interior.ColorIndex = 35;
-                    selectedRange.EntireColumn.Interior.ColorIndex = 35;
+                    selectedRange.EntireRow.Interior.ColorIndex =Global.spotlightColorIndex;
+                    selectedRange.EntireColumn.Interior.ColorIndex = Global.spotlightColorIndex;
+                    //selectedRange.EntireRow.Interior.Color = System.Drawing.ColorTranslator.ToOle(System.Drawing.Color.FromArgb(204, 255, 204)); ;
+                    //selectedRange.EntireColumn.Interior.Color = System.Drawing.ColorTranslator.ToOle(System.Drawing.Color.FromArgb(204, 255, 204)); ;
                     ThisAddIn.app.ScreenUpdating = true;
                 }
             }
