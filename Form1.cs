@@ -1458,7 +1458,6 @@ namespace ExcelAddIn
         //转置工作表（程序执行线程）
         private int transTask()
         {
-
             try
             {
                 Excel.Worksheet worksheet = ThisAddIn.app.ActiveSheet;
@@ -1483,11 +1482,22 @@ namespace ExcelAddIn
                 }
 
                 //设置转置后字段名
-                string field_name = Convert.ToString(ThisAddIn.app.InputBox("请输入转置列的字段名称：", "注意"));
+                string field_name = Convert.ToString(ThisAddIn.app.InputBox("请输入转置列的字段名称（若是日期可命名为“日期”或“date”，会自动格式化转置数据）：", "注意"));
                 if (string.IsNullOrEmpty(field_name) || field_name == "False")
                 {
                     return 1;
                 }
+
+                //开始转置
+                if (run_result_label.InvokeRequired)
+                {
+                    run_result_label.Invoke(new Action(()=>
+                        {
+                            run_result_label.Visible = true;
+                            run_result_label.Text = "正在转置......";
+                        }));
+                }
+                
 
                 ThisAddIn.app.DisplayAlerts = false;
                 ThisAddIn.app.ScreenUpdating = false;
@@ -1503,21 +1513,20 @@ namespace ExcelAddIn
                 }
 
                 int translation_start_column1 = Convert.ToInt32(translation_start_column); //将转置起始列转为数值
-                                                                                           //新建“转置表”
+                
+                //新建“转置表”
                 Excel.Worksheet trans_sheet = ThisAddIn.app.ActiveWorkbook.Worksheets.Add(Before: worksheet);
                 trans_sheet.Name = trans_sheet_name;
                 for (int s = 1; s < translation_start_column1; s++)
                 {
                     trans_sheet.Cells[1, s] = ThisAddIn.app.ActiveWorkbook.Worksheets[active_sheet_name].Cells[1, s];
                 }
-                trans_sheet.Cells[1, Convert.ToInt32(translation_start_column)] = "数值";
-                string pattern = @"^[-+]?[0-9]*\.?[0-9]+$";
-                if (ContainsSpecialChars(ThisAddIn.app.ActiveWorkbook.Worksheets[active_sheet_name].Cells[1, translation_start_column1].value, pattern))
-                {
-                    trans_sheet.Columns[translation_start_column1].NumberFormatLocal = "#,##0.00";
-                }
+                trans_sheet.Cells[1, Convert.ToInt32(translation_start_column)] = "value";
                 trans_sheet.Cells[1, translation_start_column1 + 1] = field_name;
-                if (field_name == "日期")
+
+
+                //日期数据格式化
+                if (field_name == "日期" || field_name=="date")
                 {
                     trans_sheet.Columns[Convert.ToInt32(translation_start_column) + 1].NumberFormatLocal = "yyyy-m-d";
                 }
@@ -1553,6 +1562,16 @@ namespace ExcelAddIn
                     ThisAddIn.app.Selection.PasteSpecial();
                     ThisAddIn.app.Application.CutCopyMode = Excel.XlCutCopyMode.xlCopy;
                 }
+
+                //判断value列数据是否为数字，如果是数字，将转置表的该列统一格式化为“千位分隔符+小数点后保留2位”
+                string pattern = @"^[-+]?[0-9]*\.?[0-9]+$";
+                string cellValue = ThisAddIn.app.ActiveWorkbook.Worksheets[active_sheet_name].Cells[2, translation_start_column1].Value.ToString();
+                if (ContainsSpecialChars(cellValue, pattern))
+                {
+                    trans_sheet.Columns[translation_start_column1].NumberFormatLocal = "#,##0.00";
+                }
+            
+
                 worksheet.Select();
                 worksheet.Range["A1"].Select();
                 trans_sheet.Activate();
@@ -1565,6 +1584,11 @@ namespace ExcelAddIn
             {
                 MessageBox.Show("转置出错：" + ex.Message);
                 return -2;
+            }
+            finally
+            {
+                ThisAddIn.app.ScreenUpdating = true;
+                ThisAddIn.app.DisplayAlerts = true;
             }
         }
 
