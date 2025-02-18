@@ -1,8 +1,8 @@
-﻿using AForge.Imaging;
-using Excel = Microsoft.Office.Interop.Excel;
+﻿using Excel = Microsoft.Office.Interop.Excel;
 
 namespace ExcelAddIn
 {
+    
     public partial class ThisAddIn
     {
         public static class Global
@@ -18,6 +18,7 @@ namespace ExcelAddIn
         }
 
         public static Excel.Application app;         //声明一个Excel的Application变量
+        public static string hotKey;
         private void ThisAddIn_Startup(object sender, System.EventArgs e)
         {
             app = Globals.ThisAddIn.Application;
@@ -30,6 +31,24 @@ namespace ExcelAddIn
 
         }
 
+        private void ThisAddIn_Shutdown(object sender, System.EventArgs e)
+        {
+
+        }
+
+        #region VSTO 生成的代码
+
+        /// <summary>
+        /// 设计器支持所需的方法 - 不要修改
+        /// 使用代码编辑器修改此方法的内容。
+        /// </summary>
+        private void InternalStartup()
+        {
+            this.Startup += new System.EventHandler(ThisAddIn_Startup);
+            this.Shutdown += new System.EventHandler(ThisAddIn_Shutdown);
+        }
+
+        #endregion
 
         //选定单元格变化事件
         private void app_SheetSelectionChange(object sh, Excel.Range Target)
@@ -47,7 +66,6 @@ namespace ExcelAddIn
                 }
                 else
                 {
-
                     activesheet.Cells.Interior.ColorIndex = 0;
                     ThisAddIn.app.ScreenUpdating = false;
                     selectedRange.EntireRow.Interior.ColorIndex =Global.spotlightColorIndex;
@@ -72,25 +90,6 @@ namespace ExcelAddIn
             {
                 Global.created_qr_sheet=false;
             }
-        }
-
-        private void ThisAddIn_Shutdown(object sender, System.EventArgs e)
-        {
-            
-
-        }
-        #region VSTO 生成的代码
-
-        /// <summary>
-        /// 设计器支持所需的方法 - 不要修改
-        /// 使用代码编辑器修改此方法的内容。
-        /// </summary>
-        private void InternalStartup()
-        {
-            this.Startup += new System.EventHandler(ThisAddIn_Startup);
-            this.Shutdown += new System.EventHandler(ThisAddIn_Shutdown);
-        }
-
-        #endregion
+        }        
     }
 }

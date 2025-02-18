@@ -207,12 +207,16 @@ namespace ExcelAddIn
                     find_keywordclear_pictureBox.Visible = false;
                     break;
 
+                case 5:
+                    this.TopMost = false;
+                    break;
+
                 //帮助
-                case 5:                                         
+                case 6:                                         
                     break;
 
                 //退出
-                case 6:                                        
+                case 7:                                        
                     this.Dispose();
                     break;
             }

@@ -53,6 +53,8 @@
             this.run_button = new System.Windows.Forms.Button();
             this.reset_button = new System.Windows.Forms.Button();
             this.tabPage2 = new System.Windows.Forms.TabPage();
+            this.richTextBox1 = new System.Windows.Forms.RichTextBox();
+            this.tabPage3 = new System.Windows.Forms.TabPage();
             this.version_label1 = new System.Windows.Forms.Label();
             this.label4 = new System.Windows.Forms.Label();
             this.openFileDialog1 = new System.Windows.Forms.OpenFileDialog();
@@ -60,8 +62,6 @@
             this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
             this.folderBrowserDialog1 = new System.Windows.Forms.FolderBrowserDialog();
             this.timer1 = new System.Windows.Forms.Timer(this.components);
-            this.richTextBox1 = new System.Windows.Forms.RichTextBox();
-            this.tabPage3 = new System.Windows.Forms.TabPage();
             this.tabControl1.SuspendLayout();
             this.tabPage1.SuspendLayout();
             this.panel1.SuspendLayout();
@@ -341,6 +341,26 @@
             this.tabPage2.Text = "二、使用帮助";
             this.tabPage2.UseVisualStyleBackColor = true;
             // 
+            // richTextBox1
+            // 
+            this.richTextBox1.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.richTextBox1.Location = new System.Drawing.Point(54, 27);
+            this.richTextBox1.Name = "richTextBox1";
+            this.richTextBox1.Size = new System.Drawing.Size(566, 320);
+            this.richTextBox1.TabIndex = 0;
+            this.richTextBox1.Text = resources.GetString("richTextBox1.Text");
+            // 
+            // tabPage3
+            // 
+            this.tabPage3.Font = new System.Drawing.Font("微软雅黑", 10.8F);
+            this.tabPage3.ForeColor = System.Drawing.Color.DarkSlateBlue;
+            this.tabPage3.Location = new System.Drawing.Point(124, 4);
+            this.tabPage3.Name = "tabPage3";
+            this.tabPage3.Size = new System.Drawing.Size(671, 384);
+            this.tabPage3.TabIndex = 2;
+            this.tabPage3.Text = "三、退出工具";
+            this.tabPage3.UseVisualStyleBackColor = true;
+            // 
             // version_label1
             // 
             this.version_label1.AutoSize = true;
@@ -383,30 +403,10 @@
             // 
             this.timer1.Tick += new System.EventHandler(this.timer1_Tick);
             // 
-            // richTextBox1
-            // 
-            this.richTextBox1.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.richTextBox1.Location = new System.Drawing.Point(54, 27);
-            this.richTextBox1.Name = "richTextBox1";
-            this.richTextBox1.Size = new System.Drawing.Size(566, 320);
-            this.richTextBox1.TabIndex = 0;
-            this.richTextBox1.Text = resources.GetString("richTextBox1.Text");
-            // 
-            // tabPage3
-            // 
-            this.tabPage3.Font = new System.Drawing.Font("微软雅黑", 10.8F);
-            this.tabPage3.ForeColor = System.Drawing.Color.DarkSlateBlue;
-            this.tabPage3.Location = new System.Drawing.Point(124, 4);
-            this.tabPage3.Name = "tabPage3";
-            this.tabPage3.Size = new System.Drawing.Size(671, 384);
-            this.tabPage3.TabIndex = 2;
-            this.tabPage3.Text = "三、退出工具";
-            this.tabPage3.UseVisualStyleBackColor = true;
-            // 
             // Form6
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
+            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
             this.ClientSize = new System.Drawing.Size(800, 450);
             this.Controls.Add(this.label4);
             this.Controls.Add(this.version_label1);
@@ -416,7 +416,7 @@
             this.MaximizeBox = false;
             this.Name = "Form6";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Text = "Form6";
+            this.Text = "数电发票要素提取";
             this.Load += new System.EventHandler(this.Form6_Load);
             this.tabControl1.ResumeLayout(false);
             this.tabPage1.ResumeLayout(false);

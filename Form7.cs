@@ -14,6 +14,7 @@ using System.Security.Cryptography;
 using System.IO;
 
 
+
 namespace ExcelAddIn
 {
     public partial class Form7 : Form
@@ -21,9 +22,10 @@ namespace ExcelAddIn
         // 初始化 HttpClient（推荐使用 IHttpClientFactory 生产环境）
         private static readonly HttpClient _httpClient = new HttpClient();
 
-        private string _apiKey = string.Empty;
-        private string _model = string.Empty;
-        private string _apiUrl = string.Empty;
+        private string _apiKey = string.Empty;           //api key变量
+        private string _model = string.Empty;           //模型变量
+        private string _apiUrl = string.Empty;         //api接口地址变量
+        private string _enterMode = string.Empty;     //回车模式变量
 
         public Form7()
         {
@@ -386,6 +388,7 @@ namespace ExcelAddIn
                 _apiKey = string.Empty;
                 _model = string.Empty;
                 _apiUrl = string.Empty;
+                _enterMode = string.Empty;
                 return;
             }
 
@@ -404,6 +407,7 @@ namespace ExcelAddIn
                 _apiKey = decryptedContent.Split(';')[0].Split('^')[1];
                 _model = decryptedContent.Split(';')[1].Split('^')[1];
                 _apiUrl = decryptedContent.Split(';')[2].Split('^')[1];
+                _enterMode= decryptedContent.Split(';')[3].Split('^')[1];
                 prompt_label.Text = "可以开始对话了！";
             }
             catch (Exception ex)
@@ -442,7 +446,62 @@ namespace ExcelAddIn
                 return Encoding.UTF8.GetString(decryptedBytes);
             }
         }
-        
+
+        private void richTextBoxInput_KeyDown(object sender, KeyEventArgs e)
+        {
+            switch (_enterMode)
+            {
+                case "0":
+                    if (e.KeyCode == Keys.Enter)
+                    {
+                        if (e.Shift)
+                        {
+                            // 手动添加换行符
+                            richTextBoxInput.AppendText(Environment.NewLine);
+                        }
+                        else
+                        {
+                            // 触发发送操作
+                            send_button_Click(null, EventArgs.Empty);
+                        }
+
+                        // 阻止默认行为
+                        e.Handled = true;          // 标记事件已处理
+                        e.SuppressKeyPress = true; // 阻止控件处理按键（避免“叮”声或其他默认行为）
+                    }
+                    break;
+                case "1":
+                    if (e.KeyCode == Keys.Enter)
+                    {                        
+                        richTextBoxInput.AppendText(Environment.NewLine);                       
+
+                        // 阻止默认行为
+                        e.Handled = true;          // 标记事件已处理
+                        e.SuppressKeyPress = true; // 阻止控件处理按键（避免“叮”声或其他默认行为）
+                    }
+                    break;
+                case "2":
+                    if (e.KeyCode == Keys.Enter)
+                    {
+                        if (e.Control)
+                        {
+                            // 触发发送操作
+                            send_button_Click(null, EventArgs.Empty);
+
+                        }
+                        else
+                        {
+                            // 手动添加换行符
+                            richTextBoxInput.AppendText(Environment.NewLine);                            
+                        }
+
+                        // 阻止默认行为
+                        e.Handled = true;          // 标记事件已处理
+                        e.SuppressKeyPress = true; // 阻止控件处理按键（避免“叮”声或其他默认行为）
+                    }
+                    break;
+            }
+        }
     }
 }
 

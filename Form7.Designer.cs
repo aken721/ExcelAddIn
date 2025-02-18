@@ -42,6 +42,8 @@
             // 
             // richTextBoxInput
             // 
+            this.richTextBoxInput.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.richTextBoxInput.BackColor = System.Drawing.SystemColors.Control;
             this.richTextBoxInput.ForeColor = System.Drawing.SystemColors.WindowText;
             this.richTextBoxInput.Location = new System.Drawing.Point(151, 332);
@@ -49,19 +51,25 @@
             this.richTextBoxInput.Size = new System.Drawing.Size(517, 89);
             this.richTextBoxInput.TabIndex = 4;
             this.richTextBoxInput.Text = "";
+            this.richTextBoxInput.KeyDown += new System.Windows.Forms.KeyEventHandler(this.richTextBoxInput_KeyDown);
             // 
             // prompt_label
             // 
+            this.prompt_label.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.prompt_label.AutoSize = true;
             this.prompt_label.Font = new System.Drawing.Font("微软雅黑", 9F, System.Drawing.FontStyle.Italic, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.prompt_label.ForeColor = System.Drawing.Color.SaddleBrown;
-            this.prompt_label.Location = new System.Drawing.Point(151, 428);
+            this.prompt_label.Location = new System.Drawing.Point(71, 428);
             this.prompt_label.Name = "prompt_label";
             this.prompt_label.Size = new System.Drawing.Size(0, 17);
             this.prompt_label.TabIndex = 5;
             // 
             // flowLayoutPanelChat
             // 
+            this.flowLayoutPanelChat.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
+            | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.flowLayoutPanelChat.Location = new System.Drawing.Point(151, 36);
             this.flowLayoutPanelChat.Name = "flowLayoutPanelChat";
             this.flowLayoutPanelChat.Size = new System.Drawing.Size(517, 279);
@@ -94,6 +102,8 @@
             // 
             // label1
             // 
+            this.label1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
             this.label1.AutoSize = true;
             this.label1.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.label1.ForeColor = System.Drawing.Color.DarkSlateBlue;
@@ -105,6 +115,7 @@
             // 
             // send_button
             // 
+            this.send_button.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.send_button.BackgroundImage = global::ExcelAddIn.Properties.Resources.send;
             this.send_button.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
             this.send_button.Location = new System.Drawing.Point(674, 394);
@@ -116,8 +127,8 @@
             // 
             // Form7
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
+            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
             this.ClientSize = new System.Drawing.Size(800, 450);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.flowLayoutPanelChat);

@@ -89,30 +89,65 @@ namespace ExcelAddIn
         {
             lblResult.Text = "开始检测......";
             txbKey.ReadOnly = true;
-            cbbModel.Enabled = false;
+            cbxModel.Enabled = false;
+            cbxEnterKey.Enabled = false;
             btnTest.Enabled = false;
             btnSave.Enabled = false;
             btnQuit.Enabled = false;
             this.Refresh();
-            var result= await GetDeepSeekResponse(txbKey.Text,cbbModel.Text);
+            string model = string.Empty;
+            switch (cbxModel.Text)
+            {
+                case "deepseek-v3":
+                    model = "deepseek-chat";
+                    break;
+                case "deepseek-r1":
+                    model = "deepseek-reasoner";
+                    break;
+            }
+            var result= await GetDeepSeekResponse(txbKey.Text,model);
             if(!string.IsNullOrEmpty(result.ToString()))
             {
                 lblResult.Text = result.ToString();
             }
             txbKey.ReadOnly = false;
             btnTest.Enabled = true;
-            cbbModel.Enabled = true;
+            cbxModel.Enabled = true;
+            cbxEnterKey.Enabled = true;
             btnSave.Enabled = true;
             btnQuit.Enabled = true;
         }
         private const string KeyFilePath = "encryption.key"; // 保存密钥和IV的文件路径
         private const string ConfigFilePath = "config.encrypted"; // 保存加密配置信息的文件路径
 
+        //加密保存配置信息
         private void btnSave_Click(object sender, EventArgs e)
         {
             string apiKey = txbKey.Text.Trim();
-            string model = cbbModel.Text.Trim();
+            string model = string.Empty;
+            switch(cbxModel.SelectedIndex)
+            {
+                case 0:
+                    model = "deepseek-chat";
+                    break;
+                case 1:
+                    model = "deepseek-reasoner";
+                    break;
+            }
             string apiUrl = txbUrl.Text.Trim();
+            string enterMode="0";
+            switch(cbxEnterKey.SelectedIndex )
+            {
+                case 0:
+                    enterMode = "0";
+                    break;
+                case 1:
+                    enterMode = "1";
+                    break;
+                case 2:
+                    enterMode = "2";
+                    break;
+            }
 
             if (string.IsNullOrEmpty(apiKey))
             {
@@ -125,7 +160,7 @@ namespace ExcelAddIn
                 return;
             }
 
-            string content = $"api-key^{apiKey};model^{model};api-url^{apiUrl}";
+            string content = $"api-key^{apiKey};model^{model};api-url^{apiUrl};enter-mode^{enterMode}";
 
             try
             {
@@ -156,7 +191,8 @@ namespace ExcelAddIn
             {
                 lblResult.Text = "未初始化配置";
                 txbKey.Text = "";
-                cbbModel.SelectedIndex = 0;
+                cbxModel.SelectedIndex = 0;
+                cbxEnterKey.SelectedIndex = 0;
                 return;
             }
 
@@ -173,8 +209,31 @@ namespace ExcelAddIn
 
                 // 解析配置信息
                 txbKey.Text = decryptedContent.Split(';')[0].Split('^')[1];
-                cbbModel.Text = decryptedContent.Split(';')[1].Split('^')[1];
+
+                switch (decryptedContent.Split(';')[1].Split('^')[1])
+                {
+                    case "deepseek-chat":
+                        cbxModel.Text = "deepseek-v3";
+                        break;
+                    case "deepseek-reasoner":
+                        cbxModel.Text = "deepseek-r1";
+                        break;
+                }
+                
                 txbUrl.Text = decryptedContent.Split(';')[2].Split('^')[1];
+
+                switch (decryptedContent.Split(';')[3].Split('^')[1])
+                {
+                    case "0":
+                        cbxEnterKey.SelectedIndex = 0;
+                        break;
+                    case "1":
+                        cbxEnterKey.SelectedIndex = 1;
+                        break;
+                    case "2":
+                        cbxEnterKey.SelectedIndex = 2;
+                        break;
+                }
             }
             catch (Exception ex)
             {
@@ -267,7 +326,8 @@ namespace ExcelAddIn
             if (File.Exists("config.encrypted")) File.Delete("config.encrypted");
 
             txbKey.Text = "";
-            cbbModel.SelectedIndex = 0;
+            cbxModel.SelectedIndex = 0;
+            cbxEnterKey.SelectedIndex = 0;
             lblResult.Text = "";
             txbUrl.Text = @"https://api.deepseek.com/v1/chat/completions";
             txbUrl.ReadOnly = true;
