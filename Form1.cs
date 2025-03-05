@@ -28,6 +28,7 @@ using System.Diagnostics;
 using Sdcb.WordClouds;
 using SkiaSharp;
 using System.Drawing.Text;
+using System.Net.Http;
 
 
 
@@ -3505,7 +3506,8 @@ namespace ExcelAddIn
             CleanupTempFiles();
         }
 
-         private async void chart_create_button_Click(object sender, EventArgs e)
+        [STAThread]
+        private void chart_create_button_Click(object sender, EventArgs e)
         {
             switch (chart_select_comboBox.SelectedIndex)
             {
@@ -3517,8 +3519,12 @@ namespace ExcelAddIn
                     }
                     Excel.Range range =workbook.ActiveSheet.Range[chart_range_textBox.Text];
                     string activeSheetName = workbook.ActiveSheet.Name;
-                    chart_pictureBox.Image = null;                    
-                    await Task.Run(() => GenerateWordCloud(activeSheetName,range)); 
+                    chart_pictureBox.Image = null;
+
+                    Thread staThread = new Thread(() => GenerateWordCloud(activeSheetName, range));
+                    staThread.SetApartmentState(ApartmentState.STA); // 设置STA模式
+                    staThread.IsBackground = true; // 设为后台线程
+                    staThread.Start();
                     break;
                 case 1:
                     break;
@@ -3543,6 +3549,8 @@ namespace ExcelAddIn
         {
             try
             {
+                ThisAddIn.app.DisplayAlerts = false;
+                ThisAddIn.app.ScreenUpdating = false;
                 this.Invoke(new Action(() => 
                 {
                     //ThisAddIn.app.ScreenUpdating = false;
@@ -3636,13 +3644,35 @@ namespace ExcelAddIn
                 WordCloud wc = WordCloud.Create(new WordCloudOptions(600, 400, ConvertToWordScores(frequencyDict))
                 {
                     TextOrientation = orientations[textDirection],
-                    FontManager = new FontManager([SKTypeface.FromFamilyName($"fontName")]),     //字体为雅黑
+                    FontManager = new FontManager([SKTypeface.FromFamilyName($"fontName")]),    
                 });
                 byte[] pngBytes = wc.ToSKBitmap().Encode(SKEncodedImageFormat.Png, 100).AsSpan().ToArray();
 
                 // 获取 Windows 临时文件夹路径
                 _currentWordCloudTempPath = Path.Combine(Path.GetTempPath(), "wordCloud.png");
                 File.WriteAllBytes(_currentWordCloudTempPath, pngBytes);
+
+                // 保存SVG
+                if (checkBoxSVG.Checked)
+                {
+                    this.Invoke(new Action(() => // 使用Invoke切换到UI线程
+                    {
+                        using (SaveFileDialog saveFileDialog = new SaveFileDialog())
+                        {
+                            saveFileDialog.Title = "请选择保存SVG图片路径";
+                            saveFileDialog.Filter = "SVG图片(*.svg)|*.svg";
+                            saveFileDialog.DefaultExt = ".svg";
+                            saveFileDialog.AddExtension = true;
+                            saveFileDialog.FileName = "worldCloud.svg";
+                            saveFileDialog.OverwritePrompt = true;
+                            if (saveFileDialog.ShowDialog() == DialogResult.OK)
+                            {
+                                string svg = saveFileDialog.FileName;
+                                File.WriteAllText(svg, wc.ToSvg());
+                            }
+                        }
+                    }));
+                }
 
                 this.Invoke(new Action(() =>
                 {
@@ -3661,7 +3691,7 @@ namespace ExcelAddIn
                     Width: -1,  // -1 表示保持原始宽度
                     Height: -1   // -1 表示保持原始高度
                 );
-            }
+             }
             catch (Exception ex)
             {
                 MessageBox.Show("发生错误: " + ex.Message);
@@ -3678,6 +3708,8 @@ namespace ExcelAddIn
                     ThisAddIn.app.DisplayAlerts = true;
                 }));
                 workbook.Worksheets[activeSheetName].Select();
+                ThisAddIn.app.DisplayAlerts = true;
+                ThisAddIn.app.ScreenUpdating = true;
             }
         }
 

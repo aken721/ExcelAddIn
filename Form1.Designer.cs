@@ -124,6 +124,7 @@ namespace ExcelAddIn
             this.find_keywordbutton_pictureBox = new System.Windows.Forms.PictureBox();
             this.tabPage6 = new System.Windows.Forms.TabPage();
             this.groupBoxWordCloud = new System.Windows.Forms.GroupBox();
+            this.checkBoxSVG = new System.Windows.Forms.CheckBox();
             this.comboBoxFonts = new System.Windows.Forms.ComboBox();
             this.labelFonts = new System.Windows.Forms.Label();
             this.label13 = new System.Windows.Forms.Label();
@@ -1352,6 +1353,7 @@ namespace ExcelAddIn
             // 
             // groupBoxWordCloud
             // 
+            this.groupBoxWordCloud.Controls.Add(this.checkBoxSVG);
             this.groupBoxWordCloud.Controls.Add(this.comboBoxFonts);
             this.groupBoxWordCloud.Controls.Add(this.labelFonts);
             this.groupBoxWordCloud.Controls.Add(this.label13);
@@ -1363,6 +1365,16 @@ namespace ExcelAddIn
             this.groupBoxWordCloud.TabIndex = 11;
             this.groupBoxWordCloud.TabStop = false;
             this.groupBoxWordCloud.Text = "词云图配置";
+            // 
+            // checkBoxSVG
+            // 
+            this.checkBoxSVG.AutoSize = true;
+            this.checkBoxSVG.Location = new System.Drawing.Point(199, 27);
+            this.checkBoxSVG.Name = "checkBoxSVG";
+            this.checkBoxSVG.Size = new System.Drawing.Size(123, 21);
+            this.checkBoxSVG.TabIndex = 13;
+            this.checkBoxSVG.Text = "同时生成SVG格式";
+            this.checkBoxSVG.UseVisualStyleBackColor = true;
             // 
             // comboBoxFonts
             // 
@@ -1749,5 +1761,6 @@ namespace ExcelAddIn
         private System.Windows.Forms.Label label13;
         private System.Windows.Forms.ComboBox comboBoxFonts;
         private System.Windows.Forms.Label labelFonts;
+        private System.Windows.Forms.CheckBox checkBoxSVG;
     }
 }
