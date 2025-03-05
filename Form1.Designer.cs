@@ -180,7 +180,6 @@ namespace ExcelAddIn
             this.tabControl1.Controls.Add(this.tabPage6);
             this.tabControl1.Controls.Add(this.tabPage7);
             this.tabControl1.Controls.Add(this.tabPage8);
-            this.tabControl1.Cursor = System.Windows.Forms.Cursors.Hand;
             this.tabControl1.DrawMode = System.Windows.Forms.TabDrawMode.OwnerDrawFixed;
             this.tabControl1.Font = new System.Drawing.Font("微软雅黑", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.tabControl1.HotTrack = true;
@@ -198,7 +197,6 @@ namespace ExcelAddIn
             // tabPage1
             // 
             this.tabPage1.Controls.Add(this.panel1);
-            this.tabPage1.Cursor = System.Windows.Forms.Cursors.Arrow;
             this.tabPage1.Font = new System.Drawing.Font("微软雅黑", 10.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.tabPage1.ForeColor = System.Drawing.Color.DarkSlateBlue;
             this.tabPage1.Location = new System.Drawing.Point(104, 4);
@@ -227,7 +225,6 @@ namespace ExcelAddIn
             this.panel1.Controls.Add(this.split_sheet_progressBar);
             this.panel1.Controls.Add(this.split_sheet_result_label);
             this.panel1.Controls.Add(this.split_button);
-            this.panel1.Cursor = System.Windows.Forms.Cursors.Arrow;
             this.panel1.Location = new System.Drawing.Point(0, 3);
             this.panel1.Name = "panel1";
             this.panel1.Size = new System.Drawing.Size(695, 389);
@@ -292,7 +289,6 @@ namespace ExcelAddIn
             // 
             // clear_button
             // 
-            this.clear_button.Cursor = System.Windows.Forms.Cursors.Hand;
             this.clear_button.FlatAppearance.MouseDownBackColor = System.Drawing.SystemColors.ButtonShadow;
             this.clear_button.FlatAppearance.MouseOverBackColor = System.Drawing.SystemColors.ButtonFace;
             this.clear_button.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
@@ -319,7 +315,6 @@ namespace ExcelAddIn
             // 
             // splitsheet_delete_button
             // 
-            this.splitsheet_delete_button.Cursor = System.Windows.Forms.Cursors.Hand;
             this.splitsheet_delete_button.FlatAppearance.MouseDownBackColor = System.Drawing.SystemColors.ButtonShadow;
             this.splitsheet_delete_button.FlatAppearance.MouseOverBackColor = System.Drawing.SystemColors.ButtonFace;
             this.splitsheet_delete_button.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
@@ -334,7 +329,6 @@ namespace ExcelAddIn
             // 
             // sheet_name_combobox
             // 
-            this.sheet_name_combobox.Cursor = System.Windows.Forms.Cursors.Hand;
             this.sheet_name_combobox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.sheet_name_combobox.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.sheet_name_combobox.FormattingEnabled = true;
@@ -346,7 +340,6 @@ namespace ExcelAddIn
             // 
             // splitsheet_export_button
             // 
-            this.splitsheet_export_button.Cursor = System.Windows.Forms.Cursors.Hand;
             this.splitsheet_export_button.FlatAppearance.MouseDownBackColor = System.Drawing.SystemColors.ButtonShadow;
             this.splitsheet_export_button.FlatAppearance.MouseOverBackColor = System.Drawing.SystemColors.ButtonFace;
             this.splitsheet_export_button.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
@@ -361,7 +354,6 @@ namespace ExcelAddIn
             // 
             // field_name_combobox
             // 
-            this.field_name_combobox.Cursor = System.Windows.Forms.Cursors.Hand;
             this.field_name_combobox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.field_name_combobox.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.field_name_combobox.FormattingEnabled = true;
@@ -390,7 +382,6 @@ namespace ExcelAddIn
             // 
             // split_button
             // 
-            this.split_button.Cursor = System.Windows.Forms.Cursors.Hand;
             this.split_button.FlatAppearance.MouseDownBackColor = System.Drawing.SystemColors.ButtonShadow;
             this.split_button.FlatAppearance.MouseOverBackColor = System.Drawing.SystemColors.ButtonFace;
             this.split_button.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
@@ -448,7 +439,6 @@ namespace ExcelAddIn
             // 
             // single_merge_button
             // 
-            this.single_merge_button.Cursor = System.Windows.Forms.Cursors.Hand;
             this.single_merge_button.FlatAppearance.MouseDownBackColor = System.Drawing.SystemColors.ButtonShadow;
             this.single_merge_button.FlatAppearance.MouseOverBackColor = System.Drawing.SystemColors.ButtonFace;
             this.single_merge_button.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
@@ -502,7 +492,6 @@ namespace ExcelAddIn
             // multi_merge_sheet_checkBox
             // 
             this.multi_merge_sheet_checkBox.AutoSize = true;
-            this.multi_merge_sheet_checkBox.Cursor = System.Windows.Forms.Cursors.Hand;
             this.multi_merge_sheet_checkBox.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.multi_merge_sheet_checkBox.ForeColor = System.Drawing.Color.DarkSlateBlue;
             this.multi_merge_sheet_checkBox.Location = new System.Drawing.Point(120, 337);
@@ -514,7 +503,6 @@ namespace ExcelAddIn
             // 
             // multi_merge_button
             // 
-            this.multi_merge_button.Cursor = System.Windows.Forms.Cursors.Hand;
             this.multi_merge_button.FlatAppearance.MouseDownBackColor = System.Drawing.SystemColors.ButtonShadow;
             this.multi_merge_button.FlatAppearance.MouseOverBackColor = System.Drawing.SystemColors.ButtonFace;
             this.multi_merge_button.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
@@ -529,7 +517,6 @@ namespace ExcelAddIn
             // 
             // dir_select_button
             // 
-            this.dir_select_button.Cursor = System.Windows.Forms.Cursors.Hand;
             this.dir_select_button.FlatAppearance.MouseDownBackColor = System.Drawing.SystemColors.ButtonShadow;
             this.dir_select_button.FlatAppearance.MouseOverBackColor = System.Drawing.SystemColors.ButtonFace;
             this.dir_select_button.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
@@ -545,7 +532,6 @@ namespace ExcelAddIn
             // tabPage3
             // 
             this.tabPage3.Controls.Add(this.panel3);
-            this.tabPage3.Cursor = System.Windows.Forms.Cursors.Arrow;
             this.tabPage3.Font = new System.Drawing.Font("微软雅黑", 10.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.tabPage3.ForeColor = System.Drawing.Color.DarkSlateBlue;
             this.tabPage3.Location = new System.Drawing.Point(104, 4);
@@ -572,7 +558,6 @@ namespace ExcelAddIn
             // 
             // sheet_listbox
             // 
-            this.sheet_listbox.Cursor = System.Windows.Forms.Cursors.Hand;
             this.sheet_listbox.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.sheet_listbox.FormattingEnabled = true;
             this.sheet_listbox.ItemHeight = 20;
@@ -585,7 +570,6 @@ namespace ExcelAddIn
             // 
             // batch_delete_button
             // 
-            this.batch_delete_button.Cursor = System.Windows.Forms.Cursors.Hand;
             this.batch_delete_button.FlatAppearance.MouseDownBackColor = System.Drawing.SystemColors.ButtonShadow;
             this.batch_delete_button.FlatAppearance.MouseOverBackColor = System.Drawing.SystemColors.ButtonFace;
             this.batch_delete_button.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
@@ -610,7 +594,6 @@ namespace ExcelAddIn
             // 
             // batch_export_button
             // 
-            this.batch_export_button.Cursor = System.Windows.Forms.Cursors.Hand;
             this.batch_export_button.FlatAppearance.MouseDownBackColor = System.Drawing.SystemColors.ButtonShadow;
             this.batch_export_button.FlatAppearance.MouseOverBackColor = System.Drawing.SystemColors.ButtonFace;
             this.batch_export_button.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
@@ -626,7 +609,6 @@ namespace ExcelAddIn
             // all_select_checkbox
             // 
             this.all_select_checkbox.AutoSize = true;
-            this.all_select_checkbox.Cursor = System.Windows.Forms.Cursors.Hand;
             this.all_select_checkbox.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.all_select_checkbox.Location = new System.Drawing.Point(263, 202);
             this.all_select_checkbox.Name = "all_select_checkbox";
@@ -852,7 +834,6 @@ namespace ExcelAddIn
             // 
             // contents_button
             // 
-            this.contents_button.Cursor = System.Windows.Forms.Cursors.Hand;
             this.contents_button.FlatAppearance.BorderSize = 0;
             this.contents_button.FlatAppearance.MouseDownBackColor = System.Drawing.SystemColors.ButtonShadow;
             this.contents_button.FlatAppearance.MouseOverBackColor = System.Drawing.SystemColors.ButtonFace;
@@ -893,7 +874,6 @@ namespace ExcelAddIn
             // 
             // payslip_button
             // 
-            this.payslip_button.Cursor = System.Windows.Forms.Cursors.Hand;
             this.payslip_button.FlatAppearance.BorderSize = 0;
             this.payslip_button.FlatAppearance.MouseDownBackColor = System.Drawing.SystemColors.ButtonShadow;
             this.payslip_button.FlatAppearance.MouseOverBackColor = System.Drawing.SystemColors.ButtonFace;
@@ -918,7 +898,6 @@ namespace ExcelAddIn
             // 
             // move_sheet_button
             // 
-            this.move_sheet_button.Cursor = System.Windows.Forms.Cursors.Hand;
             this.move_sheet_button.FlatAppearance.BorderSize = 0;
             this.move_sheet_button.FlatAppearance.MouseDownBackColor = System.Drawing.SystemColors.ButtonShadow;
             this.move_sheet_button.FlatAppearance.MouseOverBackColor = System.Drawing.SystemColors.ButtonFace;
@@ -945,7 +924,6 @@ namespace ExcelAddIn
             // 
             // regex_button
             // 
-            this.regex_button.Cursor = System.Windows.Forms.Cursors.Hand;
             this.regex_button.FlatAppearance.BorderSize = 0;
             this.regex_button.FlatAppearance.MouseDownBackColor = System.Drawing.SystemColors.ButtonShadow;
             this.regex_button.FlatAppearance.MouseOverBackColor = System.Drawing.SystemColors.ButtonFace;
@@ -983,7 +961,6 @@ namespace ExcelAddIn
             // 
             // add_sheet_button
             // 
-            this.add_sheet_button.Cursor = System.Windows.Forms.Cursors.Hand;
             this.add_sheet_button.FlatAppearance.BorderSize = 0;
             this.add_sheet_button.FlatAppearance.MouseDownBackColor = System.Drawing.SystemColors.ButtonShadow;
             this.add_sheet_button.FlatAppearance.MouseOverBackColor = System.Drawing.SystemColors.ButtonFace;
@@ -1010,7 +987,6 @@ namespace ExcelAddIn
             // 
             // transposition_button
             // 
-            this.transposition_button.Cursor = System.Windows.Forms.Cursors.Hand;
             this.transposition_button.FlatAppearance.BorderSize = 0;
             this.transposition_button.FlatAppearance.MouseDownBackColor = System.Drawing.SystemColors.ButtonShadow;
             this.transposition_button.FlatAppearance.MouseOverBackColor = System.Drawing.SystemColors.ButtonFace;
@@ -1448,7 +1424,7 @@ namespace ExcelAddIn
             this.label12.Name = "label12";
             this.label12.Size = new System.Drawing.Size(253, 74);
             this.label12.TabIndex = 7;
-            this.label12.Text = "注意：\r\n1. 词云图数据区域范围不包括标题行/列；\r\n2. 动态图导出格式为gif\r\n";
+            this.label12.Text = "注意：\r\n1. 词云图数据区域范围不包括标题行/列；\r\n2. 词云图功能会生成一个词频表，并将png格式的词云图插入该表\r\n";
             // 
             // chart_reset_button
             // 
@@ -1477,7 +1453,7 @@ namespace ExcelAddIn
             // label11
             // 
             this.label11.Font = new System.Drawing.Font("微软雅黑", 9F, System.Drawing.FontStyle.Italic, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.label11.ForeColor = System.Drawing.Color.Teal;
+            this.label11.ForeColor = System.Drawing.Color.DarkRed;
             this.label11.Location = new System.Drawing.Point(45, 130);
             this.label11.Name = "label11";
             this.label11.Size = new System.Drawing.Size(270, 25);
@@ -1507,8 +1483,7 @@ namespace ExcelAddIn
             this.chart_select_comboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.chart_select_comboBox.FormattingEnabled = true;
             this.chart_select_comboBox.Items.AddRange(new object[] {
-            "词云图",
-            "动态横向柱状图"});
+            "词云图"});
             this.chart_select_comboBox.Location = new System.Drawing.Point(115, 50);
             this.chart_select_comboBox.Name = "chart_select_comboBox";
             this.chart_select_comboBox.Size = new System.Drawing.Size(183, 28);
@@ -1529,7 +1504,6 @@ namespace ExcelAddIn
             // 
             this.tabPage7.BackColor = System.Drawing.SystemColors.Window;
             this.tabPage7.Controls.Add(this.richTextBox1);
-            this.tabPage7.Cursor = System.Windows.Forms.Cursors.Arrow;
             this.tabPage7.Font = new System.Drawing.Font("微软雅黑", 10.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.tabPage7.ForeColor = System.Drawing.Color.DarkSlateBlue;
             this.tabPage7.Location = new System.Drawing.Point(104, 4);
