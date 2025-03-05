@@ -184,7 +184,7 @@ namespace ExcelAddIn
             this.tabControl1.DrawMode = System.Windows.Forms.TabDrawMode.OwnerDrawFixed;
             this.tabControl1.Font = new System.Drawing.Font("微软雅黑", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.tabControl1.HotTrack = true;
-            this.tabControl1.ItemSize = new System.Drawing.Size(40, 100);
+            this.tabControl1.ItemSize = new System.Drawing.Size(40, 110);
             this.tabControl1.Location = new System.Drawing.Point(0, 1);
             this.tabControl1.Multiline = true;
             this.tabControl1.Name = "tabControl1";
@@ -200,10 +200,10 @@ namespace ExcelAddIn
             this.tabPage1.Controls.Add(this.panel1);
             this.tabPage1.Font = new System.Drawing.Font("微软雅黑", 10.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.tabPage1.ForeColor = System.Drawing.Color.DarkSlateBlue;
-            this.tabPage1.Location = new System.Drawing.Point(104, 4);
+            this.tabPage1.Location = new System.Drawing.Point(114, 4);
             this.tabPage1.Name = "tabPage1";
             this.tabPage1.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage1.Size = new System.Drawing.Size(695, 392);
+            this.tabPage1.Size = new System.Drawing.Size(685, 392);
             this.tabPage1.TabIndex = 0;
             this.tabPage1.Text = "一、分表功能";
             this.tabPage1.UseVisualStyleBackColor = true;
