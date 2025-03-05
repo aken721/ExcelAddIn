@@ -22,6 +22,12 @@ using ZXing;
 using ZXing.QrCode;
 using Excel = Microsoft.Office.Interop.Excel;
 using ZXing.Rendering;
+using System.Collections;
+using Microsoft.Office.Core;
+using System.Diagnostics;
+using Sdcb.WordClouds;
+using SkiaSharp;
+using System.Drawing.Text;
 
 
 
@@ -35,12 +41,13 @@ namespace ExcelAddIn
         private Int32 used_time_count = 0;
         private bool res = false;
         private Thread thread;
-        private List<string> active_sheet_names = new List<string>();     //当前工作簿中所有工作表名称，初始化时首次写入
+        private List<string> activeWorkBook_sheet_names = new List<string>();     //当前工作簿中所有工作表名称，初始化时首次写入
         private List<string> new_sheet_names = new List<string>();       //打开后新建表所有表名
 
         public Form1()
         {
             InitializeComponent();
+            this.FormClosing += (s, e) => CleanupTempFiles();
         }
 
         //窗体初始化
@@ -49,7 +56,7 @@ namespace ExcelAddIn
             this.MaximizeBox = false;
             //初始化tabcontrol控件
             tabControl1.SelectTab(0);
-            workbook = ThisAddIn.app.ActiveWorkbook;
+            workbook = ThisAddIn.app.ActiveWorkbook;      //变量workbook指定为当前打开的工作簿
             sheetindex = ThisAddIn.app.ActiveSheet.Name;
             excelFilePath = workbook.FullName;
             sheet_name_combobox.Items.Clear();
@@ -67,13 +74,13 @@ namespace ExcelAddIn
             splitProgressBar_label.Visible = false;
             version_label.Text = ConfigurationManager.AppSettings["version"].ToString();
 
-            if (active_sheet_names.Count > 0)
+            if (activeWorkBook_sheet_names.Count > 0)
             {
-                active_sheet_names.Clear();
+                activeWorkBook_sheet_names.Clear();
             }
             foreach (Excel.Worksheet sheet in workbook.Worksheets)
             {
-                active_sheet_names.Add(sheet.Name);
+                activeWorkBook_sheet_names.Add(sheet.Name);
             }
             if (new_sheet_names.Count > 0)
             {
@@ -126,10 +133,10 @@ namespace ExcelAddIn
             switch (tabControl1.SelectedIndex)
             {
                 //分表
-                case 0:                                             
+                case 0:
                     sheet_name_combobox.Items.Clear();
                     field_name_combobox.Items.Clear();
-                    data_start_combobox.SelectedIndex=1;
+                    data_start_combobox.SelectedIndex = 1;
                     foreach (Excel.Worksheet worksheet in workbook.Worksheets)
                     {
                         sheet_name_combobox.Items.Add(worksheet.Name);
@@ -143,7 +150,7 @@ namespace ExcelAddIn
                     break;
 
                 //并表
-                case 1:                                           
+                case 1:
                     merge_sheet_result_label.Visible = false;
                     merge_sheet_result_label.Text = "";
                     mergeProgressBar_label.Visible = false;
@@ -152,7 +159,7 @@ namespace ExcelAddIn
                     break;
 
                 //批量导、删表
-                case 2:                                         
+                case 2:
                     sheet_listbox.Items.Clear();
                     await Task.Run(() =>
                     {
@@ -169,7 +176,7 @@ namespace ExcelAddIn
                     break;
 
                 //实用功能汇总
-                case 3:                                      
+                case 3:
                     which_field_label.Visible = false;
                     which_field_combobox.Visible = false;
                     what_type_label.Visible = false;
@@ -199,7 +206,7 @@ namespace ExcelAddIn
                     break;
 
                 //数据库表提取
-                case 4:                                           
+                case 4:
                     database_result_label.Text = string.Empty;
                     dbsheet_comboBox.Items.Clear();
                     dbexport_result_label.Text = string.Empty;
@@ -207,19 +214,59 @@ namespace ExcelAddIn
                     find_keywordclear_pictureBox.Visible = false;
                     break;
 
+                //图表增强
                 case 5:
                     this.TopMost = false;
+                    chart_select_comboBox.SelectedIndex = 0;
+                    LoadFontsToComboBox(comboBoxFonts);
+                    comboBoxTextDirection.SelectedIndex = 0;
+                    //目前测试词云图中字体设定功能可能对中文不起作用，暂时隐藏
+                    labelFonts.Visible = false;                  
+                    comboBoxFonts.Visible = false;
+                    comboBoxFonts.Text = "微软雅黑";             
                     break;
 
                 //帮助
-                case 6:                                         
+                case 6:
                     break;
 
                 //退出
-                case 7:                                        
+                case 7:
                     this.Dispose();
                     break;
             }
+        }
+
+        // 定义用于存储字体信息的类
+        public class FontInfo
+        {
+            public string DisplayName { get; set; }
+            public string EnglishName { get; set; }
+        }
+
+        //在一个文本选择框中添加本机字体库中字体名称
+        private void LoadFontsToComboBox(ComboBox comboBox)
+        {
+            // 获取系统安装的字体
+            InstalledFontCollection fonts = new InstalledFontCollection();
+            foreach (FontFamily font in fonts.Families)
+            {
+                // 获取英文名称（LCID 1033对应英文）
+                string englishName = font.GetName(1033);
+                // 如果英文名为空，则使用字体家族名
+                if (string.IsNullOrEmpty(englishName))
+                    englishName = font.Name;
+
+                comboBoxFonts.Items.Add(new FontInfo
+                {
+                    DisplayName = font.Name,
+                    EnglishName = englishName
+                });
+            }
+
+            // 设置显示属性为DisplayName
+            comboBoxFonts.DisplayMember = "DisplayName";
+            comboBoxFonts.Sorted = true;
         }
 
         //限制指定数据起始行的ComboBox中只能输入数字
@@ -234,7 +281,7 @@ namespace ExcelAddIn
 
         private void data_start_combobox_TextChanged(object sender, EventArgs e)
         {
-            this.sheet_name_combobox_TextChanged(sender,e);
+            this.sheet_name_combobox_TextChanged(sender, e);
         }
 
         //更新分表功能中选中表的字段选项
@@ -251,8 +298,8 @@ namespace ExcelAddIn
             {
                 Excel.Worksheet worksheet = ThisAddIn.app.ActiveWorkbook.Worksheets[selectworksheet];
                 field_name_combobox.Items.Clear();
-                int title_last_row = int.Parse(data_start_combobox.Text)-1;
-                if(title_last_row==0)
+                int title_last_row = int.Parse(data_start_combobox.Text) - 1;
+                if (title_last_row == 0)
                 {
                     ShowLabel(split_sheet_result_label, true, "该表没有标题行！");
                     StartTimer();
@@ -268,7 +315,7 @@ namespace ExcelAddIn
                         string range_value = range.Value;
                         if (string.IsNullOrEmpty(range_value))
                         {
-                            if(range.MergeCells)
+                            if (range.MergeCells)
                             {
                                 Excel.Range merge_range = range.MergeArea;
                                 string merge_range_value = ThisAddIn.app.ActiveSheet.Range[merge_range.Address.Split(':')[0]].Value;
@@ -280,7 +327,7 @@ namespace ExcelAddIn
                                 {
                                     field_name_combobox.Items.Add(range.Column.ToString() + "." + merge_range_value);
                                 }
-                                
+
                             }
                             else
                             {
@@ -289,7 +336,7 @@ namespace ExcelAddIn
                         }
                         else
                         {
-                            field_name_combobox.Items.Add(range.Column.ToString()+"."+range.Value);
+                            field_name_combobox.Items.Add(range.Column.ToString() + "." + range.Value);
                         }
                     }
                     if (field_name_combobox.Items.Count > 0)
@@ -300,7 +347,7 @@ namespace ExcelAddIn
                     {
                         field_name_combobox.Text = "";
                     }
-                }                
+                }
             }
             field_name_combobox.Refresh();
         }
@@ -318,7 +365,7 @@ namespace ExcelAddIn
         //分表（UI主线程）
         private void split_button_Click(object sender, EventArgs e)
         {
-            if (string.IsNullOrEmpty(sheet_name_combobox.Text) && string.IsNullOrEmpty(field_name_combobox.Text)&&string.IsNullOrEmpty(data_start_combobox.Text))
+            if (string.IsNullOrEmpty(sheet_name_combobox.Text) && string.IsNullOrEmpty(field_name_combobox.Text) && string.IsNullOrEmpty(data_start_combobox.Text))
             {
                 ShowLabel(split_sheet_result_label, true, "表、字段和数据起始行均不能为空！");
                 StartTimer();
@@ -337,7 +384,7 @@ namespace ExcelAddIn
             }
             string select_sheet = sheet_name_combobox.Text;
             int dataStartRow = int.Parse(data_start_combobox.Text);
-            thread = new Thread(() => SplitTask(select_sheet, field_column,dataStartRow));
+            thread = new Thread(() => SplitTask(select_sheet, field_column, dataStartRow));
             thread.Start();
             split_sheet_result_label.Visible = true;
             split_sheet_timer.Interval = 1000;
@@ -347,10 +394,10 @@ namespace ExcelAddIn
         }
 
         //分表（程序执行线程）
-        private void SplitTask(string sheetName, int selectFieldsColumn,int selectDataStartRow)
+        private void SplitTask(string sheetName, int selectFieldsColumn, int selectDataStartRow)
         {
             res = false;
-            this.Invoke(new Action(() => 
+            this.Invoke(new Action(() =>
             {
                 tabControl1.Enabled = false;
                 split_button.Enabled = false;
@@ -369,7 +416,7 @@ namespace ExcelAddIn
                 //声明范围列数、范围行数、分表依据列数、筛选结果第一列数
                 List<string> records = new List<string>();
                 long record_row = workbook.Worksheets[sheetName].Cells[workbook.Worksheets[sheetName].Rows.Count, selectFieldsColumn].End(Excel.XlDirection.xlUp).Row;  //待分表中的数据行数
-                int current_record = 1;    
+                int current_record = 1;
 
                 //将去重后的表名加入数组
                 foreach (Excel.Range range in workbook.Worksheets[sheetName].Range[workbook.Worksheets[sheetName].Cells[selectDataStartRow, selectFieldsColumn], workbook.Worksheets[sheetName].Cells[record_row, selectFieldsColumn]])
@@ -393,9 +440,9 @@ namespace ExcelAddIn
                 //新建分表，并通过关键字段筛选，筛出结果复制到相应分表中
                 foreach (string record in records)
                 {
-                     //更新进度条
+                    //更新进度条
                     UpdateProgressBar(split_sheet_progressBar, current_record, total_record, splitProgressBar_label, "分表进度");
-                    
+
                     //未分表前工作簿已有表登记
                     if (dynamic_sheet_name.Count > 0)
                     {
@@ -428,8 +475,8 @@ namespace ExcelAddIn
                     activeSheet.Rows[selectDataStartRow].Insert(Shift: Excel.XlInsertShiftDirection.xlShiftDown, CopyOrigin: Excel.XlInsertFormatOrigin.xlFormatFromLeftOrAbove);
                     activeSheet.Range[activeSheet.Cells[selectDataStartRow, 1], activeSheet.Cells[record_row, record_column]].Select();
                     ThisAddIn.app.Selection.AutoFilter(selectFieldsColumn, record);
-                    int autofilter_row=activeSheet.Cells[sheet_allRows,selectFieldsColumn].End(Excel.XlDirection.xlUp).Row;
-                    activeSheet.Range[activeSheet.Cells[1,1], activeSheet.Cells[autofilter_row,record_column]].Select();
+                    int autofilter_row = activeSheet.Cells[sheet_allRows, selectFieldsColumn].End(Excel.XlDirection.xlUp).Row;
+                    activeSheet.Range[activeSheet.Cells[1, 1], activeSheet.Cells[autofilter_row, record_column]].Select();
                     ThisAddIn.app.Selection.Copy(ThisAddIn.app.ActiveWorkbook.Worksheets[record].Range["A1"]);
                     activeSheet.Rows[selectDataStartRow].AutoFilter();
                     activeSheet.Rows[selectDataStartRow].Delete(Excel.XlDeleteShiftDirection.xlShiftUp);
@@ -444,8 +491,8 @@ namespace ExcelAddIn
                         if (rng.Value == "序号")
                         {
                             int t_column = rng.Column;                                                                             //“序号”所在的列
-                            int data_row = add_sheet.Cells[add_sheet.Rows.Count,record_column].End(Excel.XlDirection.xlUp).Row;   //分后的表中最后一条数据所在行
-                            for (int number = 0; number <=data_row-selectDataStartRow; number++)
+                            int data_row = add_sheet.Cells[add_sheet.Rows.Count, record_column].End(Excel.XlDirection.xlUp).Row;   //分后的表中最后一条数据所在行
+                            for (int number = 0; number <= data_row - selectDataStartRow; number++)
                             {
                                 ThisAddIn.app.ActiveSheet.Cells[selectDataStartRow + number, t_column].Value = number + 1;
                             }
@@ -456,7 +503,7 @@ namespace ExcelAddIn
                     add_sheet.Range["A1"].Select();
                     current_record++;
                 }
-                workbook.Worksheets[sheetName].Activate();                
+                workbook.Worksheets[sheetName].Activate();
                 ThisAddIn.app.ActiveSheet.Range("A1").Select();
                 ThisAddIn.app.CutCopyMode = Excel.XlCutCopyMode.xlCopy;
             }
@@ -472,7 +519,7 @@ namespace ExcelAddIn
                 }
                 foreach (Excel.Worksheet newsheet in workbook.Worksheets)
                 {
-                    if (!active_sheet_names.Contains(newsheet.Name))
+                    if (!activeWorkBook_sheet_names.Contains(newsheet.Name))
                     {
                         new_sheet_names.Add(newsheet.Name);
                     }
@@ -488,7 +535,7 @@ namespace ExcelAddIn
                     field_name_combobox.Enabled = true;
                     this.ControlBox = true;
                     this.TopMost = false;
-                }));              
+                }));
                 res = true;
                 ThisAddIn.app.ScreenUpdating = true;
                 ThisAddIn.app.DisplayAlerts = true;
@@ -678,17 +725,17 @@ namespace ExcelAddIn
                 data_start_row = 2;
             }
             //在List<string>中保存当前所有表名
-            if (active_sheet_names.Count > 0)
+            if (activeWorkBook_sheet_names.Count > 0)
             {
-                active_sheet_names.Clear();
+                activeWorkBook_sheet_names.Clear();
             }
             foreach (Excel.Worksheet active_sheet_name in workbook.Worksheets)
             {
-                active_sheet_names.Add(active_sheet_name.Name);
+                activeWorkBook_sheet_names.Add(active_sheet_name.Name);
             }
 
             //启动并表线程
-            thread = new Thread(() => mergeTask(data_start_row, active_sheet_names));
+            thread = new Thread(() => mergeTask(data_start_row, activeWorkBook_sheet_names));
             thread.Start();
             merge_sheet_timer.Interval = 1000;
             merge_sheet_timer.Enabled = true;
@@ -831,17 +878,17 @@ namespace ExcelAddIn
             }
 
             //在List<string>中保存当前所有表名
-            if (active_sheet_names.Count > 0)
+            if (activeWorkBook_sheet_names.Count > 0)
             {
-                active_sheet_names.Clear();
+                activeWorkBook_sheet_names.Clear();
             }
             foreach (Excel.Worksheet active_sheet_name in workbook.Worksheets)
             {
-                active_sheet_names.Add(active_sheet_name.Name);
+                activeWorkBook_sheet_names.Add(active_sheet_name.Name);
             }
 
             //启动并表线程
-            thread = new Thread(() => multiMergeTask(data_start_row, active_sheet_names));
+            thread = new Thread(() => multiMergeTask(data_start_row, activeWorkBook_sheet_names));
             thread.Start();
             merge_sheet_timer.Interval = 1000;
             merge_sheet_timer.Enabled = true;
@@ -955,7 +1002,7 @@ namespace ExcelAddIn
                 progressBar.Update();
                 // 显示百分比数字
                 progressBar_result_label.Text = progressBar_result + progressPercentage.ToString() + "%";
-            }));            
+            }));
         }
 
         //获取指定文件夹符合要求文件的数量（包含子文件夹）
@@ -1119,7 +1166,7 @@ namespace ExcelAddIn
             foreColor_label.Visible = false;
             backColor_select_button.Visible = false;
             backColor_label.Visible = false;
-            QR_logo_label.Visible= false;
+            QR_logo_label.Visible = false;
             QR_logo_pictureBox.Visible = false;
             BC_radioButton.Visible = false;
             BC_radioButton.Checked = false;
@@ -1344,7 +1391,7 @@ namespace ExcelAddIn
                     StartTimer();
                 }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 ShowLabel(run_result_label, true, ex.Message);
             }
@@ -1361,7 +1408,7 @@ namespace ExcelAddIn
                 QR_button.Enabled = true;
                 ThisAddIn.app.ScreenUpdating = true;
                 ThisAddIn.app.DisplayAlerts = true;
-            }       
+            }
         }
 
         //转置工作表(UI主线程）
@@ -1495,13 +1542,13 @@ namespace ExcelAddIn
                 //开始转置
                 if (run_result_label.InvokeRequired)
                 {
-                    run_result_label.Invoke(new Action(()=>
+                    run_result_label.Invoke(new Action(() =>
                         {
                             run_result_label.Visible = true;
                             run_result_label.Text = "正在转置......";
                         }));
                 }
-                
+
 
                 ThisAddIn.app.DisplayAlerts = false;
                 ThisAddIn.app.ScreenUpdating = false;
@@ -1517,7 +1564,7 @@ namespace ExcelAddIn
                 }
 
                 int translation_start_column1 = Convert.ToInt32(translation_start_column); //将转置起始列转为数值
-                
+
                 //新建“转置表”
                 Excel.Worksheet trans_sheet = ThisAddIn.app.ActiveWorkbook.Worksheets.Add(Before: worksheet);
                 trans_sheet.Name = trans_sheet_name;
@@ -1530,7 +1577,7 @@ namespace ExcelAddIn
 
 
                 //日期数据格式化
-                if (field_name == "日期" || field_name=="date")
+                if (field_name == "日期" || field_name == "date")
                 {
                     trans_sheet.Columns[Convert.ToInt32(translation_start_column) + 1].NumberFormatLocal = "yyyy-m-d";
                 }
@@ -1574,7 +1621,7 @@ namespace ExcelAddIn
                 {
                     trans_sheet.Columns[translation_start_column1].NumberFormatLocal = "#,##0.00";
                 }
-            
+
 
                 worksheet.Select();
                 worksheet.Range["A1"].Select();
@@ -1584,7 +1631,7 @@ namespace ExcelAddIn
                 ThisAddIn.app.DisplayAlerts = true;
                 return 0;
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 MessageBox.Show("转置出错：" + ex.Message);
                 return -2;
@@ -1629,7 +1676,7 @@ namespace ExcelAddIn
         //which_field_combobox控件可见时
         private async void which_field_combobox_VisibleChanged(object sender, EventArgs e)
         {
-            if (which_field_combobox.Visible==true)
+            if (which_field_combobox.Visible == true)
             {
                 switch (selectfunction)
                 {
@@ -2063,10 +2110,10 @@ namespace ExcelAddIn
                         Excel.Worksheet sheet = workbook.ActiveSheet;
 
                         int usedColumn = sheet.UsedRange.Columns.Count;
-                        Dictionary<string,int> items = new Dictionary<string,int>();
-                        foreach(string selectitem in QR_listBox.SelectedItems)
+                        Dictionary<string, int> items = new Dictionary<string, int>();
+                        foreach (string selectitem in QR_listBox.SelectedItems)
                         {
-                            items.Add(selectitem, TargetField(sheet,selectitem));
+                            items.Add(selectitem, TargetField(sheet, selectitem));
                         }
 
                         //生成二维码
@@ -2119,7 +2166,7 @@ namespace ExcelAddIn
                                 Bitmap qrCode = writer.Write(Encoding.UTF8.GetString(utf8Bytes));
 
                                 // 如果提供了Logo图片路径，则在二维码中间添加Logo
-                                if (!string.IsNullOrEmpty(qr_logo_path)&& QR_logo_pictureBox.Image!=ExcelAddIn.Properties.Resources.pic_logo)
+                                if (!string.IsNullOrEmpty(qr_logo_path) && QR_logo_pictureBox.Image != ExcelAddIn.Properties.Resources.pic_logo)
                                 {
                                     using (Bitmap logo = new Bitmap(qr_logo_path))
                                     {
@@ -2176,7 +2223,7 @@ namespace ExcelAddIn
                                     Renderer = new BitmapRenderer
                                     {
                                         Foreground = qrForeColor,
-                                        Background=Color.White
+                                        Background = Color.White
                                     }
                                 };
 
@@ -2220,10 +2267,10 @@ namespace ExcelAddIn
                             StartTimer();
                         }
 
-                            break;
+                        break;
                 }
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 ShowLabel(run_result_label, true, ex.Message);
             }
@@ -2241,7 +2288,7 @@ namespace ExcelAddIn
                 ThisAddIn.app.ScreenUpdating = true;
                 ThisAddIn.app.DisplayAlerts = true;
             }
-              
+
         }
 
         //正则表达式清空选项
@@ -2273,8 +2320,8 @@ namespace ExcelAddIn
             QR_radioButton.Visible = false;
             QR_radioButton.Checked = false;
             foreColor_select_button.Visible = false;
-            foreColor_label.Visible=false;
-            backColor_select_button.Visible=false;
+            foreColor_label.Visible = false;
+            backColor_select_button.Visible = false;
             backColor_label.Visible = false;
             QR_logo_label.Visible = false;
             QR_logo_pictureBox.Visible = false;
@@ -2343,7 +2390,7 @@ namespace ExcelAddIn
             what_type_combobox.Visible = false;
             regex_rule_label.Visible = false;
             regex_rule_textbox.Visible = false;
-            run_result_label.Visible = false;            
+            run_result_label.Visible = false;
             regex_clear_button.Visible = false;
             contents_to_sheet_radioButton.Visible = true;
             sheet_to_contents_radioButton.Visible = true;
@@ -2369,7 +2416,7 @@ namespace ExcelAddIn
         private void contents_to_sheet_radioButton_CheckedChanged(object sender, EventArgs e)
         {
             if (contents_to_sheet_radioButton.Checked == true)
-            {                
+            {
                 selectfunction = 2;
                 which_field_label.Text = "链接哪列";
                 which_field_label.Visible = true;
@@ -2432,7 +2479,7 @@ namespace ExcelAddIn
         {
             openFileDialog1.Filter = "图片文件|*.jpg;*.png;*.bmp;*.gif|All files (*.*)|*.*";
             openFileDialog1.Title = "请选择要添加的二维码图标图片";
-            openFileDialog1.AddExtension=true;
+            openFileDialog1.AddExtension = true;
             openFileDialog1.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.Desktop);
             if (openFileDialog1.ShowDialog() == DialogResult.OK)
             {
@@ -2449,7 +2496,7 @@ namespace ExcelAddIn
                 Excel.Worksheet sheet = ThisAddIn.app.ActiveWorkbook.ActiveSheet;
                 QR_listBox.Items.Clear();
 
-                if (sheet.UsedRange.Rows.Count > 1 && !string.IsNullOrEmpty(sheet.Cells[1,1].Value))
+                if (sheet.UsedRange.Rows.Count > 1 && !string.IsNullOrEmpty(sheet.Cells[1, 1].Value))
                 {
                     foreach (Excel.Range cell in sheet.Range[sheet.Cells[1, 1], sheet.Cells[1, sheet.UsedRange.Columns.Count]])
                     {
@@ -2642,7 +2689,7 @@ namespace ExcelAddIn
             HideLabel(run_result_label, false, "");
         }
 
-        
+
         //自建函数
 
         //正则表达式函数，判断输入字符是否合规，如有不合规字符，返回true，否则返回false
@@ -2655,13 +2702,13 @@ namespace ExcelAddIn
         //判断当前工作簿中是否存在指定表，如存在，返回true，否则返回false
         public static bool SheetExist(string sheet_name)
         {
-            foreach(Excel.Worksheet sheet in ThisAddIn.app.ActiveWorkbook.Worksheets)
+            foreach (Excel.Worksheet sheet in ThisAddIn.app.ActiveWorkbook.Worksheets)
             {
                 if (sheet.Name == sheet_name)
                 {
                     return true;
                 }
-            }            
+            }
             return false;
         }
 
@@ -2690,7 +2737,7 @@ namespace ExcelAddIn
             {
                 MessageBox.Show("数据库地址不能为空！", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
-            else 
+            else
             {
                 switch (dbtype_comboBox.SelectedIndex)
                 {
@@ -2711,7 +2758,7 @@ namespace ExcelAddIn
                             database_result_label.Text = "数据库连接成功，数据库中包含" + tableNames.Count + "张表";
 
                             // 将表名添加到 ComboBox
-                            dbsheet_comboBox.DataSource=tableNames;
+                            dbsheet_comboBox.DataSource = tableNames;
                             //foreach (var tableName in tableNames)
                             //{
                             //    dbsheet_comboBox.Items.Add(tableName);
@@ -2783,7 +2830,7 @@ namespace ExcelAddIn
                         {
                             connectionString2 = $"Provider=Microsoft.ACE.OLEDB.12.0;Data Source={dbaddress_textBox.Text};Persist Security Info=False;Jet OLEDB:Database Password={dbpwd_textBox.Text};";
                         }
-                         tableNames = AccessDB.GetTableNames(connectionString2);
+                        tableNames = AccessDB.GetTableNames(connectionString2);
                         if (tableNames.Count == 1 && tableNames[0].Contains(":"))
                         {
                             // 处理错误情况
@@ -2976,7 +3023,7 @@ namespace ExcelAddIn
 
                     default:
                         break;
-                }            
+                }
             }
         }
 
@@ -3011,8 +3058,8 @@ namespace ExcelAddIn
                     }
 
                 //SQL Server
-                case 1:                                            
-                    connectionString= $"Data Source={dbaddress_textBox.Text};Initial Catalog={dbname_textBox.Text};User ID={dbuser_textBox.Text};Password={dbpwd_textBox.Text}";
+                case 1:
+                    connectionString = $"Data Source={dbaddress_textBox.Text};Initial Catalog={dbname_textBox.Text};User ID={dbuser_textBox.Text};Password={dbpwd_textBox.Text}";
                     using (var connection = new SqlConnection(connectionString))
                     {
                         connection.Open();
@@ -3028,7 +3075,7 @@ namespace ExcelAddIn
                     }
 
                 //Access
-                case 2:                                            
+                case 2:
                     if (string.IsNullOrEmpty(dbpwd_textBox.Text))
                     {
                         connectionString = $"Provider=Microsoft.ACE.OLEDB.12.0;Data Source={dbaddress_textBox.Text};Persist Security Info=False;";
@@ -3038,7 +3085,7 @@ namespace ExcelAddIn
                         connectionString = $"Provider=Microsoft.ACE.OLEDB.12.0;Data Source={dbaddress_textBox.Text};Persist Security Info=False;Jet OLEDB:Database Password={dbpwd_textBox.Text};";
                     }
 
-                    using (var connection = new  OleDbConnection(connectionString))
+                    using (var connection = new OleDbConnection(connectionString))
                     {
                         connection.Open();
                         using (var command = new OleDbCommand($"SELECT * FROM {tableName}", connection))
@@ -3053,7 +3100,7 @@ namespace ExcelAddIn
                     }
 
                 //SQLite
-                case 3:                                           
+                case 3:
                     if (string.IsNullOrEmpty(dbpwd_textBox.Text))
                     {
                         connectionString = $"Data Source={dbaddress_textBox.Text};Version=3;";
@@ -3078,7 +3125,7 @@ namespace ExcelAddIn
                     }
 
                 //PostgreSQL
-                case 4:                                           
+                case 4:
                     connectionString = $"Host={dbaddress_textBox.Text};Port={dbport_textBox.Text};Username={dbuser_textBox.Text};Password={dbpwd_textBox.Text};Database={dbname_textBox.Text}";
                     using (var connection = new NpgsqlConnection(connectionString))
                     {
@@ -3132,14 +3179,14 @@ namespace ExcelAddIn
                 default:
                     return null;
             }
-         }
+        }
 
         //数据库表选择改变事件
         private void dbsheet_comboBox_SelectedIndexChanged(object sender, EventArgs e)
         {
-            if(dbsheet_comboBox.SelectedIndex == -1)
+            if (dbsheet_comboBox.SelectedIndex == -1)
             {
-                dbsheet_dataGridView.DataSource=null;
+                dbsheet_dataGridView.DataSource = null;
             }
             else
             {
@@ -3182,7 +3229,7 @@ namespace ExcelAddIn
                     break;
 
                 //Oracle
-                case 5:                                
+                case 5:
                     dbport_textBox.Text = "1521";
                     break;
 
@@ -3204,7 +3251,8 @@ namespace ExcelAddIn
         //功能5页面统清空
         private void Tab5Clear()
         {
-            if (dbtype_comboBox.SelectedIndex == 2 || dbtype_comboBox.SelectedIndex == 3)            {
+            if (dbtype_comboBox.SelectedIndex == 2 || dbtype_comboBox.SelectedIndex == 3)
+            {
                 dbaddress_textBox.Text = "请双击本框选择Access数据库文件";
                 dbname_textBox.ReadOnly = true;
                 dbport_textBox.ReadOnly = true;
@@ -3213,8 +3261,8 @@ namespace ExcelAddIn
                 dbname_textBox.Text = "";
                 dbpwd_textBox.Text = "";
                 tableNames.Clear();
-                find_keyword_textBox.Text="";
-                dbsheet_comboBox.DataSource=null;
+                find_keyword_textBox.Text = "";
+                dbsheet_comboBox.DataSource = null;
                 dbsheet_dataGridView.DataSource = null;
                 database_result_label.Text = string.Empty;
                 dbexport_result_label.Text = string.Empty;
@@ -3230,7 +3278,7 @@ namespace ExcelAddIn
                 dbpwd_textBox.Text = "";
                 tableNames.Clear();
                 find_keyword_textBox.Text = "";
-                dbsheet_comboBox.DataSource=null;
+                dbsheet_comboBox.DataSource = null;
                 dbsheet_dataGridView.DataSource = null;
                 database_result_label.Text = string.Empty;
                 dbexport_result_label.Text = string.Empty;
@@ -3248,21 +3296,21 @@ namespace ExcelAddIn
                 dbexport_result_label.Text = "导出完成！";
                 MessageBox.Show("导出成功！");
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 MessageBox.Show(ex.Message);
-                dbexport_result_label.Text = "导出失败，原因为："+ex.Message; 
+                dbexport_result_label.Text = "导出失败，原因为：" + ex.Message;
             }
         }
 
         //预览数据导出到Excel
-        internal void ExportDataGridViewToExcel(DataGridView dataGridView,string newsheetname)
+        internal void ExportDataGridViewToExcel(DataGridView dataGridView, string newsheetname)
         {
             ThisAddIn.app.DisplayAlerts = false;
             ThisAddIn.app.ScreenUpdating = false;
 
             workbook = ThisAddIn.app.ActiveWorkbook;
-            Excel.Worksheet worksheet=workbook.Worksheets.Add();
+            Excel.Worksheet worksheet = workbook.Worksheets.Add();
             worksheet.Name = newsheetname;
             worksheet.Activate();
             try
@@ -3341,7 +3389,7 @@ namespace ExcelAddIn
         //地址文本框改变事件
         private void dbaddress_textBox_TextChanged(object sender, EventArgs e)
         {
-            if(dbaddress_textBox.Text== "请双击本框选择SQLite数据库文件" ||dbaddress_textBox.Text== "请双击本框选择Access数据库文件")
+            if (dbaddress_textBox.Text == "请双击本框选择SQLite数据库文件" || dbaddress_textBox.Text == "请双击本框选择Access数据库文件")
             {
                 dbaddress_textBox.ForeColor = Color.DarkGray;
                 dbaddress_textBox.Font = new Font(dbaddress_textBox.Font.FontFamily, 8, FontStyle.Italic);
@@ -3366,7 +3414,7 @@ namespace ExcelAddIn
                     items.Add(item);
                 }
             }
-            return items; 
+            return items;
         }
 
         //模糊查找按钮点击事件
@@ -3379,7 +3427,7 @@ namespace ExcelAddIn
                 if (resultItems.Count == 0 || resultItems.Count == tableNames.Count)
                 {
                     dbsheet_comboBox.DataSource = tableNames;
-                    dbexport_result_label.Text="未找到表";
+                    dbexport_result_label.Text = "未找到表";
                 }
                 else
                 {
@@ -3399,26 +3447,26 @@ namespace ExcelAddIn
         //关键字文本框改变事件
         private void find_keyword_textBox_TextChanged(object sender, EventArgs e)
         {
-            if(find_keyword_textBox.Text== "")
+            if (find_keyword_textBox.Text == "")
             {
                 dbsheet_comboBox.DataSource = tableNames;
                 find_keywordclear_pictureBox.Visible = false;
-                dbexport_result_label.Text=string.Empty;
+                dbexport_result_label.Text = string.Empty;
             }
             else
             {
                 find_keywordclear_pictureBox.Visible = true;
-                dbexport_result_label.Text=string.Empty;
+                dbexport_result_label.Text = string.Empty;
             }
-            
+
         }
 
         //清空关键字查找框内容事件
         private void find_keywordclear_pictureBox_Click(object sender, EventArgs e)
         {
-            if(find_keyword_textBox.Text != "")
+            if (find_keyword_textBox.Text != "")
             {
-                find_keyword_textBox.Text=string.Empty;
+                find_keyword_textBox.Text = string.Empty;
                 find_keywordclear_pictureBox.Visible = false;
             }
         }
@@ -3427,7 +3475,7 @@ namespace ExcelAddIn
         Color qrBackColor = Color.White;
         private void foreColor_select_button_Click(object sender, EventArgs e)
         {
-            if (colorDialog1.ShowDialog()==DialogResult.OK)
+            if (colorDialog1.ShowDialog() == DialogResult.OK)
             {
                 foreColor_select_button.BackColor = colorDialog1.Color;
                 qrForeColor = colorDialog1.Color;
@@ -3448,6 +3496,215 @@ namespace ExcelAddIn
             // 计算灰度值
             return (int)(0.299 * color.R + 0.587 * color.G + 0.114 * color.B);
         }
+
+        private void chart_reset_button_Click(object sender, EventArgs e)
+        {
+            chart_select_comboBox.SelectedIndex = 0;
+            chart_range_textBox.Text = "";
+            chart_pictureBox.Image = null;
+            CleanupTempFiles();
+        }
+
+         private async void chart_create_button_Click(object sender, EventArgs e)
+        {
+            switch (chart_select_comboBox.SelectedIndex)
+            {
+                case 0:
+                    if (string.IsNullOrEmpty(chart_range_textBox.Text))
+                    {
+                        MessageBox.Show("请先选择数据范围");
+                        return;
+                    }
+                    Excel.Range range =workbook.ActiveSheet.Range[chart_range_textBox.Text];
+                    string activeSheetName = workbook.ActiveSheet.Name;
+                    chart_pictureBox.Image = null;                    
+                    await Task.Run(() => GenerateWordCloud(activeSheetName,range)); 
+                    break;
+                case 1:
+                    break;
+            }
+        }
+
+        // 在窗体类中增加字段
+        private string _currentWordCloudTempPath;
+
+
+        // 将词频字典转换为 WordScore 集合
+        private static IEnumerable<WordScore> ConvertToWordScores(Dictionary<string, int> frequencyDict)
+        {
+            return frequencyDict
+                .Select(kv => new WordScore(
+                    Score: kv.Value,  
+                    Word: kv.Key))
+                .OrderByDescending(ws => ws.Score); // 按数值排序
+        }
+
+        private void GenerateWordCloud(string activeSheetName, Excel.Range range)
+        {
+            try
+            {
+                this.Invoke(new Action(() => 
+                {
+                    //ThisAddIn.app.ScreenUpdating = false;
+                    //ThisAddIn.app.DisplayAlerts = false;
+                    chart_create_button.Enabled = false;
+                    chart_reset_button.Enabled = false;
+                    chart_select_comboBox.Enabled = false;
+                    chart_range_textBox.ReadOnly = true;
+                }));
+
+                // 统计字符串频率
+                Dictionary<string, int> frequencyDict = new Dictionary<string, int>();
+                foreach (Excel.Range cell in range.Cells)
+                {
+                    string cellText = cell.Text.ToString().Trim();
+                    if (!string.IsNullOrEmpty(cellText))
+                    {
+                        if (frequencyDict.ContainsKey(cellText))
+                            frequencyDict[cellText]++;
+                        else
+                            frequencyDict[cellText] = 1;
+                    }
+                }
+
+                if (frequencyDict.Count == 0)
+                {
+                    MessageBox.Show("选中的范围没有文本内容");
+                    return;
+                }
+
+                string wordCloudSheetName = "_wordcloud";
+                int i = 1;
+                while (SheetExist(wordCloudSheetName)) 
+                {
+                    wordCloudSheetName = "_wordcloud"+i.ToString();
+                    i++;
+                }
+                Excel.Worksheet wordCloudSheet = workbook.Worksheets.Add(Before: workbook.ActiveSheet);
+                wordCloudSheet.Name = wordCloudSheetName;
+                wordCloudSheet.Range["A1"].Value = "key_word";
+                wordCloudSheet.Range["B1"].Value = "count";
+                int rowIndex = 2;
+                foreach (var pair in frequencyDict)
+                {
+                    wordCloudSheet.Cells[rowIndex, 1] = pair.Key;
+                    wordCloudSheet.Cells[rowIndex, 2] = pair.Value;
+                    rowIndex++;
+                }
+
+                // 定义排序范围（假设数据从A1开始，到最后一行的B列）
+                Excel.Range sortRange = wordCloudSheet.Range["A1:B" + (rowIndex - 1)];
+
+
+                // 排序
+                sortRange.Sort(
+                    Key1: wordCloudSheet.Range["B1"],                //以B列为基础进行排序
+                    Order1: Excel.XlSortOrder.xlDescending,           //降序排序
+                    Header: Excel.XlYesNoGuess.xlYes,                 //默认有标题行
+                    Orientation: Excel.XlSortOrientation.xlSortRows,  //整行排序
+                    DataOption1: Excel.XlSortDataOption.xlSortNormal  // 改为标准排序
+                );
+
+                // 强制刷新工作表计算
+                wordCloudSheet.Application.Calculate();
+
+                 //生成词云图
+
+                // 词云图方向
+                TextOrientations[] orientations =
+                [
+                    TextOrientations.PreferHorizontal,
+                    TextOrientations.PreferVertical,
+                    TextOrientations.HorizontalOnly,
+                    TextOrientations.VerticalOnly,
+                    TextOrientations.Random
+                ];
+
+                string fontName="Microsoft YaHei";
+                int textDirection = 0;
+                
+
+                this.Invoke(new Action(() =>
+                {
+                    if (comboBoxFonts.SelectedItem is FontInfo selectedFont)
+                    {
+                        fontName = selectedFont.EnglishName;
+                    }
+                    textDirection = comboBoxTextDirection.SelectedIndex;
+                }));
+
+                WordCloud wc = WordCloud.Create(new WordCloudOptions(600, 400, ConvertToWordScores(frequencyDict))
+                {
+                    TextOrientation = orientations[textDirection],
+                    FontManager = new FontManager([SKTypeface.FromFamilyName($"fontName")]),     //字体为雅黑
+                });
+                byte[] pngBytes = wc.ToSKBitmap().Encode(SKEncodedImageFormat.Png, 100).AsSpan().ToArray();
+
+                // 获取 Windows 临时文件夹路径
+                _currentWordCloudTempPath = Path.Combine(Path.GetTempPath(), "wordCloud.png");
+                File.WriteAllBytes(_currentWordCloudTempPath, pngBytes);
+
+                this.Invoke(new Action(() =>
+                {
+                    chart_pictureBox.Image = Image.FromFile(_currentWordCloudTempPath);
+
+                }));
+
+                // 插入图片并获取图片对象
+                Excel.Shape wordCloudShape = wordCloudSheet.Shapes.AddPicture
+                (
+                    Filename: _currentWordCloudTempPath,
+                    LinkToFile: MsoTriState.msoFalse,  // 不链接到文件（嵌入到文档）
+                    SaveWithDocument: MsoTriState.msoTrue,
+                    Left: 500,
+                    Top: 100,
+                    Width: -1,  // -1 表示保持原始宽度
+                    Height: -1   // -1 表示保持原始高度
+                );
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("发生错误: " + ex.Message);
+            }
+            finally
+            {
+                this.Invoke(new Action(() =>
+                {
+                    chart_create_button.Enabled = true;
+                    chart_reset_button.Enabled = true;
+                    chart_select_comboBox.Enabled = true;
+                    chart_range_textBox.ReadOnly = false;
+                    ThisAddIn.app.ScreenUpdating = true;
+                    ThisAddIn.app.DisplayAlerts = true;
+                }));
+                workbook.Worksheets[activeSheetName].Select();
+            }
+        }
+
+        // 临时文件清理方法
+        private void CleanupTempFiles()
+        {
+            try
+            {
+                if (!string.IsNullOrEmpty(_currentWordCloudTempPath) && File.Exists(_currentWordCloudTempPath))
+                {
+                    File.Delete(_currentWordCloudTempPath);
+                    _currentWordCloudTempPath = null;
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"清理临时文件失败: {ex.Message}");
+            }
+
+            // 清理图片资源
+            if (chart_pictureBox.Image != null)
+            {
+                chart_pictureBox.Image.Dispose();
+                chart_pictureBox.Image = null;
+            }
+        }
+
     }
 
     internal class MysqlDB

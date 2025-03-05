@@ -123,12 +123,19 @@ namespace ExcelAddIn
             this.label7 = new System.Windows.Forms.Label();
             this.find_keywordbutton_pictureBox = new System.Windows.Forms.PictureBox();
             this.tabPage6 = new System.Windows.Forms.TabPage();
-            this.button2 = new System.Windows.Forms.Button();
-            this.button1 = new System.Windows.Forms.Button();
+            this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.comboBoxFonts = new System.Windows.Forms.ComboBox();
+            this.labelFonts = new System.Windows.Forms.Label();
+            this.label13 = new System.Windows.Forms.Label();
+            this.comboBoxTextDirection = new System.Windows.Forms.ComboBox();
+            this.chart_pictureBox = new System.Windows.Forms.PictureBox();
+            this.label12 = new System.Windows.Forms.Label();
+            this.chart_reset_button = new System.Windows.Forms.Button();
+            this.chart_create_button = new System.Windows.Forms.Button();
             this.label11 = new System.Windows.Forms.Label();
-            this.textBox1 = new System.Windows.Forms.TextBox();
+            this.chart_range_textBox = new System.Windows.Forms.TextBox();
             this.label10 = new System.Windows.Forms.Label();
-            this.comboBox1 = new System.Windows.Forms.ComboBox();
+            this.chart_select_comboBox = new System.Windows.Forms.ComboBox();
             this.label9 = new System.Windows.Forms.Label();
             this.tabPage7 = new System.Windows.Forms.TabPage();
             this.richTextBox1 = new System.Windows.Forms.RichTextBox();
@@ -141,7 +148,6 @@ namespace ExcelAddIn
             this.openFileDialog1 = new System.Windows.Forms.OpenFileDialog();
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
             this.colorDialog1 = new System.Windows.Forms.ColorDialog();
-            this.label12 = new System.Windows.Forms.Label();
             this.tabControl1.SuspendLayout();
             this.tabPage1.SuspendLayout();
             this.panel1.SuspendLayout();
@@ -157,6 +163,8 @@ namespace ExcelAddIn
             ((System.ComponentModel.ISupportInitialize)(this.dbsheet_dataGridView)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.find_keywordbutton_pictureBox)).BeginInit();
             this.tabPage6.SuspendLayout();
+            this.groupBox1.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.chart_pictureBox)).BeginInit();
             this.tabPage7.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.SuspendLayout();
@@ -1347,13 +1355,15 @@ namespace ExcelAddIn
             // 
             // tabPage6
             // 
+            this.tabPage6.Controls.Add(this.groupBox1);
+            this.tabPage6.Controls.Add(this.chart_pictureBox);
             this.tabPage6.Controls.Add(this.label12);
-            this.tabPage6.Controls.Add(this.button2);
-            this.tabPage6.Controls.Add(this.button1);
+            this.tabPage6.Controls.Add(this.chart_reset_button);
+            this.tabPage6.Controls.Add(this.chart_create_button);
             this.tabPage6.Controls.Add(this.label11);
-            this.tabPage6.Controls.Add(this.textBox1);
+            this.tabPage6.Controls.Add(this.chart_range_textBox);
             this.tabPage6.Controls.Add(this.label10);
-            this.tabPage6.Controls.Add(this.comboBox1);
+            this.tabPage6.Controls.Add(this.chart_select_comboBox);
             this.tabPage6.Controls.Add(this.label9);
             this.tabPage6.Font = new System.Drawing.Font("微软雅黑", 10.8F);
             this.tabPage6.ForeColor = System.Drawing.Color.DarkSlateBlue;
@@ -1364,45 +1374,123 @@ namespace ExcelAddIn
             this.tabPage6.Text = "六、图表增强";
             this.tabPage6.UseVisualStyleBackColor = true;
             // 
-            // button2
+            // groupBox1
             // 
-            this.button2.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.button2.ForeColor = System.Drawing.Color.SeaGreen;
-            this.button2.Location = new System.Drawing.Point(170, 259);
-            this.button2.Name = "button2";
-            this.button2.Size = new System.Drawing.Size(75, 33);
-            this.button2.TabIndex = 6;
-            this.button2.Text = "重置";
-            this.button2.UseVisualStyleBackColor = true;
+            this.groupBox1.Controls.Add(this.comboBoxFonts);
+            this.groupBox1.Controls.Add(this.labelFonts);
+            this.groupBox1.Controls.Add(this.label13);
+            this.groupBox1.Controls.Add(this.comboBoxTextDirection);
+            this.groupBox1.Font = new System.Drawing.Font("微软雅黑", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.groupBox1.Location = new System.Drawing.Point(335, 281);
+            this.groupBox1.Name = "groupBox1";
+            this.groupBox1.Size = new System.Drawing.Size(328, 100);
+            this.groupBox1.TabIndex = 11;
+            this.groupBox1.TabStop = false;
+            this.groupBox1.Text = "词云图配置";
             // 
-            // button1
+            // comboBoxFonts
             // 
-            this.button1.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.button1.ForeColor = System.Drawing.Color.SeaGreen;
-            this.button1.Location = new System.Drawing.Point(50, 259);
-            this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(75, 33);
-            this.button1.TabIndex = 5;
-            this.button1.Text = "生成";
-            this.button1.UseVisualStyleBackColor = true;
+            this.comboBoxFonts.AutoCompleteMode = System.Windows.Forms.AutoCompleteMode.SuggestAppend;
+            this.comboBoxFonts.AutoCompleteSource = System.Windows.Forms.AutoCompleteSource.ListItems;
+            this.comboBoxFonts.FormattingEnabled = true;
+            this.comboBoxFonts.Location = new System.Drawing.Point(68, 62);
+            this.comboBoxFonts.Name = "comboBoxFonts";
+            this.comboBoxFonts.Size = new System.Drawing.Size(117, 25);
+            this.comboBoxFonts.TabIndex = 12;
+            // 
+            // labelFonts
+            // 
+            this.labelFonts.AutoSize = true;
+            this.labelFonts.Location = new System.Drawing.Point(6, 65);
+            this.labelFonts.Name = "labelFonts";
+            this.labelFonts.Size = new System.Drawing.Size(56, 17);
+            this.labelFonts.TabIndex = 11;
+            this.labelFonts.Text = "选择字体";
+            // 
+            // label13
+            // 
+            this.label13.AutoSize = true;
+            this.label13.Location = new System.Drawing.Point(6, 30);
+            this.label13.Name = "label13";
+            this.label13.Size = new System.Drawing.Size(56, 17);
+            this.label13.TabIndex = 10;
+            this.label13.Text = "文本方向";
+            // 
+            // comboBoxTextDirection
+            // 
+            this.comboBoxTextDirection.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.comboBoxTextDirection.FormattingEnabled = true;
+            this.comboBoxTextDirection.Items.AddRange(new object[] {
+            "横向为主",
+            "竖向为主",
+            "只有横向",
+            "只有竖向",
+            "随机方向"});
+            this.comboBoxTextDirection.Location = new System.Drawing.Point(68, 27);
+            this.comboBoxTextDirection.Name = "comboBoxTextDirection";
+            this.comboBoxTextDirection.Size = new System.Drawing.Size(117, 25);
+            this.comboBoxTextDirection.TabIndex = 9;
+            // 
+            // chart_pictureBox
+            // 
+            this.chart_pictureBox.Location = new System.Drawing.Point(335, 51);
+            this.chart_pictureBox.Name = "chart_pictureBox";
+            this.chart_pictureBox.Size = new System.Drawing.Size(328, 217);
+            this.chart_pictureBox.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
+            this.chart_pictureBox.TabIndex = 8;
+            this.chart_pictureBox.TabStop = false;
+            // 
+            // label12
+            // 
+            this.label12.Font = new System.Drawing.Font("微软雅黑", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.label12.ForeColor = System.Drawing.Color.Teal;
+            this.label12.Location = new System.Drawing.Point(45, 173);
+            this.label12.Name = "label12";
+            this.label12.Size = new System.Drawing.Size(253, 74);
+            this.label12.TabIndex = 7;
+            this.label12.Text = "注意：\r\n1. 词云图数据区域范围不包括标题行/列；\r\n2. 动态图导出格式为gif\r\n";
+            // 
+            // chart_reset_button
+            // 
+            this.chart_reset_button.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.chart_reset_button.ForeColor = System.Drawing.Color.SeaGreen;
+            this.chart_reset_button.Location = new System.Drawing.Point(208, 302);
+            this.chart_reset_button.Name = "chart_reset_button";
+            this.chart_reset_button.Size = new System.Drawing.Size(75, 33);
+            this.chart_reset_button.TabIndex = 6;
+            this.chart_reset_button.Text = "重置";
+            this.chart_reset_button.UseVisualStyleBackColor = true;
+            this.chart_reset_button.Click += new System.EventHandler(this.chart_reset_button_Click);
+            // 
+            // chart_create_button
+            // 
+            this.chart_create_button.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.chart_create_button.ForeColor = System.Drawing.Color.SeaGreen;
+            this.chart_create_button.Location = new System.Drawing.Point(50, 302);
+            this.chart_create_button.Name = "chart_create_button";
+            this.chart_create_button.Size = new System.Drawing.Size(75, 33);
+            this.chart_create_button.TabIndex = 5;
+            this.chart_create_button.Text = "生成";
+            this.chart_create_button.UseVisualStyleBackColor = true;
+            this.chart_create_button.Click += new System.EventHandler(this.chart_create_button_Click);
             // 
             // label11
             // 
-            this.label11.Font = new System.Drawing.Font("微软雅黑", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.label11.Font = new System.Drawing.Font("微软雅黑", 9F, System.Drawing.FontStyle.Italic, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.label11.ForeColor = System.Drawing.Color.Teal;
-            this.label11.Location = new System.Drawing.Point(28, 131);
+            this.label11.Location = new System.Drawing.Point(45, 130);
             this.label11.Name = "label11";
             this.label11.Size = new System.Drawing.Size(270, 25);
             this.label11.TabIndex = 4;
             this.label11.Text = "（直接写入数据区域范围，参考格式：A1:C9）\r\n";
             this.label11.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;
             // 
-            // textBox1
+            // chart_range_textBox
             // 
-            this.textBox1.Location = new System.Drawing.Point(115, 100);
-            this.textBox1.Name = "textBox1";
-            this.textBox1.Size = new System.Drawing.Size(161, 27);
-            this.textBox1.TabIndex = 3;
+            this.chart_range_textBox.Location = new System.Drawing.Point(115, 100);
+            this.chart_range_textBox.Name = "chart_range_textBox";
+            this.chart_range_textBox.Size = new System.Drawing.Size(183, 27);
+            this.chart_range_textBox.TabIndex = 3;
             // 
             // label10
             // 
@@ -1414,16 +1502,17 @@ namespace ExcelAddIn
             this.label10.TabIndex = 2;
             this.label10.Text = "数据区域";
             // 
-            // comboBox1
+            // chart_select_comboBox
             // 
-            this.comboBox1.FormattingEnabled = true;
-            this.comboBox1.Items.AddRange(new object[] {
+            this.chart_select_comboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.chart_select_comboBox.FormattingEnabled = true;
+            this.chart_select_comboBox.Items.AddRange(new object[] {
             "词云图",
             "动态横向柱状图"});
-            this.comboBox1.Location = new System.Drawing.Point(115, 50);
-            this.comboBox1.Name = "comboBox1";
-            this.comboBox1.Size = new System.Drawing.Size(161, 28);
-            this.comboBox1.TabIndex = 1;
+            this.chart_select_comboBox.Location = new System.Drawing.Point(115, 50);
+            this.chart_select_comboBox.Name = "chart_select_comboBox";
+            this.chart_select_comboBox.Size = new System.Drawing.Size(183, 28);
+            this.chart_select_comboBox.TabIndex = 1;
             // 
             // label9
             // 
@@ -1515,16 +1604,6 @@ namespace ExcelAddIn
             this.pictureBox1.TabIndex = 1;
             this.pictureBox1.TabStop = false;
             // 
-            // label12
-            // 
-            this.label12.Font = new System.Drawing.Font("微软雅黑", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.label12.ForeColor = System.Drawing.Color.Teal;
-            this.label12.Location = new System.Drawing.Point(28, 173);
-            this.label12.Name = "label12";
-            this.label12.Size = new System.Drawing.Size(270, 74);
-            this.label12.TabIndex = 7;
-            this.label12.Text = "注意：\r\n1.词云图数据区域范围不用包括标题行/列；\r\n2.动态\r\n";
-            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
@@ -1565,6 +1644,9 @@ namespace ExcelAddIn
             ((System.ComponentModel.ISupportInitialize)(this.find_keywordbutton_pictureBox)).EndInit();
             this.tabPage6.ResumeLayout(false);
             this.tabPage6.PerformLayout();
+            this.groupBox1.ResumeLayout(false);
+            this.groupBox1.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.chart_pictureBox)).EndInit();
             this.tabPage7.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
             this.ResumeLayout(false);
@@ -1678,13 +1760,19 @@ namespace ExcelAddIn
         private System.Windows.Forms.ComboBox data_start_combobox;
         private System.Windows.Forms.Label label8;
         private System.Windows.Forms.TabPage tabPage6;
-        private System.Windows.Forms.ComboBox comboBox1;
+        private System.Windows.Forms.ComboBox chart_select_comboBox;
         private System.Windows.Forms.Label label9;
         private System.Windows.Forms.Label label11;
-        private System.Windows.Forms.TextBox textBox1;
+        private System.Windows.Forms.TextBox chart_range_textBox;
         private System.Windows.Forms.Label label10;
-        private System.Windows.Forms.Button button2;
-        private System.Windows.Forms.Button button1;
+        private System.Windows.Forms.Button chart_reset_button;
+        private System.Windows.Forms.Button chart_create_button;
         private System.Windows.Forms.Label label12;
+        private System.Windows.Forms.PictureBox chart_pictureBox;
+        private System.Windows.Forms.ComboBox comboBoxTextDirection;
+        private System.Windows.Forms.GroupBox groupBox1;
+        private System.Windows.Forms.Label label13;
+        private System.Windows.Forms.ComboBox comboBoxFonts;
+        private System.Windows.Forms.Label labelFonts;
     }
 }

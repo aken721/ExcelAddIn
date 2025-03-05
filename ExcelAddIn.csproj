@@ -26,17 +26,40 @@
     <NoStandardLibraries>false</NoStandardLibraries>
     <RootNamespace>ExcelAddIn</RootNamespace>
     <AssemblyName>ExcelAddIn</AssemblyName>
-    <LoadBehavior>3</LoadBehavior>
     <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <DefineConstants>VSTO40</DefineConstants>
-    <BootstrapperEnabled>true</BootstrapperEnabled>
-    <BootstrapperComponentsLocation>HomeSite</BootstrapperComponentsLocation>
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
     <LangVersion>latest</LangVersion>
     <TargetFrameworkProfile />
+    <BootstrapperEnabled>true</BootstrapperEnabled>
+    <PublishUrl>publish\</PublishUrl>
+    <InstallUrl />
+    <TargetCulture>zh-chs</TargetCulture>
+    <ApplicationVersion>1.0.0.0</ApplicationVersion>
+    <AutoIncrementApplicationRevision>true</AutoIncrementApplicationRevision>
+    <UpdateEnabled>true</UpdateEnabled>
+    <UpdateInterval>7</UpdateInterval>
+    <UpdateIntervalUnits>days</UpdateIntervalUnits>
+    <IsWebBootstrapper>False</IsWebBootstrapper>
+    <ProductName>ExcelAddIn</ProductName>
+    <PublisherName />
+    <SupportUrl />
+    <FriendlyName>ExcelAddIn</FriendlyName>
+    <OfficeApplicationDescription />
+    <LoadBehavior>3</LoadBehavior>
   </PropertyGroup>
   <ItemGroup>
+    <BootstrapperPackage Include=".NETFramework,Version=v4.8">
+      <Visible>False</Visible>
+      <ProductName>Microsoft .NET Framework 4.8 %28x86 和 x64%29</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
     <BootstrapperPackage Include="Microsoft.VSTORuntime.4.0">
       <Visible>False</Visible>
       <ProductName>Microsoft Visual Studio 2010 Tools for Office Runtime %28x86 and x64%29</ProductName>
@@ -458,13 +481,13 @@
       <Version>2.2.5</Version>
     </PackageReference>
     <PackageReference Include="BouncyCastle.Cryptography">
-      <Version>2.4.0</Version>
+      <Version>2.5.1</Version>
     </PackageReference>
     <PackageReference Include="EntityFramework">
       <Version>6.5.1</Version>
     </PackageReference>
     <PackageReference Include="Google.Protobuf">
-      <Version>3.28.2</Version>
+      <Version>3.29.3</Version>
     </PackageReference>
     <PackageReference Include="K4os.Compression.LZ4">
       <Version>1.3.8</Version>
@@ -476,34 +499,37 @@
       <Version>1.0.8</Version>
     </PackageReference>
     <PackageReference Include="Microsoft.Bcl.AsyncInterfaces">
-      <Version>9.0.1</Version>
+      <Version>9.0.2</Version>
     </PackageReference>
     <PackageReference Include="Microsoft.Bcl.HashCode">
-      <Version>1.1.1</Version>
+      <Version>6.0.0</Version>
     </PackageReference>
     <PackageReference Include="Microsoft.Extensions.DependencyInjection">
-      <Version>9.0.1</Version>
+      <Version>9.0.2</Version>
     </PackageReference>
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions">
-      <Version>9.0.1</Version>
+      <Version>9.0.2</Version>
     </PackageReference>
     <PackageReference Include="Microsoft.Extensions.Logging">
-      <Version>8.0.1</Version>
+      <Version>9.0.2</Version>
     </PackageReference>
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions">
-      <Version>8.0.2</Version>
+      <Version>9.0.2</Version>
     </PackageReference>
     <PackageReference Include="Microsoft.Extensions.Options">
-      <Version>8.0.2</Version>
+      <Version>9.0.2</Version>
     </PackageReference>
     <PackageReference Include="Microsoft.Extensions.Primitives">
-      <Version>8.0.0</Version>
+      <Version>9.0.2</Version>
+    </PackageReference>
+    <PackageReference Include="Microsoft.ML">
+      <Version>4.0.2</Version>
     </PackageReference>
     <PackageReference Include="Microsoft.Win32.Registry">
       <Version>5.0.0</Version>
     </PackageReference>
     <PackageReference Include="MySql.Data">
-      <Version>9.1.0</Version>
+      <Version>9.2.0</Version>
     </PackageReference>
     <PackageReference Include="NAudio">
       <Version>2.2.1</Version>
@@ -530,10 +556,13 @@
       <Version>8.0.5</Version>
     </PackageReference>
     <PackageReference Include="Oracle.ManagedDataAccess">
-      <Version>23.6.0</Version>
+      <Version>23.7.0</Version>
     </PackageReference>
     <PackageReference Include="PDFsharp">
       <Version>6.1.1</Version>
+    </PackageReference>
+    <PackageReference Include="Sdcb.WordCloud">
+      <Version>2.0.1</Version>
     </PackageReference>
     <PackageReference Include="SQLitePCLRaw.bundle_e_sqlite3">
       <Version>2.1.10</Version>
@@ -551,16 +580,16 @@
       <Version>1.0.119</Version>
     </PackageReference>
     <PackageReference Include="System.Buffers">
-      <Version>4.5.1</Version>
+      <Version>4.6.0</Version>
     </PackageReference>
     <PackageReference Include="System.CodeDom">
-      <Version>8.0.0</Version>
+      <Version>9.0.2</Version>
     </PackageReference>
     <PackageReference Include="System.Collections.Immutable">
-      <Version>8.0.0</Version>
+      <Version>9.0.2</Version>
     </PackageReference>
     <PackageReference Include="System.Configuration.ConfigurationManager">
-      <Version>8.0.1</Version>
+      <Version>9.0.2</Version>
     </PackageReference>
     <PackageReference Include="System.Data.SQLite">
       <Version>1.0.119</Version>
@@ -575,28 +604,28 @@
       <Version>1.0.119</Version>
     </PackageReference>
     <PackageReference Include="System.Diagnostics.DiagnosticSource">
-      <Version>8.0.1</Version>
+      <Version>9.0.2</Version>
     </PackageReference>
     <PackageReference Include="System.Formats.Asn1">
-      <Version>8.0.1</Version>
+      <Version>9.0.2</Version>
     </PackageReference>
     <PackageReference Include="System.IO.Pipelines">
-      <Version>9.0.1</Version>
+      <Version>9.0.2</Version>
     </PackageReference>
     <PackageReference Include="System.Management">
-      <Version>8.0.0</Version>
+      <Version>9.0.2</Version>
     </PackageReference>
     <PackageReference Include="System.Memory">
-      <Version>4.5.5</Version>
+      <Version>4.6.0</Version>
     </PackageReference>
     <PackageReference Include="System.Net.Http.Json">
-      <Version>9.0.1</Version>
+      <Version>9.0.2</Version>
     </PackageReference>
     <PackageReference Include="System.Numerics.Vectors">
-      <Version>4.5.0</Version>
+      <Version>4.6.0</Version>
     </PackageReference>
     <PackageReference Include="System.Runtime.CompilerServices.Unsafe">
-      <Version>6.0.0</Version>
+      <Version>6.1.0</Version>
     </PackageReference>
     <PackageReference Include="System.Security.AccessControl">
       <Version>6.0.1</Version>
@@ -605,28 +634,25 @@
       <Version>5.0.0</Version>
     </PackageReference>
     <PackageReference Include="System.Text.Encodings.Web">
-      <Version>9.0.1</Version>
+      <Version>9.0.2</Version>
     </PackageReference>
     <PackageReference Include="System.Text.Json">
-      <Version>9.0.1</Version>
+      <Version>9.0.2</Version>
     </PackageReference>
     <PackageReference Include="System.Threading.Channels">
-      <Version>8.0.0</Version>
+      <Version>9.0.2</Version>
     </PackageReference>
     <PackageReference Include="System.Threading.Tasks.Extensions">
-      <Version>4.5.4</Version>
+      <Version>4.6.0</Version>
     </PackageReference>
     <PackageReference Include="System.ValueTuple">
       <Version>4.5.0</Version>
     </PackageReference>
-    <PackageReference Include="WordCloudSharp">
-      <Version>1.1.0</Version>
-    </PackageReference>
     <PackageReference Include="ZstdSharp.Port">
-      <Version>0.8.1</Version>
+      <Version>0.8.5</Version>
     </PackageReference>
     <PackageReference Include="ZXing.Net">
-      <Version>0.16.9</Version>
+      <Version>0.16.10</Version>
     </PackageReference>
   </ItemGroup>
   <ItemGroup>
@@ -661,7 +687,7 @@
     <ManifestKeyFile>ExcelAddIn_TemporaryKey.pfx</ManifestKeyFile>
   </PropertyGroup>
   <PropertyGroup>
-    <ManifestCertificateThumbprint>A4BB03BB5935AD0777388B430892BF31B9C95090</ManifestCertificateThumbprint>
+    <ManifestCertificateThumbprint>9660AF8F47A27BBE41871CC4326276921A5B33A9</ManifestCertificateThumbprint>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
     <DebugSymbols>true</DebugSymbols>
