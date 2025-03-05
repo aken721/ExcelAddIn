@@ -3705,6 +3705,20 @@ namespace ExcelAddIn
             }
         }
 
+        private void chart_select_comboBox_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            switch(chart_select_comboBox.SelectedIndex)
+            {
+                case 0:
+                    chart_range_textBox.Text = "";
+                    groupBoxWordCloud.Visible = true;
+                    break;
+                case 1:
+                    chart_range_textBox.Text = "";
+                    groupBoxWordCloud.Visible = false;
+                    break;
+            }
+        }
     }
 
     internal class MysqlDB

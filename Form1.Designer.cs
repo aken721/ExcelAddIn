@@ -123,7 +123,7 @@ namespace ExcelAddIn
             this.label7 = new System.Windows.Forms.Label();
             this.find_keywordbutton_pictureBox = new System.Windows.Forms.PictureBox();
             this.tabPage6 = new System.Windows.Forms.TabPage();
-            this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.groupBoxWordCloud = new System.Windows.Forms.GroupBox();
             this.comboBoxFonts = new System.Windows.Forms.ComboBox();
             this.labelFonts = new System.Windows.Forms.Label();
             this.label13 = new System.Windows.Forms.Label();
@@ -163,7 +163,7 @@ namespace ExcelAddIn
             ((System.ComponentModel.ISupportInitialize)(this.dbsheet_dataGridView)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.find_keywordbutton_pictureBox)).BeginInit();
             this.tabPage6.SuspendLayout();
-            this.groupBox1.SuspendLayout();
+            this.groupBoxWordCloud.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.chart_pictureBox)).BeginInit();
             this.tabPage7.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
@@ -1355,7 +1355,7 @@ namespace ExcelAddIn
             // 
             // tabPage6
             // 
-            this.tabPage6.Controls.Add(this.groupBox1);
+            this.tabPage6.Controls.Add(this.groupBoxWordCloud);
             this.tabPage6.Controls.Add(this.chart_pictureBox);
             this.tabPage6.Controls.Add(this.label12);
             this.tabPage6.Controls.Add(this.chart_reset_button);
@@ -1374,19 +1374,19 @@ namespace ExcelAddIn
             this.tabPage6.Text = "六、图表增强";
             this.tabPage6.UseVisualStyleBackColor = true;
             // 
-            // groupBox1
+            // groupBoxWordCloud
             // 
-            this.groupBox1.Controls.Add(this.comboBoxFonts);
-            this.groupBox1.Controls.Add(this.labelFonts);
-            this.groupBox1.Controls.Add(this.label13);
-            this.groupBox1.Controls.Add(this.comboBoxTextDirection);
-            this.groupBox1.Font = new System.Drawing.Font("微软雅黑", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.groupBox1.Location = new System.Drawing.Point(335, 281);
-            this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(328, 100);
-            this.groupBox1.TabIndex = 11;
-            this.groupBox1.TabStop = false;
-            this.groupBox1.Text = "词云图配置";
+            this.groupBoxWordCloud.Controls.Add(this.comboBoxFonts);
+            this.groupBoxWordCloud.Controls.Add(this.labelFonts);
+            this.groupBoxWordCloud.Controls.Add(this.label13);
+            this.groupBoxWordCloud.Controls.Add(this.comboBoxTextDirection);
+            this.groupBoxWordCloud.Font = new System.Drawing.Font("微软雅黑", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.groupBoxWordCloud.Location = new System.Drawing.Point(335, 281);
+            this.groupBoxWordCloud.Name = "groupBoxWordCloud";
+            this.groupBoxWordCloud.Size = new System.Drawing.Size(328, 100);
+            this.groupBoxWordCloud.TabIndex = 11;
+            this.groupBoxWordCloud.TabStop = false;
+            this.groupBoxWordCloud.Text = "词云图配置";
             // 
             // comboBoxFonts
             // 
@@ -1513,6 +1513,7 @@ namespace ExcelAddIn
             this.chart_select_comboBox.Name = "chart_select_comboBox";
             this.chart_select_comboBox.Size = new System.Drawing.Size(183, 28);
             this.chart_select_comboBox.TabIndex = 1;
+            this.chart_select_comboBox.SelectedIndexChanged += new System.EventHandler(this.chart_select_comboBox_SelectedIndexChanged);
             // 
             // label9
             // 
@@ -1644,8 +1645,8 @@ namespace ExcelAddIn
             ((System.ComponentModel.ISupportInitialize)(this.find_keywordbutton_pictureBox)).EndInit();
             this.tabPage6.ResumeLayout(false);
             this.tabPage6.PerformLayout();
-            this.groupBox1.ResumeLayout(false);
-            this.groupBox1.PerformLayout();
+            this.groupBoxWordCloud.ResumeLayout(false);
+            this.groupBoxWordCloud.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.chart_pictureBox)).EndInit();
             this.tabPage7.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
@@ -1770,7 +1771,7 @@ namespace ExcelAddIn
         private System.Windows.Forms.Label label12;
         private System.Windows.Forms.PictureBox chart_pictureBox;
         private System.Windows.Forms.ComboBox comboBoxTextDirection;
-        private System.Windows.Forms.GroupBox groupBox1;
+        private System.Windows.Forms.GroupBox groupBoxWordCloud;
         private System.Windows.Forms.Label label13;
         private System.Windows.Forms.ComboBox comboBoxFonts;
         private System.Windows.Forms.Label labelFonts;
