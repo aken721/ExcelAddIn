@@ -3593,25 +3593,14 @@ namespace ExcelAddIn
                 wordCloudSheet.Range["A1"].Value = "key_word";
                 wordCloudSheet.Range["B1"].Value = "count";
                 int rowIndex = 2;
-                foreach (var pair in frequencyDict)
+                var frequencyDictSorted = frequencyDict.OrderByDescending(x => x.Value);
+                foreach (var pair in frequencyDictSorted)
                 {
                     wordCloudSheet.Cells[rowIndex, 1] = pair.Key;
                     wordCloudSheet.Cells[rowIndex, 2] = pair.Value;
                     rowIndex++;
                 }
 
-                // 定义排序范围（假设数据从A1开始，到最后一行的B列）
-                Excel.Range sortRange = wordCloudSheet.Range["A1:B" + (rowIndex - 1)];
-
-
-                // 排序
-                sortRange.Sort(
-                    Key1: wordCloudSheet.Range["B1"],                //以B列为基础进行排序
-                    Order1: Excel.XlSortOrder.xlDescending,           //降序排序
-                    Header: Excel.XlYesNoGuess.xlYes,                 //默认有标题行
-                    Orientation: Excel.XlSortOrientation.xlSortRows,  //整行排序
-                    DataOption1: Excel.XlSortDataOption.xlSortNormal  // 改为标准排序
-                );
 
                 // 强制刷新工作表计算
                 wordCloudSheet.Application.Calculate();
