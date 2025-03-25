@@ -21,9 +21,8 @@ namespace ExcelAddIn
         private void Ribbon1_Load(object sender, RibbonUIEventArgs e)
         {
             Select_f_or_d.Checked = false;
-            Select_f_or_d.Label = "改文件名";
-            Select_f_or_d.ShowLabel = false;
-            switch_FD_label.Label = "文件名";
+            Select_f_or_d.Label = "文件名";
+            checkBoxAll.Checked=true;
             ThisAddIn.Global.readFile = 0;
             confirm_spotlight.Checked = false;
             playbackMode = PlaybackMode.Sequential;
@@ -124,6 +123,24 @@ namespace ExcelAddIn
         //批读文件名和批改文件名选择路径
         string get_directory_path;
 
+        //获取本目录下文件或子目录
+        private static void GetCurrentItems(string directory,List<string> items,string mode)
+        {
+            // 根据 mode 参数决定获取文件还是目录
+            if (mode == "f")
+            {
+                // 获取当前目录下的所有文件
+                string[] currentFiles = Directory.GetFiles(directory, "*.*", SearchOption.TopDirectoryOnly);
+                items.AddRange(currentFiles);
+            }
+            else if (mode == "d")
+            {
+                // 获取当前目录下的所有子目录
+                string[] subDirs = Directory.GetDirectories(directory, "*.*", SearchOption.TopDirectoryOnly);
+                items.AddRange(subDirs);
+            }
+        }
+
         //递归方法获得全部文件或目录，避免因某些子目录不可访问等问题导致获取中断
         private static void GetAllItems(string directory, List<string> items, string mode)
         {
@@ -207,6 +224,7 @@ namespace ExcelAddIn
                 ThisAddIn.app.ScreenUpdating = false;
 
                 folderBrowserDialog1.Description = "请选择文件所在文件夹";
+                
                 if (folderBrowserDialog1.ShowDialog() == DialogResult.OK)
                 {
                     get_directory_path = folderBrowserDialog1.SelectedPath;
@@ -242,7 +260,13 @@ namespace ExcelAddIn
                             worksheet.Cells[1, 3] = "新文件名";
                             List<string> files = new List<string>();
 
-                            GetAllItems(get_directory_path, files,"f");
+                            if (checkBoxAll.Checked)
+                            {
+                                GetAllItems(get_directory_path, files, "f");
+                            }
+                            {
+                                GetCurrentItems(get_directory_path,files, "f");
+                            }                            
 
                             //从读取的文件列表中删除隐藏属性的文件名；
                             files.RemoveAll(file => (File.GetAttributes(file) & FileAttributes.Hidden) == FileAttributes.Hidden);
@@ -267,10 +291,18 @@ namespace ExcelAddIn
                             worksheet.Cells[1, 3] = "新文件夹名";
                             List<string> directories = new List<string>();
 
-                            GetAllItems(get_directory_path, directories, "d");
+                            if (checkBoxAll.Checked)
+                            {
+                                GetAllItems(get_directory_path, directories, "d");
+                            }
+                            else
+                            {
+                                GetCurrentItems(get_directory_path, directories, "d");
+                            }
 
-                            //从读取的文件夹列表中删除隐藏属性的文件夹名；
-                            directories.RemoveAll(dir => IsDirectoryHidden(dir));
+
+                                //从读取的文件夹列表中删除隐藏属性的文件夹名；
+                                directories.RemoveAll(dir => IsDirectoryHidden(dir));
 
                             if (directories.Count > 0)
                             {
@@ -397,16 +429,13 @@ namespace ExcelAddIn
             if (Select_f_or_d.Checked == true)
             {
                 Select_f_or_d.Image = ExcelAddIn.Properties.Resources.Radio_Button_on;
-                Select_f_or_d.Label = "改文件夹名";
-                Select_f_or_d.ShowLabel = false;
-                switch_FD_label.Label = "目录名";
+                Select_f_or_d.Label = "目录名";
             }
             else
             {
                 Select_f_or_d.Image = ExcelAddIn.Properties.Resources.Radio_Button_off;
-                Select_f_or_d.Label = "改文件名";
-                Select_f_or_d.ShowLabel = false;
-                switch_FD_label.Label = "文件名";
+                Select_f_or_d.Label = "文件名";
+
             }
         }
 

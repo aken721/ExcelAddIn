@@ -74,8 +74,9 @@
             this.File_rename = this.Factory.CreateRibbonButton();
             this.separator3 = this.Factory.CreateRibbonSeparator();
             this.delandmove_button = this.Factory.CreateRibbonButton();
+            this.box6 = this.Factory.CreateRibbonBox();
             this.Select_f_or_d = this.Factory.CreateRibbonToggleButton();
-            this.switch_FD_label = this.Factory.CreateRibbonLabel();
+            this.checkBoxAll = this.Factory.CreateRibbonCheckBox();
             this.group4 = this.Factory.CreateRibbonGroup();
             this.to_pdf_button = this.Factory.CreateRibbonButton();
             this.box2 = this.Factory.CreateRibbonBox();
@@ -109,6 +110,7 @@
             this.group5.SuspendLayout();
             this.group2.SuspendLayout();
             this.group3.SuspendLayout();
+            this.box6.SuspendLayout();
             this.group4.SuspendLayout();
             this.box2.SuspendLayout();
             this.box3.SuspendLayout();
@@ -249,8 +251,7 @@
             this.group3.Items.Add(this.File_rename);
             this.group3.Items.Add(this.separator3);
             this.group3.Items.Add(this.delandmove_button);
-            this.group3.Items.Add(this.Select_f_or_d);
-            this.group3.Items.Add(this.switch_FD_label);
+            this.group3.Items.Add(this.box6);
             this.group3.Label = "文件/文件夹工具";
             this.group3.Name = "group3";
             // 
@@ -289,19 +290,26 @@
             this.delandmove_button.ShowImage = true;
             this.delandmove_button.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.delandmove_button_Click);
             // 
+            // box6
+            // 
+            this.box6.BoxStyle = Microsoft.Office.Tools.Ribbon.RibbonBoxStyle.Vertical;
+            this.box6.Items.Add(this.Select_f_or_d);
+            this.box6.Items.Add(this.checkBoxAll);
+            this.box6.Name = "box6";
+            // 
             // Select_f_or_d
             // 
             this.Select_f_or_d.Image = global::ExcelAddIn.Properties.Resources.Radio_Button_off;
             this.Select_f_or_d.Label = "文件名";
             this.Select_f_or_d.Name = "Select_f_or_d";
             this.Select_f_or_d.ShowImage = true;
-            this.Select_f_or_d.ShowLabel = false;
             this.Select_f_or_d.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.Select_f_or_d_Click);
             // 
-            // switch_FD_label
+            // checkBoxAll
             // 
-            this.switch_FD_label.Label = "文件名";
-            this.switch_FD_label.Name = "switch_FD_label";
+            this.checkBoxAll.Label = "子目录";
+            this.checkBoxAll.Name = "checkBoxAll";
+            this.checkBoxAll.SuperTip = "不勾选只查本级目录";
             // 
             // group4
             // 
@@ -546,6 +554,8 @@
             this.group2.PerformLayout();
             this.group3.ResumeLayout(false);
             this.group3.PerformLayout();
+            this.box6.ResumeLayout(false);
+            this.box6.PerformLayout();
             this.group4.ResumeLayout(false);
             this.group4.PerformLayout();
             this.box2.ResumeLayout(false);
@@ -579,7 +589,6 @@
         internal Microsoft.Office.Tools.Ribbon.RibbonButton File_rename;
         internal Microsoft.Office.Tools.Ribbon.RibbonToggleButton Select_f_or_d;
         internal Microsoft.Office.Tools.Ribbon.RibbonButton Rename_mp3;
-        internal Microsoft.Office.Tools.Ribbon.RibbonLabel switch_FD_label;
         private System.Windows.Forms.FolderBrowserDialog folderBrowserDialog1;
         internal Microsoft.Office.Tools.Ribbon.RibbonButton Play_button;
         internal Microsoft.Office.Tools.Ribbon.RibbonButton Select_mp3_button;
@@ -616,6 +625,8 @@
         internal Microsoft.Office.Tools.Ribbon.RibbonDropDown spotlightDropDown;
         internal Microsoft.Office.Tools.Ribbon.RibbonBox box4;
         internal Microsoft.Office.Tools.Ribbon.RibbonBox box5;
+        internal Microsoft.Office.Tools.Ribbon.RibbonBox box6;
+        internal Microsoft.Office.Tools.Ribbon.RibbonCheckBox checkBoxAll;
     }
 
     partial class ThisRibbonCollection
