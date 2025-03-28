@@ -264,6 +264,7 @@ namespace ExcelAddIn
                             {
                                 GetAllItems(get_directory_path, files, "f");
                             }
+                            else
                             {
                                 GetCurrentItems(get_directory_path,files, "f");
                             }                            

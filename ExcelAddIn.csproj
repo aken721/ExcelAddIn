@@ -687,7 +687,7 @@
     <ManifestKeyFile>ExcelAddIn_TemporaryKey.pfx</ManifestKeyFile>
   </PropertyGroup>
   <PropertyGroup>
-    <ManifestCertificateThumbprint>82A7DEE290F7C55412926D2F1B0FB4D58DE4108F</ManifestCertificateThumbprint>
+    <ManifestCertificateThumbprint>572A0D3936E80729B161E1DE766078CE5B681913</ManifestCertificateThumbprint>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
     <DebugSymbols>true</DebugSymbols>
