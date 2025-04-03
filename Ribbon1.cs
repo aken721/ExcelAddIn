@@ -2,6 +2,7 @@
 using Microsoft.Office.Tools.Ribbon;
 using NAudio.Wave;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -123,8 +124,34 @@ namespace ExcelAddIn
         //批读文件名和批改文件名选择路径
         string get_directory_path;
 
-        //获取本目录下文件或子目录
-        private static void GetCurrentItems(string directory,List<string> items,string mode)
+        // 修改后的获取本目录下文件或子目录
+        private static void GetCurrentItems(string directory, ConcurrentBag<string> items, string mode)
+        {
+            try
+            {
+                if (mode == "f")
+                {
+                    foreach (var file in Directory.EnumerateFiles(directory))
+                    {
+                        if ((File.GetAttributes(file) & FileAttributes.Hidden) != FileAttributes.Hidden)
+                            items.Add(file);
+                    }
+                }
+                else if (mode == "d")
+                {
+                    foreach (var dir in Directory.EnumerateDirectories(directory))
+                    {
+                        if (!IsDirectoryHidden(dir))
+                            items.Add(dir);
+                    }
+                }
+            }
+            catch (UnauthorizedAccessException) { }
+        }
+
+        /*
+        //原有获取本目录下文件或子目录
+        private static void GetCurrentItems(string directory, List<string> items, string mode)
         {
             // 根据 mode 参数决定获取文件还是目录
             if (mode == "f")
@@ -140,8 +167,43 @@ namespace ExcelAddIn
                 items.AddRange(subDirs);
             }
         }
+        */
 
-        //递归方法获得全部文件或目录，避免因某些子目录不可访问等问题导致获取中断
+        // 修改后的方法使用并行处理收集文件或目录
+        private static void GetAllItemsParallel(string directory, ConcurrentBag<string> items, string mode)
+        {
+            try
+            {
+                if (mode == "f")
+                {
+                    var files = Directory.EnumerateFiles(directory, "*.*", SearchOption.TopDirectoryOnly);
+                    foreach (var file in files)
+                    {
+                        if ((File.GetAttributes(file) & FileAttributes.Hidden) != FileAttributes.Hidden)
+                            items.Add(file);
+                    }
+                }
+                else if (mode == "d")
+                {
+                    var dirs = Directory.EnumerateDirectories(directory, "*.*", SearchOption.TopDirectoryOnly)
+                                        .Where(d => !IsDirectoryHidden(d));
+                    foreach (var dir in dirs)
+                        items.Add(dir);
+                }
+
+                // 并行处理子目录
+                var subDirs = Directory.EnumerateDirectories(directory);
+                Parallel.ForEach(subDirs, subDir =>
+                {
+                    GetAllItemsParallel(subDir, items, mode);
+                });
+            }
+            catch (UnauthorizedAccessException) { /* 忽略无权限目录 */ }
+            catch (IOException) { /* 忽略I/O错误 */ }
+        }
+
+        /*
+        //原有递归方法获得全部文件或目录，避免因某些子目录不可访问等问题导致获取中断
         private static void GetAllItems(string directory, List<string> items, string mode)
         {
             try
@@ -184,6 +246,7 @@ namespace ExcelAddIn
                 MessageBox.Show($"处理目录 {directory} 时发生错误: {ex.Message}");
             }
         }
+        */
 
         //检查文件夹是否为隐藏属性
         private static bool IsDirectoryHidden(string directoryPath)
@@ -206,16 +269,139 @@ namespace ExcelAddIn
             }
 
             return false;
+        }        
+
+        // 辅助方法：准备工作表
+        private Excel.Worksheet PrepareRenameWorksheet(Excel.Workbook workbook)
+        {
+            foreach (Excel.Worksheet sheet in workbook.Worksheets)
+                if (sheet.Name == "_rename") sheet.Name = "_rename_备份";
+
+            var worksheet = workbook.Worksheets.Add();
+            worksheet.Name = "_rename";
+            worksheet.Cells[1, 1] = Select_f_or_d.Checked ? "文件夹路径" : "路径";
+            worksheet.Cells[1, 2] = Select_f_or_d.Checked ? "旧文件夹名" : "旧文件名";
+            worksheet.Cells[1, 3] = Select_f_or_d.Checked ? "新文件夹名" : "新文件名";
+            return worksheet;
         }
 
-        //批读文件名
+        // 辅助方法：批量写入Excel
+        private void BulkWriteToExcel(Excel.Worksheet worksheet, List<string> items, bool isDirectory)
+        {
+            var data = new object[items.Count, 3];
+            var hyperlinks = new List<Tuple<int, int, string, string>>(); // (行, 列, 地址, 显示文本)
+
+            Parallel.For(0, items.Count, i =>
+            {
+                string path = items[i];
+                string parent = Path.GetDirectoryName(path);
+                string name = Path.GetFileName(path);
+
+                // 填充数据
+                data[i, 0] = parent;   // 路径列显示完整路径
+                data[i, 1] = name;     // 旧名称列仅显示名称
+                data[i, 2] = name;     // 新名称列
+
+                // 记录超链接信息（线程安全）
+                lock (hyperlinks)
+                {
+                    // 路径列超链接（显示完整路径）
+                    hyperlinks.Add(Tuple.Create(i + 2, 1, parent, parent));
+
+                    // 旧名称列超链接（显示名称但链接完整路径）
+                    hyperlinks.Add(Tuple.Create(i + 2, 2, path, name));
+                }
+            });
+
+            // 批量写入数据
+            var startCell = (Excel.Range)worksheet.Cells[2, 1];
+            var endCell = (Excel.Range)worksheet.Cells[items.Count + 1, 3];
+            worksheet.Range[startCell, endCell].Value2 = data;
+
+            // 批量添加超链接（主线程操作）
+            foreach (var link in hyperlinks)
+            {
+                var cell = (Excel.Range)worksheet.Cells[link.Item1, link.Item2];
+                worksheet.Hyperlinks.Add(
+                    Anchor: cell,
+                    Address: link.Item3,
+                    SubAddress: Type.Missing,
+                    ScreenTip: Type.Missing,
+                    TextToDisplay: link.Item4 // 控制显示文本
+                );
+            }
+
+            // 设置固定列宽（单位：字符数）
+            worksheet.Columns[1].ColumnWidth = 20;  // 路径列
+            worksheet.Columns[2].ColumnWidth = 30;  // 旧名称列
+            worksheet.Columns[3].ColumnWidth = 30;  // 新名称列
+
+            // 设置焦点位置
+            worksheet.Range["C2"].Select();
+        }
+
+
+        // 修改后批读文件名
+        private void Files_read_Click(object sender, RibbonControlEventArgs e)
+        {
+            if (ThisAddIn.Global.readFile == 1 && !string.IsNullOrEmpty(get_directory_path))
+            {
+                RefreshRenameTable();
+                return;
+            }
+
+            using (var dialog = new FolderBrowserDialog { Description = "请选择文件所在文件夹" })
+            {
+                if (dialog.ShowDialog() != DialogResult.OK) return;
+                get_directory_path = dialog.SelectedPath;
+            }
+
+            if (string.IsNullOrEmpty(get_directory_path)) return;
+
+            Excel.Application excelApp = ThisAddIn.app;
+            excelApp.ScreenUpdating = false;
+            excelApp.DisplayAlerts = false;
+            excelApp.StatusBar = "正在准备数据，请稍候...";
+
+            try
+            {
+                // 准备工作表
+                var workbook = excelApp.ActiveWorkbook;
+                var worksheet = PrepareRenameWorksheet(workbook);
+
+                // 根据模式获取数据
+                var items = new ConcurrentBag<string>();
+                if (checkBoxAll.Checked)
+                    GetAllItemsParallel(get_directory_path, items, Select_f_or_d.Checked ? "d" : "f");
+                else
+                    GetCurrentItems(get_directory_path, items, Select_f_or_d.Checked ? "d" : "f");
+
+                // 转换为列表并去重
+                var itemList = items.Distinct().ToList();
+
+                // 批量写入数据
+                BulkWriteToExcel(worksheet, itemList, Select_f_or_d.Checked);
+
+                ThisAddIn.Global.readFile = 1;
+                workbook.RefreshAll();
+            }
+            finally
+            {
+                excelApp.ScreenUpdating = true;
+                excelApp.DisplayAlerts = true;
+                excelApp.StatusBar = false;
+            }
+        }
+
+        /*
+        //批读文件名原有方法
         private void Files_read_Click(object sender, RibbonControlEventArgs e)
         {
             if (ThisAddIn.Global.readFile == 1 && get_directory_path.Length > 0)
             {
                 ThisAddIn.app.Application.StatusBar = "正在刷新_rename表";
                 RefreshRenameTable();
-                ThisAddIn.app.Application.StatusBar = false; 
+                ThisAddIn.app.Application.StatusBar = false;
             }
             else
             {
@@ -224,7 +410,7 @@ namespace ExcelAddIn
                 ThisAddIn.app.ScreenUpdating = false;
 
                 folderBrowserDialog1.Description = "请选择文件所在文件夹";
-                
+
                 if (folderBrowserDialog1.ShowDialog() == DialogResult.OK)
                 {
                     get_directory_path = folderBrowserDialog1.SelectedPath;
@@ -239,7 +425,7 @@ namespace ExcelAddIn
 
                 if (!string.IsNullOrEmpty(get_directory_path))
                 {
-                ThisAddIn.app.Application.StatusBar = "_rename表正在读取生成中，请稍等......";
+                    ThisAddIn.app.Application.StatusBar = "_rename表正在读取生成中，请稍等......";
 
                     foreach (Excel.Worksheet sheet in workbook.Worksheets)
                     {
@@ -266,8 +452,8 @@ namespace ExcelAddIn
                             }
                             else
                             {
-                                GetCurrentItems(get_directory_path,files, "f");
-                            }                            
+                                GetCurrentItems(get_directory_path, files, "f");
+                            }
 
                             //从读取的文件列表中删除隐藏属性的文件名；
                             files.RemoveAll(file => (File.GetAttributes(file) & FileAttributes.Hidden) == FileAttributes.Hidden);
@@ -302,14 +488,14 @@ namespace ExcelAddIn
                             }
 
 
-                                //从读取的文件夹列表中删除隐藏属性的文件夹名；
-                                directories.RemoveAll(dir => IsDirectoryHidden(dir));
+                            //从读取的文件夹列表中删除隐藏属性的文件夹名；
+                            directories.RemoveAll(dir => IsDirectoryHidden(dir));
 
                             if (directories.Count > 0)
                             {
                                 for (int i = 1; i <= directories.Count; i++)
-                                {                                   
-                                    string directory_name = Path.GetFileName(directories[i-1]);
+                                {
+                                    string directory_name = Path.GetFileName(directories[i - 1]);
                                     string directory_path = Path.GetDirectoryName(directories[i - 1]);
                                     worksheet.Cells[i + 1, 1] = directory_path;
                                     worksheet.Hyperlinks.Add(worksheet.Cells[i + 1, 1], directory_path, Type.Missing, Type.Missing, directory_path);
@@ -333,13 +519,203 @@ namespace ExcelAddIn
                     MessageBox.Show("未选择文件夹");
                     ThisAddIn.app.DisplayAlerts = true;
                     ThisAddIn.app.ScreenUpdating = true;
-                }              
+                }
 
                 workbook.Worksheets["_rename"].Activate();
                 workbook.RefreshAll();
                 ThisAddIn.app.Application.StatusBar = false;
-            }           
+            }
         }
+        */
+
+
+        //优化刷新_rename表
+        private async void RefreshRenameTable()
+        {
+            Excel.Application excelApp = ThisAddIn.app;
+            Excel.Workbook workbook = excelApp.ActiveWorkbook;
+            Excel.Worksheet worksheet = workbook.Worksheets["_rename"];
+
+            try
+            {
+                excelApp.ScreenUpdating = false;
+                excelApp.DisplayAlerts = false;
+                excelApp.StatusBar = "正在刷新数据...";
+
+                // 清空现有数据（保留标题）
+                worksheet.Range["A2:C" + worksheet.Rows.Count].Clear();
+
+                var items = new ConcurrentBag<string>();
+                bool isDirectoryMode = Select_f_or_d.Checked;
+                string mode = isDirectoryMode ? "d" : "f";
+
+                await Task.Run(() =>
+                {
+                    if (checkBoxAll.Checked)
+                    {
+                        GetAllItemsParallel(get_directory_path, items, mode);
+                    }
+                    else
+                    {
+                        GetCurrentItems(get_directory_path, items, mode);
+                    }
+                });
+
+                var itemList = items.Distinct().ToList();
+                if (itemList.Count == 0) return;
+
+                BulkUpdateWorksheet(worksheet, itemList, isDirectoryMode);
+
+                workbook.RefreshAll();
+                worksheet.Range["C2"].Select();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"刷新失败: {ex.Message}");
+            }
+            finally
+            {
+                excelApp.ScreenUpdating = true;
+                excelApp.DisplayAlerts = true;
+                excelApp.StatusBar = false;
+            }
+        }
+
+        private void BulkUpdateWorksheet(Excel.Worksheet worksheet, List<string> items, bool isDirectoryMode)
+        {
+            // 准备数据
+            object[,] data = new object[items.Count, 3];
+            var hyperlinks = new List<Tuple<int, int, string, string>>(); // (行, 列, 地址, 显示文本)
+
+            Parallel.For(0, items.Count, i =>
+            {
+                string path = items[i];
+                string parent = Path.GetDirectoryName(path);
+                string name = Path.GetFileName(path);
+
+                data[i, 0] = parent;  // 路径列显示完整路径
+                data[i, 1] = name;    // 文件名列仅显示名称
+                data[i, 2] = name;    // 新文件名列
+
+                lock (hyperlinks)
+                {
+                    // 路径列超链接（显示完整路径）
+                    hyperlinks.Add(Tuple.Create(i + 2, 1, parent, parent));
+                    // 文件名列超链接（显示文件名但链接完整路径）
+                    hyperlinks.Add(Tuple.Create(i + 2, 2, path, name));
+                }
+            });
+
+            // 批量写入数据
+            Excel.Range targetRange = worksheet.Range[
+                worksheet.Cells[2, 1],
+                worksheet.Cells[items.Count + 1, 3]];
+            targetRange.Value2 = data;
+
+            // 批量添加超链接
+            foreach (var link in hyperlinks)
+            {
+                var cell = (Excel.Range)worksheet.Cells[link.Item1, link.Item2];
+                worksheet.Hyperlinks.Add(
+                    Anchor: cell,
+                    Address: link.Item3,
+                    SubAddress: Type.Missing,
+                    ScreenTip: Type.Missing,
+                    TextToDisplay: link.Item4 // 控制显示文本
+                );
+            }
+
+            // 设置列标题（移除自动调整列宽）
+            worksheet.Cells[1, 1] = isDirectoryMode ? "文件夹路径" : "路径";
+            worksheet.Cells[1, 2] = isDirectoryMode ? "旧文件夹名" : "旧文件名";
+            worksheet.Cells[1, 3] = isDirectoryMode ? "新文件夹名" : "新文件名";
+
+            // 设置固定列宽（示例值，可根据需要调整）
+            worksheet.Columns[1].ColumnWidth = 20;  // 路径列
+            worksheet.Columns[2].ColumnWidth = 30;  // 旧文件名
+            worksheet.Columns[3].ColumnWidth = 30;  // 新文件名
+        }
+
+        /*
+        //刷新_rename表
+        private async void RefreshRenameTable()
+        {
+            Excel.Worksheet worksheet = ThisAddIn.app.ActiveWorkbook.Worksheets["_rename"];
+            ThisAddIn.app.ScreenUpdating = false;
+            ThisAddIn.app.DisplayAlerts = false;
+            worksheet.Rows.Clear();
+            await Task.Run(() =>
+            {
+                try
+                {
+                    switch (Select_f_or_d.Checked)
+                    {
+                        case false:
+                            worksheet.Cells[1, 1] = "路径";
+                            worksheet.Cells[1, 2] = "旧文件名";
+                            worksheet.Cells[1, 3] = "新文件名";
+                            List<string> files = new List<string>();
+
+                            GetAllItems(get_directory_path, files, "f");
+
+                            //从读取的文件列表中删除隐藏属性的文件名；
+                            files.RemoveAll(file => (File.GetAttributes(file) & FileAttributes.Hidden) == FileAttributes.Hidden);
+
+                            if (files.Count > 0)
+                            {
+                                for (int i = 1; i <= files.Count; i++)
+                                {
+                                    string file_name = Path.GetFileName(files[i - 1]);
+                                    string file_path = Path.GetDirectoryName(files[i - 1]);
+                                    worksheet.Cells[i + 1, 1] = file_path;
+                                    worksheet.Hyperlinks.Add(worksheet.Cells[i + 1, 1], file_path, Type.Missing, Type.Missing, file_path);
+                                    worksheet.Cells[i + 1, 2] = file_name;
+                                    worksheet.Hyperlinks.Add(worksheet.Cells[i + 1, 2], file_path + "\\" + file_name, Type.Missing, Type.Missing, file_name);
+                                    worksheet.Cells[i + 1, 3] = file_name;
+                                }
+                            }
+                            worksheet.Range["C2"].Select();
+                            break;
+                        case true:
+                            worksheet.Cells[1, 1] = "文件夹路径";
+                            worksheet.Cells[1, 2] = "旧文件夹名";
+                            worksheet.Cells[1, 3] = "新文件夹名";
+                            List<string> directories = new List<string>();
+
+                            GetAllItems(get_directory_path, directories, "d");
+
+                            //从读取的文件夹列表中删除隐藏属性的文件夹名；
+                            directories.RemoveAll(dir => IsDirectoryHidden(dir));
+                            if (directories.Count > 0)
+                            {
+                                for (int i = 1; i <= directories.Count; i++)
+                                {
+                                    string directory_name = Path.GetFileName(directories[i - 1]);
+                                    string directory_path = Path.GetDirectoryName(directories[i - 1]);
+                                    worksheet.Cells[i + 1, 1] = directory_path;
+                                    worksheet.Hyperlinks.Add(worksheet.Cells[i + 1, 1], directory_path, Type.Missing, Type.Missing, directory_path);
+                                    worksheet.Cells[i + 1, 2] = directory_name;
+                                    worksheet.Hyperlinks.Add(worksheet.Cells[i + 1, 2], directory_path + "\\" + directory_name, Type.Missing, Type.Missing, directory_name);
+                                    worksheet.Cells[i + 1, 3] = directory_name;
+                                }
+                                worksheet.Range["C2"].Select();
+                            }
+                            break;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(ex.Message);
+                }
+                finally
+                {
+                    ThisAddIn.app.DisplayAlerts = true;
+                    ThisAddIn.app.ScreenUpdating = true;
+                    ThisAddIn.app.ActiveWorkbook.RefreshAll();
+                }
+            });
+        }
+        */
 
         //批量重命名
         private void File_rename_Click(object sender, RibbonControlEventArgs e)
@@ -436,7 +812,6 @@ namespace ExcelAddIn
             {
                 Select_f_or_d.Image = ExcelAddIn.Properties.Resources.Radio_Button_off;
                 Select_f_or_d.Label = "文件名";
-
             }
         }
 
@@ -890,85 +1265,6 @@ namespace ExcelAddIn
                     ThisAddIn.Global.spotlightColorIndex = 44;  //浅橙
                     break;
             }
-        }
-
-        //刷新_rename表
-        private async void RefreshRenameTable()
-        {
-            Excel.Worksheet worksheet = ThisAddIn.app.ActiveWorkbook.Worksheets["_rename"];
-            ThisAddIn.app.ScreenUpdating = false;
-            ThisAddIn.app.DisplayAlerts = false;
-            worksheet.Rows.Clear();
-            await Task.Run(() => 
-            {
-                try
-                {
-                    switch (Select_f_or_d.Checked)
-                    {
-                        case false:
-                            worksheet.Cells[1, 1] = "路径";
-                            worksheet.Cells[1, 2] = "旧文件名";
-                            worksheet.Cells[1, 3] = "新文件名";
-                            List<string> files = new List<string>();
-
-                            GetAllItems(get_directory_path, files, "f");
-
-                            //从读取的文件列表中删除隐藏属性的文件名；
-                            files.RemoveAll(file => (File.GetAttributes(file) & FileAttributes.Hidden) == FileAttributes.Hidden);
-
-                            if (files.Count > 0)
-                            {
-                                for (int i = 1; i <= files.Count; i++)
-                                {
-                                    string file_name = Path.GetFileName(files[i - 1]);
-                                    string file_path = Path.GetDirectoryName(files[i - 1]);
-                                    worksheet.Cells[i + 1, 1] = file_path;
-                                    worksheet.Hyperlinks.Add(worksheet.Cells[i + 1, 1], file_path, Type.Missing, Type.Missing, file_path);
-                                    worksheet.Cells[i + 1, 2] = file_name;
-                                    worksheet.Hyperlinks.Add(worksheet.Cells[i + 1, 2], file_path + "\\" + file_name, Type.Missing, Type.Missing, file_name);
-                                    worksheet.Cells[i + 1, 3] = file_name;
-                                }
-                            }
-                            worksheet.Range["C2"].Select();
-                            break;
-                        case true:
-                            worksheet.Cells[1, 1] = "文件夹路径";
-                            worksheet.Cells[1, 2] = "旧文件夹名";
-                            worksheet.Cells[1, 3] = "新文件夹名";
-                            List<string> directories = new List<string>();
-
-                            GetAllItems(get_directory_path, directories, "d");
-
-                            //从读取的文件夹列表中删除隐藏属性的文件夹名；
-                            directories.RemoveAll(dir => IsDirectoryHidden(dir));
-                            if (directories.Count > 0)
-                            {
-                                for (int i = 1; i <= directories.Count; i++)
-                                {
-                                    string directory_name = Path.GetFileName(directories[i - 1]);
-                                    string directory_path = Path.GetDirectoryName(directories[i - 1]);
-                                    worksheet.Cells[i + 1, 1] = directory_path;
-                                    worksheet.Hyperlinks.Add(worksheet.Cells[i + 1, 1], directory_path, Type.Missing, Type.Missing, directory_path);
-                                    worksheet.Cells[i + 1, 2] = directory_name;
-                                    worksheet.Hyperlinks.Add(worksheet.Cells[i + 1, 2], directory_path + "\\" + directory_name, Type.Missing, Type.Missing, directory_name);
-                                    worksheet.Cells[i + 1, 3] = directory_name;
-                                }
-                                worksheet.Range["C2"].Select();
-                            }
-                            break;
-                    }
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show(ex.Message);
-                }
-                finally
-                {
-                    ThisAddIn.app.DisplayAlerts = true;
-                    ThisAddIn.app.ScreenUpdating = true;
-                    ThisAddIn.app.ActiveWorkbook.RefreshAll();
-                }
-            });            
         }
 
         //转pdf
