@@ -68,6 +68,7 @@
             this.fapiao_button = this.Factory.CreateRibbonButton();
             this.group2 = this.Factory.CreateRibbonGroup();
             this.Send_mail = this.Factory.CreateRibbonButton();
+            this.btnTimer = this.Factory.CreateRibbonButton();
             this.group3 = this.Factory.CreateRibbonGroup();
             this.Files_read = this.Factory.CreateRibbonButton();
             this.separator1 = this.Factory.CreateRibbonSeparator();
@@ -232,7 +233,8 @@
             // group2
             // 
             this.group2.Items.Add(this.Send_mail);
-            this.group2.Label = "群发工具";
+            this.group2.Items.Add(this.btnTimer);
+            this.group2.Label = "自动化工具";
             this.group2.Name = "group2";
             // 
             // Send_mail
@@ -243,6 +245,15 @@
             this.Send_mail.Name = "Send_mail";
             this.Send_mail.ShowImage = true;
             this.Send_mail.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.Send_mail_Click);
+            // 
+            // btnTimer
+            // 
+            this.btnTimer.ControlSize = Microsoft.Office.Core.RibbonControlSize.RibbonControlSizeLarge;
+            this.btnTimer.Image = global::ExcelAddIn.Properties.Resources.timer;
+            this.btnTimer.Label = "定时任务";
+            this.btnTimer.Name = "btnTimer";
+            this.btnTimer.ShowImage = true;
+            this.btnTimer.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.btnTimer_Click);
             // 
             // group3
             // 
@@ -627,6 +638,7 @@
         internal Microsoft.Office.Tools.Ribbon.RibbonBox box5;
         internal Microsoft.Office.Tools.Ribbon.RibbonBox box6;
         internal Microsoft.Office.Tools.Ribbon.RibbonCheckBox checkBoxAll;
+        internal Microsoft.Office.Tools.Ribbon.RibbonButton btnTimer;
     }
 
     partial class ThisRibbonCollection

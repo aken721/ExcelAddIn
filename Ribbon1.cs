@@ -1627,6 +1627,12 @@ namespace ExcelAddIn
             Form form7 = new Form7();
             form7.Show();
         }
+
+        private void btnTimer_Click(object sender, RibbonControlEventArgs e)
+        {
+            Form9 form9 = new Form9();
+            form9.Show();
+        }
     }
 }
 
