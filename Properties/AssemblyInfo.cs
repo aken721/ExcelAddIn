@@ -7,9 +7,9 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyTitle("ExcelAddIn")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("微软中国")]
+[assembly: AssemblyCompany("Ken")]
 [assembly: AssemblyProduct("ExcelAddIn")]
-[assembly: AssemblyCopyright("Copyright © 微软中国 2023")]
+[assembly: AssemblyCopyright("Copyright © Ken He")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -31,6 +31,6 @@ using System.Runtime.InteropServices;
 //可以指定所有这些值，也可以使用“生成号”和“修订号”的默认值，
 // 方法是按如下所示使用“*”: :
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("2.3.9.0")]
-[assembly: AssemblyFileVersion("2.3.9.0")]
+[assembly: AssemblyVersion("2.4.0.0")]
+[assembly: AssemblyFileVersion("2.4.0.0")]
 

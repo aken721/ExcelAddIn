@@ -68,6 +68,7 @@
             this.fapiao_button = this.Factory.CreateRibbonButton();
             this.group2 = this.Factory.CreateRibbonGroup();
             this.Send_mail = this.Factory.CreateRibbonButton();
+            this.separator7 = this.Factory.CreateRibbonSeparator();
             this.btnTimer = this.Factory.CreateRibbonButton();
             this.group3 = this.Factory.CreateRibbonGroup();
             this.Files_read = this.Factory.CreateRibbonButton();
@@ -105,6 +106,7 @@
             this.timer1 = new System.Windows.Forms.Timer(this.components);
             this.saveFileDialog1 = new System.Windows.Forms.SaveFileDialog();
             this.box5 = this.Factory.CreateRibbonBox();
+            this.separator6 = this.Factory.CreateRibbonSeparator();
             this.tab1.SuspendLayout();
             this.group1.SuspendLayout();
             this.box4.SuspendLayout();
@@ -233,6 +235,7 @@
             // group2
             // 
             this.group2.Items.Add(this.Send_mail);
+            this.group2.Items.Add(this.separator7);
             this.group2.Items.Add(this.btnTimer);
             this.group2.Label = "自动化工具";
             this.group2.Name = "group2";
@@ -245,6 +248,10 @@
             this.Send_mail.Name = "Send_mail";
             this.Send_mail.ShowImage = true;
             this.Send_mail.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.Send_mail_Click);
+            // 
+            // separator7
+            // 
+            this.separator7.Name = "separator7";
             // 
             // btnTimer
             // 
@@ -547,6 +554,10 @@
             // 
             this.box5.Name = "box5";
             // 
+            // separator6
+            // 
+            this.separator6.Name = "separator6";
+            // 
             // Ribbon1
             // 
             this.Name = "Ribbon1";
@@ -639,6 +650,8 @@
         internal Microsoft.Office.Tools.Ribbon.RibbonBox box6;
         internal Microsoft.Office.Tools.Ribbon.RibbonCheckBox checkBoxAll;
         internal Microsoft.Office.Tools.Ribbon.RibbonButton btnTimer;
+        internal Microsoft.Office.Tools.Ribbon.RibbonSeparator separator6;
+        internal Microsoft.Office.Tools.Ribbon.RibbonSeparator separator7;
     }
 
     partial class ThisRibbonCollection

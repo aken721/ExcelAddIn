@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form9));
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabPage1 = new System.Windows.Forms.TabPage();
             this.textBoxTaskDescription = new System.Windows.Forms.TextBox();
@@ -1286,10 +1287,11 @@
             this.Controls.Add(this.panel1);
             this.Controls.Add(this.tabControl1);
             this.Font = new System.Drawing.Font("微软雅黑", 10.5F);
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Margin = new System.Windows.Forms.Padding(5);
             this.Name = "Form9";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Text = "Form9";
+            this.Text = "定时任务";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Form9_FormClosing);
             this.Load += new System.EventHandler(this.Form9_Load);
             this.MouseDown += new System.Windows.Forms.MouseEventHandler(this.Form9_MouseDown);

@@ -382,9 +382,9 @@
             this.label4.ForeColor = System.Drawing.SystemColors.Control;
             this.label4.Location = new System.Drawing.Point(298, 413);
             this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(285, 18);
+            this.label4.Size = new System.Drawing.Size(284, 18);
             this.label4.TabIndex = 5;
-            this.label4.Text = "Copyright © He Kun.  All rights reserved";
+            this.label4.Text = "Copyright © Ken He.  All rights reserved";
             // 
             // openFileDialog1
             // 

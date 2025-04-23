@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Configuration;
+using System.Reflection;
 using System.Data;
 using System.Drawing;
 using System.Linq;
@@ -8,7 +8,7 @@ using System.Windows.Forms;
 using System.Xml.Linq;
 using Excel=Microsoft.Office.Interop.Excel;
 using System.IO;
-using System.Threading;
+
 
 
 
@@ -23,7 +23,9 @@ namespace ExcelAddIn
 
         private void Form6_Load(object sender, EventArgs e)
         {
-            version_label1.Text = ConfigurationManager.AppSettings["version"].ToString();
+            Assembly assembly = System.Reflection.Assembly.GetExecutingAssembly();
+            string version = assembly.GetName().Version.ToString();
+            version_label1.Text ="Version: "+ version;
 
             //初始化tabcontrol控件
             tabControl1.SelectTab(0);

@@ -73,7 +73,9 @@ namespace ExcelAddIn
             split_sheet_result_label.Text = "";
             split_sheet_progressBar.Visible = false;
             splitProgressBar_label.Visible = false;
-            version_label.Text = ConfigurationManager.AppSettings["version"].ToString();
+            System.Reflection.Assembly assembly = System.Reflection.Assembly.GetExecutingAssembly();
+            string version = assembly.GetName().Version.ToString();
+            version_label.Text = "Version: " + version;
 
             if (activeWorkBook_sheet_names.Count > 0)
             {

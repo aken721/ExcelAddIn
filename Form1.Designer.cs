@@ -400,10 +400,10 @@ namespace ExcelAddIn
             this.tabPage2.Controls.Add(this.panel2);
             this.tabPage2.Font = new System.Drawing.Font("微软雅黑", 10.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.tabPage2.ForeColor = System.Drawing.Color.DarkSlateBlue;
-            this.tabPage2.Location = new System.Drawing.Point(104, 4);
+            this.tabPage2.Location = new System.Drawing.Point(114, 4);
             this.tabPage2.Name = "tabPage2";
             this.tabPage2.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage2.Size = new System.Drawing.Size(695, 392);
+            this.tabPage2.Size = new System.Drawing.Size(685, 392);
             this.tabPage2.TabIndex = 1;
             this.tabPage2.Text = "二、并表功能";
             this.tabPage2.UseVisualStyleBackColor = true;
@@ -424,7 +424,7 @@ namespace ExcelAddIn
             this.panel2.Dock = System.Windows.Forms.DockStyle.Fill;
             this.panel2.Location = new System.Drawing.Point(3, 3);
             this.panel2.Name = "panel2";
-            this.panel2.Size = new System.Drawing.Size(689, 386);
+            this.panel2.Size = new System.Drawing.Size(679, 386);
             this.panel2.TabIndex = 1;
             // 
             // mergeProgressBar_label
@@ -535,9 +535,9 @@ namespace ExcelAddIn
             this.tabPage3.Controls.Add(this.panel3);
             this.tabPage3.Font = new System.Drawing.Font("微软雅黑", 10.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.tabPage3.ForeColor = System.Drawing.Color.DarkSlateBlue;
-            this.tabPage3.Location = new System.Drawing.Point(104, 4);
+            this.tabPage3.Location = new System.Drawing.Point(114, 4);
             this.tabPage3.Name = "tabPage3";
-            this.tabPage3.Size = new System.Drawing.Size(695, 392);
+            this.tabPage3.Size = new System.Drawing.Size(685, 392);
             this.tabPage3.TabIndex = 2;
             this.tabPage3.Text = "三、批量导删";
             this.tabPage3.UseVisualStyleBackColor = true;
@@ -554,7 +554,7 @@ namespace ExcelAddIn
             this.panel3.Dock = System.Windows.Forms.DockStyle.Fill;
             this.panel3.Location = new System.Drawing.Point(0, 0);
             this.panel3.Name = "panel3";
-            this.panel3.Size = new System.Drawing.Size(695, 392);
+            this.panel3.Size = new System.Drawing.Size(685, 392);
             this.panel3.TabIndex = 5;
             // 
             // sheet_listbox
@@ -624,9 +624,9 @@ namespace ExcelAddIn
             this.tabPage4.Controls.Add(this.panel4);
             this.tabPage4.Font = new System.Drawing.Font("微软雅黑", 10.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.tabPage4.ForeColor = System.Drawing.Color.DarkSlateBlue;
-            this.tabPage4.Location = new System.Drawing.Point(104, 4);
+            this.tabPage4.Location = new System.Drawing.Point(114, 4);
             this.tabPage4.Name = "tabPage4";
-            this.tabPage4.Size = new System.Drawing.Size(695, 392);
+            this.tabPage4.Size = new System.Drawing.Size(685, 392);
             this.tabPage4.TabIndex = 6;
             this.tabPage4.Text = "四、实用功能";
             this.tabPage4.UseVisualStyleBackColor = true;
@@ -667,7 +667,7 @@ namespace ExcelAddIn
             this.panel4.Dock = System.Windows.Forms.DockStyle.Fill;
             this.panel4.Location = new System.Drawing.Point(0, 0);
             this.panel4.Name = "panel4";
-            this.panel4.Size = new System.Drawing.Size(695, 392);
+            this.panel4.Size = new System.Drawing.Size(685, 392);
             this.panel4.TabIndex = 1;
             // 
             // backColor_label
@@ -1068,9 +1068,9 @@ namespace ExcelAddIn
             this.tabPage5.Controls.Add(this.find_keywordbutton_pictureBox);
             this.tabPage5.Font = new System.Drawing.Font("微软雅黑", 10.8F);
             this.tabPage5.ForeColor = System.Drawing.Color.DarkSlateBlue;
-            this.tabPage5.Location = new System.Drawing.Point(104, 4);
+            this.tabPage5.Location = new System.Drawing.Point(114, 4);
             this.tabPage5.Name = "tabPage5";
-            this.tabPage5.Size = new System.Drawing.Size(695, 392);
+            this.tabPage5.Size = new System.Drawing.Size(685, 392);
             this.tabPage5.TabIndex = 7;
             this.tabPage5.Text = "五、数据库连接";
             // 
@@ -1344,9 +1344,9 @@ namespace ExcelAddIn
             this.tabPage6.Controls.Add(this.label9);
             this.tabPage6.Font = new System.Drawing.Font("微软雅黑", 10.8F);
             this.tabPage6.ForeColor = System.Drawing.Color.DarkSlateBlue;
-            this.tabPage6.Location = new System.Drawing.Point(104, 4);
+            this.tabPage6.Location = new System.Drawing.Point(114, 4);
             this.tabPage6.Name = "tabPage6";
-            this.tabPage6.Size = new System.Drawing.Size(695, 392);
+            this.tabPage6.Size = new System.Drawing.Size(685, 392);
             this.tabPage6.TabIndex = 8;
             this.tabPage6.Text = "六、图表增强";
             this.tabPage6.UseVisualStyleBackColor = true;
@@ -1518,9 +1518,9 @@ namespace ExcelAddIn
             this.tabPage7.Controls.Add(this.richTextBox1);
             this.tabPage7.Font = new System.Drawing.Font("微软雅黑", 10.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.tabPage7.ForeColor = System.Drawing.Color.DarkSlateBlue;
-            this.tabPage7.Location = new System.Drawing.Point(104, 4);
+            this.tabPage7.Location = new System.Drawing.Point(114, 4);
             this.tabPage7.Name = "tabPage7";
-            this.tabPage7.Size = new System.Drawing.Size(695, 392);
+            this.tabPage7.Size = new System.Drawing.Size(685, 392);
             this.tabPage7.TabIndex = 4;
             this.tabPage7.Text = "七、使用帮助";
             // 
@@ -1539,9 +1539,9 @@ namespace ExcelAddIn
             this.tabPage8.BackColor = System.Drawing.SystemColors.Window;
             this.tabPage8.Font = new System.Drawing.Font("微软雅黑", 10.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.tabPage8.ForeColor = System.Drawing.Color.DarkSlateBlue;
-            this.tabPage8.Location = new System.Drawing.Point(104, 4);
+            this.tabPage8.Location = new System.Drawing.Point(114, 4);
             this.tabPage8.Name = "tabPage8";
-            this.tabPage8.Size = new System.Drawing.Size(695, 392);
+            this.tabPage8.Size = new System.Drawing.Size(685, 392);
             this.tabPage8.TabIndex = 5;
             this.tabPage8.Text = "八、退出工具";
             // 
@@ -1562,9 +1562,9 @@ namespace ExcelAddIn
             this.label4.ForeColor = System.Drawing.SystemColors.Control;
             this.label4.Location = new System.Drawing.Point(257, 417);
             this.label4.Name = "label4";
-            this.label4.Size = new System.Drawing.Size(285, 18);
+            this.label4.Size = new System.Drawing.Size(284, 18);
             this.label4.TabIndex = 2;
-            this.label4.Text = "Copyright © He Kun.  All rights reserved";
+            this.label4.Text = "Copyright © Ken He.  All rights reserved";
             // 
             // version_label
             // 
