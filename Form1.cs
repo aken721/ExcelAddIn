@@ -17,18 +17,15 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Timers;
 using System.Windows.Forms;
-using System.Configuration;
 using ZXing;
 using ZXing.QrCode;
 using Excel = Microsoft.Office.Interop.Excel;
 using ZXing.Rendering;
-using System.Collections;
 using Microsoft.Office.Core;
 using System.Diagnostics;
 using Sdcb.WordClouds;
 using SkiaSharp;
 using System.Drawing.Text;
-using System.Net.Http;
 
 
 
@@ -2945,6 +2942,8 @@ namespace ExcelAddIn
                                 dbsheet_dataGridView.DataSource = null;
                             }
                         }
+                        
+                       
                         break;
 
                     //Oracle
@@ -3143,6 +3142,7 @@ namespace ExcelAddIn
                             }
                         }
                     }
+                   
 
                 //Oracle
                 case 5:
@@ -3474,6 +3474,8 @@ namespace ExcelAddIn
             }
         }
 
+       
+        //二维码相关
         Color qrForeColor = Color.Black;
         Color qrBackColor = Color.White;
         private void foreColor_select_button_Click(object sender, EventArgs e)

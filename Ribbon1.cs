@@ -394,7 +394,7 @@ namespace ExcelAddIn
         }
 
         /*
-        //批读文件名原有方法
+        //原有批读文件名方法
         private void Files_read_Click(object sender, RibbonControlEventArgs e)
         {
             if (ThisAddIn.Global.readFile == 1 && get_directory_path.Length > 0)
@@ -637,7 +637,7 @@ namespace ExcelAddIn
         }
 
         /*
-        //刷新_rename表
+        //原有刷新_rename表
         private async void RefreshRenameTable()
         {
             Excel.Worksheet worksheet = ThisAddIn.app.ActiveWorkbook.Worksheets["_rename"];
@@ -1632,6 +1632,12 @@ namespace ExcelAddIn
         {
             Form9 form9 = new Form9();
             form9.Show();
+        }
+
+        private void doc_button_Click(object sender, RibbonControlEventArgs e)
+        {
+            Form10 form10 = new Form10();
+            form10.Show();
         }
     }
 }

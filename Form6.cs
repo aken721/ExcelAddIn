@@ -1,4 +1,6 @@
-﻿using System;
+﻿#nullable enable
+
+using System;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Data;
@@ -8,6 +10,17 @@ using System.Windows.Forms;
 using System.Xml.Linq;
 using Excel=Microsoft.Office.Interop.Excel;
 using System.IO;
+using System.Text;
+using UglyToad.PdfPig;
+using System.Text.RegularExpressions;
+using UglyToad.PdfPig.Content;
+using Docnet.Core;
+using Docnet.Core.Models;
+using Docnet.Core.Readers;
+using System.Drawing.Imaging;
+using System.Runtime.InteropServices;
+using Docnet.Core.Converters;
+using System.Globalization;
 
 
 
@@ -43,7 +56,7 @@ namespace ExcelAddIn
         private void tabControl1_DrawItem(object sender, DrawItemEventArgs e)
         {
             //调整选项卡文字方向
-            SolidBrush _Brush = new SolidBrush(Color.Black);//单色画刷
+            SolidBrush _Brush = new SolidBrush(System.Drawing.Color.Black);//单色画刷
             RectangleF _TabTextArea = (RectangleF)tabControl1.GetTabRect(e.Index);//绘制区域
             StringFormat _sf = new StringFormat();//封装文本布局格式信息
             _sf.LineAlignment = StringAlignment.Center;
@@ -66,12 +79,29 @@ namespace ExcelAddIn
                     clear_pictureBox.Visible = false;
                     break;
                 case 1:
+                    tabControl1.SelectedIndex = 0; //pdf读取功能未完成，无法使用，暂时强制切换到第一个选项卡
+                    sequence_label1.Text = string.Empty;
+                    pdf_path_textBox.Text = string.Empty;
+                    single_result_label1.Text = "";
+                    pdfSingle_FileFullNames.Clear();
+                    pdfFolder_FileFullNames.Clear();
+                    clear_pictureBox1.Visible = false;
                     break;
-                case 2:
+                case 2:                    
+                    break;
+                case 3:
                     this.Dispose();
                     break;
             }
         }
+
+
+        /// <summary>
+        /// 以下为xml数电发票读取功能模块
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+ 
 
         //下一个
         private void next_pictureBox_Click(object sender, EventArgs e)
@@ -240,6 +270,8 @@ namespace ExcelAddIn
 
         List<string> single_FileFullNames=new List<string>();
         List<string> folder_FileFullNames = new List<string>();
+        List<string> pdfSingle_FileFullNames = new List<string>();
+        List<string> pdfFolder_FileFullNames = new List<string>();
 
         private void xml_path_textBox_DoubleClick(object sender, EventArgs e)
         {
@@ -320,7 +352,7 @@ namespace ExcelAddIn
                 folder_FileFullNames.Clear();
                 folder_path_textBox.Text = folderBrowserDialog1.SelectedPath;
                 DirectoryInfo folder = new DirectoryInfo(folder_path_textBox.Text);
-                folder_FileFullNames = folder.GetFiles("*.xml", SearchOption.AllDirectories).Select(file => file.FullName).ToList();                
+                folder_FileFullNames = folder.GetFiles("*.xml", subfolder_checkBox.Checked?SearchOption.AllDirectories:SearchOption.TopDirectoryOnly).Select(file => file.FullName).ToList();                
             }
             else
             {
@@ -411,7 +443,7 @@ namespace ExcelAddIn
                 XElement taxSupervisionInfo = eInvoice.Element("TaxSupervisionInfo");
                 XElement eInvoiceData = eInvoice.Element("EInvoiceData");
                 XElement header = eInvoice.Element("Header");
-                XElement generalOrSpecialVAT = header?.Element("InherentLabel")?.Element("GeneralOrSpecialVAT");
+                XElement? generalOrSpecialVAT = header?.Element("InherentLabel")?.Element("GeneralOrSpecialVAT");
 
                 // 添加行到DataTable
                 dataTable.Rows.Add
@@ -434,7 +466,7 @@ namespace ExcelAddIn
                         eInvoiceData.Element("BasicInformation").Element("TotalTaxAm")?.Value,
                         eInvoiceData.Element("BasicInformation").Element("TotalTax-includedAmount")?.Value,
                         eInvoiceData.Element("IssuItemInformation").Element("ItemName")?.Value,
-                        generalOrSpecialVAT.Element("LabelName")?.Value,
+                        generalOrSpecialVAT?.Element("LabelName")?.Value,
                         taxSupervisionInfo.Element("TaxBureauName")?.Value,
                         xmlPath
                     );
@@ -490,7 +522,7 @@ namespace ExcelAddIn
             else
             {
                 workbook.Worksheets["_FaPiao"].Activate();
-                long usedRow= workbook.ActiveSheet.Cells[workbook.ActiveSheet.Rows.Count,10].End(Excel.XlDirection.xlUp).Row;
+                long usedRow= workbook.ActiveSheet.UsedRange.Rows.Count;
                 for (int i = 0; i < dataTable.Rows.Count; i++)
                 {
                     for (int j = 0; j < dataTable.Columns.Count; j++)
@@ -548,6 +580,383 @@ namespace ExcelAddIn
             last_pictureBox.Enabled = false;
             sequence_label.Text = "";
             single_FileFullNames.Clear();
+        }
+
+        /// <summary>
+        /// 以下为pdf电子发票读取功能模块
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+
+
+        //下一个
+        private void next_pictureBox1_Click(object sender, EventArgs e)
+        {
+            if (pdfSingle_FileFullNames.Count == 0) return;
+            int currentSequence = int.Parse(sequence_label1.Text);
+            pdf_path_textBox.Text = pdfSingle_FileFullNames[currentSequence];
+            sequence_label1.Text = Convert.ToString(currentSequence + 1);
+        }
+
+        //上一个
+        private void preview_pictureBox1_Click(object sender, EventArgs e)
+        {
+            if (pdfSingle_FileFullNames.Count == 0) return;
+            int currentSequence = int.Parse(sequence_label1.Text);
+            pdf_path_textBox.Text = pdfSingle_FileFullNames[currentSequence - 2];
+            sequence_label1.Text = Convert.ToString(currentSequence - 1);
+        }
+
+        //最后一个
+        private void last_pictureBox1_Click(object sender, EventArgs e)
+        {
+            if (pdfSingle_FileFullNames.Count == 0) return;
+            pdf_path_textBox.Text = pdfSingle_FileFullNames[pdfSingle_FileFullNames.Count - 1];
+            sequence_label1.Text = pdfSingle_FileFullNames.Count.ToString();
+        }
+
+        //第一个
+        private void begin_pictureBox1_Click(object sender, EventArgs e)
+        {
+            if (pdfSingle_FileFullNames.Count == 0) return;
+            pdf_path_textBox.Text = pdfSingle_FileFullNames[0];
+            sequence_label1.Text = "1";
+        }
+
+        //顺序号变化时
+        private void sequence_label1_TextChanged(object sender, EventArgs e)
+        {
+            int fileCount = pdfSingle_FileFullNames.Count;
+            if (sequence_label1.Text == "1" && fileCount > 1)
+            {
+                begin_pictureBox1.Enabled = false;
+                begin_pictureBox1.Visible = false;
+                preview_pictureBox1.Enabled = false;
+                preview_pictureBox1.Visible = false;
+                next_pictureBox1.Enabled = true;
+                next_pictureBox1.Visible = true;
+                last_pictureBox1.Enabled = true;
+                last_pictureBox1.Visible = true;
+            }
+            else if (sequence_label1.Text == fileCount.ToString() && fileCount > 1)
+            {
+                begin_pictureBox1.Enabled = true;
+                begin_pictureBox1.Visible = true;
+                preview_pictureBox1.Enabled = true;
+                preview_pictureBox1.Visible = true;
+                next_pictureBox1.Enabled = false;
+                next_pictureBox1.Visible = false;
+                last_pictureBox1.Enabled = false;
+                last_pictureBox1.Visible = false;
+            }
+            else if (string.IsNullOrEmpty(sequence_label1.Text))
+            {
+                begin_pictureBox1.Enabled = false;
+                begin_pictureBox1.Visible = false;
+                preview_pictureBox1.Enabled = false;
+                preview_pictureBox1.Visible = false;
+                next_pictureBox1.Enabled = false;
+                next_pictureBox1.Visible = false;
+                last_pictureBox1.Enabled = false;
+                last_pictureBox1.Visible = false;
+            }
+            else if (sequence_label1.Text == fileCount.ToString() && fileCount == 1)
+            {
+                begin_pictureBox1.Enabled = false;
+                begin_pictureBox1.Visible = false;
+                preview_pictureBox1.Enabled = false;
+                preview_pictureBox1.Visible = false;
+                next_pictureBox1.Enabled = false;
+                next_pictureBox1.Visible = false;
+                last_pictureBox1.Enabled = false;
+                last_pictureBox1.Visible = false;
+            }
+            else
+            {
+                begin_pictureBox1.Enabled = true;
+                begin_pictureBox1.Visible = true;
+                preview_pictureBox1.Enabled = true;
+                preview_pictureBox1.Visible = true;
+                next_pictureBox1.Enabled = true;
+                next_pictureBox1.Visible = true;
+                last_pictureBox1.Enabled = true;
+                last_pictureBox1.Visible = true;
+            }
+        }
+
+        private void pdf_path_textBox_DoubleClick(object sender, EventArgs e)
+        {
+            openFileDialog1.Title = "请选择要导入的电子发票";
+            openFileDialog1.Filter = "电子发票文件(*.pdf)|*.pdf";
+            openFileDialog1.Multiselect = true;
+            if (openFileDialog1.ShowDialog() == DialogResult.OK)
+            {
+                sequence_label1.Text = string.Empty;
+                pdfSingle_FileFullNames.Clear();
+                pdfSingle_FileFullNames = openFileDialog1.FileNames.ToList();
+                pdf_path_textBox.Text = pdfSingle_FileFullNames[0];
+                sequence_label1.Text = "1";
+                single_result_label1.Text = $"共{pdfSingle_FileFullNames.Count}个pdf文件";
+                if (pdfSingle_FileFullNames.Count > 1)
+                {
+                    int fileCount = pdfSingle_FileFullNames.Count;
+                    if (sequence_label1.Text == "1")
+                    {
+                        begin_pictureBox1.Enabled = false;
+                        preview_pictureBox1.Enabled = false;
+                        next_pictureBox1.Enabled = true;
+                        last_pictureBox1.Enabled = true;
+                    }
+                    else if (sequence_label1.Text == fileCount.ToString())
+                    {
+                        begin_pictureBox1.Enabled = true;
+                        preview_pictureBox1.Enabled = true;
+                        next_pictureBox1.Enabled = false;
+                        last_pictureBox1.Enabled = false;
+                    }
+                    else
+                    {
+                        begin_pictureBox1.Enabled = true;
+                        preview_pictureBox1.Enabled = true;
+                        next_pictureBox1.Enabled = true;
+                        last_pictureBox1.Enabled = true;
+                    }
+                }
+                else
+                {
+                    begin_pictureBox1.Enabled = false;
+                    preview_pictureBox1.Enabled = false;
+                    next_pictureBox1.Enabled = false;
+                    last_pictureBox1.Enabled = false;
+                }
+            }
+            else
+            {
+                return;
+            }
+        }
+
+        public Bitmap RenderPdfToImage(string pdfPath, int pageIndex,
+            int targetWidth = 1080, int targetHeight = 1920,
+            bool removeTransparency = true)
+        {
+            if (!File.Exists(pdfPath))
+                throw new FileNotFoundException("PDF文件不存在", pdfPath);
+
+            // 创建文档阅读器
+            using var docReader = DocLib.Instance.GetDocReader(
+                pdfPath,
+                new PageDimensions(targetWidth, targetHeight));
+
+            // 验证页面索引
+            if (pageIndex < 0 || pageIndex >= docReader.GetPageCount())
+                throw new ArgumentOutOfRangeException(nameof(pageIndex),
+                    $"页面索引必须在0到{docReader.GetPageCount() - 1}之间");
+
+            // 获取页面阅读器
+            using var pageReader = docReader.GetPageReader(pageIndex);
+
+            // 获取图像数据（可选择移除透明度）
+            byte[] rawBytes = removeTransparency
+                ? pageReader.GetImage(new NaiveTransparencyRemover(255, 255, 255)) // 白色背景
+                : pageReader.GetImage();
+
+            // 获取实际渲染尺寸
+            int width = pageReader.GetPageWidth();
+            int height = pageReader.GetPageHeight();
+
+            // 创建并返回位图
+            return CreateBitmapFromBytes(rawBytes, width, height);
+        }
+
+        private static Bitmap CreateBitmapFromBytes(byte[] rawBytes, int width, int height)
+        {
+            // 验证尺寸有效性
+            if (width <= 0 || height <= 0)
+                throw new InvalidOperationException($"无效的图像尺寸: {width}x{height}");
+
+            // 创建位图对象
+            var bmp = new Bitmap(width, height, PixelFormat.Format32bppArgb);
+
+            // 锁定位图进行写入
+            var rect = new Rectangle(0, 0, width, height);
+            var bmpData = bmp.LockBits(rect, ImageLockMode.WriteOnly, bmp.PixelFormat);
+
+            try
+            {
+                // 将字节数据复制到位图
+                Marshal.Copy(rawBytes, 0, bmpData.Scan0, rawBytes.Length);
+            }
+            finally
+            {
+                // 确保始终解锁位图
+                bmp.UnlockBits(bmpData);
+            }
+
+            return bmp;
+        }
+
+
+        private void pdf_path_textBox_TextChanged(object sender, EventArgs e)
+        {
+            string path = pdf_path_textBox.Text.Trim();
+
+            if (!string.IsNullOrEmpty(path) && File.Exists(path))
+            {
+                try
+                {
+                    var bitmap = RenderPdfToImage(path, pageIndex: 0);
+
+                    pictureBoxPdf.Image=bitmap;
+                    pictureBoxPdf.SizeMode = PictureBoxSizeMode.Zoom; // 设置图片适应PictureBox大小
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"加载失败: {ex.Message}");
+                }
+            }
+            else
+            {
+                // 清空 PictureBox
+                pictureBoxPdf.Image?.Dispose();
+                pictureBoxPdf.Image = null;
+
+                // 其他控件的隐藏逻辑（与你的原始代码一致）
+                if (single_FileFullNames.Count == 0)
+                {
+                    sequence_label1.Text = string.Empty;
+                    begin_pictureBox1.Enabled = false;
+                    begin_pictureBox1.Visible = false;
+                    preview_pictureBox1.Enabled = false;
+                    preview_pictureBox1.Visible = false;
+                    next_pictureBox1.Enabled = false;
+                    next_pictureBox1.Visible = false;
+                    last_pictureBox1.Enabled = false;
+                    last_pictureBox1.Visible = false;
+                }
+            }
+        }
+
+        private void pdfFolder_path_textBox_DoubleClick(object sender, EventArgs e)
+        {
+            folderBrowserDialog1.Description = "请选择PDF电子发票所在文件夹";
+            folderBrowserDialog1.ShowDialog();
+            if (folderBrowserDialog1.SelectedPath != "")
+            {
+                folder_FileFullNames.Clear();
+                string selectedFolder = folderBrowserDialog1.SelectedPath;
+                pdfFolder_path_textBox.Text = selectedFolder;
+                DirectoryInfo folder = new DirectoryInfo(selectedFolder);
+                pdfFolder_FileFullNames = folder.GetFiles("*.pdf", pdfSubfolder_checkBox.Checked ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly).Select(file => file.FullName).ToList();
+            }
+            else
+            {
+                pdfFolder_path_textBox.Text = "";
+                pdfBatch_result_label.Text = "未选择文件夹";
+            }
+        }
+
+        private void pdfBatch_run_button_Click(object sender, EventArgs e)
+        {
+            if (pdfFolder_FileFullNames.Count > 0 && Directory.Exists(pdfFolder_path_textBox.Text))
+            {
+                int o = 1;
+                foreach (string file in pdfFolder_FileFullNames)
+                {
+                    pdfBatch_result_label.Text = $"正在导入第{o}/{pdfFolder_FileFullNames.Count}个PDF文件......";
+                    System.Data.DataTable dataTable = GetInvoiceDataFromPDF(file);
+                    if (dataTable.Rows.Count > 0)
+                    {
+                        WriteToExcel(dataTable);
+                    }
+                }
+                pdfBatch_result_label.Text = "PDF电子发票批量导入已完成！";
+                timer1.Enabled = true;
+            }
+            else
+            {
+                pdfBatch_result_label.Text = "文件夹内没有PDF电子发票文件，请核对！";
+                timer1.Enabled = true;
+            }
+        }
+
+        private System.Data.DataTable GetInvoiceDataFromPDF(string pdfPath)
+        {
+            DataTable dataTable = CreateTableSchema();
+            DataRow row = dataTable.NewRow();
+            row["电子发票文件路径"] = pdfPath;
+            try
+            {
+                using (PdfDocument document = PdfDocument.Open(pdfPath))
+                {
+                    //输出抓取文本内容，调试使用
+                    StringBuilder textBuilder = new StringBuilder();
+                    foreach (var pdfPage in document.GetPages())
+                    {
+                        textBuilder.Append(pdfPage.Text);
+                    }
+                    File.WriteAllText($"d:/{Path.GetFileNameWithoutExtension(pdfPath)}.txt ", textBuilder.ToString());
+
+                    //
+                    List<WordInfo> allWords = new List<WordInfo>();
+                    foreach (var page in document.GetPages())
+                    {
+                        var words=page.GetWords();
+                        foreach (var word in words)
+                        {
+                            
+                            if (word.Text.Contains("发票号码:"))
+                            {
+                                MessageBox.Show($"{word.Text}的坐标：距离顶部{word.BoundingBox.Top}；" +
+                                    $"距离左侧{word.BoundingBox.Left}；距离底部{word.BoundingBox.Bottom}；距离右侧{word.BoundingBox.Right}");
+                            }
+                            if(word.Text.Contains("24427000000002368552"))
+                            {
+                                MessageBox.Show($"{word.Text}的坐标：距离顶部{word.BoundingBox.Top}；" +
+                                    $"距离左侧{word.BoundingBox.Left}；距离底部{word.BoundingBox.Bottom}；距离右侧{word.BoundingBox.Right}");
+                            }
+                        }                        
+                    }
+
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"处理异常: {ex}");
+            }
+            finally
+            {
+                dataTable.Rows.Add(row);
+            }
+            return dataTable;
+        }
+
+        public class WordInfo
+        {
+            public string? Text { get; set; }
+            public double X0 { get; set; }   //距离顶部坐标
+            public double Y0 { get; set; }   //距离左侧坐标
+            public double X1 { get; set; }   //距离底部坐标
+            public double Y1 { get; set; }   //距离右侧坐标
+        }
+
+        
+        private DataTable CreateTableSchema()
+        {
+            var dt = new DataTable();
+            dt.Columns.Add("发票号码", typeof(string));
+            dt.Columns.Add("开票日期", typeof(string));
+            dt.Columns.Add("销售方名称", typeof(string));
+            dt.Columns.Add("销售方纳税识别号", typeof(string));
+            dt.Columns.Add("购买方名称", typeof(string));
+            dt.Columns.Add("购买方纳税识别号", typeof(string));
+            dt.Columns.Add("不含税价格", typeof(string));
+            dt.Columns.Add("税额", typeof(string));
+            dt.Columns.Add("含税价格", typeof(string));
+            dt.Columns.Add("项目名称", typeof(string));
+            dt.Columns.Add("发票类型", typeof(string));
+            dt.Columns.Add("电子发票文件路径", typeof(string));
+            return dt;
         }
     }
 }
