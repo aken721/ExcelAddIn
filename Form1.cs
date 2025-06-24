@@ -29,6 +29,7 @@ using System.Drawing.Text;
 
 
 
+
 namespace ExcelAddIn
 {
     public partial class Form1 : Form
@@ -2920,7 +2921,7 @@ namespace ExcelAddIn
                         }
                         else
                         {
-                            database_result_label.Text = "数据库连接成功，数据库中包含" + tableNames.Count + "张表";
+                            database_result_label.Text = $"数据库连接成功，数据库中包含{tableNames.Count}张表";
 
                             // 将表名添加到 ComboBox
                             dbsheet_comboBox.DataSource = tableNames;
@@ -3324,16 +3325,42 @@ namespace ExcelAddIn
                     worksheet.Cells[1, i + 1] = dataGridView.Columns[i].HeaderText;
                 }
 
-                // 写入数据
+                // 创建列标记数组（记录需要文本格式的列）
+                bool[] isTextColumn = new bool[dataGridView.Columns.Count];
+
+                // 按列遍历：每列找到第一个长数字就标记整列
+                for (int colIndex = 0; colIndex < dataGridView.Columns.Count; colIndex++)
+                {
+                    for (int rowIndex = 0; rowIndex < dataGridView.Rows.Count; rowIndex++)
+                    {
+                        var cellValue = dataGridView.Rows[rowIndex].Cells[colIndex].Value?.ToString();
+                        if (!string.IsNullOrEmpty(cellValue)
+                            && cellValue.Length > 10
+                            && long.TryParse(cellValue, out _))
+                        {
+                            isTextColumn[colIndex] = true;
+                            break; // 找到即退出该列的遍历
+                        }
+                    }
+                }
+
+                // 写入数据并设置格式
                 for (int rowIndex = 0; rowIndex < dataGridView.Rows.Count; rowIndex++)
                 {
                     for (int colIndex = 0; colIndex < dataGridView.Columns.Count; colIndex++)
                     {
-                        // 获取单元格的值
+                        var cell = worksheet.Cells[rowIndex + 2, colIndex + 1];
                         var cellValue = dataGridView.Rows[rowIndex].Cells[colIndex].Value?.ToString() ?? "";
 
-                        // 将值写入 Excel 单元格
-                        worksheet.Cells[rowIndex + 2, colIndex + 1] = cellValue; // +2 因为第一行是标题行
+                        if (isTextColumn[colIndex])
+                        {
+                            cell.NumberFormat = "@"; // 文本格式
+                            cell.Value = cellValue;
+                        }
+                        else
+                        {
+                            cell.Value = cellValue;
+                        }
                     }
                 }
 
@@ -3343,7 +3370,6 @@ namespace ExcelAddIn
             }
             catch (Exception ex)
             {
-                // 处理异常
                 MessageBox.Show($"Error: {ex.Message}");
             }
             finally
