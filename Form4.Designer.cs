@@ -347,10 +347,10 @@
             // 
             this.result_dm_label.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Italic, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.result_dm_label.ForeColor = System.Drawing.Color.SaddleBrown;
-            this.result_dm_label.Location = new System.Drawing.Point(553, 552);
+            this.result_dm_label.Location = new System.Drawing.Point(541, 539);
             this.result_dm_label.Margin = new System.Windows.Forms.Padding(4, 0, 4, 0);
             this.result_dm_label.Name = "result_dm_label";
-            this.result_dm_label.Size = new System.Drawing.Size(454, 81);
+            this.result_dm_label.Size = new System.Drawing.Size(427, 81);
             this.result_dm_label.TabIndex = 25;
             // 
             // select_all_checkBox

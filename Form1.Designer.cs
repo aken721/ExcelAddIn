@@ -1106,12 +1106,11 @@ namespace ExcelAddIn
             // 
             // dbexport_result_label
             // 
-            this.dbexport_result_label.AutoSize = true;
-            this.dbexport_result_label.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Italic, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.dbexport_result_label.Font = new System.Drawing.Font("微软雅黑", 9F, System.Drawing.FontStyle.Italic, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.dbexport_result_label.ForeColor = System.Drawing.Color.SaddleBrown;
-            this.dbexport_result_label.Location = new System.Drawing.Point(352, 192);
+            this.dbexport_result_label.Location = new System.Drawing.Point(352, 175);
             this.dbexport_result_label.Name = "dbexport_result_label";
-            this.dbexport_result_label.Size = new System.Drawing.Size(46, 20);
+            this.dbexport_result_label.Size = new System.Drawing.Size(232, 35);
             this.dbexport_result_label.TabIndex = 20;
             this.dbexport_result_label.Text = "result";
             // 
@@ -1154,7 +1153,7 @@ namespace ExcelAddIn
             // 
             this.dbexport_button.Font = new System.Drawing.Font("微软雅黑", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.dbexport_button.ForeColor = System.Drawing.Color.SeaGreen;
-            this.dbexport_button.Location = new System.Drawing.Point(590, 192);
+            this.dbexport_button.Location = new System.Drawing.Point(590, 179);
             this.dbexport_button.Name = "dbexport_button";
             this.dbexport_button.Size = new System.Drawing.Size(74, 32);
             this.dbexport_button.TabIndex = 9;
@@ -1203,11 +1202,11 @@ namespace ExcelAddIn
             this.dbsheet_dataGridView.AllowUserToDeleteRows = false;
             this.dbsheet_dataGridView.BackgroundColor = System.Drawing.Color.WhiteSmoke;
             this.dbsheet_dataGridView.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.dbsheet_dataGridView.Location = new System.Drawing.Point(342, 231);
+            this.dbsheet_dataGridView.Location = new System.Drawing.Point(342, 217);
             this.dbsheet_dataGridView.Name = "dbsheet_dataGridView";
             this.dbsheet_dataGridView.ReadOnly = true;
             this.dbsheet_dataGridView.RowTemplate.Height = 23;
-            this.dbsheet_dataGridView.Size = new System.Drawing.Size(322, 137);
+            this.dbsheet_dataGridView.Size = new System.Drawing.Size(322, 151);
             this.dbsheet_dataGridView.TabIndex = 10;
             // 
             // database_result_label
