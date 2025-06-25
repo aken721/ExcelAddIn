@@ -27,9 +27,6 @@ using Sdcb.WordClouds;
 using SkiaSharp;
 using System.Drawing.Text;
 
-
-
-
 namespace ExcelAddIn
 {
     public partial class Form1 : Form

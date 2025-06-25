@@ -46,6 +46,22 @@
             this.label4 = new System.Windows.Forms.Label();
             this.placeholder_comboBox = new System.Windows.Forms.ComboBox();
             this.timer1 = new System.Windows.Forms.Timer(this.components);
+            this.label5 = new System.Windows.Forms.Label();
+            this.flowLayoutPanel1 = new System.Windows.Forms.FlowLayoutPanel();
+            this.flowLayoutPanel2 = new System.Windows.Forms.FlowLayoutPanel();
+            this.label6 = new System.Windows.Forms.Label();
+            this.height_textBox = new System.Windows.Forms.TextBox();
+            this.label7 = new System.Windows.Forms.Label();
+            this.flowLayoutPanel3 = new System.Windows.Forms.FlowLayoutPanel();
+            this.label8 = new System.Windows.Forms.Label();
+            this.width_textBox = new System.Windows.Forms.TextBox();
+            this.label9 = new System.Windows.Forms.Label();
+            this.pictureSize_checkBox = new System.Windows.Forms.CheckBox();
+            this.pictureOriginal_comboBox = new System.Windows.Forms.ComboBox();
+            this.docQuit_button = new System.Windows.Forms.Button();
+            this.flowLayoutPanel1.SuspendLayout();
+            this.flowLayoutPanel2.SuspendLayout();
+            this.flowLayoutPanel3.SuspendLayout();
             this.SuspendLayout();
             // 
             // label1
@@ -53,7 +69,7 @@
             this.label1.AutoSize = true;
             this.label1.Font = new System.Drawing.Font("微软雅黑", 15.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.label1.ForeColor = System.Drawing.Color.DarkSlateBlue;
-            this.label1.Location = new System.Drawing.Point(223, 14);
+            this.label1.Location = new System.Drawing.Point(281, 10);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(138, 28);
             this.label1.TabIndex = 0;
@@ -163,7 +179,7 @@
             this.label3.ForeColor = System.Drawing.Color.Teal;
             this.label3.Location = new System.Drawing.Point(65, 272);
             this.label3.Name = "label3";
-            this.label3.Size = new System.Drawing.Size(470, 104);
+            this.label3.Size = new System.Drawing.Size(562, 104);
             this.label3.TabIndex = 11;
             this.label3.Text = "使用说明：\r\n1. 在excel表格中准备数据（第一行为列标题，第一列为生成的文件名）；\r\n2. 利用word编辑模板文件，需要批量修改部分用占位符+列名标记。示" +
     "例：尊敬的【客户姓名】，您的合同金额为【合同金额】元；\r\n3. 占位符可根据习惯选定使用，并在本窗口内选择对应的占位符标识；\r\n4. 选择文档批量生成的输出路径" +
@@ -199,11 +215,161 @@
             this.placeholder_comboBox.Size = new System.Drawing.Size(349, 28);
             this.placeholder_comboBox.TabIndex = 13;
             // 
+            // label5
+            // 
+            this.label5.AutoSize = true;
+            this.label5.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.label5.ForeColor = System.Drawing.Color.DarkSlateBlue;
+            this.label5.Location = new System.Drawing.Point(3, 3);
+            this.label5.Margin = new System.Windows.Forms.Padding(3, 3, 3, 0);
+            this.label5.Name = "label5";
+            this.label5.Size = new System.Drawing.Size(121, 20);
+            this.label5.TabIndex = 14;
+            this.label5.Text = "替换图片尺寸设置";
+            // 
+            // flowLayoutPanel1
+            // 
+            this.flowLayoutPanel1.Controls.Add(this.label5);
+            this.flowLayoutPanel1.Controls.Add(this.pictureOriginal_comboBox);
+            this.flowLayoutPanel1.Controls.Add(this.flowLayoutPanel2);
+            this.flowLayoutPanel1.Controls.Add(this.flowLayoutPanel3);
+            this.flowLayoutPanel1.Controls.Add(this.pictureSize_checkBox);
+            this.flowLayoutPanel1.FlowDirection = System.Windows.Forms.FlowDirection.TopDown;
+            this.flowLayoutPanel1.Location = new System.Drawing.Point(552, 55);
+            this.flowLayoutPanel1.Name = "flowLayoutPanel1";
+            this.flowLayoutPanel1.Size = new System.Drawing.Size(134, 173);
+            this.flowLayoutPanel1.TabIndex = 15;
+            // 
+            // flowLayoutPanel2
+            // 
+            this.flowLayoutPanel2.Controls.Add(this.label6);
+            this.flowLayoutPanel2.Controls.Add(this.height_textBox);
+            this.flowLayoutPanel2.Controls.Add(this.label7);
+            this.flowLayoutPanel2.Location = new System.Drawing.Point(3, 52);
+            this.flowLayoutPanel2.Name = "flowLayoutPanel2";
+            this.flowLayoutPanel2.Size = new System.Drawing.Size(127, 33);
+            this.flowLayoutPanel2.TabIndex = 15;
+            // 
+            // label6
+            // 
+            this.label6.AutoSize = true;
+            this.label6.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.label6.ForeColor = System.Drawing.Color.DarkSlateBlue;
+            this.label6.Location = new System.Drawing.Point(3, 3);
+            this.label6.Margin = new System.Windows.Forms.Padding(3, 3, 3, 0);
+            this.label6.Name = "label6";
+            this.label6.Size = new System.Drawing.Size(23, 20);
+            this.label6.TabIndex = 0;
+            this.label6.Text = "高";
+            // 
+            // height_textBox
+            // 
+            this.height_textBox.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.height_textBox.Location = new System.Drawing.Point(32, 3);
+            this.height_textBox.Name = "height_textBox";
+            this.height_textBox.Size = new System.Drawing.Size(40, 26);
+            this.height_textBox.TabIndex = 1;
+            // 
+            // label7
+            // 
+            this.label7.AutoSize = true;
+            this.label7.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.label7.Location = new System.Drawing.Point(78, 3);
+            this.label7.Margin = new System.Windows.Forms.Padding(3, 3, 3, 0);
+            this.label7.Name = "label7";
+            this.label7.Size = new System.Drawing.Size(37, 20);
+            this.label7.TabIndex = 2;
+            this.label7.Text = "厘米";
+            // 
+            // flowLayoutPanel3
+            // 
+            this.flowLayoutPanel3.Controls.Add(this.label8);
+            this.flowLayoutPanel3.Controls.Add(this.width_textBox);
+            this.flowLayoutPanel3.Controls.Add(this.label9);
+            this.flowLayoutPanel3.Location = new System.Drawing.Point(3, 91);
+            this.flowLayoutPanel3.Name = "flowLayoutPanel3";
+            this.flowLayoutPanel3.Size = new System.Drawing.Size(127, 29);
+            this.flowLayoutPanel3.TabIndex = 16;
+            // 
+            // label8
+            // 
+            this.label8.AutoSize = true;
+            this.label8.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.label8.ForeColor = System.Drawing.Color.DarkSlateBlue;
+            this.label8.Location = new System.Drawing.Point(3, 3);
+            this.label8.Margin = new System.Windows.Forms.Padding(3, 3, 3, 0);
+            this.label8.Name = "label8";
+            this.label8.Size = new System.Drawing.Size(23, 20);
+            this.label8.TabIndex = 0;
+            this.label8.Text = "宽";
+            // 
+            // width_textBox
+            // 
+            this.width_textBox.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.width_textBox.Location = new System.Drawing.Point(32, 3);
+            this.width_textBox.Name = "width_textBox";
+            this.width_textBox.ReadOnly = true;
+            this.width_textBox.Size = new System.Drawing.Size(40, 26);
+            this.width_textBox.TabIndex = 1;
+            // 
+            // label9
+            // 
+            this.label9.AutoSize = true;
+            this.label9.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.label9.Location = new System.Drawing.Point(78, 3);
+            this.label9.Margin = new System.Windows.Forms.Padding(3, 3, 3, 0);
+            this.label9.Name = "label9";
+            this.label9.Size = new System.Drawing.Size(37, 20);
+            this.label9.TabIndex = 2;
+            this.label9.Text = "厘米";
+            // 
+            // pictureSize_checkBox
+            // 
+            this.pictureSize_checkBox.AutoSize = true;
+            this.pictureSize_checkBox.Checked = true;
+            this.pictureSize_checkBox.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.pictureSize_checkBox.Font = new System.Drawing.Font("微软雅黑", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.pictureSize_checkBox.Location = new System.Drawing.Point(3, 126);
+            this.pictureSize_checkBox.Name = "pictureSize_checkBox";
+            this.pictureSize_checkBox.Size = new System.Drawing.Size(99, 21);
+            this.pictureSize_checkBox.TabIndex = 17;
+            this.pictureSize_checkBox.Text = "保持原始比例";
+            this.pictureSize_checkBox.UseVisualStyleBackColor = true;
+            this.pictureSize_checkBox.CheckedChanged += new System.EventHandler(this.pictureSize_checkBox_CheckedChanged);
+            // 
+            // pictureOriginal_comboBox
+            // 
+            this.pictureOriginal_comboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.pictureOriginal_comboBox.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.pictureOriginal_comboBox.FormattingEnabled = true;
+            this.pictureOriginal_comboBox.Items.AddRange(new object[] {
+            "原尺寸插入",
+            "缩放插入"});
+            this.pictureOriginal_comboBox.Location = new System.Drawing.Point(3, 26);
+            this.pictureOriginal_comboBox.Name = "pictureOriginal_comboBox";
+            this.pictureOriginal_comboBox.Size = new System.Drawing.Size(121, 28);
+            this.pictureOriginal_comboBox.TabIndex = 18;
+            this.pictureOriginal_comboBox.SelectedIndexChanged += new System.EventHandler(this.pictureOriginal_comboBox_SelectedIndexChanged);
+            // 
+            // docQuit_button
+            // 
+            this.docQuit_button.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.docQuit_button.ForeColor = System.Drawing.Color.SeaGreen;
+            this.docQuit_button.Location = new System.Drawing.Point(489, 379);
+            this.docQuit_button.Name = "docQuit_button";
+            this.docQuit_button.Size = new System.Drawing.Size(75, 29);
+            this.docQuit_button.TabIndex = 16;
+            this.docQuit_button.Text = "退出";
+            this.docQuit_button.UseVisualStyleBackColor = true;
+            this.docQuit_button.Click += new System.EventHandler(this.docQuit_button_Click);
+            // 
             // Form10
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(597, 426);
+            this.ClientSize = new System.Drawing.Size(698, 426);
+            this.Controls.Add(this.docQuit_button);
+            this.Controls.Add(this.flowLayoutPanel1);
             this.Controls.Add(this.placeholder_comboBox);
             this.Controls.Add(this.label4);
             this.Controls.Add(this.label3);
@@ -223,6 +389,12 @@
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "文档批量生成";
             this.Load += new System.EventHandler(this.Form10_Load);
+            this.flowLayoutPanel1.ResumeLayout(false);
+            this.flowLayoutPanel1.PerformLayout();
+            this.flowLayoutPanel2.ResumeLayout(false);
+            this.flowLayoutPanel2.PerformLayout();
+            this.flowLayoutPanel3.ResumeLayout(false);
+            this.flowLayoutPanel3.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -246,5 +418,18 @@
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.ComboBox placeholder_comboBox;
         private System.Windows.Forms.Timer timer1;
+        private System.Windows.Forms.Label label5;
+        private System.Windows.Forms.FlowLayoutPanel flowLayoutPanel1;
+        private System.Windows.Forms.FlowLayoutPanel flowLayoutPanel2;
+        private System.Windows.Forms.Label label6;
+        private System.Windows.Forms.TextBox height_textBox;
+        private System.Windows.Forms.Label label7;
+        private System.Windows.Forms.FlowLayoutPanel flowLayoutPanel3;
+        private System.Windows.Forms.Label label8;
+        private System.Windows.Forms.TextBox width_textBox;
+        private System.Windows.Forms.Label label9;
+        private System.Windows.Forms.CheckBox pictureSize_checkBox;
+        private System.Windows.Forms.ComboBox pictureOriginal_comboBox;
+        private System.Windows.Forms.Button docQuit_button;
     }
 }
