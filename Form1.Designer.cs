@@ -123,6 +123,41 @@ namespace ExcelAddIn
             this.label7 = new System.Windows.Forms.Label();
             this.find_keywordbutton_pictureBox = new System.Windows.Forms.PictureBox();
             this.tabPage6 = new System.Windows.Forms.TabPage();
+            this.keyHeader_flowLayoutPanel = new System.Windows.Forms.FlowLayoutPanel();
+            this.apiKey_flowLayoutPanel = new System.Windows.Forms.FlowLayoutPanel();
+            this.label14 = new System.Windows.Forms.Label();
+            this.apikey_textBox = new System.Windows.Forms.TextBox();
+            this.btnKeyChar = new System.Windows.Forms.Button();
+            this.label20 = new System.Windows.Forms.Label();
+            this.keyPlaceholder_textBox = new System.Windows.Forms.TextBox();
+            this.header_flowLayoutPanel = new System.Windows.Forms.FlowLayoutPanel();
+            this.label23 = new System.Windows.Forms.Label();
+            this.authHeader_comboBox = new System.Windows.Forms.ComboBox();
+            this.customAuthHeader_textBox = new System.Windows.Forms.TextBox();
+            this.label24 = new System.Windows.Forms.Label();
+            this.prefix_comboBox = new System.Windows.Forms.ComboBox();
+            this.customPrefix_textBox = new System.Windows.Forms.TextBox();
+            this.userPassword_flowLayoutPanel = new System.Windows.Forms.FlowLayoutPanel();
+            this.user_flowLayoutPanel = new System.Windows.Forms.FlowLayoutPanel();
+            this.label16 = new System.Windows.Forms.Label();
+            this.user_textBox = new System.Windows.Forms.TextBox();
+            this.label15 = new System.Windows.Forms.Label();
+            this.userPlaceholder_textBox = new System.Windows.Forms.TextBox();
+            this.pwd_flowLayoutPanel = new System.Windows.Forms.FlowLayoutPanel();
+            this.label21 = new System.Windows.Forms.Label();
+            this.pwd_textBox = new System.Windows.Forms.TextBox();
+            this.btnPwdChar = new System.Windows.Forms.Button();
+            this.label22 = new System.Windows.Forms.Label();
+            this.pwdPlaceholder_textBox = new System.Windows.Forms.TextBox();
+            this.label19 = new System.Windows.Forms.Label();
+            this.connectType_comboBox = new System.Windows.Forms.ComboBox();
+            this.label18 = new System.Windows.Forms.Label();
+            this.apiReset_button = new System.Windows.Forms.Button();
+            this.apiRun_button = new System.Windows.Forms.Button();
+            this.apiResult_label = new System.Windows.Forms.Label();
+            this.label17 = new System.Windows.Forms.Label();
+            this.address_textBox = new System.Windows.Forms.TextBox();
+            this.tabPage7 = new System.Windows.Forms.TabPage();
             this.groupBoxWordCloud = new System.Windows.Forms.GroupBox();
             this.checkBoxSVG = new System.Windows.Forms.CheckBox();
             this.comboBoxFonts = new System.Windows.Forms.ComboBox();
@@ -138,9 +173,9 @@ namespace ExcelAddIn
             this.label10 = new System.Windows.Forms.Label();
             this.chart_select_comboBox = new System.Windows.Forms.ComboBox();
             this.label9 = new System.Windows.Forms.Label();
-            this.tabPage7 = new System.Windows.Forms.TabPage();
-            this.richTextBox1 = new System.Windows.Forms.RichTextBox();
             this.tabPage8 = new System.Windows.Forms.TabPage();
+            this.richTextBox1 = new System.Windows.Forms.RichTextBox();
+            this.tabPage9 = new System.Windows.Forms.TabPage();
             this.split_sheet_timer = new System.Windows.Forms.Timer(this.components);
             this.folderBrowserDialog1 = new System.Windows.Forms.FolderBrowserDialog();
             this.merge_sheet_timer = new System.Windows.Forms.Timer(this.components);
@@ -164,9 +199,16 @@ namespace ExcelAddIn
             ((System.ComponentModel.ISupportInitialize)(this.dbsheet_dataGridView)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.find_keywordbutton_pictureBox)).BeginInit();
             this.tabPage6.SuspendLayout();
+            this.keyHeader_flowLayoutPanel.SuspendLayout();
+            this.apiKey_flowLayoutPanel.SuspendLayout();
+            this.header_flowLayoutPanel.SuspendLayout();
+            this.userPassword_flowLayoutPanel.SuspendLayout();
+            this.user_flowLayoutPanel.SuspendLayout();
+            this.pwd_flowLayoutPanel.SuspendLayout();
+            this.tabPage7.SuspendLayout();
             this.groupBoxWordCloud.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.chart_pictureBox)).BeginInit();
-            this.tabPage7.SuspendLayout();
+            this.tabPage8.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.SuspendLayout();
             // 
@@ -181,6 +223,7 @@ namespace ExcelAddIn
             this.tabControl1.Controls.Add(this.tabPage6);
             this.tabControl1.Controls.Add(this.tabPage7);
             this.tabControl1.Controls.Add(this.tabPage8);
+            this.tabControl1.Controls.Add(this.tabPage9);
             this.tabControl1.DrawMode = System.Windows.Forms.TabDrawMode.OwnerDrawFixed;
             this.tabControl1.Font = new System.Drawing.Font("微软雅黑", 12F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.tabControl1.HotTrack = true;
@@ -1331,24 +1374,452 @@ namespace ExcelAddIn
             // 
             // tabPage6
             // 
-            this.tabPage6.Controls.Add(this.groupBoxWordCloud);
-            this.tabPage6.Controls.Add(this.chart_pictureBox);
-            this.tabPage6.Controls.Add(this.label12);
-            this.tabPage6.Controls.Add(this.chart_reset_button);
-            this.tabPage6.Controls.Add(this.chart_create_button);
-            this.tabPage6.Controls.Add(this.label11);
-            this.tabPage6.Controls.Add(this.chart_range_textBox);
-            this.tabPage6.Controls.Add(this.label10);
-            this.tabPage6.Controls.Add(this.chart_select_comboBox);
-            this.tabPage6.Controls.Add(this.label9);
-            this.tabPage6.Font = new System.Drawing.Font("微软雅黑", 10.8F);
-            this.tabPage6.ForeColor = System.Drawing.Color.DarkSlateBlue;
+            this.tabPage6.Controls.Add(this.keyHeader_flowLayoutPanel);
+            this.tabPage6.Controls.Add(this.userPassword_flowLayoutPanel);
+            this.tabPage6.Controls.Add(this.label19);
+            this.tabPage6.Controls.Add(this.connectType_comboBox);
+            this.tabPage6.Controls.Add(this.label18);
+            this.tabPage6.Controls.Add(this.apiReset_button);
+            this.tabPage6.Controls.Add(this.apiRun_button);
+            this.tabPage6.Controls.Add(this.apiResult_label);
+            this.tabPage6.Controls.Add(this.label17);
+            this.tabPage6.Controls.Add(this.address_textBox);
             this.tabPage6.Location = new System.Drawing.Point(114, 4);
             this.tabPage6.Name = "tabPage6";
             this.tabPage6.Size = new System.Drawing.Size(685, 392);
-            this.tabPage6.TabIndex = 8;
-            this.tabPage6.Text = "六、图表增强";
+            this.tabPage6.TabIndex = 9;
+            this.tabPage6.Text = " 六、API数据";
             this.tabPage6.UseVisualStyleBackColor = true;
+            // 
+            // keyHeader_flowLayoutPanel
+            // 
+            this.keyHeader_flowLayoutPanel.Controls.Add(this.apiKey_flowLayoutPanel);
+            this.keyHeader_flowLayoutPanel.Controls.Add(this.header_flowLayoutPanel);
+            this.keyHeader_flowLayoutPanel.Location = new System.Drawing.Point(41, 201);
+            this.keyHeader_flowLayoutPanel.Name = "keyHeader_flowLayoutPanel";
+            this.keyHeader_flowLayoutPanel.Size = new System.Drawing.Size(577, 87);
+            this.keyHeader_flowLayoutPanel.TabIndex = 28;
+            // 
+            // apiKey_flowLayoutPanel
+            // 
+            this.apiKey_flowLayoutPanel.Controls.Add(this.label14);
+            this.apiKey_flowLayoutPanel.Controls.Add(this.apikey_textBox);
+            this.apiKey_flowLayoutPanel.Controls.Add(this.btnKeyChar);
+            this.apiKey_flowLayoutPanel.Controls.Add(this.label20);
+            this.apiKey_flowLayoutPanel.Controls.Add(this.keyPlaceholder_textBox);
+            this.apiKey_flowLayoutPanel.Location = new System.Drawing.Point(3, 3);
+            this.apiKey_flowLayoutPanel.Name = "apiKey_flowLayoutPanel";
+            this.apiKey_flowLayoutPanel.Size = new System.Drawing.Size(571, 37);
+            this.apiKey_flowLayoutPanel.TabIndex = 26;
+            // 
+            // label14
+            // 
+            this.label14.AutoSize = true;
+            this.label14.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.label14.ForeColor = System.Drawing.Color.DarkSlateBlue;
+            this.label14.Location = new System.Drawing.Point(3, 3);
+            this.label14.Margin = new System.Windows.Forms.Padding(3, 3, 0, 3);
+            this.label14.Name = "label14";
+            this.label14.Size = new System.Drawing.Size(62, 20);
+            this.label14.TabIndex = 18;
+            this.label14.Text = "API_Key";
+            // 
+            // apikey_textBox
+            // 
+            this.apikey_textBox.Font = new System.Drawing.Font("微软雅黑", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.apikey_textBox.Location = new System.Drawing.Point(65, 3);
+            this.apikey_textBox.Margin = new System.Windows.Forms.Padding(0, 3, 0, 3);
+            this.apikey_textBox.Name = "apikey_textBox";
+            this.apikey_textBox.Size = new System.Drawing.Size(263, 23);
+            this.apikey_textBox.TabIndex = 17;
+            this.apikey_textBox.UseSystemPasswordChar = true;
+            this.apikey_textBox.Click += new System.EventHandler(this.apikey_textBox_Click);
+            this.apikey_textBox.Enter += new System.EventHandler(this.apikey_textBox_Enter);
+            this.apikey_textBox.Leave += new System.EventHandler(this.apikey_textBox_Leave);
+            // 
+            // btnKeyChar
+            // 
+            this.btnKeyChar.BackgroundImage = global::ExcelAddIn.Properties.Resources.eye_hide;
+            this.btnKeyChar.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
+            this.btnKeyChar.Location = new System.Drawing.Point(328, 3);
+            this.btnKeyChar.Margin = new System.Windows.Forms.Padding(0, 3, 3, 3);
+            this.btnKeyChar.Name = "btnKeyChar";
+            this.btnKeyChar.Size = new System.Drawing.Size(23, 23);
+            this.btnKeyChar.TabIndex = 19;
+            this.btnKeyChar.UseVisualStyleBackColor = true;
+            this.btnKeyChar.Click += new System.EventHandler(this.btnKeyChar_Click);
+            // 
+            // label20
+            // 
+            this.label20.AutoSize = true;
+            this.label20.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.label20.ForeColor = System.Drawing.Color.DarkSlateBlue;
+            this.label20.Location = new System.Drawing.Point(357, 3);
+            this.label20.Margin = new System.Windows.Forms.Padding(3, 3, 0, 3);
+            this.label20.Name = "label20";
+            this.label20.Size = new System.Drawing.Size(107, 20);
+            this.label20.TabIndex = 20;
+            this.label20.Text = "地址替换字符串";
+            // 
+            // keyPlaceholder_textBox
+            // 
+            this.keyPlaceholder_textBox.Font = new System.Drawing.Font("微软雅黑", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.keyPlaceholder_textBox.Location = new System.Drawing.Point(464, 3);
+            this.keyPlaceholder_textBox.Margin = new System.Windows.Forms.Padding(0, 3, 3, 3);
+            this.keyPlaceholder_textBox.Name = "keyPlaceholder_textBox";
+            this.keyPlaceholder_textBox.Size = new System.Drawing.Size(101, 23);
+            this.keyPlaceholder_textBox.TabIndex = 21;
+            this.keyPlaceholder_textBox.Click += new System.EventHandler(this.keyPlaceholder_textBox_Click);
+            this.keyPlaceholder_textBox.TextChanged += new System.EventHandler(this.keyPlaceholder_textBox_TextChanged);
+            this.keyPlaceholder_textBox.Enter += new System.EventHandler(this.keyPlaceholder_textBox_Enter);
+            this.keyPlaceholder_textBox.Leave += new System.EventHandler(this.keyPlaceholder_textBox_Leave);
+            // 
+            // header_flowLayoutPanel
+            // 
+            this.header_flowLayoutPanel.Controls.Add(this.label23);
+            this.header_flowLayoutPanel.Controls.Add(this.authHeader_comboBox);
+            this.header_flowLayoutPanel.Controls.Add(this.customAuthHeader_textBox);
+            this.header_flowLayoutPanel.Controls.Add(this.label24);
+            this.header_flowLayoutPanel.Controls.Add(this.prefix_comboBox);
+            this.header_flowLayoutPanel.Controls.Add(this.customPrefix_textBox);
+            this.header_flowLayoutPanel.Location = new System.Drawing.Point(3, 46);
+            this.header_flowLayoutPanel.Name = "header_flowLayoutPanel";
+            this.header_flowLayoutPanel.Size = new System.Drawing.Size(571, 34);
+            this.header_flowLayoutPanel.TabIndex = 27;
+            // 
+            // label23
+            // 
+            this.label23.AutoSize = true;
+            this.label23.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.label23.ForeColor = System.Drawing.Color.DarkSlateBlue;
+            this.label23.Location = new System.Drawing.Point(3, 3);
+            this.label23.Margin = new System.Windows.Forms.Padding(3, 3, 0, 3);
+            this.label23.Name = "label23";
+            this.label23.Size = new System.Drawing.Size(79, 20);
+            this.label23.TabIndex = 19;
+            this.label23.Text = "认证头名称";
+            // 
+            // authHeader_comboBox
+            // 
+            this.authHeader_comboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.authHeader_comboBox.Font = new System.Drawing.Font("微软雅黑", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.authHeader_comboBox.FormattingEnabled = true;
+            this.authHeader_comboBox.Items.AddRange(new object[] {
+            "X-API-KEY",
+            "Authorization",
+            "X-Auth-Token",
+            "Api-Key",
+            "X-API-Key",
+            "自定义"});
+            this.authHeader_comboBox.Location = new System.Drawing.Point(82, 3);
+            this.authHeader_comboBox.Margin = new System.Windows.Forms.Padding(0, 3, 0, 3);
+            this.authHeader_comboBox.Name = "authHeader_comboBox";
+            this.authHeader_comboBox.Size = new System.Drawing.Size(104, 25);
+            this.authHeader_comboBox.TabIndex = 20;
+            this.authHeader_comboBox.SelectedIndexChanged += new System.EventHandler(this.authHeader_comboBox_SelectedIndexChanged);
+            // 
+            // customAuthHeader_textBox
+            // 
+            this.customAuthHeader_textBox.Font = new System.Drawing.Font("微软雅黑", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.customAuthHeader_textBox.Location = new System.Drawing.Point(186, 3);
+            this.customAuthHeader_textBox.Margin = new System.Windows.Forms.Padding(0, 3, 12, 3);
+            this.customAuthHeader_textBox.Name = "customAuthHeader_textBox";
+            this.customAuthHeader_textBox.Size = new System.Drawing.Size(113, 23);
+            this.customAuthHeader_textBox.TabIndex = 21;
+            // 
+            // label24
+            // 
+            this.label24.AutoSize = true;
+            this.label24.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.label24.ForeColor = System.Drawing.Color.DarkSlateBlue;
+            this.label24.Location = new System.Drawing.Point(323, 3);
+            this.label24.Margin = new System.Windows.Forms.Padding(12, 3, 0, 3);
+            this.label24.Name = "label24";
+            this.label24.Size = new System.Drawing.Size(37, 20);
+            this.label24.TabIndex = 22;
+            this.label24.Text = "前缀";
+            // 
+            // prefix_comboBox
+            // 
+            this.prefix_comboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.prefix_comboBox.Font = new System.Drawing.Font("微软雅黑", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.prefix_comboBox.FormattingEnabled = true;
+            this.prefix_comboBox.Items.AddRange(new object[] {
+            "无",
+            "Bearer",
+            "Token",
+            "Basic",
+            "自定义"});
+            this.prefix_comboBox.Location = new System.Drawing.Point(360, 3);
+            this.prefix_comboBox.Margin = new System.Windows.Forms.Padding(0, 3, 0, 3);
+            this.prefix_comboBox.Name = "prefix_comboBox";
+            this.prefix_comboBox.Size = new System.Drawing.Size(93, 25);
+            this.prefix_comboBox.TabIndex = 23;
+            this.prefix_comboBox.SelectedIndexChanged += new System.EventHandler(this.prefix_comboBox_SelectedIndexChanged);
+            // 
+            // customPrefix_textBox
+            // 
+            this.customPrefix_textBox.Font = new System.Drawing.Font("微软雅黑", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.customPrefix_textBox.Location = new System.Drawing.Point(453, 3);
+            this.customPrefix_textBox.Margin = new System.Windows.Forms.Padding(0, 3, 3, 3);
+            this.customPrefix_textBox.Name = "customPrefix_textBox";
+            this.customPrefix_textBox.Size = new System.Drawing.Size(112, 23);
+            this.customPrefix_textBox.TabIndex = 24;
+            // 
+            // userPassword_flowLayoutPanel
+            // 
+            this.userPassword_flowLayoutPanel.Controls.Add(this.user_flowLayoutPanel);
+            this.userPassword_flowLayoutPanel.Controls.Add(this.pwd_flowLayoutPanel);
+            this.userPassword_flowLayoutPanel.Location = new System.Drawing.Point(224, 106);
+            this.userPassword_flowLayoutPanel.Name = "userPassword_flowLayoutPanel";
+            this.userPassword_flowLayoutPanel.Size = new System.Drawing.Size(394, 87);
+            this.userPassword_flowLayoutPanel.TabIndex = 27;
+            // 
+            // user_flowLayoutPanel
+            // 
+            this.user_flowLayoutPanel.Controls.Add(this.label16);
+            this.user_flowLayoutPanel.Controls.Add(this.user_textBox);
+            this.user_flowLayoutPanel.Controls.Add(this.label15);
+            this.user_flowLayoutPanel.Controls.Add(this.userPlaceholder_textBox);
+            this.user_flowLayoutPanel.Location = new System.Drawing.Point(3, 3);
+            this.user_flowLayoutPanel.Name = "user_flowLayoutPanel";
+            this.user_flowLayoutPanel.Size = new System.Drawing.Size(388, 35);
+            this.user_flowLayoutPanel.TabIndex = 25;
+            // 
+            // label16
+            // 
+            this.label16.AutoSize = true;
+            this.label16.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.label16.ForeColor = System.Drawing.Color.DarkSlateBlue;
+            this.label16.Location = new System.Drawing.Point(3, 3);
+            this.label16.Margin = new System.Windows.Forms.Padding(3, 3, 0, 3);
+            this.label16.Name = "label16";
+            this.label16.Size = new System.Drawing.Size(51, 20);
+            this.label16.TabIndex = 14;
+            this.label16.Text = "用户名";
+            // 
+            // user_textBox
+            // 
+            this.user_textBox.Font = new System.Drawing.Font("微软雅黑", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.user_textBox.Location = new System.Drawing.Point(54, 3);
+            this.user_textBox.Margin = new System.Windows.Forms.Padding(0, 3, 3, 3);
+            this.user_textBox.Name = "user_textBox";
+            this.user_textBox.Size = new System.Drawing.Size(142, 23);
+            this.user_textBox.TabIndex = 13;
+            this.user_textBox.Click += new System.EventHandler(this.user_textBox_Click);
+            this.user_textBox.Enter += new System.EventHandler(this.user_textBox_Enter);
+            this.user_textBox.Leave += new System.EventHandler(this.user_textBox_Leave);
+            // 
+            // label15
+            // 
+            this.label15.AutoSize = true;
+            this.label15.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.label15.ForeColor = System.Drawing.Color.DarkSlateBlue;
+            this.label15.Location = new System.Drawing.Point(202, 3);
+            this.label15.Margin = new System.Windows.Forms.Padding(3, 3, 0, 3);
+            this.label15.Name = "label15";
+            this.label15.Size = new System.Drawing.Size(79, 20);
+            this.label15.TabIndex = 16;
+            this.label15.Text = "替换字符串";
+            // 
+            // userPlaceholder_textBox
+            // 
+            this.userPlaceholder_textBox.Font = new System.Drawing.Font("微软雅黑", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.userPlaceholder_textBox.Location = new System.Drawing.Point(281, 3);
+            this.userPlaceholder_textBox.Margin = new System.Windows.Forms.Padding(0, 3, 3, 3);
+            this.userPlaceholder_textBox.Name = "userPlaceholder_textBox";
+            this.userPlaceholder_textBox.Size = new System.Drawing.Size(102, 23);
+            this.userPlaceholder_textBox.TabIndex = 17;
+            this.userPlaceholder_textBox.Click += new System.EventHandler(this.userPlaceholder_textBox_Click);
+            this.userPlaceholder_textBox.Enter += new System.EventHandler(this.userPlaceholder_textBox_Enter);
+            this.userPlaceholder_textBox.Leave += new System.EventHandler(this.userPlaceholder_textBox_Leave);
+            // 
+            // pwd_flowLayoutPanel
+            // 
+            this.pwd_flowLayoutPanel.Controls.Add(this.label21);
+            this.pwd_flowLayoutPanel.Controls.Add(this.pwd_textBox);
+            this.pwd_flowLayoutPanel.Controls.Add(this.btnPwdChar);
+            this.pwd_flowLayoutPanel.Controls.Add(this.label22);
+            this.pwd_flowLayoutPanel.Controls.Add(this.pwdPlaceholder_textBox);
+            this.pwd_flowLayoutPanel.Location = new System.Drawing.Point(3, 44);
+            this.pwd_flowLayoutPanel.Name = "pwd_flowLayoutPanel";
+            this.pwd_flowLayoutPanel.Size = new System.Drawing.Size(388, 35);
+            this.pwd_flowLayoutPanel.TabIndex = 26;
+            // 
+            // label21
+            // 
+            this.label21.AutoSize = true;
+            this.label21.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.label21.ForeColor = System.Drawing.Color.DarkSlateBlue;
+            this.label21.Location = new System.Drawing.Point(3, 3);
+            this.label21.Margin = new System.Windows.Forms.Padding(3, 3, 0, 3);
+            this.label21.Name = "label21";
+            this.label21.Size = new System.Drawing.Size(37, 20);
+            this.label21.TabIndex = 14;
+            this.label21.Text = "密码";
+            // 
+            // pwd_textBox
+            // 
+            this.pwd_textBox.Font = new System.Drawing.Font("微软雅黑", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.pwd_textBox.Location = new System.Drawing.Point(40, 3);
+            this.pwd_textBox.Margin = new System.Windows.Forms.Padding(0, 3, 0, 3);
+            this.pwd_textBox.Name = "pwd_textBox";
+            this.pwd_textBox.Size = new System.Drawing.Size(133, 23);
+            this.pwd_textBox.TabIndex = 15;
+            this.pwd_textBox.UseSystemPasswordChar = true;
+            this.pwd_textBox.Click += new System.EventHandler(this.pwd_textBox_Click);
+            this.pwd_textBox.Enter += new System.EventHandler(this.pwd_textBox_Enter);
+            this.pwd_textBox.Leave += new System.EventHandler(this.pwd_textBox_Leave);
+            // 
+            // btnPwdChar
+            // 
+            this.btnPwdChar.BackgroundImage = global::ExcelAddIn.Properties.Resources.eye_hide;
+            this.btnPwdChar.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
+            this.btnPwdChar.Location = new System.Drawing.Point(173, 3);
+            this.btnPwdChar.Margin = new System.Windows.Forms.Padding(0, 3, 3, 3);
+            this.btnPwdChar.Name = "btnPwdChar";
+            this.btnPwdChar.Size = new System.Drawing.Size(23, 23);
+            this.btnPwdChar.TabIndex = 17;
+            this.btnPwdChar.UseVisualStyleBackColor = true;
+            this.btnPwdChar.Click += new System.EventHandler(this.btnPwdChar_Click);
+            // 
+            // label22
+            // 
+            this.label22.AutoSize = true;
+            this.label22.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.label22.ForeColor = System.Drawing.Color.DarkSlateBlue;
+            this.label22.Location = new System.Drawing.Point(202, 3);
+            this.label22.Margin = new System.Windows.Forms.Padding(3, 3, 0, 3);
+            this.label22.Name = "label22";
+            this.label22.Size = new System.Drawing.Size(79, 20);
+            this.label22.TabIndex = 16;
+            this.label22.Text = "替换字符串";
+            // 
+            // pwdPlaceholder_textBox
+            // 
+            this.pwdPlaceholder_textBox.Font = new System.Drawing.Font("微软雅黑", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.pwdPlaceholder_textBox.Location = new System.Drawing.Point(281, 3);
+            this.pwdPlaceholder_textBox.Margin = new System.Windows.Forms.Padding(0, 3, 3, 3);
+            this.pwdPlaceholder_textBox.Name = "pwdPlaceholder_textBox";
+            this.pwdPlaceholder_textBox.Size = new System.Drawing.Size(102, 23);
+            this.pwdPlaceholder_textBox.TabIndex = 18;
+            this.pwdPlaceholder_textBox.Click += new System.EventHandler(this.pwdPlaceholder_textBox_Click);
+            this.pwdPlaceholder_textBox.Enter += new System.EventHandler(this.pwdPlaceholder_textBox_Enter);
+            this.pwdPlaceholder_textBox.Leave += new System.EventHandler(this.pwdPlaceholder_textBox_Leave);
+            // 
+            // label19
+            // 
+            this.label19.AutoSize = true;
+            this.label19.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.label19.ForeColor = System.Drawing.Color.DarkSlateBlue;
+            this.label19.Location = new System.Drawing.Point(34, 110);
+            this.label19.Name = "label19";
+            this.label19.Size = new System.Drawing.Size(65, 20);
+            this.label19.TabIndex = 24;
+            this.label19.Text = "接入方式";
+            // 
+            // connectType_comboBox
+            // 
+            this.connectType_comboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.connectType_comboBox.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.connectType_comboBox.FormattingEnabled = true;
+            this.connectType_comboBox.Items.AddRange(new object[] {
+            "直接访问",
+            "密码访问",
+            "API-Key"});
+            this.connectType_comboBox.Location = new System.Drawing.Point(105, 106);
+            this.connectType_comboBox.Name = "connectType_comboBox";
+            this.connectType_comboBox.Size = new System.Drawing.Size(101, 28);
+            this.connectType_comboBox.TabIndex = 23;
+            this.connectType_comboBox.SelectedIndexChanged += new System.EventHandler(this.connectType_comboBox_SelectedIndexChanged);
+            // 
+            // label18
+            // 
+            this.label18.AutoSize = true;
+            this.label18.Font = new System.Drawing.Font("微软雅黑", 15.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.label18.ForeColor = System.Drawing.Color.DarkSlateBlue;
+            this.label18.Location = new System.Drawing.Point(248, 17);
+            this.label18.Name = "label18";
+            this.label18.Size = new System.Drawing.Size(133, 28);
+            this.label18.TabIndex = 22;
+            this.label18.Text = "API数据导入";
+            // 
+            // apiReset_button
+            // 
+            this.apiReset_button.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.apiReset_button.ForeColor = System.Drawing.Color.SeaGreen;
+            this.apiReset_button.Location = new System.Drawing.Point(433, 346);
+            this.apiReset_button.Name = "apiReset_button";
+            this.apiReset_button.Size = new System.Drawing.Size(75, 34);
+            this.apiReset_button.TabIndex = 21;
+            this.apiReset_button.Text = "重置";
+            this.apiReset_button.UseVisualStyleBackColor = true;
+            this.apiReset_button.Click += new System.EventHandler(this.apiReset_button_Click);
+            // 
+            // apiRun_button
+            // 
+            this.apiRun_button.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.apiRun_button.ForeColor = System.Drawing.Color.SeaGreen;
+            this.apiRun_button.Location = new System.Drawing.Point(131, 346);
+            this.apiRun_button.Name = "apiRun_button";
+            this.apiRun_button.Size = new System.Drawing.Size(75, 34);
+            this.apiRun_button.TabIndex = 20;
+            this.apiRun_button.Text = "运行";
+            this.apiRun_button.UseVisualStyleBackColor = true;
+            this.apiRun_button.Click += new System.EventHandler(this.apiRun_button_Click);
+            // 
+            // apiResult_label
+            // 
+            this.apiResult_label.Font = new System.Drawing.Font("微软雅黑", 9F, System.Drawing.FontStyle.Italic, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.apiResult_label.ForeColor = System.Drawing.Color.SaddleBrown;
+            this.apiResult_label.Location = new System.Drawing.Point(38, 294);
+            this.apiResult_label.Name = "apiResult_label";
+            this.apiResult_label.Size = new System.Drawing.Size(580, 47);
+            this.apiResult_label.TabIndex = 19;
+            // 
+            // label17
+            // 
+            this.label17.AutoSize = true;
+            this.label17.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.label17.ForeColor = System.Drawing.Color.DarkSlateBlue;
+            this.label17.Location = new System.Drawing.Point(34, 63);
+            this.label17.Name = "label17";
+            this.label17.Size = new System.Drawing.Size(60, 20);
+            this.label17.TabIndex = 12;
+            this.label17.Text = "API地址";
+            // 
+            // address_textBox
+            // 
+            this.address_textBox.Font = new System.Drawing.Font("微软雅黑", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.address_textBox.Location = new System.Drawing.Point(100, 59);
+            this.address_textBox.Name = "address_textBox";
+            this.address_textBox.Size = new System.Drawing.Size(518, 23);
+            this.address_textBox.TabIndex = 11;
+            this.address_textBox.Click += new System.EventHandler(this.address_textBox_Click);
+            this.address_textBox.DoubleClick += new System.EventHandler(this.address_textBox_DoubleClick);
+            this.address_textBox.Enter += new System.EventHandler(this.address_textBox_Enter);
+            this.address_textBox.Leave += new System.EventHandler(this.address_textBox_Leave);
+            // 
+            // tabPage7
+            // 
+            this.tabPage7.Controls.Add(this.groupBoxWordCloud);
+            this.tabPage7.Controls.Add(this.chart_pictureBox);
+            this.tabPage7.Controls.Add(this.label12);
+            this.tabPage7.Controls.Add(this.chart_reset_button);
+            this.tabPage7.Controls.Add(this.chart_create_button);
+            this.tabPage7.Controls.Add(this.label11);
+            this.tabPage7.Controls.Add(this.chart_range_textBox);
+            this.tabPage7.Controls.Add(this.label10);
+            this.tabPage7.Controls.Add(this.chart_select_comboBox);
+            this.tabPage7.Controls.Add(this.label9);
+            this.tabPage7.Font = new System.Drawing.Font("微软雅黑", 10.8F);
+            this.tabPage7.ForeColor = System.Drawing.Color.DarkSlateBlue;
+            this.tabPage7.Location = new System.Drawing.Point(114, 4);
+            this.tabPage7.Name = "tabPage7";
+            this.tabPage7.Size = new System.Drawing.Size(685, 392);
+            this.tabPage7.TabIndex = 8;
+            this.tabPage7.Text = "七、图表增强";
+            this.tabPage7.UseVisualStyleBackColor = true;
             // 
             // groupBoxWordCloud
             // 
@@ -1511,17 +1982,17 @@ namespace ExcelAddIn
             this.label9.TabIndex = 0;
             this.label9.Text = "图表类型";
             // 
-            // tabPage7
+            // tabPage8
             // 
-            this.tabPage7.BackColor = System.Drawing.SystemColors.Window;
-            this.tabPage7.Controls.Add(this.richTextBox1);
-            this.tabPage7.Font = new System.Drawing.Font("微软雅黑", 10.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.tabPage7.ForeColor = System.Drawing.Color.DarkSlateBlue;
-            this.tabPage7.Location = new System.Drawing.Point(114, 4);
-            this.tabPage7.Name = "tabPage7";
-            this.tabPage7.Size = new System.Drawing.Size(685, 392);
-            this.tabPage7.TabIndex = 4;
-            this.tabPage7.Text = "七、使用帮助";
+            this.tabPage8.BackColor = System.Drawing.SystemColors.Window;
+            this.tabPage8.Controls.Add(this.richTextBox1);
+            this.tabPage8.Font = new System.Drawing.Font("微软雅黑", 10.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.tabPage8.ForeColor = System.Drawing.Color.DarkSlateBlue;
+            this.tabPage8.Location = new System.Drawing.Point(114, 4);
+            this.tabPage8.Name = "tabPage8";
+            this.tabPage8.Size = new System.Drawing.Size(685, 392);
+            this.tabPage8.TabIndex = 4;
+            this.tabPage8.Text = "八、使用帮助";
             // 
             // richTextBox1
             // 
@@ -1529,20 +2000,20 @@ namespace ExcelAddIn
             this.richTextBox1.Location = new System.Drawing.Point(77, 48);
             this.richTextBox1.Name = "richTextBox1";
             this.richTextBox1.ReadOnly = true;
-            this.richTextBox1.Size = new System.Drawing.Size(519, 320);
+            this.richTextBox1.Size = new System.Drawing.Size(544, 320);
             this.richTextBox1.TabIndex = 0;
             this.richTextBox1.Text = resources.GetString("richTextBox1.Text");
             // 
-            // tabPage8
+            // tabPage9
             // 
-            this.tabPage8.BackColor = System.Drawing.SystemColors.Window;
-            this.tabPage8.Font = new System.Drawing.Font("微软雅黑", 10.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.tabPage8.ForeColor = System.Drawing.Color.DarkSlateBlue;
-            this.tabPage8.Location = new System.Drawing.Point(114, 4);
-            this.tabPage8.Name = "tabPage8";
-            this.tabPage8.Size = new System.Drawing.Size(685, 392);
-            this.tabPage8.TabIndex = 5;
-            this.tabPage8.Text = "八、退出工具";
+            this.tabPage9.BackColor = System.Drawing.SystemColors.Window;
+            this.tabPage9.Font = new System.Drawing.Font("微软雅黑", 10.8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.tabPage9.ForeColor = System.Drawing.Color.DarkSlateBlue;
+            this.tabPage9.Location = new System.Drawing.Point(114, 4);
+            this.tabPage9.Name = "tabPage9";
+            this.tabPage9.Size = new System.Drawing.Size(685, 392);
+            this.tabPage9.TabIndex = 5;
+            this.tabPage9.Text = "九、退出工具";
             // 
             // split_sheet_timer
             // 
@@ -1630,10 +2101,22 @@ namespace ExcelAddIn
             ((System.ComponentModel.ISupportInitialize)(this.find_keywordbutton_pictureBox)).EndInit();
             this.tabPage6.ResumeLayout(false);
             this.tabPage6.PerformLayout();
+            this.keyHeader_flowLayoutPanel.ResumeLayout(false);
+            this.apiKey_flowLayoutPanel.ResumeLayout(false);
+            this.apiKey_flowLayoutPanel.PerformLayout();
+            this.header_flowLayoutPanel.ResumeLayout(false);
+            this.header_flowLayoutPanel.PerformLayout();
+            this.userPassword_flowLayoutPanel.ResumeLayout(false);
+            this.user_flowLayoutPanel.ResumeLayout(false);
+            this.user_flowLayoutPanel.PerformLayout();
+            this.pwd_flowLayoutPanel.ResumeLayout(false);
+            this.pwd_flowLayoutPanel.PerformLayout();
+            this.tabPage7.ResumeLayout(false);
+            this.tabPage7.PerformLayout();
             this.groupBoxWordCloud.ResumeLayout(false);
             this.groupBoxWordCloud.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.chart_pictureBox)).EndInit();
-            this.tabPage7.ResumeLayout(false);
+            this.tabPage8.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
@@ -1646,8 +2129,8 @@ namespace ExcelAddIn
         private System.Windows.Forms.TabPage tabPage1;
         private System.Windows.Forms.TabPage tabPage2;
         private System.Windows.Forms.TabPage tabPage3;
-        private System.Windows.Forms.TabPage tabPage7;
         private System.Windows.Forms.TabPage tabPage8;
+        private System.Windows.Forms.TabPage tabPage9;
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.Label label1;
@@ -1745,7 +2228,7 @@ namespace ExcelAddIn
         private System.Windows.Forms.Label foreColor_label;
         private System.Windows.Forms.ComboBox data_start_combobox;
         private System.Windows.Forms.Label label8;
-        private System.Windows.Forms.TabPage tabPage6;
+        private System.Windows.Forms.TabPage tabPage7;
         private System.Windows.Forms.ComboBox chart_select_comboBox;
         private System.Windows.Forms.Label label9;
         private System.Windows.Forms.Label label11;
@@ -1761,5 +2244,40 @@ namespace ExcelAddIn
         private System.Windows.Forms.ComboBox comboBoxFonts;
         private System.Windows.Forms.Label labelFonts;
         private System.Windows.Forms.CheckBox checkBoxSVG;
+        private System.Windows.Forms.TabPage tabPage6;
+        private System.Windows.Forms.Button apiReset_button;
+        private System.Windows.Forms.Button apiRun_button;
+        private System.Windows.Forms.Label apiResult_label;
+        private System.Windows.Forms.Label label14;
+        private System.Windows.Forms.TextBox apikey_textBox;
+        private System.Windows.Forms.Label label15;
+        private System.Windows.Forms.TextBox pwd_textBox;
+        private System.Windows.Forms.Label label16;
+        private System.Windows.Forms.TextBox user_textBox;
+        private System.Windows.Forms.Label label17;
+        private System.Windows.Forms.TextBox address_textBox;
+        private System.Windows.Forms.Label label18;
+        private System.Windows.Forms.FlowLayoutPanel user_flowLayoutPanel;
+        private System.Windows.Forms.Label label19;
+        private System.Windows.Forms.ComboBox connectType_comboBox;
+        private System.Windows.Forms.FlowLayoutPanel apiKey_flowLayoutPanel;
+        private System.Windows.Forms.Button btnPwdChar;
+        private System.Windows.Forms.Button btnKeyChar;
+        private System.Windows.Forms.Label label20;
+        private System.Windows.Forms.TextBox keyPlaceholder_textBox;
+        private System.Windows.Forms.FlowLayoutPanel userPassword_flowLayoutPanel;
+        private System.Windows.Forms.TextBox userPlaceholder_textBox;
+        private System.Windows.Forms.FlowLayoutPanel pwd_flowLayoutPanel;
+        private System.Windows.Forms.Label label21;
+        private System.Windows.Forms.Label label22;
+        private System.Windows.Forms.TextBox pwdPlaceholder_textBox;
+        private System.Windows.Forms.FlowLayoutPanel keyHeader_flowLayoutPanel;
+        private System.Windows.Forms.FlowLayoutPanel header_flowLayoutPanel;
+        private System.Windows.Forms.Label label23;
+        private System.Windows.Forms.ComboBox authHeader_comboBox;
+        private System.Windows.Forms.TextBox customAuthHeader_textBox;
+        private System.Windows.Forms.Label label24;
+        private System.Windows.Forms.ComboBox prefix_comboBox;
+        private System.Windows.Forms.TextBox customPrefix_textBox;
     }
 }

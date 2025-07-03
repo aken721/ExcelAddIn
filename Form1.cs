@@ -1,31 +1,33 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
+using System.Data.OleDb;
+using System.Data.SqlClient;
+using System.Data.SQLite;
+using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Imaging;
+using System.Drawing.Text;
 using System.IO;
-using System.Data;
-using System.Data.SqlClient;
-using System.Data.OleDb;
-using MySql.Data.MySqlClient;
-using Npgsql;
-using System.Data.SQLite;
-using Oracle.ManagedDataAccess.Client;
 using System.Linq;
+using System.Net;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Timers;
 using System.Windows.Forms;
-using ZXing;
-using ZXing.QrCode;
-using Excel = Microsoft.Office.Interop.Excel;
-using ZXing.Rendering;
 using Microsoft.Office.Core;
-using System.Diagnostics;
+using MySql.Data.MySqlClient;
+using Newtonsoft.Json.Linq;
+using Npgsql;
+using Oracle.ManagedDataAccess.Client;
 using Sdcb.WordClouds;
 using SkiaSharp;
-using System.Drawing.Text;
+using ZXing;
+using ZXing.QrCode;
+using ZXing.Rendering;
+using Excel = Microsoft.Office.Interop.Excel;
 
 namespace ExcelAddIn
 {
@@ -211,9 +213,16 @@ namespace ExcelAddIn
                     dbexport_result_label.Text = string.Empty;
                     find_keywordclear_pictureBox.Visible = false;
                     break;
+                
+                //API接口数据提取
+                case 5:
+                    connectType_comboBox.SelectedIndex = 0;
+                    authHeader_comboBox.SelectedIndex = 0;
+                    prefix_comboBox.SelectedIndex = 0;
+                    break;
 
                 //图表增强
-                case 5:
+                case 6:
                     this.TopMost = false;
                     chart_select_comboBox.SelectedIndex = 0;
                     LoadFontsToComboBox(comboBoxFonts);
@@ -225,11 +234,11 @@ namespace ExcelAddIn
                     break;
 
                 //帮助
-                case 6:
+                case 7:
                     break;
 
                 //退出
-                case 7:
+                case 8:
                     this.Dispose();
                     break;
             }
@@ -3561,7 +3570,6 @@ namespace ExcelAddIn
         // 在窗体类中增加字段
         private string _currentWordCloudTempPath;
 
-
         // 将词频字典转换为 WordScore 集合
         private static IEnumerable<WordScore> ConvertToWordScores(Dictionary<string, int> frequencyDict)
         {
@@ -3767,8 +3775,977 @@ namespace ExcelAddIn
                     break;
             }
         }
+
+
+        /// <summary>
+        /// 以下部分为api数据获取功能内容
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void btnPwdChar_Click(object sender, EventArgs e)
+        {
+            if (pwd_textBox.UseSystemPasswordChar)
+            {
+                pwd_textBox.UseSystemPasswordChar = false;
+                btnPwdChar.BackgroundImage = ExcelAddIn.Properties.Resources.eye_open;
+            }
+            else
+            {
+                pwd_textBox.UseSystemPasswordChar = true;
+                btnPwdChar.BackgroundImage = ExcelAddIn.Properties.Resources.eye_hide;
+            }
+        }
+
+        private void btnKeyChar_Click(object sender, EventArgs e)
+        {
+            if (apikey_textBox.UseSystemPasswordChar)
+            {
+                apikey_textBox.UseSystemPasswordChar = false;
+                btnKeyChar.BackgroundImage = ExcelAddIn.Properties.Resources.eye_open;
+            }
+            else
+            {
+                apikey_textBox.UseSystemPasswordChar = true;
+                btnKeyChar.BackgroundImage = ExcelAddIn.Properties.Resources.eye_hide;
+            }
+        }
+
+        private void connectType_comboBox_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            switch(connectType_comboBox.SelectedIndex)
+            {
+                case 0:
+                    userPassword_flowLayoutPanel.Visible = false;
+                    keyHeader_flowLayoutPanel.Visible = false;
+                    break;
+                case 1:
+                    userPassword_flowLayoutPanel.Visible = true;
+                    keyHeader_flowLayoutPanel.Visible = false;
+                    break;
+                case 2: // Azure OpenAI
+                    userPassword_flowLayoutPanel.Visible = false;
+                    keyHeader_flowLayoutPanel.Visible = true;
+                    break;
+            }
+        }
+
+        private async void apiRun_button_Click(object sender, EventArgs e)
+        {
+            // 在进入后台线程之前获取UI控件的值
+            int selectedConnectType = connectType_comboBox.SelectedIndex;
+            string apiUrl = address_textBox.Text.Trim();
+            string username = user_textBox.Text.Trim();
+            string password = pwd_textBox.Text;
+            string apiKey = apikey_textBox.Text.Trim();
+            string userPlaceholder = userPlaceholder_textBox.Text.Trim();
+            string pwdPlaceholder = pwdPlaceholder_textBox.Text.Trim();
+            string keyPlaceholder = keyPlaceholder_textBox.Text.Trim();
+
+            // 获取认证头配置
+            string authHeader = "X-API-KEY"; // 默认值
+            string authPrefix = ""; // 默认无前缀
+
+            if (keyHeader_flowLayoutPanel.Visible)
+            {
+                // 获取认证头名称
+                if (authHeader_comboBox.SelectedIndex == 5) // 自定义
+                {
+                    authHeader = customAuthHeader_textBox.Text.Trim();
+                }
+                else
+                {
+                    authHeader = authHeader_comboBox.SelectedItem.ToString();
+                }
+
+                // 获取前缀
+                if (prefix_comboBox.SelectedIndex == 4) // 自定义
+                {
+                    authPrefix = customPrefix_textBox.Text.Trim();
+                }
+                else
+                {
+                    string selectedPrefix = prefix_comboBox.SelectedItem.ToString();
+                    authPrefix = (selectedPrefix == "无") ? "" : selectedPrefix;
+                }
+            }
+
+            // 安全禁用按钮
+            SafeInvoke(() =>
+            {
+                apiRun_button.Enabled = false;
+                apiReset_button.Enabled = false;
+                apikey_textBox.ReadOnly = true;
+                user_textBox.ReadOnly = true;
+                pwd_textBox.ReadOnly = true;
+                address_textBox.ReadOnly = true;
+                connectType_comboBox.Enabled = false;
+                userPlaceholder_textBox.ReadOnly = true;
+                pwdPlaceholder_textBox.ReadOnly = true;
+                keyPlaceholder_textBox.ReadOnly = true;
+                SafeUpdateStatus("处理中...", System.Drawing.Color.Blue);
+            });
+
+            try
+            {
+                // 验证输入
+                if (string.IsNullOrEmpty(apiUrl))
+                {
+                    throw new Exception("API地址不能为空");
+                }
+
+                // 根据连接类型验证输入
+                switch (selectedConnectType)
+                {
+                    case 1: // 密码访问
+                        if (string.IsNullOrEmpty(userPlaceholder) && !string.IsNullOrEmpty(username))
+                            throw new Exception("必须提供用户名占位符");
+                        if (string.IsNullOrEmpty(pwdPlaceholder) && !string.IsNullOrEmpty(password))
+                            throw new Exception("必须提供密码占位符");
+                        break;
+
+                    case 2: // API Key访问
+                        if (string.IsNullOrEmpty(keyPlaceholder) && string.IsNullOrEmpty(apiKey))
+                            throw new Exception("必须提供API Key或占位符");
+                        break;
+                }
+
+                // 构建最终URL（含占位符替换）
+                string finalUrl = BuildFinalUrl(
+                    apiUrl,
+                    selectedConnectType,
+                    username,
+                    password,
+                    apiKey,
+                    userPlaceholder,
+                    pwdPlaceholder,
+                    keyPlaceholder
+                );
+
+                // 获取数据
+                DataTable dataTable = await Task.Run(() => FetchData(
+                    finalUrl,
+                    selectedConnectType,
+                    username,
+                    password,
+                    apiKey,
+                    keyPlaceholder,
+                    authHeader,  // 新增参数
+                    authPrefix   // 新增参数
+                ));
+
+                // 写入Excel
+                await Task.Run(() => ApiWriteToExcel(dataTable));
+
+                SafeUpdateStatus($"成功写入 {dataTable.Rows.Count} 行数据", System.Drawing.Color.Green);
+            }
+            catch (Exception ex)
+            {
+                SafeUpdateStatus($"错误: {ex.Message}", System.Drawing.Color.Red);
+            }
+            finally
+            {
+                // 安全重新启用按钮
+                SafeInvoke(() =>
+                {
+                    apiRun_button.Enabled = true;
+                    apiReset_button.Enabled = true;
+                    apikey_textBox.ReadOnly = false;
+                    user_textBox.ReadOnly = false;
+                    pwd_textBox.ReadOnly = false;
+                    address_textBox.ReadOnly = false;
+                    userPlaceholder_textBox.ReadOnly = false;
+                    pwdPlaceholder_textBox.ReadOnly = false;
+                    keyPlaceholder_textBox.ReadOnly = false;
+                    connectType_comboBox.Enabled = true;
+                });
+            }
+        }
+
+        // 构建最终URL（含占位符替换）
+        private string BuildFinalUrl(
+            string baseUrl,
+            int connectType,
+            string username,
+            string password,
+            string apiKey,
+            string userPlaceholder,
+            string pwdPlaceholder,
+            string keyPlaceholder)
+        {
+            string finalUrl = baseUrl;
+
+            switch (connectType)
+            {
+                case 1: // 密码访问
+                    if (!string.IsNullOrEmpty(userPlaceholder) && !string.IsNullOrEmpty(username))
+                        finalUrl = finalUrl.Replace(userPlaceholder, Uri.EscapeDataString(username));
+
+                    if (!string.IsNullOrEmpty(pwdPlaceholder) && !string.IsNullOrEmpty(password))
+                        finalUrl = finalUrl.Replace(pwdPlaceholder, Uri.EscapeDataString(password));
+                    break;
+
+                case 2: // API Key访问
+                    if (!string.IsNullOrEmpty(keyPlaceholder) && !string.IsNullOrEmpty(apiKey))
+                        finalUrl = finalUrl.Replace(keyPlaceholder, Uri.EscapeDataString(apiKey));
+                    break;
+            }
+
+            return finalUrl;
+        }
+
+        // 安全更新状态的方法
+        private void SafeUpdateStatus(string message, System.Drawing.Color color)
+        {
+            if (apiResult_label.InvokeRequired)
+            {
+                apiResult_label.Invoke(new Action(() =>
+                {
+                    apiResult_label.Text = message;
+                    apiResult_label.ForeColor = color;
+                }));
+            }
+            else
+            {
+                apiResult_label.Text = message;
+                apiResult_label.ForeColor = color;
+            }
+        }
+
+        // 安全执行UI操作的方法
+        private void SafeInvoke(Action action)
+        {
+            if (this.InvokeRequired)
+            {
+                this.Invoke(action);
+            }
+            else
+            {
+                action();
+            }
+        }
+
+        //重置ui各控件
+        private void apiReset_button_Click(object sender, EventArgs e)
+        {
+            connectType_comboBox.SelectedIndex = 0;
+            address_textBox.Text = string.Empty;
+            user_textBox.Text = string.Empty;
+            pwd_textBox.Text = string.Empty;
+            apikey_textBox.Text = string.Empty;
+            userPlaceholder_textBox.Text = string.Empty;
+            pwdPlaceholder_textBox.Text = string.Empty;
+            keyPlaceholder_textBox.Text = string.Empty;
+            pwd_textBox.UseSystemPasswordChar = true;
+            apikey_textBox.UseSystemPasswordChar = true;
+            btnPwdChar.BackgroundImage = ExcelAddIn.Properties.Resources.eye_hide;
+            btnKeyChar.BackgroundImage = ExcelAddIn.Properties.Resources.eye_hide;
+            SafeUpdateStatus("", System.Drawing.Color.Black);
+
+            // 重置认证头配置
+            authHeader_comboBox.SelectedIndex = 0;
+            prefix_comboBox.SelectedIndex = 0;
+            customAuthHeader_textBox.Text = string.Empty;
+            customAuthHeader_textBox.Visible = false;
+            customPrefix_textBox.Text = string.Empty;
+            customPrefix_textBox.Visible = false;
+        }
+
+        // 从API获取数据
+        private DataTable FetchData(
+    string apiUrl,
+    int connectType,
+    string username,
+    string password,
+    string apiKey,
+    string keyPlaceholder,
+    string authHeader,  // 新增参数
+    string authPrefix)  // 新增参数
+        {
+            ServicePointManager.SecurityProtocol =
+                SecurityProtocolType.Tls12 |
+                SecurityProtocolType.Tls11 |
+                SecurityProtocolType.Tls;
+
+            // 测试环境忽略证书验证（生产环境应移除）
+            ServicePointManager.ServerCertificateValidationCallback =
+                (sender, certificate, chain, sslPolicyErrors) => true;
+            // =======================
+
+            try
+            {
+                HttpWebRequest request = (HttpWebRequest)WebRequest.Create(apiUrl);
+                request.Timeout = 30000;
+
+                // 设置认证方式
+                switch (connectType)
+                {
+                    case 1: // 密码访问（基本认证）
+                        if (!string.IsNullOrEmpty(username) || !string.IsNullOrEmpty(password))
+                        {
+                            string authInfo = $"{username}:{password}";
+                            string base64Auth = Convert.ToBase64String(Encoding.ASCII.GetBytes(authInfo));
+                            request.Headers["Authorization"] = "Basic " + base64Auth;
+                        }
+                        break;
+
+                    case 2: // API Key访问
+                        if (string.IsNullOrEmpty(keyPlaceholder) && !string.IsNullOrEmpty(apiKey))
+                        {
+                            // 构建认证头值
+                            string headerValue = string.IsNullOrEmpty(authPrefix)
+                                ? apiKey
+                                : $"{authPrefix} {apiKey}";
+
+                            // 设置认证头
+                            request.Headers[authHeader] = headerValue;
+                        }
+                        break;
+                }
+
+                using (HttpWebResponse response = (HttpWebResponse)request.GetResponse())
+                {
+                    if (response.StatusCode != HttpStatusCode.OK)
+                    {
+                        throw new Exception($"API返回错误: {response.StatusCode}");
+                    }
+
+                    // 获取内容类型
+                    string contentType = response.ContentType?.ToLower() ?? "";
+                    string content;
+
+                    using (Stream stream = response.GetResponseStream())
+                    using (StreamReader reader = new StreamReader(stream))
+                    {
+                        content = reader.ReadToEnd();
+                    }
+
+                    SafeUpdateStatus("数据获取成功，正在处理...", System.Drawing.Color.Blue);
+
+                    // 解析数据
+                    return ParseContent(content, contentType);
+                }
+            }
+            catch (WebException webEx)
+            {
+                string errorDetails = webEx.Message;
+                if (webEx.Response != null)
+                {
+                    using (var stream = webEx.Response.GetResponseStream())
+                    using (var reader = new StreamReader(stream))
+                    {
+                        errorDetails = reader.ReadToEnd();
+                    }
+                }
+                throw new Exception($"网络错误: {errorDetails}");
+            }
+        }
+
+        // 解析API返回内容
+        private DataTable ParseContent(string content, string contentType)
+        {
+            if (string.IsNullOrEmpty(content))
+            {
+                throw new Exception("API返回内容为空");
+            }
+
+            // 根据内容类型或内容特征自动判断格式
+            if (contentType.Contains("json") || content.Trim().StartsWith("{") || content.Trim().StartsWith("["))
+            {
+                return ParseJson(content);
+            }
+            else if (contentType.Contains("xml") || content.Trim().StartsWith("<"))
+            {
+                return ParseXml(content);
+            }
+            else if (contentType.Contains("csv") || (content.Contains(",") && content.Contains("\n")))
+            {
+                return ParseCsv(content);
+            }
+            else
+            {
+                throw new Exception("无法识别的数据格式");
+            }
+        }
+
+
+        //解析json
+        private DataTable ParseJson(string json)
+        {
+            try
+            {
+                // 尝试解析 JSON
+                JToken token = JToken.Parse(json);
+
+                // 智能识别最佳表格数据
+                DataTable dt = ExtractDataTable(token);
+
+                if (dt.Rows.Count == 0)
+                {
+                    // 如果没有提取到数据，尝试将整个 JSON 作为单行
+                    return CreateSingleRowTable(token);
+                }
+
+                return dt;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"JSON解析失败: {ex.Message}");
+            }
+        }
+
+        // 从 JToken 中提取 DataTable
+        private DataTable ExtractDataTable(JToken token)
+        {
+            DataTable dt = new DataTable();
+
+            // 情况1: 直接是数组
+            if (token is JArray array)
+            {
+                return ConvertJArrayToDataTable(array);
+            }
+
+            // 情况2: 对象中包含数组属性
+            if (token is JObject obj)
+            {
+                // 查找可能的数组字段
+                var arrayProperties = obj.Properties()
+                    .Where(p => p.Value is JArray)
+                    .OrderByDescending(p => ((JArray)p.Value).Count) // 优先选择最大的数组
+                    .ToList();
+
+                if (arrayProperties.Any())
+                {
+                    // 选择第一个非空数组
+                    foreach (var prop in arrayProperties)
+                    {
+                        var arrayValue = (JArray)prop.Value;
+                        if (arrayValue.Count > 0)
+                        {
+                            return ConvertJArrayToDataTable(arrayValue);
+                        }
+                    }
+                }
+
+                // 查找包含数组的嵌套对象
+                var nestedObjects = obj.Properties()
+                    .Where(p => p.Value is JObject)
+                    .ToList();
+
+                foreach (var nested in nestedObjects)
+                {
+                    var nestedTable = ExtractDataTable(nested.Value);
+                    if (nestedTable.Rows.Count > 0)
+                    {
+                        return nestedTable;
+                    }
+                }
+            }
+
+            return dt;                       // 空表
+        }
+
+        // 将 JArray 转换为 DataTable
+        private DataTable ConvertJArrayToDataTable(JArray array)
+        {
+            DataTable dt = new DataTable();
+
+            // 处理空数组
+            if (array.Count == 0) return dt;
+
+            // 确定列结构
+            var firstItem = array.First;
+
+            if (firstItem is JObject firstObj)
+            {
+                // 对象数组 - 使用属性名作为列名
+                foreach (JProperty prop in firstObj.Properties())
+                {
+                    dt.Columns.Add(prop.Name, typeof(string));
+                }
+            }
+            else
+            {
+                // 简单值数组
+                dt.Columns.Add("Value", typeof(string));
+            }
+
+            // 添加行
+            foreach (var item in array)
+            {
+                if (item is JObject obj)
+                {
+                    DataRow row = dt.NewRow();
+                    foreach (JProperty prop in obj.Properties())
+                    {
+                        if (dt.Columns.Contains(prop.Name))
+                        {
+                            row[prop.Name] = prop.Value?.ToString() ?? string.Empty;
+                        }
+                    }
+                    dt.Rows.Add(row);
+                }
+                else
+                {
+                    // 简单值
+                    DataRow row = dt.NewRow();
+                    row[0] = item?.ToString() ?? string.Empty;
+                    dt.Rows.Add(row);
+                }
+            }
+
+            return dt;
+        }
+
+        // 创建单行表格
+        private DataTable CreateSingleRowTable(JToken token)
+        {
+            DataTable dt = new DataTable();
+            dt.Columns.Add("Property", typeof(string));
+            dt.Columns.Add("Value", typeof(string));
+
+            FlattenToken(token, "", dt);
+
+            return dt;
+        }
+
+        // 递归扁平化 JToken
+        private void FlattenToken(JToken token, string prefix, DataTable dt)
+        {
+            switch (token)
+            {
+                case JObject obj:
+                    foreach (var property in obj.Properties())
+                    {
+                        string newPrefix = string.IsNullOrEmpty(prefix)
+                            ? property.Name
+                            : $"{prefix}.{property.Name}";
+
+                        FlattenToken(property.Value, newPrefix, dt);
+                    }
+                    break;
+
+                case JArray array:
+                    for (int i = 0; i < array.Count; i++)
+                    {
+                        string newPrefix = $"{prefix}[{i}]";
+                        FlattenToken(array[i], newPrefix, dt);
+                    }
+                    break;
+
+                case JValue value:
+                    dt.Rows.Add(prefix, value.ToString());
+                    break;
+
+                default:
+                    dt.Rows.Add(prefix, token?.ToString() ?? string.Empty);
+                    break;
+            }
+        }
+
+        //解析xml
+        private DataTable ParseXml(string xml)
+        {
+            try
+            {
+                DataSet dataSet = new DataSet();
+                using (StringReader reader = new StringReader(xml))
+                {
+                    dataSet.ReadXml(reader);
+                }
+                return dataSet.Tables.Count > 0 ? dataSet.Tables[0] : throw new Exception("XML中没有有效数据表");
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"XML解析失败: {ex.Message}");
+            }
+        }
+
+        //解析csv
+        private DataTable ParseCsv(string csv)
+        {
+            try
+            {
+                DataTable dt = new DataTable();
+
+                using (StringReader reader = new StringReader(csv))
+                {
+                    // 读取标题行
+                    string headerLine = reader.ReadLine();
+                    if (string.IsNullOrEmpty(headerLine))
+                    {
+                        throw new Exception("CSV内容为空");
+                    }
+
+                    string[] headers = headerLine.Split(',');
+                    foreach (string header in headers)
+                    {
+                        dt.Columns.Add(header.Trim());
+                    }
+
+                    // 读取数据行
+                    string line;
+                    int rowCount = 0;
+                    while ((line = reader.ReadLine()) != null)
+                    {
+                        rowCount++;
+
+                        // 更新状态（每100行）
+                        if (rowCount % 100 == 0)
+                        {
+                            SafeUpdateStatus($"正在解析CSV数据: {rowCount}行", System.Drawing.Color.Blue);
+                        }
+
+                        string[] fields = line.Split(',');
+                        if (fields.Length != headers.Length)
+                        {
+                            // 跳过列数不匹配的行
+                            continue;
+                        }
+
+                        DataRow dr = dt.NewRow();
+                        for (int i = 0; i < fields.Length; i++)
+                        {
+                            dr[i] = fields[i].Trim();
+                        }
+                        dt.Rows.Add(dr);
+                    }
+                }
+                return dt;
+            }
+            catch (Exception ex)
+            {
+                throw new Exception($"CSV解析失败: {ex.Message}");
+            }
+        }
+
+        // 将数据写入Excel
+        private void ApiWriteToExcel(DataTable dataTable)
+        {
+            try
+            {
+                Excel.Workbook workbook = ThisAddIn.app.ActiveWorkbook;
+                string sheetName = "API_Data";
+                int sameNameCount = 0;
+                foreach (Excel.Worksheet sheet in workbook.Worksheets)
+                {
+                    if (sheet.Name == sheetName)
+                    {
+                        sameNameCount++;
+                        sheetName = $"API_Data_{sameNameCount}";
+                    }
+                }
+                Excel.Worksheet addSheet = workbook.Worksheets.Add(Before: workbook.Worksheets[1]);
+                addSheet.Name = sheetName;
+
+                // 计算要写入的总行数和列数
+                int totalRows = dataTable.Rows.Count + 1; // 包括标题行
+                int totalCols = dataTable.Columns.Count;
+
+                if (totalCols > 0 && totalRows > 0)
+                {
+                    // 设置整个数据区域为文本格式
+                    SafeInvoke(() =>
+                    {
+                        Excel.Range dataRange = addSheet.Range[
+                            addSheet.Cells[1, 1],
+                            addSheet.Cells[totalRows, totalCols]
+                        ];
+                        dataRange.NumberFormat = "@"; // "@" 表示文本格式
+                    });
+                }
+
+                // 写入标题
+                for (int i = 0; i < dataTable.Columns.Count; i++)
+                {
+                    int colIndex = i + 1;
+                    SafeInvoke(() =>
+                    {
+                        // 显式设置为文本格式
+                        Excel.Range cell = addSheet.Cells[1, colIndex];
+                        cell.NumberFormat = "@";
+                        cell.Value = dataTable.Columns[i].ColumnName;
+                    });
+                }
+
+                // 写入数据
+                for (int row = 0; row < dataTable.Rows.Count; row++)
+                {
+                    // 更新状态
+                    if (row % 100 == 0)
+                    {
+                        SafeUpdateStatus($"正在写入Excel: {row}/{dataTable.Rows.Count}行", System.Drawing.Color.Blue);
+                    }
+
+                    for (int col = 0; col < dataTable.Columns.Count; col++)
+                    {
+                        object value = dataTable.Rows[row][col];
+                        int rowIndex = row + 2; // 标题行占用第1行
+                        int colIndex = col + 1;
+
+                        SafeInvoke(() =>
+                        {
+                            // 显式设置为文本格式
+                            Excel.Range cell = addSheet.Cells[rowIndex, colIndex];
+                            cell.NumberFormat = "@";
+
+                            // 处理空值
+                            if (value == null || value == DBNull.Value)
+                            {
+                                cell.Value = string.Empty;
+                            }
+                            else
+                            {
+                                // 对于以0开头的数字，添加前导撇号强制文本格式
+                                string strValue = value.ToString();
+                                if (strValue.StartsWith("0") && strValue.Length > 1)
+                                {
+                                    cell.Value = "'" + strValue;
+                                }
+                                else
+                                {
+                                    cell.Value = strValue;
+                                }
+                            }
+                        });
+                    }
+                }
+
+                // 格式化
+                SafeInvoke(() =>
+                {
+                    if (dataTable.Columns.Count > 0)
+                    {
+                        // 标题行格式化
+                        Excel.Range headerRange = addSheet.Range[
+                            addSheet.Cells[1, 1],
+                            addSheet.Cells[1, dataTable.Columns.Count]
+                        ];
+                        headerRange.Font.Bold = true;
+                        headerRange.Interior.Color = System.Drawing.ColorTranslator.ToOle(System.Drawing.Color.LightGray);
+
+                        // 自动调整列宽
+                        //addSheet.Columns.AutoFit();
+
+                        // 选择第一单元格
+                        addSheet.Cells[1, 1].Select();
+                    }
+                });
+
+                SafeUpdateStatus($"成功写入 {dataTable.Rows.Count} 行数据", System.Drawing.Color.Green);
+            }
+            catch (Exception ex)
+            {
+                SafeUpdateStatus($"Excel写入错误: {ex.Message}", System.Drawing.Color.Red);
+                throw;
+            }
+        }
+
+        private void address_textBox_DoubleClick(object sender, EventArgs e)
+        {
+            if(!string.IsNullOrEmpty(address_textBox.Text))
+            {
+                // 双击时打开链接
+                try
+                {
+                    System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+                    {
+                        FileName = address_textBox.Text,
+                        UseShellExecute = true // 使用系统默认浏览器打开链接
+                    });
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("无法打开链接: " + ex.Message);
+                }
+            }
+        }
+
+        private bool isFirstClickAfterFocus = false;
+
+        private void TextBox_Enter(object sender, EventArgs e)
+        {
+            if (sender is TextBox textBox)
+            {
+                isFirstClickAfterFocus = true;
+
+                // 仅在首次点击且文本不为空时全选
+                if (!string.IsNullOrEmpty(textBox.Text) && isFirstClickAfterFocus)
+                {
+                    textBox.SelectAll();
+                }
+            }
+        }
+
+        private void TextBox_Leave(object sender, EventArgs e)
+        {
+            if (sender is TextBox textBox)
+            {
+                isFirstClickAfterFocus = false;
+            }
+        }
+
+        private void TextBox_Click(object sender, EventArgs e)
+        {
+            if (sender is TextBox textBox)
+            {
+                // 如果不是首次点击（即已经获得焦点后的后续点击）
+                if (!isFirstClickAfterFocus)
+                {
+                    // 允许默认行为（光标移动到点击位置）
+                }
+                else
+                {
+                    // 首次点击已经在Enter事件中处理了全选
+                    // 这里将标志设置为false，以便后续点击正常处理
+                    textBox.SelectAll();
+                    isFirstClickAfterFocus = false;
+                }
+            }
+        }
+
+        //以下为各个文本框的事件处理方法
+        private void address_textBox_Enter(object sender, EventArgs e)
+        {
+            TextBox_Enter(address_textBox, e);
+        }
+
+        private void address_textBox_Leave(object sender, EventArgs e)
+        {
+            TextBox_Leave(address_textBox, e);
+        }
+
+        private void address_textBox_Click(object sender, EventArgs e)
+        {
+            TextBox_Click(address_textBox, e);
+        }
+
+        private void user_textBox_Click(object sender, EventArgs e)
+        {
+            TextBox_Click(user_textBox, e);
+        }
+
+        private void user_textBox_Enter(object sender, EventArgs e)
+        {
+            TextBox_Enter(user_textBox, e);
+        }
+
+        private void user_textBox_Leave(object sender, EventArgs e)
+        {
+            TextBox_Leave(user_textBox, e);
+        }
+
+        private void userPlaceholder_textBox_Click(object sender, EventArgs e)
+        {
+            TextBox_Click(userPlaceholder_textBox, e);
+        }
+
+        private void userPlaceholder_textBox_Enter(object sender, EventArgs e)
+        {
+            TextBox_Enter(userPlaceholder_textBox, e);
+        }
+
+        private void userPlaceholder_textBox_Leave(object sender, EventArgs e)
+        {
+            TextBox_Leave(userPlaceholder_textBox, e);
+        }
+
+        private void pwd_textBox_Click(object sender, EventArgs e)
+        {
+            TextBox_Click(pwd_textBox, e);
+        }
+
+        private void pwd_textBox_Enter(object sender, EventArgs e)
+        {
+            TextBox_Enter(pwd_textBox, e);
+        }
+
+        private void pwd_textBox_Leave(object sender, EventArgs e)
+        {
+            TextBox_Leave(pwd_textBox, e);
+        }
+
+        private void pwdPlaceholder_textBox_Click(object sender, EventArgs e)
+        {
+            TextBox_Click(pwdPlaceholder_textBox, e);
+        }
+
+        private void pwdPlaceholder_textBox_Enter(object sender, EventArgs e)
+        {
+            TextBox_Enter(pwdPlaceholder_textBox, e);
+        }
+
+        private void pwdPlaceholder_textBox_Leave(object sender, EventArgs e)
+        {
+            TextBox_Leave(pwdPlaceholder_textBox, e);
+        }
+
+        private void apikey_textBox_Click(object sender, EventArgs e)
+        {
+            TextBox_Click(apikey_textBox, e);
+        }
+
+        private void apikey_textBox_Enter(object sender, EventArgs e)
+        {
+            TextBox_Enter(apikey_textBox, e);
+        }
+
+        private void apikey_textBox_Leave(object sender, EventArgs e)
+        {
+            TextBox_Leave(apikey_textBox, e);
+        }
+
+        private void keyPlaceholder_textBox_Click(object sender, EventArgs e)
+        {
+            TextBox_Click(keyPlaceholder_textBox, e);
+        }
+
+        private void keyPlaceholder_textBox_Enter(object sender, EventArgs e)
+        {
+            TextBox_Enter(keyPlaceholder_textBox, e);
+        }
+
+        private void keyPlaceholder_textBox_Leave(object sender, EventArgs e)
+        {
+            TextBox_Leave(keyPlaceholder_textBox, e);
+        }
+
+        private void keyPlaceholder_textBox_TextChanged(object sender, EventArgs e)
+        {
+            if (string.IsNullOrEmpty(keyPlaceholder_textBox.Text))
+            {
+                header_flowLayoutPanel.Visible = true;
+            }
+            else
+            {
+                header_flowLayoutPanel.Visible = false;
+            }
+        }
+
+        private void authHeader_comboBox_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            // 当选择"自定义"时显示自定义输入框
+            customAuthHeader_textBox.Visible = (authHeader_comboBox.SelectedIndex == 5);
+
+            // 如果选择"Authorization"，默认设置前缀为"Bearer"
+            if (authHeader_comboBox.SelectedItem.ToString() == "Authorization" &&
+                prefix_comboBox.SelectedIndex == 0)
+            {
+                prefix_comboBox.SelectedIndex = 1; // Bearer
+            }
+        }
+
+        private void prefix_comboBox_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            // 当选择"自定义"时显示自定义输入框
+            customPrefix_textBox.Visible = (prefix_comboBox.SelectedIndex == 4);
+        }
     }
 
+
+
+    /// <summary>
+    /// 以下为数据库操作类，提供获取数据库表名的功能
+    /// </summary>
     internal class MysqlDB
     {
         internal static List<string> GetTableNames(string connString)
