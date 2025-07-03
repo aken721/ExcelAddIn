@@ -4426,14 +4426,17 @@ namespace ExcelAddIn
                 Excel.Workbook workbook = ThisAddIn.app.ActiveWorkbook;
                 string sheetName = "API_Data";
                 int sameNameCount = 0;
+                List<string> sheetNames = new List<string>();
                 foreach (Excel.Worksheet sheet in workbook.Worksheets)
                 {
-                    if (sheet.Name == sheetName)
-                    {
-                        sameNameCount++;
-                        sheetName = $"API_Data_{sameNameCount}";
-                    }
+                    sheetNames.Add(sheet.Name);
                 }
+                while (sheetNames.Contains(sheetName))
+                {
+                    sameNameCount++;
+                    sheetName = $"API_Data_{sameNameCount}";
+                }
+
                 Excel.Worksheet addSheet = workbook.Worksheets.Add(Before: workbook.Worksheets[1]);
                 addSheet.Name = sheetName;
 
@@ -4468,12 +4471,44 @@ namespace ExcelAddIn
                 }
 
                 // 写入数据
+                int dataTotalRows = dataTable.Rows.Count;
+                int updateFrequency = 1; // 默认更新频率
+
+                // 根据总行数确定更新频率
+                if (dataTotalRows <= 20)
+                {
+                    updateFrequency = 1;
+                }
+                else if (dataTotalRows <= 50)
+                {
+                    updateFrequency = 5;
+                }
+                else if (dataTotalRows <= 100)
+                {
+                    updateFrequency = 10;
+                }
+                else if (dataTotalRows <= 500)
+                {
+                    updateFrequency = 50;
+                }
+                else
+                {
+                    updateFrequency = 100;
+                }
+
+                // 确保至少更新一次
+                if (updateFrequency == 0) updateFrequency = 1;
+
+                // 写入数据
                 for (int row = 0; row < dataTable.Rows.Count; row++)
                 {
+                    // 检查是否需要更新状态（基于行数和时间间隔）
+                    bool shouldUpdate = row % updateFrequency == 0;
+
                     // 更新状态
-                    if (row % 100 == 0)
+                    if (shouldUpdate)
                     {
-                        SafeUpdateStatus($"正在写入Excel: {row}/{dataTable.Rows.Count}行", System.Drawing.Color.Blue);
+                        SafeUpdateStatus($"正在写入Excel: {row}/{dataTotalRows}行", System.Drawing.Color.Blue);
                     }
 
                     for (int col = 0; col < dataTable.Columns.Count; col++)
