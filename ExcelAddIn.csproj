@@ -585,6 +585,9 @@
     <PackageReference Include="NAudio.WinMM">
       <Version>2.2.1</Version>
     </PackageReference>
+    <PackageReference Include="Newtonsoft.Json">
+      <Version>13.0.3</Version>
+    </PackageReference>
     <PackageReference Include="Npgsql">
       <Version>8.0.7</Version>
     </PackageReference>
