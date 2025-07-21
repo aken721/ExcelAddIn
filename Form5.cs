@@ -22,16 +22,21 @@ namespace ExcelAddIn
     public partial class Form5 : Form
     {
         DataTable dt = new DataTable();
+
+
         public Form5()
         {
             InitializeComponent();
             picture_radioButton.Checked = true;
             folder_path_label.Text = string.Empty;
-            
+
             dt.Columns.Add("fold_path", typeof(string));
             dt.Columns.Add("file_name", typeof(string));
             dt.Columns.Add("qr_sequence", typeof(string));
             dt.Columns.Add("qr_content", typeof(string));
+
+            // 视频框绘制事件
+            videoSourcePlayer1.Paint += videoSourcePlayer1_Paint;
         }
 
 
@@ -41,6 +46,43 @@ namespace ExcelAddIn
         }
 
         List<string> files_fullname = new List<string>();
+
+        private int currentCameraIndex = 0;             // 当前摄像头索引
+        private FilterInfoCollection videoDevices;     // 摄像头设备集合
+        private List<Rectangle> qrRectangles = new List<Rectangle>();
+        private Pen qrBoxPen = new Pen(Color.LimeGreen, 3);
+        private int frameWidth = 0;
+        private int frameHeight = 0;
+        private VideoCaptureDevice videoDevice;   // 新增摄像头扫码时，用于存储当前设备的变量
+        private bool isProcessing = false;      // 添加标志变量
+        private Bitmap frame;                  // 新增摄像头扫码时，用于存储当前帧的变量
+        private readonly object _lockObject = new object();    // 锁对象，用于确保dt写入时现成安全
+
+        // 添加摄像头切换方法
+        private void switchCamera_button_Click(object sender, EventArgs e)
+        {
+            if (videoDevices == null || videoDevices.Count < 2) return;
+
+            // 停止当前设备
+            if (videoDevice != null && videoDevice.IsRunning)
+            {
+                videoDevice.SignalToStop();
+                videoDevice.WaitForStop();
+            }
+
+            // 切换到下一个摄像头
+            currentCameraIndex = (currentCameraIndex + 1) % videoDevices.Count;
+
+            // 启动新设备
+            videoDevice = new VideoCaptureDevice(videoDevices[currentCameraIndex].MonikerString);
+            videoDevice.VideoResolution = videoDevice.VideoCapabilities[0];
+            videoSourcePlayer1.VideoSource = videoDevice;
+            videoDevice.Start();
+            videoSourcePlayer1.Start();
+
+            // 更新标签显示
+            folder_path_label.Text = $"已切换摄像头: {videoDevices[currentCameraIndex].Name}";
+        }
 
         private async void scan_button_Click(object sender, EventArgs e)
         {
@@ -73,17 +115,19 @@ namespace ExcelAddIn
                             using (Bitmap bitmap = new Bitmap(item))
                             {
                                 Bitmap gray_bitmap = PreprocessImage(bitmap);
-                                
-                                if (ReadQRCode(gray_bitmap)!=null && ReadQRCode(gray_bitmap).Count > 0)
+
+                                // 使用无矩形版本的方法（图片模式不需要矩形）
+                                List<string> results = ReadQRCode(gray_bitmap);
+                                if (results != null && results.Count > 0)
                                 {
-                                    for (int i = 0; i < ReadQRCode(gray_bitmap).Count; i++)
+                                    for (int i = 0; i < results.Count; i++)
                                     {
                                         string[] details = new string[4]
                                         {
-                                            Path.GetDirectoryName(item),
-                                            Path.GetFileName(item),
-                                            (i + 1).ToString(),
-                                            ReadQRCode(gray_bitmap)[i]
+                                    Path.GetDirectoryName(item),
+                                    Path.GetFileName(item),
+                                    (i + 1).ToString(),
+                                    results[i]
                                         };
                                         dt.Rows.Add(details);
                                     }
@@ -115,11 +159,16 @@ namespace ExcelAddIn
             }
             else if (webcam_radioButton.Checked)
             {
-
                 isProcessing = false;
-                FilterInfoCollection videoDevices = new FilterInfoCollection(FilterCategory.VideoInputDevice);
+                videoDevices = new FilterInfoCollection(FilterCategory.VideoInputDevice);
                 if (videoDevices.Count > 0)
                 {
+                    // 显示切换摄像头按钮
+                    switchCamera_button.Visible = videoDevices.Count > 1;
+
+                    // 初始化当前摄像头索引
+                    currentCameraIndex = 0;
+
                     frame = null;
                     picture_radioButton.Enabled = false;
                     webcam_radioButton.Enabled = false;
@@ -128,12 +177,11 @@ namespace ExcelAddIn
                     cancel_button.Enabled = true;
                     folder_path_label.Text = "开始扫描二维码......";
                     videoDevice = new VideoCaptureDevice(videoDevices[0].MonikerString);
-                    videoDevice.VideoResolution =videoDevice.VideoCapabilities[0]; 
+                    videoDevice.VideoResolution = videoDevice.VideoCapabilities[0];
                     videoSourcePlayer1.VideoSource = videoDevice;
                     videoDevice.Start();
                     videoSourcePlayer1.Start();
-                    //videoDevice.NewFrame += new NewFrameEventHandler(videoDevice_NewFrame);
-                    timer1.Interval = 1000;
+                    timer1.Interval = 100; // 加快扫描频率
                     timer1.Enabled = true;
                 }
                 else
@@ -143,39 +191,40 @@ namespace ExcelAddIn
             }
         }
 
-        //private void videoDevice_NewFrame(object sender, NewFrameEventArgs eventArgs)
-        //{
-        //    frame = (Bitmap)eventArgs.Frame.Clone(); // 使用frame变量
-        //}
-
-        private VideoCaptureDevice videoDevice;   // 新增摄像头扫码时，用于存储当前设备的变量
-        private bool isProcessing = false;      // 添加标志变量
-        private Bitmap frame;                  // 新增摄像头扫码时，用于存储当前帧的变量
-        private readonly object _lockObject = new object();    // 锁对象，用于确保dt写入时现成安全
-
         private void timer1_Tick(object sender, EventArgs e)
         {
             if (isProcessing) return;
             isProcessing = true;
-            
+
             Task.Run(() =>
             {
                 frame = videoSourcePlayer1.GetCurrentVideoFrame();
-                if (frame == null) 
+                if (frame == null)
                 {
                     isProcessing = false;
                     return;
                 }
-                
 
                 using (Bitmap gray_bitmap = PreprocessImage(frame))
                 {
-                    List<string> results = ReadQRCode(gray_bitmap);
-                    if (results != null && results.Count > 0 ) // 检查标志变量
+                    List<Rectangle> rects;
+                    List<string> results = ReadQRCode(gray_bitmap, out rects);
+
+                    // 更新矩形和帧尺寸
+                    this.Invoke((MethodInvoker)delegate {
+                        qrRectangles = rects;
+                        if (frame != null)
+                        {
+                            frameWidth = frame.Width;
+                            frameHeight = frame.Height;
+                        }
+                        videoSourcePlayer1.Invalidate(); // 请求重绘
+                    });
+
+                    if (results != null && results.Count > 0)
                     {
                         this.Invoke((MethodInvoker)delegate
                         {
-                            //videoDevice.NewFrame -= videoDevice_NewFrame;
                             using (SoundPlayer scan_player = new SoundPlayer(Resources.ScanSound))
                             {
                                 scan_player.Play();
@@ -190,17 +239,17 @@ namespace ExcelAddIn
 
                         foreach (var result in results)
                         {
-                            lock (_lockObject) // Ensure thread safety when accessing shared resource 'dt'
+                            lock (_lockObject)
                             {
                                 string[] details = new string[4]
-                            {
-                                "webcam",
-                                "webcam",
-                                (results.IndexOf(result) + 1).ToString(),
-                                result.ToString()
-                            };
+                                {
+                            "webcam",
+                            "webcam",
+                            (results.IndexOf(result) + 1).ToString(),
+                            result.ToString()
+                                };
                                 dt.Rows.Add(details);
-                            }                            
+                            }
                         }
                         if (dt.Rows.Count > 0)
                         {
@@ -216,43 +265,71 @@ namespace ExcelAddIn
                                 scan_button.Enabled = true;
                                 cancel_button.Enabled = false;
                                 folder_path_label.Text = "二维码读取完毕！";
+                                qrRectangles.Clear(); // 清空矩形
                             });
                         }
                     }
                 }
-                isProcessing = false; // 处理完毕，重置标志
-            });            
+                isProcessing = false;
+            });
         }
 
+
         //ZXing 二维码读取
+        // 重载ReadQRCode方法 - 用于图片模式
         private List<string> ReadQRCode(Bitmap bitmap)
         {
-            List<string> qrCodeContents = new List<string>();            
-            // 创建专用的QRCodeReader
+            List<Rectangle> dummy;
+            return ReadQRCode(bitmap, out dummy);
+        }
+
+        // 重载ReadQRCode方法 - 用于摄像头模式
+        private List<string> ReadQRCode(Bitmap bitmap, out List<Rectangle> rectangles)
+        {
+            rectangles = new List<Rectangle>();
+            List<string> qrCodeContents = new List<string>();
+
             BarcodeReader reader = new BarcodeReader()
             {
                 Options = new DecodingOptions
                 {
-                    // 设置尝试解码的次数
                     TryHarder = true,
-                    // 指定字符集
                     PossibleFormats = new List<BarcodeFormat> { BarcodeFormat.QR_CODE },
                     CharacterSet = null
                 }
             };
+
             try
             {
-                // 解码图像中的多个二维码
                 var results = reader.DecodeMultiple(bitmap);
-                if (results == null)
-                {
-                    return null;
-                }
+                if (results == null) return null;
+
                 foreach (var result in results)
                 {
                     if (result != null && !string.IsNullOrEmpty(result.Text))
                     {
                         qrCodeContents.Add(result.Text);
+
+                        // 计算二维码边界框
+                        if (result.ResultPoints != null && result.ResultPoints.Length >= 3)
+                        {
+                            float minX = float.MaxValue;
+                            float minY = float.MaxValue;
+                            float maxX = float.MinValue;
+                            float maxY = float.MinValue;
+
+                            foreach (var point in result.ResultPoints)
+                            {
+                                minX = Math.Min(minX, point.X);
+                                minY = Math.Min(minY, point.Y);
+                                maxX = Math.Max(maxX, point.X);
+                                maxY = Math.Max(maxY, point.Y);
+                            }
+
+                            rectangles.Add(new Rectangle(
+                                (int)minX, (int)minY,
+                                (int)(maxX - minX), (int)(maxY - minY)));
+                        }
                     }
                 }
                 return qrCodeContents;
@@ -262,8 +339,36 @@ namespace ExcelAddIn
                 MessageBox.Show(ex.Message);
                 return null;
             }
+        }
 
-            
+        // 添加视频播放器的绘制事件
+        private void videoSourcePlayer1_Paint(object sender, PaintEventArgs e)
+        {
+            if (qrRectangles == null || qrRectangles.Count == 0 || frameWidth == 0 || frameHeight == 0)
+                return;
+
+            float scaleX = (float)videoSourcePlayer1.Width / frameWidth;
+            float scaleY = (float)videoSourcePlayer1.Height / frameHeight;
+
+            foreach (var rect in qrRectangles)
+            {
+                // 计算缩放后的矩形
+                Rectangle scaledRect = new Rectangle(
+                    (int)(rect.X * scaleX),
+                    (int)(rect.Y * scaleY),
+                    (int)(rect.Width * scaleX),
+                    (int)(rect.Height * scaleY)
+                );
+
+                // 绘制矩形框
+                e.Graphics.DrawRectangle(qrBoxPen, scaledRect);
+
+                // 添加聚焦效果
+                using (var brush = new SolidBrush(Color.FromArgb(50, Color.LimeGreen)))
+                {
+                    e.Graphics.FillRectangle(brush, scaledRect);
+                }
+            }
         }
 
         //ZXing判断一张图片中包含多少个二维码，该方法在功能实现中未使用
@@ -441,50 +546,44 @@ namespace ExcelAddIn
 
         private void cancel_button_Click(object sender, EventArgs e)
         {
-            // 停止 VideoSourcePlayer
+            // 停止设备
             if (videoSourcePlayer1.IsRunning)
             {
-                videoSourcePlayer1.SignalToStop(); // 发出停止信号
-                videoSourcePlayer1.WaitForStop();   // 等待线程停止
+                videoSourcePlayer1.SignalToStop();
+                videoSourcePlayer1.WaitForStop();
             }
-
-            // 停止 VideoCaptureDevice
             if (videoDevice != null && videoDevice.IsRunning)
             {
-                videoDevice.SignalToStop(); // 发出停止信号
-                videoDevice.WaitForStop();   // 等待线程停止
+                videoDevice.SignalToStop();
+                videoDevice.WaitForStop();
             }
 
-            // 恢复按钮状态
+            // 重置状态
             scan_button.Enabled = true;
             quit_button.Enabled = true;
             cancel_button.Enabled = false;
-            isProcessing=false;
-
-            // 清空文件夹路径标签
-            if (!string.IsNullOrEmpty(folder_path_label.Text))
-            {
-                folder_path_label.Text = "";
-            }
+            isProcessing = false;
+            qrRectangles.Clear();
+            folder_path_label.Text = "";
         }
 
 
         private void Form5_FormClosing(object sender, FormClosingEventArgs e)
         {
-            // 停止 VideoSourcePlayer
             if (videoSourcePlayer1.IsRunning)
             {
-                videoSourcePlayer1.SignalToStop(); // 发出停止信号
-                videoSourcePlayer1.WaitForStop();   // 等待线程停止
+                videoSourcePlayer1.SignalToStop();
+                videoSourcePlayer1.WaitForStop();
                 videoSourcePlayer1.VideoSource = null;
             }
-
-            // 停止 VideoCaptureDevice
             if (videoDevice != null && videoDevice.IsRunning)
             {
-                videoDevice.SignalToStop(); // 发出停止信号
-                videoDevice.WaitForStop();   // 等待线程停止
+                videoDevice.SignalToStop();
+                videoDevice.WaitForStop();
             }
+
+            // 释放资源
+            if (qrBoxPen != null) qrBoxPen.Dispose();
         }
     }
 }

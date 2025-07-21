@@ -267,6 +267,8 @@
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>
+    <None Include="ExcelAddIn_TemporaryKey.pfx" />
+    <None Include="Properties\Resources\switch.png" />
     <None Include="Properties\Resources\document.ico" />
     <None Include="Properties\Resources\document.png" />
     <None Include="Properties\Resources\management.png" />
@@ -314,7 +316,6 @@
       <DependentUpon>Ribbon1.cs</DependentUpon>
     </EmbeddedResource>
     <Content Include="app.config" />
-    <None Include="ExcelAddIn_TemporaryKey.pfx" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
@@ -759,7 +760,7 @@
     <ManifestKeyFile>ExcelAddIn_TemporaryKey.pfx</ManifestKeyFile>
   </PropertyGroup>
   <PropertyGroup>
-    <ManifestCertificateThumbprint>572A0D3936E80729B161E1DE766078CE5B681913</ManifestCertificateThumbprint>
+    <ManifestCertificateThumbprint>2A1400ECEA0BF5DEAC1885844836BC1CF22DF9B8</ManifestCertificateThumbprint>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x86'">
     <DebugSymbols>true</DebugSymbols>
