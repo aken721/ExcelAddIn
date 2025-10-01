@@ -234,80 +234,64 @@ namespace ExcelAddIn
 
         private void AddChatItem(string text, bool isUser)
         {
-            // 创建 RichTextBox 并设置基础属性
-            RichTextBox richTextBox = new RichTextBox
-            {
-                Text = text,
-                BorderStyle = BorderStyle.None,
-                ReadOnly = true,
-                WordWrap = true,
-                Padding = new Padding(5),
-                Margin = new Padding(5),
-                ContextMenuStrip = CreateContextMenu(isUser) // 添加右键菜单
-            };
+            int scrollBarWidth = SystemInformation.VerticalScrollBarWidth;
+            int availableWidth = flowLayoutPanelChat.ClientSize.Width - scrollBarWidth - 20;
 
-            // 根据消息类型设置样式和对齐
+            RichTextBox richTextBox = new RichTextBox { Text = text, BorderStyle = BorderStyle.None, ReadOnly = true, WordWrap = true, Padding = new Padding(5), ContextMenuStrip = CreateMessageContextMenu(isUser) };
+
+            using (Graphics g = richTextBox.CreateGraphics())
+            {
+                SizeF textSize = g.MeasureString(text, richTextBox.Font, availableWidth, StringFormat.GenericTypographic);
+                richTextBox.Width = Math.Min((int)Math.Ceiling(textSize.Width) + richTextBox.Padding.Horizontal, availableWidth);
+                richTextBox.Height = (int)Math.Ceiling(textSize.Height) + richTextBox.Padding.Vertical;
+            }
+
             if (isUser)
             {
                 richTextBox.BackColor = Color.LightBlue;
-                richTextBox.ForeColor = Color.Black;
+                richTextBox.Tag = "user_message";
+                int rtbLeftMargin = flowLayoutPanelChat.ClientSize.Width - richTextBox.Width - 10 - scrollBarWidth;
+                if (rtbLeftMargin < 10) rtbLeftMargin = 10;
+                richTextBox.Margin = new Padding(rtbLeftMargin, 5, 10, 0);
+                flowLayoutPanelChat.Controls.Add(richTextBox);
 
-                // 动态计算用户消息宽度
-                using (Graphics g = richTextBox.CreateGraphics())
-                {
-                    // 测量单行文本理想宽度
-                    SizeF textSize = g.MeasureString(text, richTextBox.Font, int.MaxValue, StringFormat.GenericTypographic);
-
-                    // 计算最大可用宽度（容器宽度 - 左右边距）
-                    int maxWidth = flowLayoutPanelChat.Width - 30; // 15px 左边距 + 15px 右边距
-
-                    // 设置实际宽度（取文本宽度和最大宽度的较小值）
-                    richTextBox.Width = Math.Min(
-                        (int)Math.Ceiling(textSize.Width) + richTextBox.Padding.Horizontal,
-                        maxWidth
-                    );
-                }
-
-                // 设置右对齐边距
-                int leftMargin = flowLayoutPanelChat.Width - richTextBox.Width - 15;
-                richTextBox.Margin = new Padding(leftMargin, 5, 15, 5);
+                FlowLayoutPanel buttonPanel = new FlowLayoutPanel { FlowDirection = FlowDirection.LeftToRight, AutoSize = false, Size = new Size(44, 20), BackColor = Color.Transparent, Padding = new Padding(0), Tag = "user_button_panel" };
+                Button btnEdit = new Button { Text = "✎", Size = new Size(20, 20), Margin = new Padding(1, 0, 1, 0), FlatStyle = FlatStyle.Flat, Font = new Font("Segoe UI Symbol", 7), Cursor = Cursors.Hand };
+                btnEdit.Click += (s, e) => { richTextBoxInput.Text = text; richTextBoxInput.Focus(); richTextBoxInput.SelectAll(); };
+                buttonPanel.Controls.Add(btnEdit);
+                Button btnResend = new Button { Text = "↻", Size = new Size(20, 20), Margin = new Padding(1, 0, 1, 0), FlatStyle = FlatStyle.Flat, Font = new Font("Segoe UI Symbol", 7), Cursor = Cursors.Hand };
+                btnResend.Click += (s, e) => { richTextBoxInput.Text = text; send_button_Click(null, EventArgs.Empty); };
+                buttonPanel.Controls.Add(btnResend);
+                int btnLeftMargin = flowLayoutPanelChat.ClientSize.Width - buttonPanel.Width - 10 - scrollBarWidth;
+                if (btnLeftMargin < 10) btnLeftMargin = 10;
+                buttonPanel.Margin = new Padding(btnLeftMargin, 2, 10, 15);
+                flowLayoutPanelChat.Controls.Add(buttonPanel);
+                flowLayoutPanelChat.ScrollControlIntoView(buttonPanel);
             }
             else
             {
                 richTextBox.BackColor = Color.LightGreen;
-                richTextBox.ForeColor = Color.Black;
-
-                // 动态计算系统消息宽度
-                using (Graphics g = richTextBox.CreateGraphics())
-                {
-                    SizeF textSize = g.MeasureString(text, richTextBox.Font, int.MaxValue, StringFormat.GenericTypographic);
-                    int maxWidth = flowLayoutPanelChat.Width - 20; // 左边距10px + 右边距10px
-                    richTextBox.Width = Math.Min(
-                        (int)Math.Ceiling(textSize.Width) + richTextBox.Padding.Horizontal,
-                        maxWidth
-                    );
-                }
-
                 richTextBox.Margin = new Padding(10, 5, 10, 5);
+                flowLayoutPanelChat.Controls.Add(richTextBox);
+                flowLayoutPanelChat.ScrollControlIntoView(richTextBox);
             }
-
-            // 计算文本实际需要的高度（保持原逻辑）
-            using (Graphics g = richTextBox.CreateGraphics())
-            {
-                int contentWidth = richTextBox.Width - richTextBox.Padding.Horizontal;
-                SizeF textSize = g.MeasureString(
-                    text,
-                    richTextBox.Font,
-                    contentWidth,
-                    StringFormat.GenericTypographic
-                );
-                richTextBox.Height = (int)Math.Ceiling(textSize.Height) + richTextBox.Padding.Vertical;
-            }
-
-            // 添加控件并滚动到最新消息
-            flowLayoutPanelChat.Controls.Add(richTextBox);
-            flowLayoutPanelChat.ScrollControlIntoView(richTextBox);
         }
+
+        private ContextMenuStrip CreateMessageContextMenu(bool isUserMessage)
+        {
+            ContextMenuStrip menu = new ContextMenuStrip();
+            ToolStripMenuItem copyItem = new ToolStripMenuItem("复制");
+            copyItem.Click += (s, e) => { if (menu.SourceControl is RichTextBox rtb) { Clipboard.SetText(rtb.SelectionLength > 0 ? rtb.SelectedText : rtb.Text); } };
+            menu.Items.Add(copyItem);
+            if (isUserMessage)
+            {
+                ToolStripMenuItem deleteItem = new ToolStripMenuItem("删除");
+                deleteItem.Click += (s, e) => { if (menu.SourceControl is RichTextBox rtb && flowLayoutPanelChat.Controls.Contains(rtb)) { flowLayoutPanelChat.Controls.Remove(rtb); rtb.Dispose(); } };
+                menu.Items.Add(deleteItem);
+            }
+            return menu;
+        }
+
 
         // 创建右键上下文菜单
         private ContextMenuStrip CreateContextMenu(bool isUserMessage)
