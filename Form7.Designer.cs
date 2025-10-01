@@ -49,7 +49,7 @@
             this.richTextBoxInput.ForeColor = System.Drawing.SystemColors.WindowText;
             this.richTextBoxInput.Location = new System.Drawing.Point(151, 332);
             this.richTextBoxInput.Name = "richTextBoxInput";
-            this.richTextBoxInput.Size = new System.Drawing.Size(517, 89);
+            this.richTextBoxInput.Size = new System.Drawing.Size(517, 75);
             this.richTextBoxInput.TabIndex = 4;
             this.richTextBoxInput.Text = "";
             this.richTextBoxInput.KeyDown += new System.Windows.Forms.KeyEventHandler(this.richTextBoxInput_KeyDown);
@@ -58,12 +58,11 @@
             // 
             this.prompt_label.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
-            this.prompt_label.AutoSize = true;
-            this.prompt_label.Font = new System.Drawing.Font("微软雅黑", 9F, System.Drawing.FontStyle.Italic, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.prompt_label.Font = new System.Drawing.Font("微软雅黑", 7.5F, System.Drawing.FontStyle.Italic, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.prompt_label.ForeColor = System.Drawing.Color.SaddleBrown;
-            this.prompt_label.Location = new System.Drawing.Point(71, 428);
+            this.prompt_label.Location = new System.Drawing.Point(67, 415);
             this.prompt_label.Name = "prompt_label";
-            this.prompt_label.Size = new System.Drawing.Size(0, 17);
+            this.prompt_label.Size = new System.Drawing.Size(679, 29);
             this.prompt_label.TabIndex = 5;
             // 
             // flowLayoutPanelChat
@@ -115,29 +114,29 @@
             this.label1.Text = "文字输入：";
             // 
             // send_button
-            //
+            // 
             this.send_button.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.send_button.BackgroundImage = global::ExcelAddIn.Properties.Resources.send;
             this.send_button.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
-            this.send_button.Location = new System.Drawing.Point(674, 394);
+            this.send_button.Location = new System.Drawing.Point(674, 376);
             this.send_button.Name = "send_button";
             this.send_button.Size = new System.Drawing.Size(27, 27);
             this.send_button.TabIndex = 2;
             this.send_button.UseVisualStyleBackColor = true;
             this.send_button.Click += new System.EventHandler(this.send_button_Click);
-            //
+            // 
             // checkBoxUseMcp
-            //
+            // 
             this.checkBoxUseMcp.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.checkBoxUseMcp.AutoSize = true;
             this.checkBoxUseMcp.Font = new System.Drawing.Font("微软雅黑", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.checkBoxUseMcp.Location = new System.Drawing.Point(70, 397);
+            this.checkBoxUseMcp.Location = new System.Drawing.Point(70, 376);
             this.checkBoxUseMcp.Name = "checkBoxUseMcp";
-            this.checkBoxUseMcp.Size = new System.Drawing.Size(75, 21);
+            this.checkBoxUseMcp.Size = new System.Drawing.Size(78, 21);
             this.checkBoxUseMcp.TabIndex = 9;
             this.checkBoxUseMcp.Text = "使用MCP";
             this.checkBoxUseMcp.UseVisualStyleBackColor = true;
-            //
+            // 
             // Form7
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);

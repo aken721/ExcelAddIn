@@ -2158,6 +2158,7 @@ namespace ExcelAddIn
                 // 调试信息：检查是否有工具调用
                 System.Diagnostics.Debug.WriteLine($"AI响应内容: {choice?.message?.content}");
                 System.Diagnostics.Debug.WriteLine($"工具调用数量: {choice?.message?.tool_calls?.Length ?? 0}");
+                System.Diagnostics.Debug.WriteLine($"完整响应: {responseContent}");
 
                 // 检查是否有工具调用
                 if (choice?.message?.tool_calls != null && choice.message.tool_calls.Length > 0)
@@ -2166,6 +2167,7 @@ namespace ExcelAddIn
                     var toolCalls = choice.message.tool_calls;
 
                     System.Diagnostics.Debug.WriteLine($"开始执行 {toolCalls.Length} 个工具调用");
+                    prompt_label.Text = $"正在执行 {toolCalls.Length} 个工具操作...";
 
                     // 将AI的工具调用消息加入历史
                     _chatHistory.Add(new ChatMessage
@@ -2192,6 +2194,7 @@ namespace ExcelAddIn
 
                         System.Diagnostics.Debug.WriteLine($"执行工具: {functionName}");
                         System.Diagnostics.Debug.WriteLine($"参数: {toolCall.function.arguments}");
+                        prompt_label.Text = $"正在执行工具: {functionName}...";
 
                         // 执行工具
                         var toolResult = ExecuteMcpTool(functionName, arguments);
@@ -2207,42 +2210,107 @@ namespace ExcelAddIn
                         });
                     }
 
-                    // 再次调用API获取最终回复
-                    var finalRequestBody = new Dictionary<string, object>
+                    // 循环处理工具调用，直到AI不再请求工具
+                    while (true)
                     {
-                        { "model", _model },
-                        { "messages", BuildMessages(useMcp) },
-                        { "temperature", 0.7 },
-                        { "max_tokens", 2000 }
-                    };
-
-                    if (useMcp && _excelMcp != null)
-                    {
-                        finalRequestBody["tools"] = GetMcpTools();
-                    }
-
-                    var finalResponse = await client.PostAsJsonAsync(apiUrl, finalRequestBody);
-                    var finalResponseContent = await finalResponse.Content.ReadAsStringAsync();
-
-                    if (!finalResponse.IsSuccessStatusCode)
-                    {
-                        throw new HttpRequestException($"HTTP Error: {finalResponse.StatusCode}");
-                    }
-
-                    var finalJsonResponse = JsonSerializer.Deserialize<DeepSeekResponse>(finalResponseContent);
-                    var aiResponse = finalJsonResponse?.choices[0].message.content?.Trim();
-
-                    // 将最终AI回复加入历史
-                    if (!string.IsNullOrEmpty(aiResponse))
-                    {
-                        _chatHistory.Add(new ChatMessage
+                        // 再次调用API获取回复（可能是最终回复或更多工具调用）
+                        var finalRequestBody = new Dictionary<string, object>
                         {
-                            Role = "assistant",
-                            Content = aiResponse
-                        });
-                    }
+                            { "model", _model },
+                            { "messages", BuildMessages(useMcp) },
+                            { "temperature", 0.7 },
+                            { "max_tokens", 2000 }
+                        };
 
-                    return aiResponse ?? string.Empty;
+                        if (useMcp && _excelMcp != null)
+                        {
+                            finalRequestBody["tools"] = GetMcpTools();
+                        }
+
+                        prompt_label.Text = "等待AI响应...";
+                        var finalResponse = await client.PostAsJsonAsync(apiUrl, finalRequestBody);
+                        var finalResponseContent = await finalResponse.Content.ReadAsStringAsync();
+
+                        if (!finalResponse.IsSuccessStatusCode)
+                        {
+                            throw new HttpRequestException($"HTTP Error: {finalResponse.StatusCode}");
+                        }
+
+                        var finalJsonResponse = JsonSerializer.Deserialize<DeepSeekResponse>(finalResponseContent);
+                        var finalChoice = finalJsonResponse?.choices[0];
+
+                        System.Diagnostics.Debug.WriteLine($"第二轮AI响应内容: {finalChoice?.message?.content}");
+                        System.Diagnostics.Debug.WriteLine($"第二轮工具调用数量: {finalChoice?.message?.tool_calls?.Length ?? 0}");
+
+                        // 检查是否还有工具调用
+                        if (finalChoice?.message?.tool_calls != null && finalChoice.message.tool_calls.Length > 0)
+                        {
+                            // 继续执行工具调用
+                            var moreToolCalls = finalChoice.message.tool_calls;
+                            System.Diagnostics.Debug.WriteLine($"继续执行 {moreToolCalls.Length} 个工具调用");
+                            prompt_label.Text = $"正在执行 {moreToolCalls.Length} 个工具操作...";
+
+                            // 将AI的工具调用消息加入历史
+                            _chatHistory.Add(new ChatMessage
+                            {
+                                Role = "assistant",
+                                Content = finalChoice.message.content,
+                                ToolCalls = moreToolCalls.Select(tc => new ToolCall
+                                {
+                                    Id = tc.id,
+                                    Type = tc.type,
+                                    Function = new FunctionCall
+                                    {
+                                        Name = tc.function.name,
+                                        Arguments = tc.function.arguments
+                                    }
+                                }).ToList()
+                            });
+
+                            // 执行每个工具调用
+                            foreach (var toolCall in moreToolCalls)
+                            {
+                                var functionName = toolCall.function.name;
+                                var arguments = JsonSerializer.Deserialize<JsonElement>(toolCall.function.arguments);
+
+                                System.Diagnostics.Debug.WriteLine($"执行工具: {functionName}");
+                                System.Diagnostics.Debug.WriteLine($"参数: {toolCall.function.arguments}");
+                                prompt_label.Text = $"正在执行工具: {functionName}...";
+
+                                // 执行工具
+                                var toolResult = ExecuteMcpTool(functionName, arguments);
+
+                                System.Diagnostics.Debug.WriteLine($"工具执行结果: {toolResult}");
+
+                                // 将工具结果加入历史
+                                _chatHistory.Add(new ChatMessage
+                                {
+                                    Role = "tool",
+                                    Content = toolResult,
+                                    ToolCallId = toolCall.id
+                                });
+                            }
+
+                            // 继续循环，再次调用API
+                        }
+                        else
+                        {
+                            // 没有更多工具调用，这是最终回复
+                            var aiResponse = finalChoice?.message?.content?.Trim();
+
+                            // 将最终AI回复加入历史
+                            if (!string.IsNullOrEmpty(aiResponse))
+                            {
+                                _chatHistory.Add(new ChatMessage
+                                {
+                                    Role = "assistant",
+                                    Content = aiResponse
+                                });
+                            }
+
+                            return aiResponse ?? string.Empty;
+                        }
+                    }
                 }
                 else
                 {
@@ -2272,20 +2340,37 @@ namespace ExcelAddIn
             // 添加系统提示词（仅在使用MCP时）
             if (useMcp && _excelMcp != null)
             {
-                var systemPrompt = @"你是一个Excel操作助手。你可以通过工具调用来操作Excel文件。
+                var systemPrompt = @"你是一个Excel操作助手。你必须通过调用工具来操作Excel文件。
+
+**核心原则**：
+🚫 **禁止仅用文字描述操作** - 例如：""我将在A1写入数据""、""现在我把名称写入A列""
+✅ **必须实际调用工具函数** - 直接使用 set_cell_value、get_worksheet_names 等工具
 
 **重要规则**：
 1. **必须直接调用工具，不要只是描述要做什么**：
    - 错误示例：""我将在A1单元格写入测试"" ❌
-   - 正确示例：直接调用 set_cell_value 工具 ✅
-2. **""表""默认指工作表（worksheet）**：
+   - 错误示例：""现在我将这些工作表名称写入当前表的A列"" ❌
+   - 正确示例：直接调用 set_cell_value 工具，参数为 row=1, column=1, value=""测试"" ✅
+   - 正确示例：循环调用 set_cell_value 工具，将每个工作表名称写入 A1、A2、A3... ✅
+
+2. **对于需要多步操作的任务，必须调用多次工具**：
+   - 例如：要将5个工作表名称写入A1-A5，必须调用5次 set_cell_value 工具
+   - 第一次：set_cell_value(row=1, column=1, value=""Sheet1"")
+   - 第二次：set_cell_value(row=2, column=1, value=""Sheet2"")
+   - ...以此类推
+
+3. **""表""默认指工作表（worksheet）**：
    - 当用户说""新建一个表""、""创建表""时，指的是在当前工作簿中创建新的工作表（sheet），而不是创建新的工作簿
    - 当用户说""新建工作簿""、""创建Excel文件""时，才是创建工作簿
    - 例如：""新建一个销售表"" → 使用 create_worksheet，而不是 create_workbook
-3. 当用户说""当前工作簿""、""这个工作簿""、""当前表""、""这个表""时，指的是最近操作的工作簿和工作表
-4. 当用户未明确指定工作簿名称时，使用当前活跃的工作簿
-5. 当用户未明确指定工作表名称时，使用当前活跃的工作表
-6. 通过上下文分析推断用户想要操作的对象
+
+4. 当用户说""当前工作簿""、""这个工作簿""、""当前表""、""这个表""时，指的是最近操作的工作簿和工作表
+
+5. 当用户未明确指定工作簿名称时，使用当前活跃的工作簿
+
+6. 当用户未明确指定工作表名称时，使用当前活跃的工作表
+
+7. 通过上下文分析推断用户想要操作的对象
 
 **当前环境**：
 - 这是Excel插件环境，用户在Excel中打开了工作簿并启动了对话框
@@ -2296,13 +2381,17 @@ namespace ExcelAddIn
 - 如果当前活跃工作簿为""无""，请先使用 get_current_excel_info 工具获取最新的Excel环境信息
 - 获取信息后，你就能知道用户当前打开的工作簿和工作表，然后可以直接对其进行操作
 - 不要只是告诉用户你将要做什么，必须实际调用工具来执行操作
+- 每个操作都必须对应一个工具调用，不能省略
 
-**操作指南**：
-- 对话开始时，如果不确定当前环境，建议先调用 get_current_excel_info
-- 收到用户指令后，直接调用相应的工具，不要只是描述
-- 创建或打开工作簿后，它会自动成为当前活跃工作簿
-- 创建工作表后，它会自动成为当前活跃工作表
-- 你应该根据对话上下文理解用户的意图
+**操作流程示例**：
+用户：""请将当前工作簿中所有表的名称写入当前表的A列""
+正确做法：
+1. 调用 get_worksheet_names 获取所有工作表名称
+2. 对每个工作表名称，调用 set_cell_value(row=行号, column=1, value=表名)
+3. 完成后告诉用户操作完成
+
+错误做法：
+只回复""现在我将这些工作表名称写入当前表的A列""但不调用任何工具 ❌
 
 请根据用户的自然语言指令，**立即调用**相应的工具完成任务，而不是仅仅描述你要做什么。";
 
