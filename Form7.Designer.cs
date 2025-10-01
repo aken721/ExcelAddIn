@@ -37,6 +37,7 @@
             this.exitMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.label1 = new System.Windows.Forms.Label();
             this.send_button = new System.Windows.Forms.Button();
+            this.checkBoxUseMcp = new System.Windows.Forms.CheckBox();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -114,7 +115,7 @@
             this.label1.Text = "文字输入：";
             // 
             // send_button
-            // 
+            //
             this.send_button.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.send_button.BackgroundImage = global::ExcelAddIn.Properties.Resources.send;
             this.send_button.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
@@ -124,12 +125,25 @@
             this.send_button.TabIndex = 2;
             this.send_button.UseVisualStyleBackColor = true;
             this.send_button.Click += new System.EventHandler(this.send_button_Click);
-            // 
+            //
+            // checkBoxUseMcp
+            //
+            this.checkBoxUseMcp.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.checkBoxUseMcp.AutoSize = true;
+            this.checkBoxUseMcp.Font = new System.Drawing.Font("微软雅黑", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.checkBoxUseMcp.Location = new System.Drawing.Point(70, 397);
+            this.checkBoxUseMcp.Name = "checkBoxUseMcp";
+            this.checkBoxUseMcp.Size = new System.Drawing.Size(75, 21);
+            this.checkBoxUseMcp.TabIndex = 9;
+            this.checkBoxUseMcp.Text = "使用MCP";
+            this.checkBoxUseMcp.UseVisualStyleBackColor = true;
+            //
             // Form7
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
             this.ClientSize = new System.Drawing.Size(800, 450);
+            this.Controls.Add(this.checkBoxUseMcp);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.flowLayoutPanelChat);
             this.Controls.Add(this.prompt_label);
@@ -158,5 +172,6 @@
         private System.Windows.Forms.ToolStripMenuItem settingsMenuItem;
         private System.Windows.Forms.ToolStripMenuItem exitMenuItem;
         private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.CheckBox checkBoxUseMcp;
     }
 }

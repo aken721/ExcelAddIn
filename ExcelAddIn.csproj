@@ -204,6 +204,7 @@
     can be found.
   -->
   <ItemGroup>
+    <Compile Include="ExcelMcp.cs" />
     <Compile Include="Form1.cs">
       <SubType>Form</SubType>
     </Compile>
