@@ -14,9 +14,6 @@ using System.Media;
 using ExcelAddIn.Properties;
 
 
-
-
-
 namespace ExcelAddIn
 {
     public partial class Form5 : Form
