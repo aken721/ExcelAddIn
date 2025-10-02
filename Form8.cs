@@ -1,14 +1,14 @@
 ﻿using System;
 using System.Drawing;
-using System.Net.Http.Headers;
+using System.IO;
 using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Net.Http.Json;
+using System.Security.Cryptography;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using System.Net.Http.Json;
-using System.IO;
-using System.Security.Cryptography;
-using System.Threading;
 
 
 namespace ExcelAddIn
@@ -42,7 +42,7 @@ namespace ExcelAddIn
             e.Graphics.DrawString(tabControl1.Controls[e.Index].Text, SystemInformation.MenuFont, _Brush, _TabTextArea, _sf);
         }
 
-        private async Task<string> GetDeepSeekResponse(string apiKey,string model)
+        private async Task<string> GetDeepSeekResponse(string apiKey, string model)
         {
             string apiUrl = txbUrl.Text;
 
@@ -76,11 +76,11 @@ namespace ExcelAddIn
                         return $"测试失败，错误代码：{response.StatusCode}，错误信息：{responseContent}";
                     }
                 }
-                catch(HttpRequestException ex)
+                catch (HttpRequestException ex)
                 {
                     // 返回异常信息
                     return $"测试失败，发生异常：{ex.Message}";
-                }                         
+                }
             }
         }
 
@@ -105,8 +105,8 @@ namespace ExcelAddIn
                     model = "deepseek-reasoner";
                     break;
             }
-            var result= await GetDeepSeekResponse(txbKey.Text,model);
-            if(!string.IsNullOrEmpty(result.ToString()))
+            var result = await GetDeepSeekResponse(txbKey.Text, model);
+            if (!string.IsNullOrEmpty(result.ToString()))
             {
                 lblResult.Text = result.ToString();
             }
@@ -125,7 +125,7 @@ namespace ExcelAddIn
         {
             string apiKey = txbKey.Text.Trim();
             string model = string.Empty;
-            switch(cbxModel.SelectedIndex)
+            switch (cbxModel.SelectedIndex)
             {
                 case 0:
                     model = "deepseek-chat";
@@ -135,8 +135,8 @@ namespace ExcelAddIn
                     break;
             }
             string apiUrl = txbUrl.Text.Trim();
-            string enterMode="0";
-            switch(cbxEnterKey.SelectedIndex )
+            string enterMode = "0";
+            switch (cbxEnterKey.SelectedIndex)
             {
                 case 0:
                     enterMode = "0";
@@ -219,7 +219,7 @@ namespace ExcelAddIn
                         cbxModel.Text = "deepseek-r1";
                         break;
                 }
-                
+
                 txbUrl.Text = decryptedContent.Split(';')[2].Split('^')[1];
 
                 switch (decryptedContent.Split(';')[3].Split('^')[1])
@@ -335,15 +335,15 @@ namespace ExcelAddIn
 
         private void pbxPassword_Click(object sender, EventArgs e)
         {
-            if (txbKey.UseSystemPasswordChar) 
+            if (txbKey.UseSystemPasswordChar)
             {
                 pbxPassword.BackgroundImage = Properties.Resources.eye_open;
                 txbKey.UseSystemPasswordChar = false;
             }
             else
             {
-                pbxPassword.BackgroundImage=Properties.Resources.eye_hide;
-                txbKey.UseSystemPasswordChar=true;
+                pbxPassword.BackgroundImage = Properties.Resources.eye_hide;
+                txbKey.UseSystemPasswordChar = true;
             }
         }
 
@@ -353,17 +353,17 @@ namespace ExcelAddIn
             if (i < 2)
             {
                 i++;
-                lblResult.Text = $"警告{i}：请不要轻易修改api地址";                
+                lblResult.Text = $"警告{i}：请不要轻易修改api地址";
             }
-            else if(i==2)
+            else if (i == 2)
             {
                 i++;
                 lblResult.Text = $"警告{i}：修改api地址可能导致访问失败，除非你知道必须修改它了，那就再双击我1次试试";
-                
+
             }
             else
-            { 
-            txbUrl.ReadOnly = false;
+            {
+                txbUrl.ReadOnly = false;
             }
         }
     }

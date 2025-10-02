@@ -1,17 +1,17 @@
 ﻿using System;
-using System.IO;
 using System.Collections.Generic;
 using System.Data;
-using System.Text.RegularExpressions;
 using System.Globalization;
+using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using Microsoft.Office.Interop.Excel;
 using Microsoft.Vbe.Interop;
-using Excel= Microsoft.Office.Interop.Excel;
-using System.Runtime.InteropServices;
+using Excel = Microsoft.Office.Interop.Excel;
 
 namespace ExcelAddIn
 {
@@ -83,7 +83,7 @@ namespace ExcelAddIn
             labelVBA.Visible = false;
             labelScript.Visible = false;
             comboBoxVBA.Visible = false;
-            textBoxScript.Visible = false;            
+            textBoxScript.Visible = false;
         }
 
         private void tabControl1_SelectedIndexChanged(object sender, EventArgs e)
@@ -95,18 +95,18 @@ namespace ExcelAddIn
                     break;
                 case 1:
                     btnRefresh.Visible = false;
-                    if(radioButtonOnce.Checked)
+                    if (radioButtonOnce.Checked)
                     {
                         panelWeek.Visible = false;
                     }
-                    if(radioButtonDay.Checked)
+                    if (radioButtonDay.Checked)
                     {
                         panelWeek.Visible = true;
                         labelFrequency.Text = "天发生一次";
                         if (textBoxInterval.Text == "" || int.Parse(textBoxInterval.Text) < 1) textBoxInterval.Text = "1";
                         flowLayoutPanelWeekDay.Visible = false;
                     }
-                    if(radioButtonWeek.Checked)
+                    if (radioButtonWeek.Checked)
                     {
                         panelWeek.Visible = true;
                         labelFrequency.Text = "周发生一次";
@@ -114,7 +114,7 @@ namespace ExcelAddIn
                         if (textBoxInterval.Text == "" || int.Parse(textBoxInterval.Text) < 1) textBoxInterval.Text = "1";
                         flowLayoutPanelWeekDay.Visible = true;
                     }
-                    if(radioButtonMonth.Checked)
+                    if (radioButtonMonth.Checked)
                     {
                         panelWeek.Visible = false;
                         panelMonth.Visible = true;
@@ -203,7 +203,7 @@ namespace ExcelAddIn
                 DataGridViewTextBoxColumn taskDescriptionColumn = new DataGridViewTextBoxColumn();
                 taskDescriptionColumn.Name = "任务描述";
                 taskDescriptionColumn.DataPropertyName = "任务描述"; // 绑定到 DataTable 的列名
-                dataGridView1.Columns.Add(taskDescriptionColumn);                
+                dataGridView1.Columns.Add(taskDescriptionColumn);
 
                 DataGridViewTextBoxColumn startTimeColumn = new DataGridViewTextBoxColumn();
                 startTimeColumn.Name = "开始时间";
@@ -340,7 +340,7 @@ namespace ExcelAddIn
         private void DataGridView1_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
             // 处理删除按钮点击
-            if (e.RowIndex >= 0 && dataGridView1.Columns[e.ColumnIndex].Name == "是否启用") DataGridView1_CellValueChanged(sender,e);
+            if (e.RowIndex >= 0 && dataGridView1.Columns[e.ColumnIndex].Name == "是否启用") DataGridView1_CellValueChanged(sender, e);
 
             if (e.RowIndex >= 0 && dataGridView1.Columns[e.ColumnIndex].Name == "操作列")
             {
@@ -571,7 +571,7 @@ namespace ExcelAddIn
         }
 
 
-        
+
 
         private void DataGridView1_DataError(object sender, DataGridViewDataErrorEventArgs e)
         {
@@ -580,7 +580,7 @@ namespace ExcelAddIn
                 System.Windows.MessageBox.Show("请为'是否启用'列输入有效的布尔值(true/false)");
                 e.ThrowException = false;
             }
-        }        
+        }
 
         // 移除自定义列的方法
         private void RemoveCustomColumns()
@@ -878,7 +878,7 @@ namespace ExcelAddIn
         {
             string result = "成功";
             try
-            {      
+            {
                 switch (task.TaskType)
                 {
                     case "运行CMD命令":
@@ -938,9 +938,9 @@ namespace ExcelAddIn
                     }
                 }
             }
-            catch(Exception ex) 
-            { 
-                 Console.WriteLine("更新上次运行结果失败："+ex.Message);
+            catch (Exception ex)
+            {
+                Console.WriteLine("更新上次运行结果失败：" + ex.Message);
             }
         }
 
@@ -1333,7 +1333,8 @@ namespace ExcelAddIn
 
         private void RefreshTaskStatuses()
         {
-            Parallel.ForEach(_activeTasks, task => {
+            Parallel.ForEach(_activeTasks, task =>
+            {
                 task.IsExpired = CalculateIsExpired(task);
                 task.TaskStatus = task.IsExpired ? "已失效" : "计划中";
             });
@@ -1408,7 +1409,7 @@ namespace ExcelAddIn
             panelMonth.Visible = false;
             panelWeek.Visible = true;
             labelFrequency.Text = "天发生一次";
-            if(textBoxInterval.Text == "" || int.Parse(textBoxInterval.Text) < 1) textBoxInterval.Text = "1";
+            if (textBoxInterval.Text == "" || int.Parse(textBoxInterval.Text) < 1) textBoxInterval.Text = "1";
             flowLayoutPanelWeekDay.Visible = false;
         }
 
@@ -1434,7 +1435,7 @@ namespace ExcelAddIn
             this.Dispose();
         }
 
-        
+
 
         private string[] IsCheckedBoxChecked(FlowLayoutPanel flowLayoutPanel)
         {
@@ -2172,7 +2173,7 @@ namespace ExcelAddIn
 
         private void checkBoxStop_VisibleChanged(object sender, EventArgs e)
         {
-            if(!checkBoxStop.Visible)
+            if (!checkBoxStop.Visible)
             {
                 checkBoxStop.Checked = false;
                 dateTimePicker3.Visible = false;
@@ -2244,7 +2245,7 @@ namespace ExcelAddIn
         {
             try
             {
-                await Task.Run(()=> System.Diagnostics.Process.Start(exeFilePath));
+                await Task.Run(() => System.Diagnostics.Process.Start(exeFilePath));
             }
             catch (Exception ex)
             {
@@ -2363,7 +2364,7 @@ namespace ExcelAddIn
             DateTime selectedStartTime = dateTimePicker2.Value;
             DateTime selectedStopDate = dateTimePicker3.Value.Date;
             DateTime selectedStopTime = dateTimePicker4.Value;
-            DateTime startDateTime = new DateTime(selectedStartDate.Year,selectedStartDate.Month,selectedStartDate.Day,selectedStartTime.Hour,selectedStartTime.Minute,selectedStartTime.Second);
+            DateTime startDateTime = new DateTime(selectedStartDate.Year, selectedStartDate.Month, selectedStartDate.Day, selectedStartTime.Hour, selectedStartTime.Minute, selectedStartTime.Second);
             DateTime stopDateTime = new DateTime(selectedStopDate.Year, selectedStopDate.Month, selectedStopDate.Day, selectedStopTime.Hour, selectedStopTime.Minute, selectedStopTime.Second);
             DateTime latestValidTime = startDateTime > DateTime.Now ? startDateTime : DateTime.Now;
             if (radioButtonOnce.Checked && startDateTime.AddMinutes(10) < DateTime.Now)
@@ -2396,7 +2397,7 @@ namespace ExcelAddIn
                 tabControl1.SelectedIndex = 1;
                 return false;
             }
-            else if (checkBoxStop.Checked && stopDateTime <latestValidTime.AddMinutes(10))
+            else if (checkBoxStop.Checked && stopDateTime < latestValidTime.AddMinutes(10))
             {
                 System.Windows.MessageBox.Show("停止时间不能早于开始时间或当前时间");
                 tabControl1.SelectedIndex = 1;
@@ -2404,7 +2405,7 @@ namespace ExcelAddIn
             }
 
             //检查任务设置
-            if(comboBoxProjectType.SelectedIndex == 0 && textBoxCMD.Text == "请输入CMD命令")
+            if (comboBoxProjectType.SelectedIndex == 0 && textBoxCMD.Text == "请输入CMD命令")
             {
                 System.Windows.MessageBox.Show("cmd命令不能为空");
                 tabControl1.SelectedIndex = 2;
@@ -2440,7 +2441,7 @@ namespace ExcelAddIn
                 tabControl1.SelectedIndex = 2;
                 return false;
             }
-            return true;            
+            return true;
         }
 
         //恢复初始化
@@ -2480,7 +2481,7 @@ namespace ExcelAddIn
             radioButtonMonth.Checked = false;
             textBoxInterval.Text = "1";
             //周详细安排
-            foreach(Control control in flowLayoutPanelWeekDay.Controls)
+            foreach (Control control in flowLayoutPanelWeekDay.Controls)
             {
                 if (control is System.Windows.Forms.CheckBox checkBox)
                 {
@@ -2491,7 +2492,7 @@ namespace ExcelAddIn
             textBoxMonth.Text = "";
             //月详细安排（日期）
             textBoxDay.Text = "";
-            
+
 
             //操作页恢复初始化
             comboBoxProjectType.SelectedIndex = 0;
@@ -2499,7 +2500,7 @@ namespace ExcelAddIn
             textBoxCMD.ForeColor = System.Drawing.Color.DarkGray; // 设置字体颜色为灰色
             textBoxCMD.Font = new System.Drawing.Font(textBoxCMD.Font, System.Drawing.FontStyle.Italic); // 设置字体为斜体
             textBoxCMD.ReadOnly = false;
-            textBoxScript.Text = "";            
+            textBoxScript.Text = "";
         }
 
         private void Form9_FormClosing(object sender, FormClosingEventArgs e)
@@ -2524,10 +2525,10 @@ namespace ExcelAddIn
             dataGridView1.CellValueChanged -= DataGridView1_CellValueChanged;
             dataGridView1.CellContentClick -= DataGridView1_CellContentClick;
 
-            if(IsSheetExist("_定时任务"))
+            if (IsSheetExist("_定时任务"))
             {
                 Worksheet worksheet = Globals.ThisAddIn.Application.ActiveWorkbook.Sheets["_定时任务"];
-                if(worksheet.UsedRange.Rows.Count == 1)
+                if (worksheet.UsedRange.Rows.Count == 1)
                 {
                     worksheet.Delete();
                 }

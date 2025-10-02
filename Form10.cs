@@ -43,7 +43,7 @@ namespace ExcelAddIn
             pictureOriginal_comboBox.SelectedIndex = 0; // 默认图片原始尺寸
             pictureSize_checkBox.Checked = true;
             width_textBox.ReadOnly = true; // 默认锁定比例时宽度不可编辑
-            if(pictureOriginal_comboBox.SelectedIndex==0)
+            if (pictureOriginal_comboBox.SelectedIndex == 0)
             {
                 height_textBox.Text = string.Empty;  // 默认高度3厘米
                 width_textBox.Text = string.Empty;   // 默认宽度3厘米
@@ -51,18 +51,18 @@ namespace ExcelAddIn
             else
             {
                 height_textBox.Text = "3";   // 默认高度3厘米
-            }                
+            }
         }
 
         private void pictureOriginal_comboBox_SelectedIndexChanged(object sender, EventArgs e)
         {
-            switch(pictureOriginal_comboBox.SelectedIndex)
+            switch (pictureOriginal_comboBox.SelectedIndex)
             {
                 case 0:
                     pictureInsertMode = 0;
                     height_textBox.Text = string.Empty;  // 清空高度
                     width_textBox.Text = string.Empty;   // 清空宽度
-                    flowLayoutPanel2.Visible=false; // 隐藏高设置面板
+                    flowLayoutPanel2.Visible = false; // 隐藏高设置面板
                     flowLayoutPanel3.Visible = false; // 隐藏宽设置面板
                     pictureSize_checkBox.Visible = false; // 隐藏锁定比例复选框
                     break;

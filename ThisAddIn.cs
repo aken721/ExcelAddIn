@@ -2,7 +2,7 @@
 
 namespace ExcelAddIn
 {
-    
+
     public partial class ThisAddIn
     {
         public static class Global
@@ -13,8 +13,8 @@ namespace ExcelAddIn
             //聚光灯功能开关标识，0为关闭，1为打开
             public static int spotlight;
             public static int spotlightColorIndex;
-            
-            public static bool created_qr_sheet=false;
+
+            public static bool created_qr_sheet = false;
         }
 
         public static Excel.Application app;         //声明一个Excel的Application变量
@@ -26,7 +26,7 @@ namespace ExcelAddIn
 
             //监听选定单元格变化所触发事件
             app.SheetSelectionChange += app_SheetSelectionChange;
-            
+
             app.SheetBeforeDelete += new Excel.AppEvents_SheetBeforeDeleteEventHandler(Application_SheetBeforeDelete);
 
         }
@@ -68,7 +68,7 @@ namespace ExcelAddIn
                 {
                     activesheet.Cells.Interior.ColorIndex = 0;
                     ThisAddIn.app.ScreenUpdating = false;
-                    selectedRange.EntireRow.Interior.ColorIndex =Global.spotlightColorIndex;
+                    selectedRange.EntireRow.Interior.ColorIndex = Global.spotlightColorIndex;
                     selectedRange.EntireColumn.Interior.ColorIndex = Global.spotlightColorIndex;
                     //selectedRange.EntireRow.Interior.Color = System.Drawing.ColorTranslator.ToOle(System.Drawing.Color.FromArgb(204, 255, 204)); ;
                     //selectedRange.EntireColumn.Interior.Color = System.Drawing.ColorTranslator.ToOle(System.Drawing.Color.FromArgb(204, 255, 204)); ;
@@ -84,12 +84,12 @@ namespace ExcelAddIn
             Excel.Worksheet ws = Globals.ThisAddIn.Application.ActiveSheet;
             if (ws.Name == "_rename")
             {
-                Global.readFile = 0;    
+                Global.readFile = 0;
             }
-            if(ws.Name== "_QR_Scan")
+            if (ws.Name == "_QR_Scan")
             {
-                Global.created_qr_sheet=false;
+                Global.created_qr_sheet = false;
             }
-        }        
+        }
     }
 }

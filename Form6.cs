@@ -2,25 +2,21 @@
 
 using System;
 using System.Collections.Generic;
-using System.Reflection;
 using System.Data;
 using System.Drawing;
+using System.Drawing.Imaging;
+using System.IO;
 using System.Linq;
+using System.Reflection;
+using System.Runtime.InteropServices;
+using System.Text;
 using System.Windows.Forms;
 using System.Xml.Linq;
-using Excel=Microsoft.Office.Interop.Excel;
-using System.IO;
-using System.Text;
-using UglyToad.PdfPig;
-using System.Text.RegularExpressions;
-using UglyToad.PdfPig.Content;
 using Docnet.Core;
-using Docnet.Core.Models;
-using Docnet.Core.Readers;
-using System.Drawing.Imaging;
-using System.Runtime.InteropServices;
 using Docnet.Core.Converters;
-using System.Globalization;
+using Docnet.Core.Models;
+using UglyToad.PdfPig;
+using Excel = Microsoft.Office.Interop.Excel;
 
 
 
@@ -38,7 +34,7 @@ namespace ExcelAddIn
         {
             Assembly assembly = System.Reflection.Assembly.GetExecutingAssembly();
             string version = assembly.GetName().Version.ToString();
-            version_label1.Text ="Version: "+ version;
+            version_label1.Text = "Version: " + version;
 
             //初始化tabcontrol控件
             tabControl1.SelectTab(0);
@@ -87,7 +83,7 @@ namespace ExcelAddIn
                     pdfFolder_FileFullNames.Clear();
                     clear_pictureBox1.Visible = false;
                     break;
-                case 2:                    
+                case 2:
                     break;
                 case 3:
                     this.Dispose();
@@ -101,14 +97,14 @@ namespace ExcelAddIn
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
- 
+
 
         //下一个
         private void next_pictureBox_Click(object sender, EventArgs e)
         {
             if (single_FileFullNames.Count == 0) return;
-            int currentSequence=int.Parse(sequence_label.Text);
-            xml_path_textBox.Text = single_FileFullNames[currentSequence ];
+            int currentSequence = int.Parse(sequence_label.Text);
+            xml_path_textBox.Text = single_FileFullNames[currentSequence];
             sequence_label.Text = Convert.ToString(currentSequence + 1);
         }
 
@@ -117,8 +113,8 @@ namespace ExcelAddIn
         {
             if (single_FileFullNames.Count == 0) return;
             int currentSequence = int.Parse(sequence_label.Text);
-            xml_path_textBox.Text = single_FileFullNames[currentSequence-2];
-            sequence_label.Text = Convert.ToString(currentSequence -1);
+            xml_path_textBox.Text = single_FileFullNames[currentSequence - 2];
+            sequence_label.Text = Convert.ToString(currentSequence - 1);
         }
 
         //最后一个
@@ -141,7 +137,7 @@ namespace ExcelAddIn
         private void sequence_label_TextChanged(object sender, EventArgs e)
         {
             int fileCount = single_FileFullNames.Count;
-            if (sequence_label.Text == "1" && fileCount>1)
+            if (sequence_label.Text == "1" && fileCount > 1)
             {
                 begin_pictureBox.Enabled = false;
                 begin_pictureBox.Visible = false;
@@ -152,7 +148,7 @@ namespace ExcelAddIn
                 last_pictureBox.Enabled = true;
                 last_pictureBox.Visible = true;
             }
-            else if (sequence_label.Text == fileCount.ToString() && fileCount>1)
+            else if (sequence_label.Text == fileCount.ToString() && fileCount > 1)
             {
                 begin_pictureBox.Enabled = true;
                 begin_pictureBox.Visible = true;
@@ -163,7 +159,7 @@ namespace ExcelAddIn
                 last_pictureBox.Enabled = false;
                 last_pictureBox.Visible = false;
             }
-            else if(string.IsNullOrEmpty(sequence_label.Text))
+            else if (string.IsNullOrEmpty(sequence_label.Text))
             {
                 begin_pictureBox.Enabled = false;
                 begin_pictureBox.Visible = false;
@@ -174,7 +170,7 @@ namespace ExcelAddIn
                 last_pictureBox.Enabled = false;
                 last_pictureBox.Visible = false;
             }
-            else if(sequence_label.Text == fileCount.ToString() && fileCount == 1)
+            else if (sequence_label.Text == fileCount.ToString() && fileCount == 1)
             {
                 begin_pictureBox.Enabled = false;
                 begin_pictureBox.Visible = false;
@@ -235,7 +231,7 @@ namespace ExcelAddIn
         private void xml_path_textBox_TextChanged(object sender, EventArgs e)
         {
             string path = xml_path_textBox.Text;
-            if (!string.IsNullOrEmpty(path)&&File.Exists(path)) 
+            if (!string.IsNullOrEmpty(path) && File.Exists(path))
             {
                 XDocument xmlDoc = XDocument.Load(path); // 加载你的XML文件
 
@@ -251,7 +247,7 @@ namespace ExcelAddIn
                 xml_treeView.SelectedNode.EnsureVisible(); // 确保选中的节点是可见的
             }
             else
-            {                
+            {
                 xml_treeView.Nodes.Clear();
                 if (single_FileFullNames.Count == 0)
                 {
@@ -268,7 +264,7 @@ namespace ExcelAddIn
             }
         }
 
-        List<string> single_FileFullNames=new List<string>();
+        List<string> single_FileFullNames = new List<string>();
         List<string> folder_FileFullNames = new List<string>();
         List<string> pdfSingle_FileFullNames = new List<string>();
         List<string> pdfFolder_FileFullNames = new List<string>();
@@ -283,12 +279,12 @@ namespace ExcelAddIn
                 sequence_label.Text = string.Empty;
                 single_FileFullNames.Clear();
                 single_FileFullNames = openFileDialog1.FileNames.ToList();
-                xml_path_textBox.Text= single_FileFullNames[0];
+                xml_path_textBox.Text = single_FileFullNames[0];
                 sequence_label.Text = "1";
                 single_result_label.Text = $"共{single_FileFullNames.Count}个XML文件";
                 if (single_FileFullNames.Count > 1)
-                {                    
-                    int fileCount= single_FileFullNames.Count;
+                {
+                    int fileCount = single_FileFullNames.Count;
                     if (sequence_label.Text == "1")
                     {
                         begin_pictureBox.Enabled = false;
@@ -296,7 +292,7 @@ namespace ExcelAddIn
                         next_pictureBox.Enabled = true;
                         last_pictureBox.Enabled = true;
                     }
-                    else if (sequence_label.Text==fileCount.ToString())
+                    else if (sequence_label.Text == fileCount.ToString())
                     {
                         begin_pictureBox.Enabled = true;
                         preview_pictureBox.Enabled = true;
@@ -316,7 +312,7 @@ namespace ExcelAddIn
                     begin_pictureBox.Enabled = false;
                     preview_pictureBox.Enabled = false;
                     next_pictureBox.Enabled = false;
-                    last_pictureBox.Enabled= false;
+                    last_pictureBox.Enabled = false;
                 }
             }
             else
@@ -334,7 +330,7 @@ namespace ExcelAddIn
                 timer1.Enabled = true;
                 return;
             }
-            System.Data.DataTable dataTable= GetInvoiceDataFromXML(xml_path);
+            System.Data.DataTable dataTable = GetInvoiceDataFromXML(xml_path);
             if (dataTable.Rows.Count > 0)
             {
                 WriteToExcel(dataTable);
@@ -345,14 +341,14 @@ namespace ExcelAddIn
 
         private void folder_path_textBox_DoubleClick(object sender, EventArgs e)
         {
-            folderBrowserDialog1.Description="请选择XML电子发票所在文件夹";
+            folderBrowserDialog1.Description = "请选择XML电子发票所在文件夹";
             folderBrowserDialog1.ShowDialog();
             if (folderBrowserDialog1.SelectedPath != "")
             {
                 folder_FileFullNames.Clear();
                 folder_path_textBox.Text = folderBrowserDialog1.SelectedPath;
                 DirectoryInfo folder = new DirectoryInfo(folder_path_textBox.Text);
-                folder_FileFullNames = folder.GetFiles("*.xml", subfolder_checkBox.Checked?SearchOption.AllDirectories:SearchOption.TopDirectoryOnly).Select(file => file.FullName).ToList();                
+                folder_FileFullNames = folder.GetFiles("*.xml", subfolder_checkBox.Checked ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly).Select(file => file.FullName).ToList();
             }
             else
             {
@@ -363,10 +359,10 @@ namespace ExcelAddIn
 
         private void batch_run_button_Click(object sender, EventArgs e)
         {
-            
-            if(folder_FileFullNames.Count > 0 && Directory.Exists(folder_path_textBox.Text))
+
+            if (folder_FileFullNames.Count > 0 && Directory.Exists(folder_path_textBox.Text))
             {
-                int o= 1;
+                int o = 1;
                 foreach (string file in folder_FileFullNames)
                 {
                     batch_result_label.Text = $"共{folder_FileFullNames.Count}个XML文件，正在导入第{o}个......";
@@ -383,7 +379,7 @@ namespace ExcelAddIn
             {
                 batch_result_label.Text = "文件夹内没有XML电子发票文件，请核对！";
                 timer1.Enabled = true;
-            }            
+            }
         }
 
         private void folder_path_textBox_TextChanged(object sender, EventArgs e)
@@ -407,7 +403,7 @@ namespace ExcelAddIn
         private System.Data.DataTable GetInvoiceDataFromXML(string xmlPath)
         {
             System.Data.DataTable dataTable = new System.Data.DataTable();
-       
+
 
             //// 加载XML文档
             //XElement xmlDocument = XElement.Load(xmlPath);
@@ -484,9 +480,9 @@ namespace ExcelAddIn
             {
                 if (sheet.Name == "_FaPiao" && isFieldExist("电子发票文件路径") && isFieldExist("发票类型"))
                 {
-                    isFaPiaoSheetExist=true;
+                    isFaPiaoSheetExist = true;
                 }
-                else if(sheet.Name =="_FaPiao")
+                else if (sheet.Name == "_FaPiao")
                 {
                     sheet.Name = "_FaPiao_Original";
                 }
@@ -500,9 +496,9 @@ namespace ExcelAddIn
                 Excel.Worksheet addSheet = workbook.Worksheets.Add(Before: workbook.ActiveSheet);
                 addSheet.Name = "_FaPiao";
                 addSheet.Activate();
-                for(int t = 0; t < dataTable.Columns.Count; t++)
+                for (int t = 0; t < dataTable.Columns.Count; t++)
                 {
-                    workbook.ActiveSheet.Cells[1,t+1]=dataTable.Columns[t].ColumnName;
+                    workbook.ActiveSheet.Cells[1, t + 1] = dataTable.Columns[t].ColumnName;
                 }
                 for (int i = 0; i < dataTable.Rows.Count; i++)
                 {
@@ -522,14 +518,14 @@ namespace ExcelAddIn
             else
             {
                 workbook.Worksheets["_FaPiao"].Activate();
-                long usedRow= workbook.ActiveSheet.UsedRange.Rows.Count;
+                long usedRow = workbook.ActiveSheet.UsedRange.Rows.Count;
                 for (int i = 0; i < dataTable.Rows.Count; i++)
                 {
                     for (int j = 0; j < dataTable.Columns.Count; j++)
                     {
                         workbook.ActiveSheet.Cells[usedRow + i + 1, j + 1].NumberFormat = "@";
-                        workbook.ActiveSheet.Cells[usedRow+i + 1, j + 1] = dataTable.Rows[i][j];
-                        if(workbook.ActiveSheet.Cells[1, j + 1].Value == "电子发票文件路径")
+                        workbook.ActiveSheet.Cells[usedRow + i + 1, j + 1] = dataTable.Rows[i][j];
+                        if (workbook.ActiveSheet.Cells[1, j + 1].Value == "电子发票文件路径")
                         {
                             Excel.Worksheet sht = workbook.ActiveSheet;
                             string str = Path.GetDirectoryName(sht.Cells[usedRow + i + 1, j + 1].Value);
@@ -546,9 +542,9 @@ namespace ExcelAddIn
         private bool isFieldExist(string fieldName)
         {
             Excel.Worksheet activeSheet = ThisAddIn.app.ActiveSheet;
-            foreach (Excel.Range cell in activeSheet.Range[activeSheet.Cells[1,1],activeSheet.Cells[1,activeSheet.UsedRange.Columns.Count]]) 
+            foreach (Excel.Range cell in activeSheet.Range[activeSheet.Cells[1, 1], activeSheet.Cells[1, activeSheet.UsedRange.Columns.Count]])
             {
-                if(cell.Value == fieldName)
+                if (cell.Value == fieldName)
                 {
                     return true;
                 }
@@ -558,8 +554,8 @@ namespace ExcelAddIn
 
         private void timer1_Tick(object sender, EventArgs e)
         {
-            this.Invoke(new System.Action(() => 
-            { 
+            this.Invoke(new System.Action(() =>
+            {
                 batch_result_label.Text = "";
                 single_result_label.Text = "";
             }));
@@ -807,7 +803,7 @@ namespace ExcelAddIn
                 {
                     var bitmap = RenderPdfToImage(path, pageIndex: 0);
 
-                    pictureBoxPdf.Image=bitmap;
+                    pictureBoxPdf.Image = bitmap;
                     pictureBoxPdf.SizeMode = PictureBoxSizeMode.Zoom; // 设置图片适应PictureBox大小
                 }
                 catch (Exception ex)
@@ -901,21 +897,21 @@ namespace ExcelAddIn
                     List<WordInfo> allWords = new List<WordInfo>();
                     foreach (var page in document.GetPages())
                     {
-                        var words=page.GetWords();
+                        var words = page.GetWords();
                         foreach (var word in words)
                         {
-                            
+
                             if (word.Text.Contains("发票号码:"))
                             {
                                 MessageBox.Show($"{word.Text}的坐标：距离顶部{word.BoundingBox.Top}；" +
                                     $"距离左侧{word.BoundingBox.Left}；距离底部{word.BoundingBox.Bottom}；距离右侧{word.BoundingBox.Right}");
                             }
-                            if(word.Text.Contains("24427000000002368552"))
+                            if (word.Text.Contains("24427000000002368552"))
                             {
                                 MessageBox.Show($"{word.Text}的坐标：距离顶部{word.BoundingBox.Top}；" +
                                     $"距离左侧{word.BoundingBox.Left}；距离底部{word.BoundingBox.Bottom}；距离右侧{word.BoundingBox.Right}");
                             }
-                        }                        
+                        }
                     }
 
                 }
@@ -940,7 +936,7 @@ namespace ExcelAddIn
             public double Y1 { get; set; }   //距离右侧坐标
         }
 
-        
+
         private DataTable CreateTableSchema()
         {
             var dt = new DataTable();

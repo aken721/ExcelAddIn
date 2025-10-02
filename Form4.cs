@@ -2,24 +2,20 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using Microsoft.VisualBasic.FileIO;
-using System.Windows.Forms;
-using Excel=Microsoft.Office.Interop.Excel;
 using System.Runtime.InteropServices;
-using System.Management;
-using Org.BouncyCastle.Bcpg.Sig;
-using System.Threading.Tasks;
-using System.Threading;
+using System.Windows.Forms;
+using Microsoft.VisualBasic.FileIO;
+using Excel = Microsoft.Office.Interop.Excel;
 
 namespace ExcelAddIn
 {
     public partial class Form4 : Form
     {
         readonly Excel.Worksheet worksheet = ThisAddIn.app.ActiveWorkbook.Worksheets["_rename"];
-        internal  int regulation_number = 1;
+        internal int regulation_number = 1;
         public static int runButtonClicked = 0;
-        public static int  resetButtonClicked= 0;
-        private readonly string command=Ribbon1.runcommand;
+        public static int resetButtonClicked = 0;
+        private readonly string command = Ribbon1.runcommand;
         private bool isCheckedAll = false;
 
         public Form4()
@@ -35,14 +31,14 @@ namespace ExcelAddIn
             }
             else
             {
-                Invoke(new MethodInvoker(() => 
+                Invoke(new MethodInvoker(() =>
                 {
                     file_type_checkedListBox.Enabled = false;
                     select_all_checkBox.Visible = false;
                 }));
-                
+
             }
-            
+
             file_type_checkedListBox.CheckOnClick = true;
             delete_select_radioButton.Select();
 
@@ -67,7 +63,7 @@ namespace ExcelAddIn
             file_type_checkedListBox.Items.Clear();
             List<string> items = new List<string>();
             int usedrowsCount = worksheet.UsedRange.Rows.Count;
-            
+
             for (int i = 2; i <= usedrowsCount; i++)
             {
                 string fileName = Path.Combine(worksheet.Cells[i, 1].Value, worksheet.Cells[i, 2].Value);
@@ -83,9 +79,9 @@ namespace ExcelAddIn
             items.Sort();
             if (items.Count > 0)
             {
-                foreach (string item in items) 
+                foreach (string item in items)
                 {
-                    file_type_checkedListBox.Items.Add(item);                
+                    file_type_checkedListBox.Items.Add(item);
                 }
                 select_all_checkBox.Visible = true;
             }
@@ -106,7 +102,7 @@ namespace ExcelAddIn
             filename_regular_textBox2.Visible = true;
             regulation_add_pictureBox2.Visible = true;
             regulation_reduce_pictureBox2.Visible = true;
-        } 
+        }
 
         //删除第2行规则
         private void regulation_reduce_pictureBox2_Click(object sender, EventArgs e)
@@ -125,7 +121,7 @@ namespace ExcelAddIn
         private void regulation_add_pictureBox2_Click(object sender, EventArgs e)
         {
             regulation_add_pictureBox2.Visible = false;
-            regulation_reduce_pictureBox2.Visible=false;
+            regulation_reduce_pictureBox2.Visible = false;
             filename_regular_label3.Visible = true;
             filename_regular_ComboBox3.SelectedIndex = -1;
             filename_regular_ComboBox3.Visible = true;
@@ -187,9 +183,9 @@ namespace ExcelAddIn
             List<string> rules_about_contains = new List<string>();
             List<string> rules_about_notcontains = new List<string>();
 
-            for(int i=0;i<file_type_checkedListBox.Items.Count;i++)
+            for (int i = 0; i < file_type_checkedListBox.Items.Count; i++)
             {
-                if(file_type_checkedListBox.GetItemChecked(i))
+                if (file_type_checkedListBox.GetItemChecked(i))
                 {
                     rules_about_extension.Add(file_type_checkedListBox.Items[i].ToString());
                 }
@@ -198,18 +194,18 @@ namespace ExcelAddIn
             ProcessRules(filename_regular_ComboBox1, filename_regular_textBox1, rules_about_startwith, rules_about_endwith, rules_about_contains, rules_about_notcontains);
             ProcessRules(filename_regular_ComboBox2, filename_regular_textBox2, rules_about_startwith, rules_about_endwith, rules_about_contains, rules_about_notcontains);
             ProcessRules(filename_regular_ComboBox3, filename_regular_textBox3, rules_about_startwith, rules_about_endwith, rules_about_contains, rules_about_notcontains);
-            
+
             //检测“包含”和“不包含”是否设置相同字符串
-            List<string> duplicates=rules_about_contains.Intersect(rules_about_notcontains).ToList();
-            if(duplicates.Count()>0)
+            List<string> duplicates = rules_about_contains.Intersect(rules_about_notcontains).ToList();
+            if (duplicates.Count() > 0)
             {
-                if(MessageBox.Show("规则中“包含”和“不包含”不能设置相同字符串，确认后将删除重复规则后继续，取消将返回重新设定规则", "Error", MessageBoxButtons.OKCancel, MessageBoxIcon.Error)==DialogResult.OK)
+                if (MessageBox.Show("规则中“包含”和“不包含”不能设置相同字符串，确认后将删除重复规则后继续，取消将返回重新设定规则", "Error", MessageBoxButtons.OKCancel, MessageBoxIcon.Error) == DialogResult.OK)
                 {
                     rules_about_contains.Remove(duplicates[0]);
                 }
             }
 
-            
+
             if (rules_about_extension.Count == 0 && rules_about_startwith.Count == 0 && rules_about_endwith.Count == 0 && rules_about_contains.Count == 0 && rules_about_notcontains.Count == 0)
             {
                 result_dm_label.Text = "请先设置规则！";
@@ -271,12 +267,12 @@ namespace ExcelAddIn
                             {
                                 string driveType = DriveInfo(resultList[0]);
                                 DialogResult dialogResult = new DialogResult();
-                                
+
                                 switch (this.delete_select_radioButton.Checked)
                                 {
                                     //选择删除文件
                                     case true:
-                                        if(driveType== "Fixed")
+                                        if (driveType == "Fixed")
                                         {
                                             dialogResult = MessageBox.Show($"删除文件是高风险操作，本次将移除{resultList.Count}个文件至回收站！", "警告", MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
                                         }
@@ -288,8 +284,8 @@ namespace ExcelAddIn
                                         {
                                             int errorCount = 0;
                                             int deleteCount = 0;
-                                            if (driveType== "Fixed")
-                                            {                                                
+                                            if (driveType == "Fixed")
+                                            {
                                                 foreach (string item in resultList)
                                                 {
                                                     deleteCount++;
@@ -350,7 +346,7 @@ namespace ExcelAddIn
                                                 {
                                                     result_dm_label.Text = $"删除{errorCount}个文件时出错";
                                                 }
-                                            }                                                                        
+                                            }
                                         }
                                         else return;
                                         break;
@@ -364,7 +360,7 @@ namespace ExcelAddIn
                                                 result_dm_label.Text = $"开始移动文件到目标文件夹：{destinationFolder}......";
                                                 this.Refresh();
                                                 MoveFiles(resultList, destinationFolder, "file");
-                                                result_dm_label.Text = $"移动到目标文件夹：{destinationFolder}，已完成";                                                
+                                                result_dm_label.Text = $"移动到目标文件夹：{destinationFolder}，已完成";
                                             }
                                             else return;
                                         }
@@ -385,7 +381,7 @@ namespace ExcelAddIn
                             //读取_rename表中所有文件夹名
                             for (int i = 2; i <= worksheet.UsedRange.Rows.Count; i++)
                             {
-                                string file_path = worksheet.Cells[i, 1].Value+"\\"+worksheet.Cells[i, 2].Value;
+                                string file_path = worksheet.Cells[i, 1].Value + "\\" + worksheet.Cells[i, 2].Value;
                                 folder_list_all.Add(file_path);
                             }
 
@@ -469,7 +465,7 @@ namespace ExcelAddIn
                                                         try
                                                         {
                                                             // 将文件夹直接删除
-                                                            FileSystem.DeleteDirectory(item, UIOption.OnlyErrorDialogs, RecycleOption.DeletePermanently,UICancelOption.ThrowException);
+                                                            FileSystem.DeleteDirectory(item, UIOption.OnlyErrorDialogs, RecycleOption.DeletePermanently, UICancelOption.ThrowException);
                                                         }
                                                         catch (Exception ex)
                                                         {
@@ -512,15 +508,15 @@ namespace ExcelAddIn
                             }
                             break;
                     }
-                    
+
                 }
-                catch(Exception ex)
+                catch (Exception ex)
                 {
-                    result_dm_label.Text=$"{ex.Message}！";
+                    result_dm_label.Text = $"{ex.Message}！";
                 }
                 finally
                 {
-                    runButtonClicked+=1;
+                    runButtonClicked += 1;
                 }
             }
         }
@@ -550,12 +546,12 @@ namespace ExcelAddIn
 
 
         //筛选器，对符合筛选条件的文件名进行筛选
-        private List<string> MatchingList(List<string> listFiles,List<string> listRules,string type)
+        private List<string> MatchingList(List<string> listFiles, List<string> listRules, string type)
         {
             List<string> matchingList = new List<string>();
             foreach (string listFile in listFiles)
             {
-                string matching_filename = Path.GetFileNameWithoutExtension(listFile);                
+                string matching_filename = Path.GetFileNameWithoutExtension(listFile);
                 switch (type)
                 {
                     //判断是否匹配始于规则的文件名
@@ -615,14 +611,14 @@ namespace ExcelAddIn
                             }
                         }
                         break;
-                }                
+                }
             }
             return matchingList;
-        }                                       
+        }
 
         //移动文件/文件夹
-        private void MoveFiles(List<string> listFiles, string destinationFolder,string type)
-        {           
+        private void MoveFiles(List<string> listFiles, string destinationFolder, string type)
+        {
             switch (type)
             {
                 case "file":
@@ -654,7 +650,7 @@ namespace ExcelAddIn
                             }
                         }
                         else result_dm_label.Text = $"源文件{listFile}不存在，继续移动下一个";
-                                                
+
                     }
                     break;
                 case "folder":
@@ -664,12 +660,12 @@ namespace ExcelAddIn
                         {
                             try
                             {
-                                string originalDirectoryName =listFile.Split('\\').Last();
-                                string destinationPath = destinationFolder+"\\"+originalDirectoryName;
+                                string originalDirectoryName = listFile.Split('\\').Last();
+                                string destinationPath = destinationFolder + "\\" + originalDirectoryName;
 
                                 // 如果目标路径已经存在同名文件夹，则重命名目标文件夹
                                 int i = 1;
-                                 
+
                                 while (Directory.Exists(destinationPath))
                                 {
                                     destinationPath = $"{originalDirectoryName}({i}){destinationFolder}";
@@ -684,16 +680,16 @@ namespace ExcelAddIn
                                 continue;
                             }
                         }
-                        else result_dm_label.Invoke(new Action(() => result_dm_label.Text = $"源文件夹{listFile}不存在，继续移动下一个"));                        
+                        else result_dm_label.Invoke(new Action(() => result_dm_label.Text = $"源文件夹{listFile}不存在，继续移动下一个"));
                     }
                     break;
-            }            
+            }
         }
 
         private void file_type_checkedListBox_ItemCheck(object sender, ItemCheckEventArgs e)
         {
             if (isCheckedAll) return;
-            
+
             if (e.NewValue == CheckState.Unchecked)
             {
                 select_all_checkBox.Checked = false;
@@ -738,7 +734,7 @@ namespace ExcelAddIn
             string drive = Path.GetPathRoot(filePath);
             DriveInfo driveInfo = new DriveInfo(drive);
             return driveInfo.DriveType.ToString();
-           
+
         }
 
 
@@ -808,7 +804,7 @@ namespace ExcelAddIn
     /// </summary>
     public class ControlInfo
     {
-        public string ControlName{get;set;}
+        public string ControlName { get; set; }
 
         public enum ControlType
         {
@@ -833,7 +829,7 @@ namespace ExcelAddIn
             return ControlName;
         }
 
-         public bool ControlExists(string controlName,Form form)
+        public bool ControlExists(string controlName, Form form)
         {
             foreach (Control control in form.Controls)
             {

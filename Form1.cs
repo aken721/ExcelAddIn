@@ -213,7 +213,7 @@ namespace ExcelAddIn
                     dbexport_result_label.Text = string.Empty;
                     find_keywordclear_pictureBox.Visible = false;
                     break;
-                
+
                 //API接口数据提取
                 case 5:
                     connectType_comboBox.SelectedIndex = 0;
@@ -228,9 +228,9 @@ namespace ExcelAddIn
                     LoadFontsToComboBox(comboBoxFonts);
                     comboBoxTextDirection.SelectedIndex = 0;
                     //目前测试词云图中字体设定功能可能对中文不起作用，暂时隐藏
-                    labelFonts.Visible = false;                  
+                    labelFonts.Visible = false;
                     comboBoxFonts.Visible = false;
-                    comboBoxFonts.Text = "微软雅黑";             
+                    comboBoxFonts.Text = "微软雅黑";
                     break;
 
                 //帮助
@@ -2949,8 +2949,8 @@ namespace ExcelAddIn
                                 dbsheet_dataGridView.DataSource = null;
                             }
                         }
-                        
-                       
+
+
                         break;
 
                     //Oracle
@@ -3149,7 +3149,7 @@ namespace ExcelAddIn
                             }
                         }
                     }
-                   
+
 
                 //Oracle
                 case 5:
@@ -3506,7 +3506,7 @@ namespace ExcelAddIn
             }
         }
 
-       
+
         //二维码相关
         Color qrForeColor = Color.Black;
         Color qrBackColor = Color.White;
@@ -3553,7 +3553,7 @@ namespace ExcelAddIn
                         MessageBox.Show("请先选择数据范围");
                         return;
                     }
-                    Excel.Range range =workbook.ActiveSheet.Range[chart_range_textBox.Text];
+                    Excel.Range range = workbook.ActiveSheet.Range[chart_range_textBox.Text];
                     string activeSheetName = workbook.ActiveSheet.Name;
                     chart_pictureBox.Image = null;
 
@@ -3575,7 +3575,7 @@ namespace ExcelAddIn
         {
             return frequencyDict
                 .Select(kv => new WordScore(
-                    Score: kv.Value,  
+                    Score: kv.Value,
                     Word: kv.Key))
                 .OrderByDescending(ws => ws.Score); // 按数值排序
         }
@@ -3586,7 +3586,7 @@ namespace ExcelAddIn
             {
                 ThisAddIn.app.DisplayAlerts = false;
                 ThisAddIn.app.ScreenUpdating = false;
-                this.Invoke(new Action(() => 
+                this.Invoke(new Action(() =>
                 {
                     //ThisAddIn.app.ScreenUpdating = false;
                     //ThisAddIn.app.DisplayAlerts = false;
@@ -3618,9 +3618,9 @@ namespace ExcelAddIn
 
                 string wordCloudSheetName = "_wordcloud";
                 int i = 1;
-                while (SheetExist(wordCloudSheetName)) 
+                while (SheetExist(wordCloudSheetName))
                 {
-                    wordCloudSheetName = "_wordcloud"+i.ToString();
+                    wordCloudSheetName = "_wordcloud" + i.ToString();
                     i++;
                 }
                 Excel.Worksheet wordCloudSheet = workbook.Worksheets.Add(Before: workbook.ActiveSheet);
@@ -3640,7 +3640,7 @@ namespace ExcelAddIn
                 // 强制刷新工作表计算
                 wordCloudSheet.Application.Calculate();
 
-                 //生成词云图
+                //生成词云图
 
                 // 词云图方向
                 TextOrientations[] orientations =
@@ -3652,9 +3652,9 @@ namespace ExcelAddIn
                     TextOrientations.Random
                 ];
 
-                string fontName="Microsoft YaHei";
+                string fontName = "Microsoft YaHei";
                 int textDirection = 0;
-                
+
 
                 this.Invoke(new Action(() =>
                 {
@@ -3668,7 +3668,7 @@ namespace ExcelAddIn
                 WordCloud wc = WordCloud.Create(new WordCloudOptions(600, 400, ConvertToWordScores(frequencyDict))
                 {
                     TextOrientation = orientations[textDirection],
-                    FontManager = new FontManager([SKTypeface.FromFamilyName($"fontName")]),    
+                    FontManager = new FontManager([SKTypeface.FromFamilyName($"fontName")]),
                 });
                 byte[] pngBytes = wc.ToSKBitmap().Encode(SKEncodedImageFormat.Png, 100).AsSpan().ToArray();
 
@@ -3715,7 +3715,7 @@ namespace ExcelAddIn
                     Width: -1,  // -1 表示保持原始宽度
                     Height: -1   // -1 表示保持原始高度
                 );
-             }
+            }
             catch (Exception ex)
             {
                 MessageBox.Show("发生错误: " + ex.Message);
@@ -3763,7 +3763,7 @@ namespace ExcelAddIn
 
         private void chart_select_comboBox_SelectedIndexChanged(object sender, EventArgs e)
         {
-            switch(chart_select_comboBox.SelectedIndex)
+            switch (chart_select_comboBox.SelectedIndex)
             {
                 case 0:
                     chart_range_textBox.Text = "";
@@ -3812,7 +3812,7 @@ namespace ExcelAddIn
 
         private void connectType_comboBox_SelectedIndexChanged(object sender, EventArgs e)
         {
-            switch(connectType_comboBox.SelectedIndex)
+            switch (connectType_comboBox.SelectedIndex)
             {
                 case 0:
                     userPassword_flowLayoutPanel.Visible = false;
@@ -4577,7 +4577,7 @@ namespace ExcelAddIn
 
         private void address_textBox_DoubleClick(object sender, EventArgs e)
         {
-            if(!string.IsNullOrEmpty(address_textBox.Text))
+            if (!string.IsNullOrEmpty(address_textBox.Text))
             {
                 // 双击时打开链接
                 try

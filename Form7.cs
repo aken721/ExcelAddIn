@@ -2,16 +2,16 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Drawing;
+using System.IO;
 using System.Linq;
-using System.Net.Http.Headers;
 using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Net.Http.Json;
+using System.Security.Cryptography;
 using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using System.Net.Http.Json;
-using System.Text.Json;
-using System.Security.Cryptography;
-using System.IO;
 
 
 
@@ -37,7 +37,7 @@ namespace ExcelAddIn
         public Form7()
         {
             InitializeComponent();
-            
+
 
             // 强制使用 TLS 1.2+ 协议
             System.Net.ServicePointManager.SecurityProtocol =
@@ -68,7 +68,7 @@ namespace ExcelAddIn
             richTextBoxInput.Multiline = true;
             richTextBoxInput.ScrollBars = RichTextBoxScrollBars.Vertical;
             // 将自定义上下文菜单绑定到 RichTextBox
-            richTextBoxInput.ContextMenuStrip = customContextMenu; 
+            richTextBoxInput.ContextMenuStrip = customContextMenu;
         }
 
         private async void Form7_Load(object sender, EventArgs e)
@@ -162,11 +162,11 @@ namespace ExcelAddIn
         private void Clear_Click(object sender, EventArgs e)
         {
             richTextBoxInput.Clear(); // 清空 RichTextBox 内容
-        }       
+        }
 
         private async void send_button_Click(object sender, EventArgs e)
         {
-            if(string.IsNullOrEmpty(_apiKey)||string.IsNullOrEmpty(_model))
+            if (string.IsNullOrEmpty(_apiKey) || string.IsNullOrEmpty(_model))
             {
                 prompt_label.Text = "没有获取到API KEY或选择模型，请先使用配置功能进行配置";
                 return;
@@ -181,7 +181,7 @@ namespace ExcelAddIn
             try
             {
                 // 添加用户消息
-                AddChatItem(userInput, true);                
+                AddChatItem(userInput, true);
                 prompt_label.Text = "思考中...";
                 richTextBoxInput.Clear();
                 send_button.Enabled = false;
@@ -2599,7 +2599,7 @@ namespace ExcelAddIn
 
         private void settingsMenuItem_Click(object sender, EventArgs e)
         {
-            Form8 form8=new Form8();
+            Form8 form8 = new Form8();
             form8.FormClosed += Form8_FormClosed;
             form8.ShowDialog();
         }
@@ -2651,7 +2651,7 @@ namespace ExcelAddIn
                 _apiKey = decryptedContent.Split(';')[0].Split('^')[1];
                 _model = decryptedContent.Split(';')[1].Split('^')[1];
                 _apiUrl = decryptedContent.Split(';')[2].Split('^')[1];
-                _enterMode= decryptedContent.Split(';')[3].Split('^')[1];
+                _enterMode = decryptedContent.Split(';')[3].Split('^')[1];
                 // 不在这里更新UI
             }
             catch (Exception ex)
@@ -2660,7 +2660,7 @@ namespace ExcelAddIn
                 System.Diagnostics.Debug.WriteLine($"解密配置失败：{ex.Message}");
                 _apiKey = string.Empty;
                 _model = string.Empty;
-                _apiUrl= string.Empty;
+                _apiUrl = string.Empty;
             }
         }
 
@@ -2717,8 +2717,8 @@ namespace ExcelAddIn
                     break;
                 case "1":
                     if (e.KeyCode == Keys.Enter)
-                    {                        
-                        richTextBoxInput.AppendText(Environment.NewLine);                       
+                    {
+                        richTextBoxInput.AppendText(Environment.NewLine);
 
                         // 阻止默认行为
                         e.Handled = true;          // 标记事件已处理
@@ -2737,7 +2737,7 @@ namespace ExcelAddIn
                         else
                         {
                             // 手动添加换行符
-                            richTextBoxInput.AppendText(Environment.NewLine);                            
+                            richTextBoxInput.AppendText(Environment.NewLine);
                         }
 
                         // 阻止默认行为

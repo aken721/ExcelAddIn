@@ -1,7 +1,4 @@
-﻿using Microsoft.Office.Tools.Excel;
-using Microsoft.Office.Tools.Ribbon;
-using NAudio.Wave;
-using System;
+﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -9,12 +6,14 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using Microsoft.Office.Tools.Ribbon;
+using NAudio.Wave;
 using Excel = Microsoft.Office.Interop.Excel;
 
 namespace ExcelAddIn
 {
     public partial class Ribbon1
-    {       
+    {
 
         //文件还是目录判断标识变量
         public static string runcommand = "";
@@ -23,7 +22,7 @@ namespace ExcelAddIn
         {
             Select_f_or_d.Checked = false;
             Select_f_or_d.Label = "文件名";
-            checkBoxAll.Checked=true;
+            checkBoxAll.Checked = true;
             ThisAddIn.Global.readFile = 0;
             confirm_spotlight.Checked = false;
             playbackMode = PlaybackMode.Sequential;
@@ -37,7 +36,7 @@ namespace ExcelAddIn
             page_zoom_comboBox.Text = "无缩放";
             sheet_export_comboBox.Text = "当前表";
             export_type_comboBox.Text = "多表单文件";
-            export_type_comboBox.Visible=false;
+            export_type_comboBox.Visible = false;
 
             spotlightDropDown.SelectedItemIndex = 0;
             spotlightDropDown.Image = Properties.Resources.green35;
@@ -45,7 +44,7 @@ namespace ExcelAddIn
 
             //默认设置聚光灯颜色为浅绿色，colorIndex
             ThisAddIn.Global.spotlightColorIndex = 35;
-        }      
+        }
 
 
         //表操作按钮
@@ -98,7 +97,7 @@ namespace ExcelAddIn
                 int runClick_form4 = Form4.runButtonClicked;
                 int resetClick_form4 = Form4.resetButtonClicked;
                 if (runClick_form4 > 0 || resetClick_form4 > 0)
-                {                    
+                {
                     RefreshRenameTable();
                     MessageBox.Show("删除或移动文件窗口已关闭，_rename表已更新，如不再需要进行重命名操作，可手工删除_rename表即可");
                 }
@@ -106,7 +105,7 @@ namespace ExcelAddIn
                 {
                     return;
                 }
-            }); 
+            });
         }
 
         //指定字段名所处的列
@@ -269,7 +268,7 @@ namespace ExcelAddIn
             }
 
             return false;
-        }        
+        }
 
         // 辅助方法：准备工作表
         private Excel.Worksheet PrepareRenameWorksheet(Excel.Workbook workbook)
@@ -728,7 +727,7 @@ namespace ExcelAddIn
             if (!string.IsNullOrEmpty(get_directory_path) && ThisAddIn.Global.readFile == 1 && IsSheetExist(workbook, "_rename"))
             {
                 //调用file.move或direction.move修改名
-                ThisAddIn.app.Application.StatusBar="文件正在重命名中，请稍后...";
+                ThisAddIn.app.Application.StatusBar = "文件正在重命名中，请稍后...";
 
                 for (int i = 2; i <= workbook.ActiveSheet.UsedRange.Rows.Count; i++)
                 {
@@ -796,9 +795,9 @@ namespace ExcelAddIn
             }
             ThisAddIn.app.DisplayAlerts = true;
             ThisAddIn.app.ScreenUpdating = true;
-            ThisAddIn.app.Application.StatusBar=false;
+            ThisAddIn.app.Application.StatusBar = false;
         }
-  
+
 
         //文件目录选项
         private void Select_f_or_d_Click(object sender, RibbonControlEventArgs e)
@@ -1122,7 +1121,7 @@ namespace ExcelAddIn
                 }
                 else
                 {
-                    if (playbackMode==PlaybackMode.SingleLoop)
+                    if (playbackMode == PlaybackMode.SingleLoop)
                     {
                         waveOutEvent?.Stop();
                         currentSongIndex = (currentSongIndex - 1 + musicFiles.Count) % musicFiles.Count;
@@ -1133,7 +1132,7 @@ namespace ExcelAddIn
                         waveOutEvent?.Stop();
                         currentSongIndex = (currentSongIndex - 2 + musicFiles.Count) % musicFiles.Count;
                         await PlayMusic();
-                    }                    
+                    }
                 }
             }
         }
@@ -1188,14 +1187,14 @@ namespace ExcelAddIn
         }
 
         //记录聚光灯功能打开前的彩色单元格位置和填充颜色
-        Dictionary<string, int> cellColor = new Dictionary<string, int>();  
+        Dictionary<string, int> cellColor = new Dictionary<string, int>();
 
         //聚光灯功能按钮
         private void confirm_spotlight_Click(object sender, RibbonControlEventArgs e)
         {
             Excel.Worksheet currentWorksheet = ThisAddIn.app.ActiveSheet;
             Excel.Range usedRange = currentWorksheet.UsedRange;
-            if (confirm_spotlight.Checked==true)
+            if (confirm_spotlight.Checked == true)
             {
                 cellColor = GetColorDictionary(usedRange);
                 confirm_spotlight.Label = "关闭聚光灯";
@@ -1207,17 +1206,17 @@ namespace ExcelAddIn
                 confirm_spotlight.Label = "打开聚光灯";
                 confirm_spotlight.Image = ExcelAddIn.Properties.Resources.spotlight_close;
                 ThisAddIn.Global.spotlight = 0;
-                Excel.Range selectCell= ThisAddIn.app.ActiveCell;
+                Excel.Range selectCell = ThisAddIn.app.ActiveCell;
                 ThisAddIn.app.ScreenUpdating = false;
                 selectCell.EntireRow.Interior.ColorIndex = 0;
                 selectCell.EntireColumn.Interior.ColorIndex = 0;
-                if (cellColor.Count>0)
+                if (cellColor.Count > 0)
                 {
                     foreach (var cellColorEntry in cellColor)
                     {
                         string cellAddress = cellColorEntry.Key;
-                        int cellColorIndex=cellColorEntry.Value;
-                        Excel.Range cell= currentWorksheet.Range[cellAddress];
+                        int cellColorIndex = cellColorEntry.Value;
+                        Excel.Range cell = currentWorksheet.Range[cellAddress];
                         cell.Interior.ColorIndex = cellColorIndex;
                     }
                 }
@@ -1227,16 +1226,16 @@ namespace ExcelAddIn
         }
 
         //获取已有彩色单元格位置和颜色索引的字典变量的方法
-        private Dictionary<string,int> GetColorDictionary(Excel.Range usedRange)
+        private Dictionary<string, int> GetColorDictionary(Excel.Range usedRange)
         {
-            Dictionary<string,int> cellColorDict=new Dictionary<string,int>();
+            Dictionary<string, int> cellColorDict = new Dictionary<string, int>();
             foreach (Excel.Range cell in usedRange)
             {
-                if (cell.Interior.ColorIndex>0)
+                if (cell.Interior.ColorIndex > 0)
                 {
                     string cellAddress = cell.Address;
                     int cellColorIndex = cell.Interior.ColorIndex;
-                    cellColorDict.Add(cellAddress,cellColorIndex);
+                    cellColorDict.Add(cellAddress, cellColorIndex);
                 }
             }
             return cellColorDict;
@@ -1244,7 +1243,7 @@ namespace ExcelAddIn
 
         private void spotlightDropDown_SelectionChanged(object sender, RibbonControlEventArgs e)
         {
-            switch(spotlightDropDown.SelectedItemIndex)
+            switch (spotlightDropDown.SelectedItemIndex)
             {
                 case 0:
                     ThisAddIn.Global.spotlightColorIndex = 35;  //浅绿
@@ -1276,7 +1275,7 @@ namespace ExcelAddIn
             {
                 case "当前表":
                     ThisAddIn.app.ScreenUpdating = false;
-                    ThisAddIn.app.DisplayAlerts= false;
+                    ThisAddIn.app.DisplayAlerts = false;
                     Excel.Worksheet worksheet = workbook.ActiveSheet;
                     string sheetName = worksheet.Name;
                     saveFileDialog1.Filter = "PDF Files|*.pdf";
@@ -1360,7 +1359,7 @@ namespace ExcelAddIn
                             saveFileDialog1.FileName = $"{Path.GetFileNameWithoutExtension(workbook.Name)}.pdf";
                             saveFileDialog1.AddExtension = true;
                             DialogResult res = saveFileDialog1.ShowDialog();
-                            if (res == DialogResult.OK) 
+                            if (res == DialogResult.OK)
                             {
                                 foreach (Excel.Worksheet sheet in workbook.Worksheets)
                                 {
@@ -1420,7 +1419,7 @@ namespace ExcelAddIn
                                             pagesSetup.FitToPagesTall = 1;
                                             break;
                                     }
-                                }                                
+                                }
                             }
                             workbook.ExportAsFixedFormat(Excel.XlFixedFormatType.xlTypePDF, saveFileDialog1.FileName, Excel.XlFixedFormatQuality.xlQualityStandard, Type.Missing, false);
                             MessageBox.Show("PDF已转换完成！");
@@ -1517,7 +1516,7 @@ namespace ExcelAddIn
                     ThisAddIn.app.ScreenUpdating = true;
                     ThisAddIn.app.DisplayAlerts = true;
                     break;
-            }            
+            }
         }
 
         /// <summary>
@@ -1532,14 +1531,14 @@ namespace ExcelAddIn
             {
                 export_type_comboBox.Visible = true;
             }
-            else if(sheet_export_comboBox.Text =="当前表")
+            else if (sheet_export_comboBox.Text == "当前表")
             {
                 export_type_comboBox.Visible = false;
             }
             else
-            {       
+            {
 
-                if (MessageBox.Show("该选项只能是“当前表”或“全部表”")==DialogResult.OK)
+                if (MessageBox.Show("该选项只能是“当前表”或“全部表”") == DialogResult.OK)
                 {
                     export_type_comboBox.Visible = false;
                     sheet_export_comboBox.Text = "当前表";
@@ -1549,7 +1548,7 @@ namespace ExcelAddIn
 
         private void export_type_comboBox_TextChanged(object sender, RibbonControlEventArgs e)
         {
-            if(export_type_comboBox.Text =="多表多文件" || export_type_comboBox.Text == "多表单文件")
+            if (export_type_comboBox.Text == "多表多文件" || export_type_comboBox.Text == "多表单文件")
             {
                 return;
             }

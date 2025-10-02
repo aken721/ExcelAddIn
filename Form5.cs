@@ -1,17 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Data;
 using System.Drawing;
+using System.IO;
 using System.Linq;
+using System.Media;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using Excel=Microsoft.Office.Interop.Excel;
+using AForge.Video.DirectShow;
+using ExcelAddIn.Properties;
 using ZXing;
 using ZXing.Common;
-using AForge.Video.DirectShow;
-using System.Media;
-using ExcelAddIn.Properties;
+using Excel = Microsoft.Office.Interop.Excel;
 
 
 namespace ExcelAddIn
@@ -208,7 +208,8 @@ namespace ExcelAddIn
                     List<string> results = ReadQRCode(gray_bitmap, out rects);
 
                     // 更新矩形和帧尺寸
-                    this.Invoke((MethodInvoker)delegate {
+                    this.Invoke((MethodInvoker)delegate
+                    {
                         qrRectangles = rects;
                         if (frame != null)
                         {
@@ -434,7 +435,7 @@ namespace ExcelAddIn
 
         // 转换为灰度图像
         private Bitmap PreprocessImage(Bitmap bitmap)
-        {            
+        {
             Bitmap grayBitmap = new Bitmap(bitmap.Width, bitmap.Height);
             for (int y = 0; y < bitmap.Height; y++)
             {
@@ -461,9 +462,9 @@ namespace ExcelAddIn
 
         private void WriteToExcel(System.Data.DataTable data)
         {
-            ThisAddIn.app.Application.ScreenUpdating=false;
-            ThisAddIn.app.Application.DisplayAlerts=false;
-            
+            ThisAddIn.app.Application.ScreenUpdating = false;
+            ThisAddIn.app.Application.DisplayAlerts = false;
+
 
             if (!ThisAddIn.Global.created_qr_sheet)
             {
@@ -501,7 +502,7 @@ namespace ExcelAddIn
                         string str = data.Rows[i][j].ToString();
                         sheet.Cells[row + i, j + 1].NumberFormat = "@";
                         sheet.Cells[row + i, j + 1].Value = str;
-                        if (j == 1 && sheet.Cells[row + i, j + 1].Value!="webcam")
+                        if (j == 1 && sheet.Cells[row + i, j + 1].Value != "webcam")
                         {
                             sheet.Hyperlinks.Add(sheet.Cells[row + i, j + 1], Path.Combine(data.Rows[i][0].ToString(), str), Type.Missing, Type.Missing, str);
                         }
@@ -513,7 +514,7 @@ namespace ExcelAddIn
                     }
                 }
             }
-            catch(Exception ex) 
+            catch (Exception ex)
             {
                 MessageBox.Show(ex.Message);
             }
