@@ -1062,6 +1062,675 @@ namespace ExcelAddIn
                             required = new[] { "formula" }
                         }
                     }
+                },
+                new
+                {
+                    type = "function",
+                    function = new
+                    {
+                        name = "find_value",
+                        description = "在工作表中查找指定值的所有位置",
+                        parameters = new
+                        {
+                            type = "object",
+                            properties = new
+                            {
+                                fileName = new { type = "string", description = "工作簿文件名（可选）" },
+                                sheetName = new { type = "string", description = "工作表名称（可选）" },
+                                searchValue = new { type = "string", description = "要查找的值" },
+                                matchCase = new { type = "boolean", description = "是否区分大小写（默认false）" }
+                            },
+                            required = new[] { "searchValue" }
+                        }
+                    }
+                },
+                new
+                {
+                    type = "function",
+                    function = new
+                    {
+                        name = "find_and_replace",
+                        description = "在工作表中查找并替换所有匹配的值",
+                        parameters = new
+                        {
+                            type = "object",
+                            properties = new
+                            {
+                                fileName = new { type = "string", description = "工作簿文件名（可选）" },
+                                sheetName = new { type = "string", description = "工作表名称（可选）" },
+                                findWhat = new { type = "string", description = "要查找的值" },
+                                replaceWith = new { type = "string", description = "替换后的值" },
+                                matchCase = new { type = "boolean", description = "是否区分大小写（默认false）" }
+                            },
+                            required = new[] { "findWhat", "replaceWith" }
+                        }
+                    }
+                },
+                new
+                {
+                    type = "function",
+                    function = new
+                    {
+                        name = "freeze_panes",
+                        description = "冻结窗格（冻结指定行和列之前的部分）",
+                        parameters = new
+                        {
+                            type = "object",
+                            properties = new
+                            {
+                                fileName = new { type = "string", description = "工作簿文件名（可选）" },
+                                sheetName = new { type = "string", description = "工作表名称（可选）" },
+                                row = new { type = "integer", description = "冻结行号（在此行之前的行将被冻结）" },
+                                column = new { type = "integer", description = "冻结列号（在此列之前的列将被冻结）" }
+                            },
+                            required = new[] { "row", "column" }
+                        }
+                    }
+                },
+                new
+                {
+                    type = "function",
+                    function = new
+                    {
+                        name = "unfreeze_panes",
+                        description = "取消冻结窗格",
+                        parameters = new
+                        {
+                            type = "object",
+                            properties = new
+                            {
+                                fileName = new { type = "string", description = "工作簿文件名（可选）" },
+                                sheetName = new { type = "string", description = "工作表名称（可选）" }
+                            },
+                            required = new string[] { }
+                        }
+                    }
+                },
+                new
+                {
+                    type = "function",
+                    function = new
+                    {
+                        name = "autofit_columns",
+                        description = "自动调整列宽以适应内容",
+                        parameters = new
+                        {
+                            type = "object",
+                            properties = new
+                            {
+                                fileName = new { type = "string", description = "工作簿文件名（可选）" },
+                                sheetName = new { type = "string", description = "工作表名称（可选）" },
+                                rangeAddress = new { type = "string", description = "要调整的范围地址（如'A:A'或'A1:C10'）" }
+                            },
+                            required = new[] { "rangeAddress" }
+                        }
+                    }
+                },
+                new
+                {
+                    type = "function",
+                    function = new
+                    {
+                        name = "autofit_rows",
+                        description = "自动调整行高以适应内容",
+                        parameters = new
+                        {
+                            type = "object",
+                            properties = new
+                            {
+                                fileName = new { type = "string", description = "工作簿文件名（可选）" },
+                                sheetName = new { type = "string", description = "工作表名称（可选）" },
+                                rangeAddress = new { type = "string", description = "要调整的范围地址（如'1:1'或'A1:C10'）" }
+                            },
+                            required = new[] { "rangeAddress" }
+                        }
+                    }
+                },
+                new
+                {
+                    type = "function",
+                    function = new
+                    {
+                        name = "set_column_visible",
+                        description = "设置列的可见性（隐藏或显示列）",
+                        parameters = new
+                        {
+                            type = "object",
+                            properties = new
+                            {
+                                fileName = new { type = "string", description = "工作簿文件名（可选）" },
+                                sheetName = new { type = "string", description = "工作表名称（可选）" },
+                                columnIndex = new { type = "integer", description = "列号（A=1, B=2...）" },
+                                visible = new { type = "boolean", description = "是否可见（true显示，false隐藏）" }
+                            },
+                            required = new[] { "columnIndex", "visible" }
+                        }
+                    }
+                },
+                new
+                {
+                    type = "function",
+                    function = new
+                    {
+                        name = "set_row_visible",
+                        description = "设置行的可见性（隐藏或显示行）",
+                        parameters = new
+                        {
+                            type = "object",
+                            properties = new
+                            {
+                                fileName = new { type = "string", description = "工作簿文件名（可选）" },
+                                sheetName = new { type = "string", description = "工作表名称（可选）" },
+                                rowIndex = new { type = "integer", description = "行号" },
+                                visible = new { type = "boolean", description = "是否可见（true显示，false隐藏）" }
+                            },
+                            required = new[] { "rowIndex", "visible" }
+                        }
+                    }
+                },
+                new
+                {
+                    type = "function",
+                    function = new
+                    {
+                        name = "add_comment",
+                        description = "为单元格添加批注",
+                        parameters = new
+                        {
+                            type = "object",
+                            properties = new
+                            {
+                                fileName = new { type = "string", description = "工作簿文件名（可选）" },
+                                sheetName = new { type = "string", description = "工作表名称（可选）" },
+                                cellAddress = new { type = "string", description = "单元格地址（如'A1'）" },
+                                commentText = new { type = "string", description = "批注文本" }
+                            },
+                            required = new[] { "cellAddress", "commentText" }
+                        }
+                    }
+                },
+                new
+                {
+                    type = "function",
+                    function = new
+                    {
+                        name = "delete_comment",
+                        description = "删除单元格的批注",
+                        parameters = new
+                        {
+                            type = "object",
+                            properties = new
+                            {
+                                fileName = new { type = "string", description = "工作簿文件名（可选）" },
+                                sheetName = new { type = "string", description = "工作表名称（可选）" },
+                                cellAddress = new { type = "string", description = "单元格地址（如'A1'）" }
+                            },
+                            required = new[] { "cellAddress" }
+                        }
+                    }
+                },
+                new
+                {
+                    type = "function",
+                    function = new
+                    {
+                        name = "get_comment",
+                        description = "获取单元格的批注内容",
+                        parameters = new
+                        {
+                            type = "object",
+                            properties = new
+                            {
+                                fileName = new { type = "string", description = "工作簿文件名（可选）" },
+                                sheetName = new { type = "string", description = "工作表名称（可选）" },
+                                cellAddress = new { type = "string", description = "单元格地址（如'A1'）" }
+                            },
+                            required = new[] { "cellAddress" }
+                        }
+                    }
+                },
+                new
+                {
+                    type = "function",
+                    function = new
+                    {
+                        name = "add_hyperlink",
+                        description = "为单元格添加超链接对象（非公式方式）。适用于外部链接，如网址（会用浏览器打开）、本地文件路径、网络文件路径等。不适用于工作簿内部跳转。",
+                        parameters = new
+                        {
+                            type = "object",
+                            properties = new
+                            {
+                                fileName = new { type = "string", description = "工作簿文件名（可选）" },
+                                sheetName = new { type = "string", description = "工作表名称（可选）" },
+                                cellAddress = new { type = "string", description = "单元格地址（如'A1'）" },
+                                url = new { type = "string", description = "链接地址：网址（如'https://www.baidu.com'）或本地/网络文件路径（如'C:\\Documents\\file.xlsx'）" },
+                                displayText = new { type = "string", description = "显示文本（可选）" }
+                            },
+                            required = new[] { "cellAddress", "url" }
+                        }
+                    }
+                },
+                new
+                {
+                    type = "function",
+                    function = new
+                    {
+                        name = "set_hyperlink_formula",
+                        description = "使用HYPERLINK公式为单元格设置超链接。适用于工作簿内部跳转（如跳转到其他工作表的某个单元格），此类链接在Excel内打开，不会打开浏览器。",
+                        parameters = new
+                        {
+                            type = "object",
+                            properties = new
+                            {
+                                fileName = new { type = "string", description = "工作簿文件名（可选）" },
+                                sheetName = new { type = "string", description = "工作表名称（可选）" },
+                                cellAddress = new { type = "string", description = "要设置公式的单元格地址（如'A1'）" },
+                                targetLocation = new { type = "string", description = "目标位置，格式为'工作表名!单元格地址'，如'Sheet2!A1'、'销售数据!B5'" },
+                                displayText = new { type = "string", description = "显示文本，如'跳转到Sheet2'、'查看详情'" }
+                            },
+                            required = new[] { "cellAddress", "targetLocation", "displayText" }
+                        }
+                    }
+                },
+                new
+                {
+                    type = "function",
+                    function = new
+                    {
+                        name = "delete_hyperlink",
+                        description = "删除单元格的超链接",
+                        parameters = new
+                        {
+                            type = "object",
+                            properties = new
+                            {
+                                fileName = new { type = "string", description = "工作簿文件名（可选）" },
+                                sheetName = new { type = "string", description = "工作表名称（可选）" },
+                                cellAddress = new { type = "string", description = "单元格地址（如'A1'）" }
+                            },
+                            required = new[] { "cellAddress" }
+                        }
+                    }
+                },
+                new
+                {
+                    type = "function",
+                    function = new
+                    {
+                        name = "get_used_range",
+                        description = "获取工作表中已使用的单元格范围",
+                        parameters = new
+                        {
+                            type = "object",
+                            properties = new
+                            {
+                                fileName = new { type = "string", description = "工作簿文件名（可选）" },
+                                sheetName = new { type = "string", description = "工作表名称（可选）" }
+                            },
+                            required = new string[] { }
+                        }
+                    }
+                },
+                new
+                {
+                    type = "function",
+                    function = new
+                    {
+                        name = "get_range_statistics",
+                        description = "获取单元格范围的统计信息（总和、平均值、最大值、最小值等）",
+                        parameters = new
+                        {
+                            type = "object",
+                            properties = new
+                            {
+                                fileName = new { type = "string", description = "工作簿文件名（可选）" },
+                                sheetName = new { type = "string", description = "工作表名称（可选）" },
+                                rangeAddress = new { type = "string", description = "单元格范围地址（如'A1:A10'）" }
+                            },
+                            required = new[] { "rangeAddress" }
+                        }
+                    }
+                },
+                new
+                {
+                    type = "function",
+                    function = new
+                    {
+                        name = "get_last_row",
+                        description = "获取指定列中最后一个有数据的行号",
+                        parameters = new
+                        {
+                            type = "object",
+                            properties = new
+                            {
+                                fileName = new { type = "string", description = "工作簿文件名（可选）" },
+                                sheetName = new { type = "string", description = "工作表名称（可选）" },
+                                columnIndex = new { type = "integer", description = "列号（默认为1，即A列）" }
+                            },
+                            required = new string[] { }
+                        }
+                    }
+                },
+                new
+                {
+                    type = "function",
+                    function = new
+                    {
+                        name = "get_last_column",
+                        description = "获取指定行中最后一个有数据的列号",
+                        parameters = new
+                        {
+                            type = "object",
+                            properties = new
+                            {
+                                fileName = new { type = "string", description = "工作簿文件名（可选）" },
+                                sheetName = new { type = "string", description = "工作表名称（可选）" },
+                                rowIndex = new { type = "integer", description = "行号（默认为1）" }
+                            },
+                            required = new string[] { }
+                        }
+                    }
+                },
+                new
+                {
+                    type = "function",
+                    function = new
+                    {
+                        name = "sort_range",
+                        description = "对单元格范围进行排序",
+                        parameters = new
+                        {
+                            type = "object",
+                            properties = new
+                            {
+                                fileName = new { type = "string", description = "工作簿文件名（可选）" },
+                                sheetName = new { type = "string", description = "工作表名称（可选）" },
+                                rangeAddress = new { type = "string", description = "要排序的范围地址（如'A1:C10'）" },
+                                sortColumnIndex = new { type = "integer", description = "排序依据的列索引（相对于范围的列，1表示第一列）" },
+                                ascending = new { type = "boolean", description = "是否升序排列（true升序，false降序，默认true）" }
+                            },
+                            required = new[] { "rangeAddress", "sortColumnIndex" }
+                        }
+                    }
+                },
+                new
+                {
+                    type = "function",
+                    function = new
+                    {
+                        name = "set_auto_filter",
+                        description = "为范围设置自动筛选",
+                        parameters = new
+                        {
+                            type = "object",
+                            properties = new
+                            {
+                                fileName = new { type = "string", description = "工作簿文件名（可选）" },
+                                sheetName = new { type = "string", description = "工作表名称（可选）" },
+                                rangeAddress = new { type = "string", description = "要筛选的范围地址（如'A1:C10'）" },
+                                columnIndex = new { type = "integer", description = "筛选列索引（可选，0表示不筛选）" },
+                                criteria = new { type = "string", description = "筛选条件（可选）" }
+                            },
+                            required = new[] { "rangeAddress" }
+                        }
+                    }
+                },
+                new
+                {
+                    type = "function",
+                    function = new
+                    {
+                        name = "remove_duplicates",
+                        description = "删除范围中的重复行",
+                        parameters = new
+                        {
+                            type = "object",
+                            properties = new
+                            {
+                                fileName = new { type = "string", description = "工作簿文件名（可选）" },
+                                sheetName = new { type = "string", description = "工作表名称（可选）" },
+                                rangeAddress = new { type = "string", description = "要处理的范围地址（如'A1:C10'）" },
+                                columnIndices = new { type = "string", description = "用于判断重复的列索引数组（JSON格式，如'[1,2]'表示第1和第2列）" }
+                            },
+                            required = new[] { "rangeAddress", "columnIndices" }
+                        }
+                    }
+                },
+                new
+                {
+                    type = "function",
+                    function = new
+                    {
+                        name = "move_worksheet",
+                        description = "移动工作表到指定位置",
+                        parameters = new
+                        {
+                            type = "object",
+                            properties = new
+                            {
+                                fileName = new { type = "string", description = "工作簿文件名（可选）" },
+                                sheetName = new { type = "string", description = "要移动的工作表名称" },
+                                position = new { type = "integer", description = "目标位置（1表示第一个位置）" }
+                            },
+                            required = new[] { "sheetName", "position" }
+                        }
+                    }
+                },
+                new
+                {
+                    type = "function",
+                    function = new
+                    {
+                        name = "set_worksheet_visible",
+                        description = "设置工作表的可见性（隐藏或显示工作表）",
+                        parameters = new
+                        {
+                            type = "object",
+                            properties = new
+                            {
+                                fileName = new { type = "string", description = "工作簿文件名（可选）" },
+                                sheetName = new { type = "string", description = "工作表名称" },
+                                visible = new { type = "boolean", description = "是否可见（true显示，false隐藏）" }
+                            },
+                            required = new[] { "sheetName", "visible" }
+                        }
+                    }
+                },
+                new
+                {
+                    type = "function",
+                    function = new
+                    {
+                        name = "get_worksheet_index",
+                        description = "获取工作表在工作簿中的位置索引",
+                        parameters = new
+                        {
+                            type = "object",
+                            properties = new
+                            {
+                                fileName = new { type = "string", description = "工作簿文件名（可选）" },
+                                sheetName = new { type = "string", description = "工作表名称" }
+                            },
+                            required = new[] { "sheetName" }
+                        }
+                    }
+                },
+                // 命名区域工具
+                new
+                {
+                    type = "function",
+                    function = new
+                    {
+                        name = "create_named_range",
+                        description = "创建命名区域，使公式更易读。例如将A2:A100命名为'销售额'，之后可以使用=SUM(销售额)代替=SUM(A2:A100)",
+                        parameters = new
+                        {
+                            type = "object",
+                            properties = new
+                            {
+                                fileName = new { type = "string", description = "工作簿文件名（可选）" },
+                                sheetName = new { type = "string", description = "工作表名称（可选）" },
+                                rangeName = new { type = "string", description = "命名区域的名称，如'销售额'、'成本'" },
+                                rangeAddress = new { type = "string", description = "区域地址，如'A2:A100'、'B1:D10'" }
+                            },
+                            required = new[] { "rangeName", "rangeAddress" }
+                        }
+                    }
+                },
+                new
+                {
+                    type = "function",
+                    function = new
+                    {
+                        name = "delete_named_range",
+                        description = "删除命名区域",
+                        parameters = new
+                        {
+                            type = "object",
+                            properties = new
+                            {
+                                fileName = new { type = "string", description = "工作簿文件名（可选）" },
+                                rangeName = new { type = "string", description = "要删除的命名区域的名称" }
+                            },
+                            required = new[] { "rangeName" }
+                        }
+                    }
+                },
+                new
+                {
+                    type = "function",
+                    function = new
+                    {
+                        name = "get_named_ranges",
+                        description = "获取工作簿中所有命名区域的列表",
+                        parameters = new
+                        {
+                            type = "object",
+                            properties = new
+                            {
+                                fileName = new { type = "string", description = "工作簿文件名（可选）" }
+                            }
+                        }
+                    }
+                },
+                new
+                {
+                    type = "function",
+                    function = new
+                    {
+                        name = "get_named_range_address",
+                        description = "获取命名区域的引用地址",
+                        parameters = new
+                        {
+                            type = "object",
+                            properties = new
+                            {
+                                fileName = new { type = "string", description = "工作簿文件名（可选）" },
+                                rangeName = new { type = "string", description = "命名区域的名称" }
+                            },
+                            required = new[] { "rangeName" }
+                        }
+                    }
+                },
+                // 单元格格式增强工具
+                new
+                {
+                    type = "function",
+                    function = new
+                    {
+                        name = "set_cell_text_wrap",
+                        description = "设置单元格文本自动换行，适用于长文本内容",
+                        parameters = new
+                        {
+                            type = "object",
+                            properties = new
+                            {
+                                fileName = new { type = "string", description = "工作簿文件名（可选）" },
+                                sheetName = new { type = "string", description = "工作表名称（可选）" },
+                                rangeAddress = new { type = "string", description = "单元格或区域地址，如'A1'或'A1:C10'" },
+                                wrap = new { type = "boolean", description = "true=自动换行，false=不换行" }
+                            },
+                            required = new[] { "rangeAddress", "wrap" }
+                        }
+                    }
+                },
+                new
+                {
+                    type = "function",
+                    function = new
+                    {
+                        name = "set_cell_indent",
+                        description = "设置单元格的缩进级别，用于层级显示",
+                        parameters = new
+                        {
+                            type = "object",
+                            properties = new
+                            {
+                                fileName = new { type = "string", description = "工作簿文件名（可选）" },
+                                sheetName = new { type = "string", description = "工作表名称（可选）" },
+                                rangeAddress = new { type = "string", description = "单元格或区域地址" },
+                                indentLevel = new { type = "integer", description = "缩进级别（0-15）" }
+                            },
+                            required = new[] { "rangeAddress", "indentLevel" }
+                        }
+                    }
+                },
+                new
+                {
+                    type = "function",
+                    function = new
+                    {
+                        name = "set_cell_orientation",
+                        description = "设置单元格文本的旋转角度，常用于表头设计",
+                        parameters = new
+                        {
+                            type = "object",
+                            properties = new
+                            {
+                                fileName = new { type = "string", description = "工作簿文件名（可选）" },
+                                sheetName = new { type = "string", description = "工作表名称（可选）" },
+                                rangeAddress = new { type = "string", description = "单元格或区域地址" },
+                                degrees = new { type = "integer", description = "旋转角度（-90到90），正数逆时针，负数顺时针" }
+                            },
+                            required = new[] { "rangeAddress", "degrees" }
+                        }
+                    }
+                },
+                new
+                {
+                    type = "function",
+                    function = new
+                    {
+                        name = "set_cell_shrink_to_fit",
+                        description = "设置单元格缩小字体以适应单元格宽度",
+                        parameters = new
+                        {
+                            type = "object",
+                            properties = new
+                            {
+                                fileName = new { type = "string", description = "工作簿文件名（可选）" },
+                                sheetName = new { type = "string", description = "工作表名称（可选）" },
+                                rangeAddress = new { type = "string", description = "单元格或区域地址" },
+                                shrink = new { type = "boolean", description = "true=缩小字体填充，false=不缩小" }
+                            },
+                            required = new[] { "rangeAddress", "shrink" }
+                        }
+                    }
+                },
+                new
+                {
+                    type = "function",
+                    function = new
+                    {
+                        name = "get_current_selection",
+                        description = "获取当前选中的单元格或区域的信息（地址、行号、列号、值等）",
+                        parameters = new
+                        {
+                            type = "object",
+                            properties = new { }
+                        }
+                    }
                 }
             };
 
@@ -2067,6 +2736,606 @@ namespace ExcelAddIn
                             }
                         }
 
+                    case "find_value":
+                        {
+                            var fileName = GetFileName();
+                            var sheetName = GetSheetName();
+                            var searchValue = arguments.GetProperty("searchValue").GetString();
+                            var matchCase = arguments.TryGetProperty("matchCase", out var mcProp) && mcProp.GetBoolean();
+
+                            var worksheet = GetWorksheet(fileName, sheetName);
+                            var usedRange = worksheet.UsedRange;
+                            var results = new List<string>();
+
+                            var foundCell = usedRange.Find(
+                                What: searchValue,
+                                LookIn: Microsoft.Office.Interop.Excel.XlFindLookIn.xlValues,
+                                LookAt: Microsoft.Office.Interop.Excel.XlLookAt.xlPart,
+                                SearchOrder: Microsoft.Office.Interop.Excel.XlSearchOrder.xlByRows,
+                                MatchCase: matchCase);
+
+                            if (foundCell != null)
+                            {
+                                string firstAddress = foundCell.Address;
+                                do
+                                {
+                                    results.Add(foundCell.Address);
+                                    foundCell = usedRange.FindNext(foundCell);
+                                }
+                                while (foundCell != null && foundCell.Address != firstAddress);
+                            }
+
+                            return results.Count > 0 
+                                ? $"找到 {results.Count} 个匹配项: {string.Join(", ", results)}" 
+                                : "未找到匹配项";
+                        }
+
+                    case "find_and_replace":
+                        {
+                            var fileName = GetFileName();
+                            var sheetName = GetSheetName();
+                            var findWhat = arguments.GetProperty("findWhat").GetString();
+                            var replaceWith = arguments.GetProperty("replaceWith").GetString();
+                            var matchCase = arguments.TryGetProperty("matchCase", out var mcProp) && mcProp.GetBoolean();
+
+                            var worksheet = GetWorksheet(fileName, sheetName);
+                            var usedRange = worksheet.UsedRange;
+                            int count = 0;
+
+                            var foundCell = usedRange.Find(
+                                What: findWhat,
+                                LookIn: Microsoft.Office.Interop.Excel.XlFindLookIn.xlValues,
+                                LookAt: Microsoft.Office.Interop.Excel.XlLookAt.xlPart,
+                                MatchCase: matchCase);
+
+                            if (foundCell != null)
+                            {
+                                string firstAddress = foundCell.Address;
+                                do
+                                {
+                                    foundCell.Value = replaceWith;
+                                    count++;
+                                    foundCell = usedRange.FindNext(foundCell);
+                                }
+                                while (foundCell != null && foundCell.Address != firstAddress);
+                            }
+
+                            return $"成功替换了 {count} 个单元格";
+                        }
+
+                    case "freeze_panes":
+                        {
+                            var fileName = GetFileName();
+                            var sheetName = GetSheetName();
+                            var row = arguments.GetProperty("row").GetInt32();
+                            var column = arguments.GetProperty("column").GetInt32();
+
+                            var worksheet = GetWorksheet(fileName, sheetName);
+                            var cell = worksheet.Cells[row, column];
+                            cell.Select();
+                            ThisAddIn.app.ActiveWindow.FreezePanes = true;
+
+                            return $"成功冻结窗格（在行 {row}，列 {column} 处）";
+                        }
+
+                    case "unfreeze_panes":
+                        {
+                            var fileName = GetFileName();
+                            var sheetName = GetSheetName();
+                            var worksheet = GetWorksheet(fileName, sheetName);
+
+                            ThisAddIn.app.ActiveWindow.FreezePanes = false;
+                            return "成功取消冻结窗格";
+                        }
+
+                    case "autofit_columns":
+                        {
+                            var fileName = GetFileName();
+                            var sheetName = GetSheetName();
+                            var rangeAddress = arguments.GetProperty("rangeAddress").GetString();
+
+                            var worksheet = GetWorksheet(fileName, sheetName);
+                            var range = worksheet.Range[rangeAddress];
+                            range.Columns.AutoFit();
+
+                            return $"成功自动调整列宽: {rangeAddress}";
+                        }
+
+                    case "autofit_rows":
+                        {
+                            var fileName = GetFileName();
+                            var sheetName = GetSheetName();
+                            var rangeAddress = arguments.GetProperty("rangeAddress").GetString();
+
+                            var worksheet = GetWorksheet(fileName, sheetName);
+                            var range = worksheet.Range[rangeAddress];
+                            range.Rows.AutoFit();
+
+                            return $"成功自动调整行高: {rangeAddress}";
+                        }
+
+                    case "set_column_visible":
+                        {
+                            var fileName = GetFileName();
+                            var sheetName = GetSheetName();
+                            var columnIndex = arguments.GetProperty("columnIndex").GetInt32();
+                            var visible = arguments.GetProperty("visible").GetBoolean();
+
+                            var worksheet = GetWorksheet(fileName, sheetName);
+                            var column = worksheet.Columns[columnIndex];
+                            column.Hidden = !visible;
+
+                            return $"成功设置第 {columnIndex} 列的可见性为 {(visible ? "显示" : "隐藏")}";
+                        }
+
+                    case "set_row_visible":
+                        {
+                            var fileName = GetFileName();
+                            var sheetName = GetSheetName();
+                            var rowIndex = arguments.GetProperty("rowIndex").GetInt32();
+                            var visible = arguments.GetProperty("visible").GetBoolean();
+
+                            var worksheet = GetWorksheet(fileName, sheetName);
+                            var row = worksheet.Rows[rowIndex];
+                            row.Hidden = !visible;
+
+                            return $"成功设置第 {rowIndex} 行的可见性为 {(visible ? "显示" : "隐藏")}";
+                        }
+
+                    case "add_comment":
+                        {
+                            var fileName = GetFileName();
+                            var sheetName = GetSheetName();
+                            var cellAddress = arguments.GetProperty("cellAddress").GetString();
+                            var commentText = arguments.GetProperty("commentText").GetString();
+
+                            var worksheet = GetWorksheet(fileName, sheetName);
+                            var cell = worksheet.Range[cellAddress];
+
+                            // 如果已有批注，先删除
+                            if (cell.Comment != null)
+                            {
+                                cell.Comment.Delete();
+                            }
+
+                            cell.AddComment(commentText);
+                            return $"成功为单元格 {cellAddress} 添加批注";
+                        }
+
+                    case "delete_comment":
+                        {
+                            var fileName = GetFileName();
+                            var sheetName = GetSheetName();
+                            var cellAddress = arguments.GetProperty("cellAddress").GetString();
+
+                            var worksheet = GetWorksheet(fileName, sheetName);
+                            var cell = worksheet.Range[cellAddress];
+
+                            if (cell.Comment != null)
+                            {
+                                cell.Comment.Delete();
+                                return $"成功删除单元格 {cellAddress} 的批注";
+                            }
+
+                            return $"单元格 {cellAddress} 没有批注";
+                        }
+
+                    case "get_comment":
+                        {
+                            var fileName = GetFileName();
+                            var sheetName = GetSheetName();
+                            var cellAddress = arguments.GetProperty("cellAddress").GetString();
+
+                            var worksheet = GetWorksheet(fileName, sheetName);
+                            var cell = worksheet.Range[cellAddress];
+
+                            var commentText = cell.Comment?.Text() ?? "";
+                            return string.IsNullOrEmpty(commentText) 
+                                ? $"单元格 {cellAddress} 没有批注" 
+                                : $"单元格 {cellAddress} 的批注: {commentText}";
+                        }
+
+                    case "add_hyperlink":
+                        {
+                            var fileName = GetFileName();
+                            var sheetName = GetSheetName();
+                            var cellAddress = arguments.GetProperty("cellAddress").GetString();
+                            var url = arguments.GetProperty("url").GetString();
+                            var displayText = arguments.TryGetProperty("displayText", out var dtProp) ? dtProp.GetString() : null;
+
+                            var worksheet = GetWorksheet(fileName, sheetName);
+                            var cell = worksheet.Range[cellAddress];
+
+                            // 只处理外部链接（网址、文件路径等）
+                            // 不处理文档内跳转（应使用 set_hyperlink_formula）
+                            worksheet.Hyperlinks.Add(
+                                Anchor: cell,
+                                Address: url,
+                                TextToDisplay: displayText ?? url);
+
+                            return $"成功为单元格 {cellAddress} 添加超链接对象（外部链接）: {url}";
+                        }
+
+                    case "set_hyperlink_formula":
+                        {
+                            var fileName = GetFileName();
+                            var sheetName = GetSheetName();
+                            var cellAddress = arguments.GetProperty("cellAddress").GetString();
+                            var targetLocation = arguments.GetProperty("targetLocation").GetString();
+                            var displayText = arguments.GetProperty("displayText").GetString();
+
+                            var worksheet = GetWorksheet(fileName, sheetName);
+                            var cell = worksheet.Range[cellAddress];
+
+                            // 使用 HYPERLINK 公式
+                            // 格式：=HYPERLINK("#工作表名!单元格", "显示文本")
+                            var formula = $"=HYPERLINK(\"#{targetLocation}\", \"{displayText}\")";
+                            cell.Formula = formula;
+
+                            return $"成功为单元格 {cellAddress} 设置HYPERLINK公式，跳转目标: {targetLocation}";
+                        }
+
+                    case "delete_hyperlink":
+                        {
+                            var fileName = GetFileName();
+                            var sheetName = GetSheetName();
+                            var cellAddress = arguments.GetProperty("cellAddress").GetString();
+
+                            var worksheet = GetWorksheet(fileName, sheetName);
+                            var cell = worksheet.Range[cellAddress];
+
+                            if (cell.Hyperlinks.Count > 0)
+                            {
+                                cell.Hyperlinks.Delete();
+                                return $"成功删除单元格 {cellAddress} 的超链接";
+                            }
+
+                            return $"单元格 {cellAddress} 没有超链接";
+                        }
+
+                    case "get_used_range":
+                        {
+                            var fileName = GetFileName();
+                            var sheetName = GetSheetName();
+                            var worksheet = GetWorksheet(fileName, sheetName);
+
+                            var usedRange = worksheet.UsedRange;
+                            var address = usedRange.Address;
+
+                            return $"工作表 {sheetName} 的已使用范围: {address}";
+                        }
+
+                    case "get_range_statistics":
+                        {
+                            var fileName = GetFileName();
+                            var sheetName = GetSheetName();
+                            var rangeAddress = arguments.GetProperty("rangeAddress").GetString();
+
+                            var worksheet = GetWorksheet(fileName, sheetName);
+                            var range = worksheet.Range[rangeAddress];
+
+                            var stats = new System.Text.StringBuilder();
+                            stats.AppendLine($"范围 {rangeAddress} 的统计信息:");
+
+                            try
+                            {
+                                stats.AppendLine($"  总和: {ThisAddIn.app.WorksheetFunction.Sum(range)}");
+                            }
+                            catch { stats.AppendLine("  总和: N/A"); }
+
+                            try
+                            {
+                                stats.AppendLine($"  平均值: {ThisAddIn.app.WorksheetFunction.Average(range)}");
+                            }
+                            catch { stats.AppendLine("  平均值: N/A"); }
+
+                            try
+                            {
+                                stats.AppendLine($"  计数: {ThisAddIn.app.WorksheetFunction.Count(range)}");
+                            }
+                            catch { stats.AppendLine("  计数: N/A"); }
+
+                            try
+                            {
+                                stats.AppendLine($"  最大值: {ThisAddIn.app.WorksheetFunction.Max(range)}");
+                            }
+                            catch { stats.AppendLine("  最大值: N/A"); }
+
+                            try
+                            {
+                                stats.AppendLine($"  最小值: {ThisAddIn.app.WorksheetFunction.Min(range)}");
+                            }
+                            catch { stats.AppendLine("  最小值: N/A"); }
+
+                            return stats.ToString();
+                        }
+
+                    case "get_last_row":
+                        {
+                            var fileName = GetFileName();
+                            var sheetName = GetSheetName();
+                            var columnIndex = arguments.TryGetProperty("columnIndex", out var ciProp) ? ciProp.GetInt32() : 1;
+
+                            var worksheet = GetWorksheet(fileName, sheetName);
+                            var column = worksheet.Columns[columnIndex];
+                            var lastCell = column.Find("*", 
+                                SearchOrder: Microsoft.Office.Interop.Excel.XlSearchOrder.xlByRows, 
+                                SearchDirection: Microsoft.Office.Interop.Excel.XlSearchDirection.xlPrevious);
+
+                            var lastRow = lastCell?.Row ?? 0;
+                            return $"列 {columnIndex} 的最后一行: {lastRow}";
+                        }
+
+                    case "get_last_column":
+                        {
+                            var fileName = GetFileName();
+                            var sheetName = GetSheetName();
+                            var rowIndex = arguments.TryGetProperty("rowIndex", out var riProp) ? riProp.GetInt32() : 1;
+
+                            var worksheet = GetWorksheet(fileName, sheetName);
+                            var row = worksheet.Rows[rowIndex];
+                            var lastCell = row.Find("*", 
+                                SearchOrder: Microsoft.Office.Interop.Excel.XlSearchOrder.xlByColumns, 
+                                SearchDirection: Microsoft.Office.Interop.Excel.XlSearchDirection.xlPrevious);
+
+                            var lastColumn = lastCell?.Column ?? 0;
+                            return $"行 {rowIndex} 的最后一列: {lastColumn}";
+                        }
+
+                    case "sort_range":
+                        {
+                            var fileName = GetFileName();
+                            var sheetName = GetSheetName();
+                            var rangeAddress = arguments.GetProperty("rangeAddress").GetString();
+                            var sortColumnIndex = arguments.GetProperty("sortColumnIndex").GetInt32();
+                            var ascending = arguments.TryGetProperty("ascending", out var ascProp) ? ascProp.GetBoolean() : true;
+
+                            var worksheet = GetWorksheet(fileName, sheetName);
+                            var range = worksheet.Range[rangeAddress];
+                            var sortKey = range.Columns[sortColumnIndex];
+
+                            range.Sort(
+                                Key1: sortKey,
+                                Order1: ascending ? Microsoft.Office.Interop.Excel.XlSortOrder.xlAscending : Microsoft.Office.Interop.Excel.XlSortOrder.xlDescending,
+                                Header: Microsoft.Office.Interop.Excel.XlYesNoGuess.xlYes);
+
+                            return $"成功对范围 {rangeAddress} 按第 {sortColumnIndex} 列进行{(ascending ? "升序" : "降序")}排序";
+                        }
+
+                    case "set_auto_filter":
+                        {
+                            var fileName = GetFileName();
+                            var sheetName = GetSheetName();
+                            var rangeAddress = arguments.GetProperty("rangeAddress").GetString();
+                            var columnIndex = arguments.TryGetProperty("columnIndex", out var ciProp) ? ciProp.GetInt32() : 0;
+                            var criteria = arguments.TryGetProperty("criteria", out var cProp) ? cProp.GetString() : null;
+
+                            var worksheet = GetWorksheet(fileName, sheetName);
+                            var range = worksheet.Range[rangeAddress];
+
+                            // 如果已有筛选，先清除
+                            if (worksheet.AutoFilterMode)
+                            {
+                                worksheet.AutoFilterMode = false;
+                            }
+
+                            if (columnIndex > 0 && !string.IsNullOrEmpty(criteria))
+                            {
+                                range.AutoFilter(Field: columnIndex, Criteria1: criteria);
+                                return $"成功为范围 {rangeAddress} 的第 {columnIndex} 列设置筛选条件: {criteria}";
+                            }
+                            else
+                            {
+                                range.AutoFilter();
+                                return $"成功为范围 {rangeAddress} 设置自动筛选";
+                            }
+                        }
+
+                    case "remove_duplicates":
+                        {
+                            var fileName = GetFileName();
+                            var sheetName = GetSheetName();
+                            var rangeAddress = arguments.GetProperty("rangeAddress").GetString();
+                            var columnIndicesJson = arguments.GetProperty("columnIndices").GetString();
+
+                            var worksheet = GetWorksheet(fileName, sheetName);
+                            var range = worksheet.Range[rangeAddress];
+
+                            var columnIndices = JsonSerializer.Deserialize<int[]>(columnIndicesJson);
+                            var columns = columnIndices.Cast<object>().ToArray();
+
+                            range.RemoveDuplicates(Columns: columns, Header: Microsoft.Office.Interop.Excel.XlYesNoGuess.xlYes);
+                            return $"成功删除范围 {rangeAddress} 中的重复项";
+                        }
+
+                    case "move_worksheet":
+                        {
+                            var fileName = GetFileName();
+                            var sheetName = arguments.GetProperty("sheetName").GetString();
+                            var position = arguments.GetProperty("position").GetInt32();
+
+                            var workbook = GetCurrentWorkbook(fileName);
+                            var worksheet = workbook.Worksheets[sheetName];
+
+                            if (position == 1)
+                            {
+                                worksheet.Move(Before: workbook.Worksheets[1]);
+                            }
+                            else if (position > workbook.Worksheets.Count)
+                            {
+                                worksheet.Move(After: workbook.Worksheets[workbook.Worksheets.Count]);
+                            }
+                            else
+                            {
+                                worksheet.Move(Before: workbook.Worksheets[position]);
+                            }
+
+                            return $"成功将工作表 {sheetName} 移动到位置 {position}";
+                        }
+
+                    case "set_worksheet_visible":
+                        {
+                            var fileName = GetFileName();
+                            var sheetName = arguments.GetProperty("sheetName").GetString();
+                            var visible = arguments.GetProperty("visible").GetBoolean();
+
+                            var workbook = GetCurrentWorkbook(fileName);
+                            var worksheet = workbook.Worksheets[sheetName];
+                            worksheet.Visible = visible ? Microsoft.Office.Interop.Excel.XlSheetVisibility.xlSheetVisible : Microsoft.Office.Interop.Excel.XlSheetVisibility.xlSheetHidden;
+
+                            return $"成功设置工作表 {sheetName} 的可见性为 {(visible ? "显示" : "隐藏")}";
+                        }
+
+                    case "get_worksheet_index":
+                        {
+                            var fileName = GetFileName();
+                            var sheetName = arguments.GetProperty("sheetName").GetString();
+
+                            var workbook = GetCurrentWorkbook(fileName);
+                            var worksheet = workbook.Worksheets[sheetName];
+                            var index = worksheet.Index;
+
+                            return $"工作表 {sheetName} 的位置索引: {index}";
+                        }
+
+                    // 命名区域工具执行
+                    case "create_named_range":
+                        {
+                            var fileName = GetFileName();
+                            var sheetName = GetSheetName();
+                            var rangeName = arguments.GetProperty("rangeName").GetString();
+                            var rangeAddress = arguments.GetProperty("rangeAddress").GetString();
+
+                            _excelMcp.CreateNamedRange(fileName, sheetName, rangeName, rangeAddress);
+                            return $"成功创建命名区域 '{rangeName}' 引用 {rangeAddress}";
+                        }
+
+                    case "delete_named_range":
+                        {
+                            var fileName = GetFileName();
+                            var rangeName = arguments.GetProperty("rangeName").GetString();
+
+                            _excelMcp.DeleteNamedRange(fileName, rangeName);
+                            return $"成功删除命名区域 '{rangeName}'";
+                        }
+
+                    case "get_named_ranges":
+                        {
+                            var fileName = GetFileName();
+                            var namedRanges = _excelMcp.GetNamedRanges(fileName);
+
+                            if (namedRanges.Count == 0)
+                                return "工作簿中没有命名区域";
+
+                            return $"工作簿中的命名区域：\n{string.Join("\n", namedRanges)}";
+                        }
+
+                    case "get_named_range_address":
+                        {
+                            var fileName = GetFileName();
+                            var rangeName = arguments.GetProperty("rangeName").GetString();
+
+                            var address = _excelMcp.GetNamedRangeAddress(fileName, rangeName);
+                            return $"命名区域 '{rangeName}' 的引用地址: {address}";
+                        }
+
+                    // 单元格格式增强工具执行
+                    case "set_cell_text_wrap":
+                        {
+                            var fileName = GetFileName();
+                            var sheetName = GetSheetName();
+                            var rangeAddress = arguments.GetProperty("rangeAddress").GetString();
+                            var wrap = arguments.GetProperty("wrap").GetBoolean();
+
+                            _excelMcp.SetCellTextWrap(fileName, sheetName, rangeAddress, wrap);
+                            return $"成功设置 {rangeAddress} 的文本换行为: {(wrap ? "启用" : "禁用")}";
+                        }
+
+                    case "set_cell_indent":
+                        {
+                            var fileName = GetFileName();
+                            var sheetName = GetSheetName();
+                            var rangeAddress = arguments.GetProperty("rangeAddress").GetString();
+                            var indentLevel = arguments.GetProperty("indentLevel").GetInt32();
+
+                            _excelMcp.SetCellIndent(fileName, sheetName, rangeAddress, indentLevel);
+                            return $"成功设置 {rangeAddress} 的缩进级别为: {indentLevel}";
+                        }
+
+                    case "set_cell_orientation":
+                        {
+                            var fileName = GetFileName();
+                            var sheetName = GetSheetName();
+                            var rangeAddress = arguments.GetProperty("rangeAddress").GetString();
+                            var degrees = arguments.GetProperty("degrees").GetInt32();
+
+                            _excelMcp.SetCellOrientation(fileName, sheetName, rangeAddress, degrees);
+                            return $"成功设置 {rangeAddress} 的文本旋转角度为: {degrees}度";
+                        }
+
+                    case "set_cell_shrink_to_fit":
+                        {
+                            var fileName = GetFileName();
+                            var sheetName = GetSheetName();
+                            var rangeAddress = arguments.GetProperty("rangeAddress").GetString();
+                            var shrink = arguments.GetProperty("shrink").GetBoolean();
+
+                            _excelMcp.SetCellShrinkToFit(fileName, sheetName, rangeAddress, shrink);
+                            return $"成功设置 {rangeAddress} 的缩小字体填充为: {(shrink ? "启用" : "禁用")}";
+                        }
+
+                    case "get_current_selection":
+                        {
+                            try
+                            {
+                                if (ThisAddIn.app == null || ThisAddIn.app.Selection == null)
+                                    return "无法获取当前选中的单元格";
+
+                                var selection = ThisAddIn.app.Selection as Microsoft.Office.Interop.Excel.Range;
+                                if (selection == null)
+                                    return "当前没有选中单元格区域";
+
+                                var result = new System.Text.StringBuilder();
+                                result.AppendLine("当前选中的单元格信息:");
+                                result.AppendLine($"- 地址: {selection.Address}");
+                                result.AppendLine($"- 行号: {selection.Row}");
+                                result.AppendLine($"- 列号: {selection.Column}");
+                                result.AppendLine($"- 行数: {selection.Rows.Count}");
+                                result.AppendLine($"- 列数: {selection.Columns.Count}");
+
+                                // 如果是单个单元格，显示值
+                                if (selection.Cells.Count == 1)
+                                {
+                                    result.AppendLine($"- 值: {selection.Value?.ToString() ?? "(空)"}");
+                                    if (selection.HasFormula)
+                                    {
+                                        result.AppendLine($"- 公式: {selection.Formula}");
+                                    }
+                                }
+                                else
+                                {
+                                    result.AppendLine($"- 单元格总数: {selection.Cells.Count}");
+                                }
+
+                                if (ThisAddIn.app.ActiveWorkbook != null)
+                                {
+                                    result.AppendLine($"- 所属工作簿: {ThisAddIn.app.ActiveWorkbook.Name}");
+                                }
+
+                                if (ThisAddIn.app.ActiveSheet != null)
+                                {
+                                    Microsoft.Office.Interop.Excel.Worksheet ws = ThisAddIn.app.ActiveSheet;
+                                    result.AppendLine($"- 所属工作表: {ws.Name}");
+                                }
+
+                                return result.ToString();
+                            }
+                            catch (Exception ex)
+                            {
+                                return $"获取当前选中单元格信息失败: {ex.Message}";
+                            }
+                        }
+
                     default:
                         return $"未知的工具: {toolName}";
                 }
@@ -2363,14 +3632,62 @@ namespace ExcelAddIn
    - 当用户说""新建一个表""、""创建表""时，指的是在当前工作簿中创建新的工作表（sheet），而不是创建新的工作簿
    - 当用户说""新建工作簿""、""创建Excel文件""时，才是创建工作簿
    - 例如：""新建一个销售表"" → 使用 create_worksheet，而不是 create_workbook
+   - **重要**：create_worksheet 默认会在工作簿的最前面（第一个位置）创建新工作表
+   - 除非用户明确说明""在某张表后面/前面新建""，否则默认就是在最前面新建
 
-4. 当用户说""当前工作簿""、""这个工作簿""、""当前表""、""这个表""时，指的是最近操作的工作簿和工作表
+4. **创建目录表的正确方式**：
+   - 当用户要求创建目录表并写入表名时，注意行号分配：
+   - 如果需要添加标题（如""工作表目录""），标题应在A1，表名从A2开始
+   - 例如：创建目录表 → 先在A1写入""工作表目录"" → 表名从A2、A3、A4...开始写入
+   - **错误做法**：标题在A1，第一个表名也在A1 ❌
+   - **正确做法**：标题在A1（row=1），第一个表名在A2（row=2），第二个在A3（row=3）✅
 
-5. 当用户未明确指定工作簿名称时，使用当前活跃的工作簿
+5. **理解""当前单元格""的含义**：
+   - 当用户说""当前单元格""、""选中的单元格""、""这个单元格""时，指的是用户在Excel中当前选中的单元格或区域
+   - 首先调用 get_current_selection 工具获取当前选中的单元格信息
+   - 然后根据返回的行号、列号或地址来操作该单元格
+   - 例如：""在当前单元格输入测试"" → 先调用 get_current_selection，获得行号和列号，再调用 set_cell_value
 
-6. 当用户未明确指定工作表名称时，使用当前活跃的工作表
+6. **区分两种超链接方式及其应用场景**：
+   
+   **A. HYPERLINK公式方式（set_hyperlink_formula）**：
+   - 适用场景：工作簿内部跳转
+   - 典型用途：
+     * 跳转到同一工作簿的其他工作表
+     * 创建目录页，链接到各个数据表
+     * 在数据表中创建""返回目录""链接
+   - 优点：在Excel内部打开，不会启动浏览器
+   - 公式格式：=HYPERLINK(""#工作表名!单元格"", ""显示文本"")
+   - 示例用法：
+     * 用户说""在A1创建跳转到Sheet2的链接"" → 使用 set_hyperlink_formula
+     * 用户说""创建目录，链接到各个工作表"" → 使用 set_hyperlink_formula
+     * 用户说""在当前单元格添加返回首页的链接"" → 使用 set_hyperlink_formula
+   
+   **B. 超链接对象方式（add_hyperlink）**：
+   - 适用场景：外部资源访问
+   - 典型用途：
+     * 打开网址（会启动默认浏览器）
+     * 打开本地文件（Excel、Word、PDF等）
+     * 打开网络共享文件
+   - 优点：可以链接到任何外部资源
+   - 示例用法：
+     * 用户说""在A1添加百度的链接"" → 使用 add_hyperlink
+     * 用户说""链接到本地的报告文档"" → 使用 add_hyperlink
+     * 用户说""添加公司网站链接"" → 使用 add_hyperlink
+   
+   **重要：如何选择**：
+   - 如果目标是同一工作簿内的其他位置 → 使用 set_hyperlink_formula ✅
+   - 如果目标是网址、本地文件、网络文件 → 使用 add_hyperlink ✅
+   - 错误示例：用户说""跳转到Sheet2""却使用 add_hyperlink ❌
+   - 正确示例：用户说""跳转到Sheet2""使用 set_hyperlink_formula ✅
 
-7. 通过上下文分析推断用户想要操作的对象
+7. 当用户说""当前工作簿""、""这个工作簿""、""当前表""、""这个表""时，指的是最近操作的工作簿和工作表
+
+8. 当用户未明确指定工作簿名称时，使用当前活跃的工作簿
+
+9. 当用户未明确指定工作表名称时，使用当前活跃的工作表
+
+10. 通过上下文分析推断用户想要操作的对象
 
 **当前环境**：
 - 这是Excel插件环境，用户在Excel中打开了工作簿并启动了对话框
@@ -2382,6 +3699,7 @@ namespace ExcelAddIn
 - 获取信息后，你就能知道用户当前打开的工作簿和工作表，然后可以直接对其进行操作
 - 不要只是告诉用户你将要做什么，必须实际调用工具来执行操作
 - 每个操作都必须对应一个工具调用，不能省略
+- 当用户提到""当前单元格""时，先调用 get_current_selection 获取选中信息
 
 **操作流程示例**：
 用户：""请将当前工作簿中所有表的名称写入当前表的A列""
@@ -2392,6 +3710,41 @@ namespace ExcelAddIn
 
 错误做法：
 只回复""现在我将这些工作表名称写入当前表的A列""但不调用任何工具 ❌
+
+用户：""在所有表前新建一个目录表，写入所有表名，并加上超链接""
+正确做法（假设有Sheet1、Sheet2、Sheet3三个表）：
+1. 调用 create_worksheet(sheetName=""目录"") → 自动在最前面创建目录表
+2. 调用 get_worksheet_names() → 获取所有表名：[""目录"", ""Sheet1"", ""Sheet2"", ""Sheet3""]
+3. 调用 set_cell_value(row=1, column=1, value=""工作表目录"") → 在A1写入标题
+4. 调用 set_hyperlink_formula(cellAddress=""A2"", targetLocation=""Sheet1!A1"", displayText=""Sheet1"") → 第一个表名在A2
+5. 调用 set_hyperlink_formula(cellAddress=""A3"", targetLocation=""Sheet2!A1"", displayText=""Sheet2"") → 第二个表名在A3
+6. 调用 set_hyperlink_formula(cellAddress=""A4"", targetLocation=""Sheet3!A1"", displayText=""Sheet3"") → 第三个表名在A4
+7. 告诉用户完成
+
+**重要**：注意行号从2开始（跳过标题行A1），避免标题被覆盖
+
+用户：""在当前单元格输入测试""
+正确做法：
+1. 调用 get_current_selection 获取当前选中的单元格信息
+2. 从返回信息中提取行号和列号
+3. 调用 set_cell_value(row=行号, column=列号, value=""测试"")
+4. 告诉用户操作完成
+
+用户：""在A1创建跳转到销售数据表的链接""
+正确做法：
+1. 调用 set_hyperlink_formula(cellAddress=""A1"", targetLocation=""销售数据!A1"", displayText=""查看销售数据"")
+2. 告诉用户已创建工作簿内部跳转链接
+
+错误做法：
+使用 add_hyperlink 添加外部链接 ❌（这会导致无法正确跳转）
+
+用户：""在B2添加百度搜索的链接""
+正确做法：
+1. 调用 add_hyperlink(cellAddress=""B2"", url=""https://www.baidu.com"", displayText=""百度搜索"")
+2. 告诉用户已添加外部网址链接
+
+错误做法：
+使用 set_hyperlink_formula ❌（这只适用于工作簿内部跳转）
 
 请根据用户的自然语言指令，**立即调用**相应的工具完成任务，而不是仅仅描述你要做什么。";
 

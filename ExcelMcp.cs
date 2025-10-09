@@ -981,6 +981,543 @@ namespace ExcelAddIn
 
         #endregion
 
+        #region 查找和搜索 (Find & Search Operations)
+
+        public List<string> FindValue(string fileName, string sheetName, string searchValue, bool matchCase = false)
+        {
+            Worksheet worksheet = GetWorksheetById(fileName, sheetName);
+            var results = new List<string>();
+
+            Range usedRange = worksheet.UsedRange;
+            Range foundCell = usedRange.Find(
+                What: searchValue,
+                LookIn: XlFindLookIn.xlValues,
+                LookAt: XlLookAt.xlPart,
+                SearchOrder: XlSearchOrder.xlByRows,
+                MatchCase: matchCase);
+
+            if (foundCell != null)
+            {
+                string firstAddress = foundCell.Address;
+                do
+                {
+                    results.Add(foundCell.Address);
+                    foundCell = usedRange.FindNext(foundCell);
+                }
+                while (foundCell != null && foundCell.Address != firstAddress);
+            }
+
+            Marshal.ReleaseComObject(usedRange);
+            Marshal.ReleaseComObject(worksheet);
+
+            return results;
+        }
+
+        public int FindAndReplace(string fileName, string sheetName, string findWhat, string replaceWith, bool matchCase = false)
+        {
+            Worksheet worksheet = GetWorksheetById(fileName, sheetName);
+            Range usedRange = worksheet.UsedRange;
+
+            int count = 0;
+            Range foundCell = usedRange.Find(
+                What: findWhat,
+                LookIn: XlFindLookIn.xlValues,
+                LookAt: XlLookAt.xlPart,
+                MatchCase: matchCase);
+
+            if (foundCell != null)
+            {
+                string firstAddress = foundCell.Address;
+                do
+                {
+                    foundCell.Value = replaceWith;
+                    count++;
+                    foundCell = usedRange.FindNext(foundCell);
+                }
+                while (foundCell != null && foundCell.Address != firstAddress);
+            }
+
+            Marshal.ReleaseComObject(usedRange);
+            Marshal.ReleaseComObject(worksheet);
+
+            return count;
+        }
+
+        #endregion
+
+        #region 视图和布局 (View & Layout Operations)
+
+        public void FreezePanes(string fileName, string sheetName, int row, int column)
+        {
+            Worksheet worksheet = GetWorksheetById(fileName, sheetName);
+            
+            // 选择要冻结的位置（冻结点的右下角单元格）
+            Range cell = (Range)worksheet.Cells[row, column];
+            cell.Select();
+            
+            // 冻结窗格
+            ThisAddIn.app.ActiveWindow.FreezePanes = true;
+
+            Marshal.ReleaseComObject(cell);
+            Marshal.ReleaseComObject(worksheet);
+        }
+
+        public void UnfreezePanes(string fileName, string sheetName)
+        {
+            Worksheet worksheet = GetWorksheetById(fileName, sheetName);
+            ThisAddIn.app.ActiveWindow.FreezePanes = false;
+            Marshal.ReleaseComObject(worksheet);
+        }
+
+        public void AutoFitColumns(string fileName, string sheetName, string rangeAddress)
+        {
+            Worksheet worksheet = GetWorksheetById(fileName, sheetName);
+            Range range = worksheet.get_Range(rangeAddress);
+            range.Columns.AutoFit();
+            Marshal.ReleaseComObject(range);
+            Marshal.ReleaseComObject(worksheet);
+        }
+
+        public void AutoFitRows(string fileName, string sheetName, string rangeAddress)
+        {
+            Worksheet worksheet = GetWorksheetById(fileName, sheetName);
+            Range range = worksheet.get_Range(rangeAddress);
+            range.Rows.AutoFit();
+            Marshal.ReleaseComObject(range);
+            Marshal.ReleaseComObject(worksheet);
+        }
+
+        public void SetColumnVisible(string fileName, string sheetName, int columnIndex, bool visible)
+        {
+            Worksheet worksheet = GetWorksheetById(fileName, sheetName);
+            Range column = (Range)worksheet.Columns[columnIndex];
+            column.Hidden = !visible;
+            Marshal.ReleaseComObject(column);
+            Marshal.ReleaseComObject(worksheet);
+        }
+
+        public void SetRowVisible(string fileName, string sheetName, int rowIndex, bool visible)
+        {
+            Worksheet worksheet = GetWorksheetById(fileName, sheetName);
+            Range row = (Range)worksheet.Rows[rowIndex];
+            row.Hidden = !visible;
+            Marshal.ReleaseComObject(row);
+            Marshal.ReleaseComObject(worksheet);
+        }
+
+        #endregion
+
+        #region 批注操作 (Comment Operations)
+
+        public void AddComment(string fileName, string sheetName, string cellAddress, string commentText)
+        {
+            Worksheet worksheet = GetWorksheetById(fileName, sheetName);
+            Range cell = worksheet.get_Range(cellAddress);
+            
+            // 如果已有批注，先删除
+            if (cell.Comment != null)
+            {
+                cell.Comment.Delete();
+            }
+            
+            cell.AddComment(commentText);
+            Marshal.ReleaseComObject(cell);
+            Marshal.ReleaseComObject(worksheet);
+        }
+
+        public void DeleteComment(string fileName, string sheetName, string cellAddress)
+        {
+            Worksheet worksheet = GetWorksheetById(fileName, sheetName);
+            Range cell = worksheet.get_Range(cellAddress);
+            
+            if (cell.Comment != null)
+            {
+                cell.Comment.Delete();
+            }
+            
+            Marshal.ReleaseComObject(cell);
+            Marshal.ReleaseComObject(worksheet);
+        }
+
+        public string GetComment(string fileName, string sheetName, string cellAddress)
+        {
+            Worksheet worksheet = GetWorksheetById(fileName, sheetName);
+            Range cell = worksheet.get_Range(cellAddress);
+            
+            string commentText = cell.Comment?.Text() ?? "";
+            
+            Marshal.ReleaseComObject(cell);
+            Marshal.ReleaseComObject(worksheet);
+            
+            return commentText;
+        }
+
+        #endregion
+
+        #region 超链接操作 (Hyperlink Operations)
+
+        public void AddHyperlink(string fileName, string sheetName, string cellAddress, string url, string displayText = null)
+        {
+            Worksheet worksheet = GetWorksheetById(fileName, sheetName);
+            Range cell = worksheet.get_Range(cellAddress);
+            
+            // 判断是否为文档内跳转
+            if (url.StartsWith("#"))
+            {
+                // 文档内跳转，使用SubAddress参数
+                worksheet.Hyperlinks.Add(
+                    Anchor: cell,
+                    Address: "",
+                    SubAddress: url.TrimStart('#'),
+                    TextToDisplay: displayText ?? url);
+            }
+            else
+            {
+                // 外部链接（网址、文件等），使用Address参数
+                worksheet.Hyperlinks.Add(
+                    Anchor: cell,
+                    Address: url,
+                    TextToDisplay: displayText ?? url);
+            }
+            
+            Marshal.ReleaseComObject(cell);
+            Marshal.ReleaseComObject(worksheet);
+        }
+
+        public void DeleteHyperlink(string fileName, string sheetName, string cellAddress)
+        {
+            Worksheet worksheet = GetWorksheetById(fileName, sheetName);
+            Range cell = worksheet.get_Range(cellAddress);
+            
+            if (cell.Hyperlinks.Count > 0)
+            {
+                cell.Hyperlinks.Delete();
+            }
+            
+            Marshal.ReleaseComObject(cell);
+            Marshal.ReleaseComObject(worksheet);
+        }
+
+        #endregion
+
+        #region 数据分析 (Data Analysis Operations)
+
+        public string GetUsedRange(string fileName, string sheetName)
+        {
+            Worksheet worksheet = GetWorksheetById(fileName, sheetName);
+            Range usedRange = worksheet.UsedRange;
+            string address = usedRange.Address;
+            Marshal.ReleaseComObject(usedRange);
+            Marshal.ReleaseComObject(worksheet);
+            return address;
+        }
+
+        public Dictionary<string, object> GetRangeStatistics(string fileName, string sheetName, string rangeAddress)
+        {
+            Worksheet worksheet = GetWorksheetById(fileName, sheetName);
+            Range range = worksheet.get_Range(rangeAddress);
+            
+            var stats = new Dictionary<string, object>();
+            
+            try
+            {
+                stats["Sum"] = ThisAddIn.app.WorksheetFunction.Sum(range);
+            }
+            catch { stats["Sum"] = "N/A"; }
+            
+            try
+            {
+                stats["Average"] = ThisAddIn.app.WorksheetFunction.Average(range);
+            }
+            catch { stats["Average"] = "N/A"; }
+            
+            try
+            {
+                stats["Count"] = ThisAddIn.app.WorksheetFunction.Count(range);
+            }
+            catch { stats["Count"] = "N/A"; }
+            
+            try
+            {
+                stats["Max"] = ThisAddIn.app.WorksheetFunction.Max(range);
+            }
+            catch { stats["Max"] = "N/A"; }
+            
+            try
+            {
+                stats["Min"] = ThisAddIn.app.WorksheetFunction.Min(range);
+            }
+            catch { stats["Min"] = "N/A"; }
+            
+            Marshal.ReleaseComObject(range);
+            Marshal.ReleaseComObject(worksheet);
+            
+            return stats;
+        }
+
+        public int GetLastRow(string fileName, string sheetName, int columnIndex = 1)
+        {
+            Worksheet worksheet = GetWorksheetById(fileName, sheetName);
+            Range column = (Range)worksheet.Columns[columnIndex];
+            Range lastCell = column.Find("*", SearchOrder: XlSearchOrder.xlByRows, SearchDirection: XlSearchDirection.xlPrevious);
+            
+            int lastRow = lastCell?.Row ?? 0;
+            
+            if (lastCell != null) Marshal.ReleaseComObject(lastCell);
+            Marshal.ReleaseComObject(column);
+            Marshal.ReleaseComObject(worksheet);
+            
+            return lastRow;
+        }
+
+        public int GetLastColumn(string fileName, string sheetName, int rowIndex = 1)
+        {
+            Worksheet worksheet = GetWorksheetById(fileName, sheetName);
+            Range row = (Range)worksheet.Rows[rowIndex];
+            Range lastCell = row.Find("*", SearchOrder: XlSearchOrder.xlByColumns, SearchDirection: XlSearchDirection.xlPrevious);
+            
+            int lastColumn = lastCell?.Column ?? 0;
+            
+            if (lastCell != null) Marshal.ReleaseComObject(lastCell);
+            Marshal.ReleaseComObject(row);
+            Marshal.ReleaseComObject(worksheet);
+            
+            return lastColumn;
+        }
+
+        #endregion
+
+        #region 排序和筛选 (Sort & Filter Operations)
+
+        public void SortRange(string fileName, string sheetName, string rangeAddress, int sortColumnIndex, bool ascending = true)
+        {
+            Worksheet worksheet = GetWorksheetById(fileName, sheetName);
+            Range range = worksheet.get_Range(rangeAddress);
+            Range sortKey = (Range)range.Columns[sortColumnIndex];
+            
+            range.Sort(
+                Key1: sortKey,
+                Order1: ascending ? XlSortOrder.xlAscending : XlSortOrder.xlDescending,
+                Header: XlYesNoGuess.xlYes);
+            
+            Marshal.ReleaseComObject(sortKey);
+            Marshal.ReleaseComObject(range);
+            Marshal.ReleaseComObject(worksheet);
+        }
+
+        public void SetAutoFilter(string fileName, string sheetName, string rangeAddress, int columnIndex = 0, string criteria = null)
+        {
+            Worksheet worksheet = GetWorksheetById(fileName, sheetName);
+            Range range = worksheet.get_Range(rangeAddress);
+            
+            // 如果已有筛选，先清除
+            if (worksheet.AutoFilterMode)
+            {
+                worksheet.AutoFilterMode = false;
+            }
+            
+            if (columnIndex > 0 && !string.IsNullOrEmpty(criteria))
+            {
+                range.AutoFilter(Field: columnIndex, Criteria1: criteria);
+            }
+            else
+            {
+                range.AutoFilter();
+            }
+            
+            Marshal.ReleaseComObject(range);
+            Marshal.ReleaseComObject(worksheet);
+        }
+
+        public void RemoveDuplicates(string fileName, string sheetName, string rangeAddress, int[] columnIndices)
+        {
+            Worksheet worksheet = GetWorksheetById(fileName, sheetName);
+            Range range = worksheet.get_Range(rangeAddress);
+            
+            // 转换为object数组（Excel COM需要）
+            object[] columns = columnIndices.Cast<object>().ToArray();
+            
+            range.RemoveDuplicates(Columns: columns, Header: XlYesNoGuess.xlYes);
+            
+            Marshal.ReleaseComObject(range);
+            Marshal.ReleaseComObject(worksheet);
+        }
+
+        #endregion
+
+        #region 工作表高级操作 (Advanced Worksheet Operations)
+
+        public void MoveWorksheet(string fileName, string sheetName, int position)
+        {
+            var workbook = GetWorkbookById(fileName);
+            Worksheet worksheet = (Worksheet)workbook.Worksheets[sheetName];
+            
+            if (position == 1)
+            {
+                worksheet.Move(Before: workbook.Worksheets[1]);
+            }
+            else if (position > workbook.Worksheets.Count)
+            {
+                worksheet.Move(After: workbook.Worksheets[workbook.Worksheets.Count]);
+            }
+            else
+            {
+                worksheet.Move(Before: workbook.Worksheets[position]);
+            }
+            
+            Marshal.ReleaseComObject(worksheet);
+            Marshal.ReleaseComObject(workbook);
+        }
+
+        public void SetWorksheetVisible(string fileName, string sheetName, bool visible)
+        {
+            var workbook = GetWorkbookById(fileName);
+            Worksheet worksheet = (Worksheet)workbook.Worksheets[sheetName];
+            worksheet.Visible = visible ? XlSheetVisibility.xlSheetVisible : XlSheetVisibility.xlSheetHidden;
+            Marshal.ReleaseComObject(worksheet);
+            Marshal.ReleaseComObject(workbook);
+        }
+
+        public int GetWorksheetIndex(string fileName, string sheetName)
+        {
+            var workbook = GetWorkbookById(fileName);
+            Worksheet worksheet = (Worksheet)workbook.Worksheets[sheetName];
+            int index = worksheet.Index;
+            Marshal.ReleaseComObject(worksheet);
+            Marshal.ReleaseComObject(workbook);
+            return index;
+        }
+
+        #endregion
+
+        #region 命名区域操作 (Named Ranges Operations)
+
+        /// <summary>
+        /// 创建命名区域
+        /// </summary>
+        public void CreateNamedRange(string fileName, string sheetName, string rangeName, string rangeAddress)
+        {
+            var worksheet = GetWorksheetById(fileName, sheetName);
+            var range = worksheet.get_Range(rangeAddress);
+
+            var workbook = GetWorkbookById(fileName);
+            workbook.Names.Add(rangeName, range);
+
+            Marshal.ReleaseComObject(range);
+            Marshal.ReleaseComObject(worksheet);
+        }
+
+        /// <summary>
+        /// 删除命名区域
+        /// </summary>
+        public void DeleteNamedRange(string fileName, string rangeName)
+        {
+            var workbook = GetWorkbookById(fileName);
+
+            foreach (Name name in workbook.Names)
+            {
+                if (name.Name == rangeName)
+                {
+                    name.Delete();
+                    Marshal.ReleaseComObject(name);
+                    break;
+                }
+                Marshal.ReleaseComObject(name);
+            }
+        }
+
+        /// <summary>
+        /// 获取所有命名区域
+        /// </summary>
+        public List<string> GetNamedRanges(string fileName)
+        {
+            var workbook = GetWorkbookById(fileName);
+            var names = new List<string>();
+
+            foreach (Name name in workbook.Names)
+            {
+                names.Add($"{name.Name} = {name.RefersTo}");
+                Marshal.ReleaseComObject(name);
+            }
+
+            return names;
+        }
+
+        /// <summary>
+        /// 获取命名区域的引用地址
+        /// </summary>
+        public string GetNamedRangeAddress(string fileName, string rangeName)
+        {
+            var workbook = GetWorkbookById(fileName);
+
+            foreach (Name name in workbook.Names)
+            {
+                if (name.Name == rangeName)
+                {
+                    string refersTo = name.RefersTo.ToString();
+                    Marshal.ReleaseComObject(name);
+                    return refersTo;
+                }
+                Marshal.ReleaseComObject(name);
+            }
+
+            throw new ArgumentException($"命名区域 '{rangeName}' 不存在。");
+        }
+
+        #endregion
+
+        #region 单元格格式增强 (Cell Format Enhancement)
+
+        /// <summary>
+        /// 设置单元格文本自动换行
+        /// </summary>
+        public void SetCellTextWrap(string fileName, string sheetName, string rangeAddress, bool wrap)
+        {
+            var worksheet = GetWorksheetById(fileName, sheetName);
+            var range = worksheet.get_Range(rangeAddress);
+            range.WrapText = wrap;
+            Marshal.ReleaseComObject(range);
+            Marshal.ReleaseComObject(worksheet);
+        }
+
+        /// <summary>
+        /// 设置单元格缩进级别
+        /// </summary>
+        public void SetCellIndent(string fileName, string sheetName, string rangeAddress, int indentLevel)
+        {
+            var worksheet = GetWorksheetById(fileName, sheetName);
+            var range = worksheet.get_Range(rangeAddress);
+            range.IndentLevel = indentLevel;
+            Marshal.ReleaseComObject(range);
+            Marshal.ReleaseComObject(worksheet);
+        }
+
+        /// <summary>
+        /// 设置单元格文本旋转角度
+        /// </summary>
+        public void SetCellOrientation(string fileName, string sheetName, string rangeAddress, int degrees)
+        {
+            var worksheet = GetWorksheetById(fileName, sheetName);
+            var range = worksheet.get_Range(rangeAddress);
+            range.Orientation = degrees; // -90 to 90
+            Marshal.ReleaseComObject(range);
+            Marshal.ReleaseComObject(worksheet);
+        }
+
+        /// <summary>
+        /// 设置单元格缩小字体填充
+        /// </summary>
+        public void SetCellShrinkToFit(string fileName, string sheetName, string rangeAddress, bool shrink)
+        {
+            var worksheet = GetWorksheetById(fileName, sheetName);
+            var range = worksheet.get_Range(rangeAddress);
+            range.ShrinkToFit = shrink;
+            Marshal.ReleaseComObject(range);
+            Marshal.ReleaseComObject(worksheet);
+        }
+
+        #endregion
+
         #region IDisposable Implementation
 
         public void Dispose()
