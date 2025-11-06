@@ -1,0 +1,427 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>HtmlEditorControl</name>
+    </assembly>
+    <members>
+        <member name="T:HtmlEditorControl.HtmlEditorControl">
+            <summary>
+            HTML富文本编辑控件
+            </summary>
+        </member>
+        <member name="P:HtmlEditorControl.HtmlEditorControl.IsInDesignMode">
+            <summary>
+            检查控件是否在设计模式下运行
+            </summary>
+        </member>
+        <member name="M:HtmlEditorControl.HtmlEditorControl.#ctor">
+            <summary>
+            构造函数
+            </summary>
+        </member>
+        <member name="M:HtmlEditorControl.HtmlEditorControl.InitializeComponent">
+            <summary>
+            初始化组件
+            </summary>
+        </member>
+        <member name="M:HtmlEditorControl.HtmlEditorControl.CreateEditToolStrip">
+            <summary>
+            创建编辑工具栏（撤销/重做）
+            </summary>
+        </member>
+        <member name="M:HtmlEditorControl.HtmlEditorControl.CreateFormatToolStrip">
+            <summary>
+            创建格式工具栏（加粗/斜体/下划线等）
+            </summary>
+        </member>
+        <member name="M:HtmlEditorControl.HtmlEditorControl.CreateFontToolStrip">
+            <summary>
+            创建字体工具栏（字体/大小/颜色）
+            </summary>
+        </member>
+        <member name="M:HtmlEditorControl.HtmlEditorControl.CreateAlignToolStrip">
+            <summary>
+            创建对齐工具栏（左/中/右，列表，缩进）
+            </summary>
+        </member>
+        <member name="M:HtmlEditorControl.HtmlEditorControl.CreateInsertToolStrip">
+            <summary>
+            创建插入工具栏（图片/链接/表格/水平线）
+            </summary>
+        </member>
+        <member name="M:HtmlEditorControl.HtmlEditorControl.CreateAdvancedToolStrip">
+            <summary>
+            创建高级工具栏（HTML模式/打印/模板/切换模式）
+            </summary>
+        </member>
+        <member name="M:HtmlEditorControl.HtmlEditorControl.CreateCompactToolStrip">
+            <summary>
+            创建单行紧凑工具栏
+            </summary>
+        </member>
+        <member name="M:HtmlEditorControl.HtmlEditorControl.PopulateCompactToolStrip">
+            <summary>
+            填充单行紧凑工具栏的所有按钮
+            </summary>
+        </member>
+        <member name="M:HtmlEditorControl.HtmlEditorControl.CreateContextMenu">
+            <summary>
+            创建右键菜单
+            </summary>
+        </member>
+        <member name="M:HtmlEditorControl.HtmlEditorControl.CreateContentContextMenu">
+            <summary>
+            创建编辑区域的右键菜单
+            </summary>
+        </member>
+        <member name="M:HtmlEditorControl.HtmlEditorControl.ContentContextMenu_Opening(System.Object,System.ComponentModel.CancelEventArgs)">
+            <summary>
+            编辑区域右键菜单打开前的处理
+            </summary>
+        </member>
+        <member name="M:HtmlEditorControl.HtmlEditorControl.ShowFindDialog">
+            <summary>
+            显示查找对话框
+            </summary>
+        </member>
+        <member name="M:HtmlEditorControl.HtmlEditorControl.LoadIcon(System.String,System.Func{System.Drawing.Bitmap})">
+            <summary>
+            从文件或代码生成加载图标
+            </summary>
+        </member>
+        <member name="M:HtmlEditorControl.HtmlEditorControl.TryLoadIconForButton(System.Windows.Forms.ToolStripButton,System.String)">
+            <summary>
+            尝试加载图标文件，如果找到则返回true并设置按钮为图标显示
+            </summary>
+            <param name="button">要设置的按钮</param>
+            <param name="iconName">图标文件名（不含扩展名）</param>
+            <returns>是否成功加载图标</returns>
+        </member>
+        <member name="M:HtmlEditorControl.HtmlEditorControl.CreateUndoIcon">
+            <summary>
+            创建撤销图标
+            </summary>
+        </member>
+        <member name="M:HtmlEditorControl.HtmlEditorControl.CreateRedoIcon">
+            <summary>
+            创建重做图标
+            </summary>
+        </member>
+        <member name="M:HtmlEditorControl.HtmlEditorControl.CreateAlignLeftIcon">
+            <summary>
+            创建左对齐图标
+            </summary>
+        </member>
+        <member name="M:HtmlEditorControl.HtmlEditorControl.CreateAlignCenterIcon">
+            <summary>
+            创建居中对齐图标
+            </summary>
+        </member>
+        <member name="M:HtmlEditorControl.HtmlEditorControl.CreateAlignRightIcon">
+            <summary>
+            创建右对齐图标
+            </summary>
+        </member>
+        <member name="M:HtmlEditorControl.HtmlEditorControl.CreateIndentIcon">
+            <summary>
+            创建增加缩进图标
+            </summary>
+        </member>
+        <member name="M:HtmlEditorControl.HtmlEditorControl.CreateOutdentIcon">
+            <summary>
+            创建减少缩进图标
+            </summary>
+        </member>
+        <member name="M:HtmlEditorControl.HtmlEditorControl.CreateImageIcon">
+            <summary>
+            创建图片图标
+            </summary>
+        </member>
+        <member name="M:HtmlEditorControl.HtmlEditorControl.CreateLinkIcon">
+            <summary>
+            创建链接图标
+            </summary>
+        </member>
+        <member name="M:HtmlEditorControl.HtmlEditorControl.CreateTableIcon">
+            <summary>
+            创建表格图标
+            </summary>
+        </member>
+        <member name="M:HtmlEditorControl.HtmlEditorControl.CreateHorizontalRuleIcon">
+            <summary>
+            创建水平线图标
+            </summary>
+        </member>
+        <member name="M:HtmlEditorControl.HtmlEditorControl.CreateRemoveFormatIcon">
+            <summary>
+            创建清除格式图标
+            </summary>
+        </member>
+        <member name="M:HtmlEditorControl.HtmlEditorControl.CreatePrintPreviewIcon">
+            <summary>
+            创建打印预览图标
+            </summary>
+        </member>
+        <member name="M:HtmlEditorControl.HtmlEditorControl.CreatePrintIcon">
+            <summary>
+            创建打印图标
+            </summary>
+        </member>
+        <member name="M:HtmlEditorControl.HtmlEditorControl.CreateFormatPainterIcon">
+            <summary>
+            创建格式刷图标
+            </summary>
+        </member>
+        <member name="M:HtmlEditorControl.HtmlEditorControl.InitializeWebView2Async">
+            <summary>
+            异步初始化WebView2
+            </summary>
+        </member>
+        <member name="M:HtmlEditorControl.HtmlEditorControl.LoadSystemFonts">
+            <summary>
+            加载系统字体
+            </summary>
+        </member>
+        <member name="M:HtmlEditorControl.HtmlEditorControl.ExecuteCommandAsync(System.String,System.Boolean,System.Object)">
+            <summary>
+            执行编辑命令（异步）
+            </summary>
+        </member>
+        <member name="M:HtmlEditorControl.HtmlEditorControl.ExecuteCommand(System.String,System.Boolean,System.Object)">
+            <summary>
+            同步包装器（用于事件处理）
+            </summary>
+        </member>
+        <member name="M:HtmlEditorControl.HtmlEditorControl.ToggleToolbarMode">
+            <summary>
+            工具栏模式切换（由外部菜单调用）
+            </summary>
+        </member>
+        <member name="M:HtmlEditorControl.HtmlEditorControl.ToggleModeButton_Click(System.Object,System.EventArgs)">
+            <summary>
+            工具栏模式切换按钮点击事件（已废弃，切换功能移到菜单栏）
+            </summary>
+        </member>
+        <member name="P:HtmlEditorControl.HtmlEditorControl.IsCompactMode">
+            <summary>
+            获取或设置当前工具栏是否为单行紧凑模式
+            可以在设计器属性窗口中设置
+            </summary>
+        </member>
+        <member name="P:HtmlEditorControl.HtmlEditorControl.ToolbarVisible">
+            <summary>
+            获取或设置工具栏是否可见
+            </summary>
+        </member>
+        <member name="P:HtmlEditorControl.HtmlEditorControl.PlaceholderText">
+            <summary>
+            获取或设置占位符文本
+            </summary>
+        </member>
+        <member name="P:HtmlEditorControl.HtmlEditorControl.InitialHtmlContent">
+            <summary>
+            获取或设置初始HTML内容
+            </summary>
+        </member>
+        <member name="P:HtmlEditorControl.HtmlEditorControl.AutoSaveToolbarLayout">
+            <summary>
+            获取或设置是否自动保存工具栏布局
+            </summary>
+        </member>
+        <member name="P:HtmlEditorControl.HtmlEditorControl.DefaultFontColor">
+            <summary>
+            获取或设置默认字体颜色
+            </summary>
+        </member>
+        <member name="P:HtmlEditorControl.HtmlEditorControl.DefaultBackgroundColor">
+            <summary>
+            获取或设置默认背景颜色
+            </summary>
+        </member>
+        <member name="P:HtmlEditorControl.HtmlEditorControl.DefaultFontFamily">
+            <summary>
+            获取或设置默认字体名称
+            </summary>
+        </member>
+        <member name="P:HtmlEditorControl.HtmlEditorControl.DefaultFontSize">
+            <summary>
+            获取或设置默认字体大小（HTML大小：1-7）
+            </summary>
+        </member>
+        <member name="P:HtmlEditorControl.HtmlEditorControl.DefaultBold">
+            <summary>
+            获取或设置默认是否加粗
+            </summary>
+        </member>
+        <member name="P:HtmlEditorControl.HtmlEditorControl.DefaultItalic">
+            <summary>
+            获取或设置默认是否斜体
+            </summary>
+        </member>
+        <member name="P:HtmlEditorControl.HtmlEditorControl.DefaultUnderline">
+            <summary>
+            获取或设置默认是否下划线
+            </summary>
+        </member>
+        <member name="M:HtmlEditorControl.HtmlEditorControl.ConvertFontSizeToPt(System.String)">
+            <summary>
+            将字号（中文或数字）转换为磅值
+            </summary>
+        </member>
+        <member name="M:HtmlEditorControl.HtmlEditorControl.FindMatchingFontSize(System.String)">
+            <summary>
+            查找匹配的字号（将CSS字体大小转换为选项）
+            </summary>
+        </member>
+        <member name="M:HtmlEditorControl.HtmlEditorControl.SetFontSizeInPt(System.String)">
+            <summary>
+            使用 CSS 样式设置字体大小（单位：pt）
+            </summary>
+        </member>
+        <member name="P:HtmlEditorControl.HtmlEditorControl.HtmlContent">
+            <summary>
+            获取或设置HTML内容（同步方式，可能阻塞）
+            </summary>
+        </member>
+        <member name="M:HtmlEditorControl.HtmlEditorControl.GetHtmlContentAsync">
+            <summary>
+            异步获取HTML内容
+            </summary>
+        </member>
+        <member name="M:HtmlEditorControl.HtmlEditorControl.UnescapeJsonString(System.String)">
+            <summary>
+            反转义 JSON 字符串
+            </summary>
+        </member>
+        <member name="M:HtmlEditorControl.HtmlEditorControl.SetHtmlContentAsync(System.String)">
+            <summary>
+            异步设置HTML内容
+            </summary>
+        </member>
+        <member name="P:HtmlEditorControl.HtmlEditorControl.FullHtmlDocument">
+            <summary>
+            获取完整的HTML文档
+            </summary>
+        </member>
+        <member name="M:HtmlEditorControl.HtmlEditorControl.GetFullHtmlDocumentAsync">
+            <summary>
+            异步获取完整的HTML文档
+            </summary>
+        </member>
+        <member name="P:HtmlEditorControl.HtmlEditorControl.TextContent">
+            <summary>
+            获取纯文本内容
+            </summary>
+        </member>
+        <member name="M:HtmlEditorControl.HtmlEditorControl.GetTextContentAsync">
+            <summary>
+            异步获取纯文本内容
+            </summary>
+        </member>
+        <member name="M:HtmlEditorControl.HtmlEditorControl.SaveToFile(System.String)">
+            <summary>
+            保存HTML到文件
+            </summary>
+        </member>
+        <member name="M:HtmlEditorControl.HtmlEditorControl.LoadFromFile(System.String)">
+            <summary>
+            从文件加载HTML
+            </summary>
+        </member>
+        <member name="M:HtmlEditorControl.HtmlEditorControl.GenerateCompleteHtmlDocument">
+            <summary>
+            生成完整的HTML文档（用于保存或发送邮件）
+            </summary>
+        </member>
+        <member name="M:HtmlEditorControl.HtmlEditorControl.Clear">
+            <summary>
+            清空内容
+            </summary>
+        </member>
+        <member name="M:HtmlEditorControl.HtmlEditorControl.InsertTable(System.Int32,System.Int32)">
+            <summary>
+            插入表格
+            </summary>
+        </member>
+        <member name="M:HtmlEditorControl.HtmlEditorControl.InsertImageFromFile(System.String)">
+            <summary>
+            从文件插入图片
+            </summary>
+        </member>
+        <member name="M:HtmlEditorControl.HtmlEditorControl.ToggleHtmlModeAsync">
+            <summary>
+            切换HTML模式（异步）
+            </summary>
+        </member>
+        <member name="M:HtmlEditorControl.HtmlEditorControl.LoadTemplate(System.String)">
+            <summary>
+            加载模板
+            </summary>
+        </member>
+        <member name="M:HtmlEditorControl.HtmlEditorControl.CopyFormatAsync">
+            <summary>
+            复制当前选中文本的格式
+            </summary>
+        </member>
+        <member name="M:HtmlEditorControl.HtmlEditorControl.RegisterFormatPainterClickHandlerAsync">
+            <summary>
+            注册格式刷点击处理
+            </summary>
+        </member>
+        <member name="M:HtmlEditorControl.HtmlEditorControl.ApplyFormatAsync">
+            <summary>
+            应用复制的格式到当前选中的文本
+            </summary>
+        </member>
+        <member name="M:HtmlEditorControl.HtmlEditorControl.ToolStripPanel_Layout(System.Object,System.Windows.Forms.LayoutEventArgs)">
+            <summary>
+            工具栏布局更改事件 - 自动保存布局
+            </summary>
+        </member>
+        <member name="M:HtmlEditorControl.HtmlEditorControl.SaveToolbarLayout">
+            <summary>
+            保存工具栏布局到配置文件
+            </summary>
+        </member>
+        <member name="M:HtmlEditorControl.HtmlEditorControl.UpdatePlaceholderAsync">
+            <summary>
+            更新占位符文本
+            </summary>
+        </member>
+        <member name="M:HtmlEditorControl.HtmlEditorControl.ApplyDefaultFormatAsync">
+            <summary>
+            应用默认格式设置到编辑器的body
+            </summary>
+        </member>
+        <member name="M:HtmlEditorControl.HtmlEditorControl.LoadToolbarLayout">
+            <summary>
+            从配置文件加载工具栏布局
+            </summary>
+        </member>
+        <member name="M:HtmlEditorControl.HtmlEditorControl.ApplySavedLayout">
+            <summary>
+            应用保存的布局到工具栏
+            </summary>
+        </member>
+        <member name="M:HtmlEditorControl.HtmlEditorControl.UseDefaultLayout(System.Windows.Forms.ToolStrip)">
+            <summary>
+            使用默认位置添加单个工具栏
+            </summary>
+        </member>
+        <member name="M:HtmlEditorControl.HtmlEditorControl.UseDefaultLayoutForAll">
+            <summary>
+            恢复所有工具栏的默认布局
+            </summary>
+        </member>
+        <member name="M:HtmlEditorControl.HtmlEditorControl.ResetToolbarLayout">
+            <summary>
+            重置工具栏布局为默认（公开方法）
+            </summary>
+        </member>
+        <member name="T:HtmlEditorControl.TableDialog">
+            <summary>
+            表格插入对话框
+            </summary>
+        </member>
+    </members>
+</doc>

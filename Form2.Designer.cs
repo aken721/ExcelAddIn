@@ -37,7 +37,6 @@
             this.mailfrom_label = new System.Windows.Forms.Label();
             this.smtp_label = new System.Windows.Forms.Label();
             this.subject_textBox = new System.Windows.Forms.TextBox();
-            this.body_richTextBox = new System.Windows.Forms.RichTextBox();
             this.attachment_no_radioButton = new System.Windows.Forms.RadioButton();
             this.attachment_yes_radioButton = new System.Windows.Forms.RadioButton();
             this.attachment_checkBox = new System.Windows.Forms.CheckBox();
@@ -69,6 +68,7 @@
             this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
             this.attachment_textBox = new System.Windows.Forms.TextBox();
             this.panel1 = new System.Windows.Forms.Panel();
+            this.body_htmlEditorControl = new HtmlEditorControl.HtmlEditorControl();
             ((System.ComponentModel.ISupportInitialize)(this.mailpassword_pictureBox)).BeginInit();
             this.panel1.SuspendLayout();
             this.SuspendLayout();
@@ -147,15 +147,6 @@
             this.subject_textBox.Name = "subject_textBox";
             this.subject_textBox.Size = new System.Drawing.Size(473, 26);
             this.subject_textBox.TabIndex = 0;
-            // 
-            // body_richTextBox
-            // 
-            this.body_richTextBox.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.body_richTextBox.Location = new System.Drawing.Point(157, 69);
-            this.body_richTextBox.Name = "body_richTextBox";
-            this.body_richTextBox.Size = new System.Drawing.Size(462, 117);
-            this.body_richTextBox.TabIndex = 1;
-            this.body_richTextBox.Text = "";
             // 
             // attachment_no_radioButton
             // 
@@ -435,9 +426,8 @@
             this.send_progress_label.ForeColor = System.Drawing.Color.SaddleBrown;
             this.send_progress_label.Location = new System.Drawing.Point(77, 366);
             this.send_progress_label.Name = "send_progress_label";
-            this.send_progress_label.Size = new System.Drawing.Size(208, 17);
+            this.send_progress_label.Size = new System.Drawing.Size(0, 17);
             this.send_progress_label.TabIndex = 32;
-            this.send_progress_label.Text = "已发送？封，共？封，发送进度100%";
             // 
             // ssl_checkBox
             // 
@@ -471,6 +461,7 @@
             // panel1
             // 
             this.panel1.AutoSize = true;
+            this.panel1.Controls.Add(this.body_htmlEditorControl);
             this.panel1.Controls.Add(this.subject_label);
             this.panel1.Controls.Add(this.attachment_textBox);
             this.panel1.Controls.Add(this.body_label);
@@ -485,7 +476,6 @@
             this.panel1.Controls.Add(this.label14);
             this.panel1.Controls.Add(this.subject_textBox);
             this.panel1.Controls.Add(this.quit_button);
-            this.panel1.Controls.Add(this.body_richTextBox);
             this.panel1.Controls.Add(this.clear_button);
             this.panel1.Controls.Add(this.attachment_no_radioButton);
             this.panel1.Controls.Add(this.send_button);
@@ -511,6 +501,16 @@
             this.panel1.Name = "panel1";
             this.panel1.Size = new System.Drawing.Size(724, 457);
             this.panel1.TabIndex = 34;
+            // 
+            // body_htmlEditorControl
+            // 
+            this.body_htmlEditorControl.DefaultBackgroundColor = System.Drawing.Color.Transparent;
+            this.body_htmlEditorControl.DefaultFontColor = System.Drawing.Color.Black;
+            this.body_htmlEditorControl.HtmlContent = "";
+            this.body_htmlEditorControl.Location = new System.Drawing.Point(149, 66);
+            this.body_htmlEditorControl.Name = "body_htmlEditorControl";
+            this.body_htmlEditorControl.Size = new System.Drawing.Size(470, 117);
+            this.body_htmlEditorControl.TabIndex = 34;
             // 
             // Form2
             // 
@@ -540,7 +540,6 @@
         private System.Windows.Forms.Label mailfrom_label;
         private System.Windows.Forms.Label smtp_label;
         private System.Windows.Forms.TextBox subject_textBox;
-        private System.Windows.Forms.RichTextBox body_richTextBox;
         private System.Windows.Forms.RadioButton attachment_no_radioButton;
         private System.Windows.Forms.RadioButton attachment_yes_radioButton;
         private System.Windows.Forms.CheckBox attachment_checkBox;
@@ -572,5 +571,6 @@
         private System.Windows.Forms.ToolTip toolTip1;
         private System.Windows.Forms.TextBox attachment_textBox;
         private System.Windows.Forms.Panel panel1;
+        private HtmlEditorControl.HtmlEditorControl body_htmlEditorControl;
     }
 }

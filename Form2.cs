@@ -5,6 +5,7 @@ using System.Net.Mail;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using Excel = Microsoft.Office.Interop.Excel;
+using HtmlEditorControl;
 
 namespace ExcelAddIn
 {
@@ -107,112 +108,136 @@ namespace ExcelAddIn
         }
 
         //发送按钮
-        private void send_button_Click(object sender, EventArgs e)
+        private async void send_button_Click(object sender, EventArgs e)
         {
             if (mailfrom_textBox.Text != "" && mailfrom_comboBox.Text != "" && smtp_textBox.Text != "" && port_textBox.Text != "" && mailpassword_textBox.Text != "")
             {
-                string myMail = mailfrom_textBox.Text + "@" + mailfrom_comboBox.Text;
-                string myPassword = mailpassword_textBox.Text;
-                string mySmtp = smtp_textBox.Text;
-                string myPort = port_textBox.Text;
-                string mySubject = subject_textBox.Text;
-                string myAttachpath = attachment_textBox.Text;
+                // ===== 第一步：重置进度条和错误记录 =====
+                ResetProgress();
+                errRecord.Clear();
 
-                string myBody = body_richTextBox.Text;
-                int address_column = 0;
-                int attachment_column = 0;
+                // ===== 第二步：禁用控件，防止误操作 =====
+                DisableControls();
 
-                if (attachment_textBox.Text == "请手工输入附件所在目录的完整路径，或双击选择目录" || attachment_textBox.Text == "请手工输入文件的完整路径，或双击选择文件")
+                try
                 {
-                    attachment_textBox.Text = "";
-                    attachment_textBox.ForeColor = Color.Black;
-                }
+                    // ===== 第三步：准备数据阶段 =====
+                    ShowProgress(0, "准备数据....");
+                    Application.DoEvents(); // 强制更新UI
 
-                //读取收件人地址并写入myMailsto列表
-                if (mailto_textBox.Text != "" || mailto_comboBox.Text != "")
-                {
-                    myMailsto.Clear();
-                    //读取手工输入收件人地址
-                    if (mailto_textBox.Text != "")
+                    string myMail = mailfrom_textBox.Text + "@" + mailfrom_comboBox.Text;
+                    string myPassword = mailpassword_textBox.Text;
+                    string mySmtp = smtp_textBox.Text;
+                    string myPort = port_textBox.Text;
+                    string mySubject = subject_textBox.Text;
+                    string myAttachpath = attachment_textBox.Text;
+
+                    string myBody =await body_htmlEditorControl.GetHtmlContentAsync();
+                    int address_column = 0;
+                    int attachment_column = 0;
+
+                    if (attachment_textBox.Text == "请手工输入附件所在目录的完整路径，或双击选择目录" || attachment_textBox.Text == "请手工输入文件的完整路径，或双击选择文件")
                     {
-                        foreach (string mail in mailto_textBox.Text.Split(",".ToCharArray()))
-                        {
-                            myMailsto.Add(mail);
-                        }
+                        attachment_textBox.Text = "";
+                        attachment_textBox.ForeColor = Color.Black;
                     }
 
-                    //读取excel表中收件人地址列内容
-                    if (mailto_comboBox.Text != "")
+                    //读取收件人地址并写入myMailsto列表
+                    if (mailto_textBox.Text != "" || mailto_comboBox.Text != "")
                     {
-                        foreach (Excel.Range fields_range in ThisAddIn.app.ActiveSheet.Range[ThisAddIn.app.ActiveSheet.Cells[1, 1], ThisAddIn.app.ActiveSheet.Cells[1, ThisAddIn.app.ActiveSheet.UsedRange.Columns.Count]])
+                        myMailsto.Clear();
+                        //读取手工输入收件人地址
+                        if (mailto_textBox.Text != "")
                         {
-                            if (fields_range.Value == mailto_comboBox.Text)
+                            foreach (string mail in mailto_textBox.Text.Split(",".ToCharArray()))
                             {
-                                address_column = fields_range.Column;
-                                break;
+                                myMailsto.Add(mail);
                             }
                         }
-                        foreach (Excel.Range records_range in ThisAddIn.app.ActiveSheet.Range[ThisAddIn.app.ActiveSheet.Cells[2, address_column], ThisAddIn.app.ActiveSheet.Cells[ThisAddIn.app.ActiveSheet.UsedRange.Rows.Count, address_column]])
-                        {
-                            if (!string.IsNullOrEmpty(records_range.Value) && !myMailsto.Contains(records_range.Value))
-                            {
-                                myMailsto.Add(records_range.Value);
-                            }
-                        }
-                    }
-                }
-                else
-                {
-                    MessageBox.Show("收件人邮箱地址不能为空，请核对后再次运行");
-                    return;
-                }
 
-                //读取附件
-                if (attachment_yes_radioButton.Checked)
-                {
-                    if (attachment_checkBox.Checked)
-                    {
-                        foreach (Excel.Range fields_range in ThisAddIn.app.ActiveSheet.Range[ThisAddIn.app.ActiveSheet.Cells[1, 1], ThisAddIn.app.ActiveSheet.Cells[1, ThisAddIn.app.ActiveSheet.UsedRange.Columns.Count]])
+                        //读取excel表中收件人地址列内容
+                        if (mailto_comboBox.Text != "")
                         {
-                            if (fields_range.Value == "附件")
+                            foreach (Excel.Range fields_range in ThisAddIn.app.ActiveSheet.Range[ThisAddIn.app.ActiveSheet.Cells[1, 1], ThisAddIn.app.ActiveSheet.Cells[1, ThisAddIn.app.ActiveSheet.UsedRange.Columns.Count]])
                             {
-                                attachment_column = fields_range.Column;
-                                break;
-                            }
-                        }
-                        address_attachment.Clear();
-                        for (int i = 2; i <= ThisAddIn.app.ActiveSheet.UsedRange.Rows.Count; i++)
-                        {
-                            if (!address_attachment.ContainsKey(ThisAddIn.app.ActiveSheet.Cells[i, address_column].Value))
-                            {
-                                string dic_key = ThisAddIn.app.ActiveSheet.Cells[i, address_column].Value;
-                                List<string> dic_value = new List<string>();
-                                string attach_path = ThisAddIn.app.ActiveSheet.Cells[i, attachment_column].Value;
-                                if (attach_path.Contains(";"))
+                                if (fields_range.Value == mailto_comboBox.Text)
                                 {
-                                    string[] attachmentPathValues = attach_path.Split(';');
-                                    foreach (string attachmentPathValue in attachmentPathValues)
-                                    {
-                                        dic_value.Add(myAttachpath + "\\" + attachmentPathValue);
-                                    }
+                                    address_column = fields_range.Column;
+                                    break;
                                 }
-                                else if (attach_path.Contains("；"))
+                            }
+                            foreach (Excel.Range records_range in ThisAddIn.app.ActiveSheet.Range[ThisAddIn.app.ActiveSheet.Cells[2, address_column], ThisAddIn.app.ActiveSheet.Cells[ThisAddIn.app.ActiveSheet.UsedRange.Rows.Count, address_column]])
+                            {
+                                if (!string.IsNullOrEmpty(records_range.Value) && !myMailsto.Contains(records_range.Value))
                                 {
-                                    string[] attachmentPathValues = attach_path.Split('；');
-                                    foreach (string attachmentPathValue in attachmentPathValues)
+                                    myMailsto.Add(records_range.Value);
+                                }
+                            }
+                        }
+                    }
+                    else
+                    {
+                        MessageBox.Show("收件人邮箱地址不能为空，请核对后再次运行");
+                        EnableControls(); // 启用控件
+                        return;
+                    }
+
+                    //读取附件
+                    if (attachment_yes_radioButton.Checked)
+                    {
+                        if (attachment_checkBox.Checked)
+                        {
+                            foreach (Excel.Range fields_range in ThisAddIn.app.ActiveSheet.Range[ThisAddIn.app.ActiveSheet.Cells[1, 1], ThisAddIn.app.ActiveSheet.Cells[1, ThisAddIn.app.ActiveSheet.UsedRange.Columns.Count]])
+                            {
+                                if (fields_range.Value == "附件")
+                                {
+                                    attachment_column = fields_range.Column;
+                                    break;
+                                }
+                            }
+                            address_attachment.Clear();
+                            for (int i = 2; i <= ThisAddIn.app.ActiveSheet.UsedRange.Rows.Count; i++)
+                            {
+                                if (!address_attachment.ContainsKey(ThisAddIn.app.ActiveSheet.Cells[i, address_column].Value))
+                                {
+                                    string dic_key = ThisAddIn.app.ActiveSheet.Cells[i, address_column].Value;
+                                    List<string> dic_value = new List<string>();
+                                    string attach_path = ThisAddIn.app.ActiveSheet.Cells[i, attachment_column].Value;
+                                    if (attach_path.Contains(";"))
                                     {
-                                        dic_value.Add(myAttachpath + "\\" + attachmentPathValue);
+                                        string[] attachmentPathValues = attach_path.Split(';');
+                                        foreach (string attachmentPathValue in attachmentPathValues)
+                                        {
+                                            dic_value.Add(myAttachpath + "\\" + attachmentPathValue);
+                                        }
                                     }
+                                    else if (attach_path.Contains("；"))
+                                    {
+                                        string[] attachmentPathValues = attach_path.Split('；');
+                                        foreach (string attachmentPathValue in attachmentPathValues)
+                                        {
+                                            dic_value.Add(myAttachpath + "\\" + attachmentPathValue);
+                                        }
+                                    }
+                                    else
+                                    {
+                                        dic_value.Add(myAttachpath + "\\" + attach_path);
+                                    }
+                                    address_attachment.Add(dic_key, dic_value);
                                 }
                                 else
                                 {
-                                    dic_value.Add(myAttachpath + "\\" + attach_path);
+                                    continue;
                                 }
-                                address_attachment.Add(dic_key, dic_value);
                             }
-                            else
+                        }
+                        else
+                        {
+                            address_attachment.Clear();
+                            foreach (string address_key in myMailsto)
                             {
-                                continue;
+                                //MessageBox.Show(address_key);
+                                address_attachment.Add(address_key, myAttachment);
                             }
                         }
                     }
@@ -225,55 +250,134 @@ namespace ExcelAddIn
                             address_attachment.Add(address_key, myAttachment);
                         }
                     }
-                }
-                else
-                {
-                    address_attachment.Clear();
-                    foreach (string address_key in myMailsto)
-                    {
-                        //MessageBox.Show(address_key);
-                        address_attachment.Add(address_key, myAttachment);
-                    }
-                }
-                int current_maito = 1;
-                int total_mailto = myMailsto.Count;
 
-                //遍历收件人地址，调用发邮件函数发送邮件
-                foreach (string myMailto in myMailsto)
-                {
-                    //更新进度条
-                    string result_text = "正在发送" + current_maito.ToString() + "个，共" + total_mailto.ToString() + "个，已完成";
-                    UpdateProgressBar(send_progressBar, current_maito, total_mailto, send_progress_label, result_text);
-                    send_progress_label.Visible = true;
-                    send_progressBar.Visible = true;
-                    string result;
-                    if (ssl_checkBox.Checked)
+                    int current_maito = 1;
+                    int total_mailto = myMailsto.Count;
+                    int success_count = 0;
+                    int fail_count = 0;
+
+                    // ===== 第四步：发送阶段 =====
+                    //遍历收件人地址，调用发邮件函数发送邮件
+                    foreach (string myMailto in myMailsto)
                     {
-                        result = SendMail(myMailto, myMail, myPassword, mySmtp, myPort, mySubject, myBody, address_attachment[myMailto], true);
+                        //更新进度条 - 显示正在发送第几封
+                        int progressPercentage = (int)((double)(current_maito - 1) / total_mailto * 100);
+                        string progressText = "正在发送第 " + current_maito.ToString() + "/" + total_mailto.ToString() + " 封";
+                        ShowProgress(progressPercentage, progressText);
+                        Application.DoEvents(); // 强制更新UI
+
+                        string result;
+                        if (ssl_checkBox.Checked)
+                        {
+                            result = SendMail(myMailto, myMail, myPassword, mySmtp, myPort, mySubject, myBody, address_attachment[myMailto], true);
+                        }
+                        else
+                        {
+                            result = SendMail(myMailto, myMail, myPassword, mySmtp, myPort, mySubject, myBody, address_attachment[myMailto]);
+                        }
+
+                        if (result != "finished")
+                        {
+                            errRecord.Add(myMailto + ":" + result);
+                            fail_count++;
+                        }
+                        else
+                        {
+                            success_count++;
+                        }
+
+                        current_maito++;
+                    }
+
+                    // ===== 第五步：完成阶段 =====
+                    string completeText = "完成发送 " + total_mailto.ToString() + " 封，成功 " + success_count.ToString() + " 封，失败 " + fail_count.ToString() + " 封";
+                    ShowProgress(100, completeText);
+                    Application.DoEvents(); // 强制更新UI
+
+                    // 显示最终结果消息框
+                    if (errRecord.Count == 0)
+                    {
+                        MessageBox.Show("共 " + total_mailto.ToString() + " 封邮件，全部发送成功！", "发送完成", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     }
                     else
                     {
-                        result = SendMail(myMailto, myMail, myPassword, mySmtp, myPort, mySubject, myBody, address_attachment[myMailto]);
-                    }
-                    current_maito++;
-                    if (result != "finished")
-                    {
-                        errRecord.Add(myMailto + ":" + result);
+                        MessageBox.Show("共 " + total_mailto.ToString() + " 封邮件，成功 " + success_count.ToString() + " 封，失败 " + fail_count.ToString() + " 封。\n\n失败原因：\n" + string.Join("\n", errRecord), "发送完成", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     }
                 }
-                if (errRecord.Count == 0)
+                catch (Exception ex)
                 {
-                    MessageBox.Show("共" + total_mailto.ToString() + "封邮件，全部发送成功");
+                    MessageBox.Show("发送过程中出现错误：" + ex.Message, "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
-                else
+                finally
                 {
-                    MessageBox.Show("共" + total_mailto.ToString() + "封邮件，其中有" + errRecord.Count.ToString() + "未发送成功,原因是：" + string.Join("\n", errRecord));
+                    // ===== 最终：启用控件 =====
+                    EnableControls();
                 }
             }
             else
             {
                 MessageBox.Show("发件人邮箱和密码不能为空");
             }
+        }
+
+        //重置进度条和提示信息
+        private void ResetProgress()
+        {
+            send_progressBar.Value = 0;
+            send_progress_label.Text = "";
+            send_progress_label.Visible = false;
+            send_progressBar.Visible = false;
+        }
+
+        //显示进度信息
+        private void ShowProgress(int percentage, string message)
+        {
+            send_progressBar.Value = percentage;
+            send_progress_label.Text = message + " " + percentage.ToString() + "%";
+            send_progress_label.Visible = true;
+            send_progressBar.Visible = true;
+        }
+
+        //禁用控件，防止误操作
+        private void DisableControls()
+        {
+            send_button.Enabled = false;
+            clear_button.Enabled = false;
+            mailfrom_textBox.Enabled = false;
+            mailfrom_comboBox.Enabled = false;
+            mailpassword_textBox.Enabled = false;
+            smtp_textBox.Enabled = false;
+            port_textBox.Enabled = false;
+            ssl_checkBox.Enabled = false;
+            mailto_textBox.Enabled = false;
+            mailto_comboBox.Enabled = false;
+            subject_textBox.Enabled = false;
+            body_htmlEditorControl.Enabled = false;
+            attachment_yes_radioButton.Enabled = false;
+            attachment_no_radioButton.Enabled = false;
+            attachment_checkBox.Enabled = false;
+            attachment_textBox.Enabled = false;
+        }
+
+        //启用控件
+        private void EnableControls()
+        {
+            send_button.Enabled = true;
+            clear_button.Enabled = true;
+            mailfrom_textBox.Enabled = true;
+            mailfrom_comboBox.Enabled = true;
+            mailpassword_textBox.Enabled = true;
+            smtp_textBox.Enabled = true;
+            port_textBox.Enabled = true;
+            ssl_checkBox.Enabled = true;
+            mailto_textBox.Enabled = true;
+            mailto_comboBox.Enabled = true;
+            subject_textBox.Enabled = true;
+            body_htmlEditorControl.Enabled = true;
+            attachment_yes_radioButton.Enabled = true;
+            attachment_no_radioButton.Enabled = true;
+            attachment_checkBox.Enabled = true;
+            attachment_textBox.Enabled = true;
         }
 
 
@@ -334,7 +438,7 @@ namespace ExcelAddIn
         private void clear_button_Click(object sender, EventArgs e)
         {
             subject_textBox.Text = "";
-            body_richTextBox.Text = "";
+            body_htmlEditorControl.Text = "";
             attachment_textBox.Text = "";
             mailto_textBox.Text = "";
             mailto_comboBox.Text = "";
@@ -343,6 +447,9 @@ namespace ExcelAddIn
             mailpassword_textBox.Text = "";
             smtp_textBox.Text = "";
             port_textBox.Text = "";
+            send_progress_label.Text = "";
+            send_progressBar.Value = 0; 
+            send_progressBar.Visible = false;   
         }
 
         //退出按钮
