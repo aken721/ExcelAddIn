@@ -10,12 +10,15 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Xml.Linq;
 using Docnet.Core;
 using Docnet.Core.Converters;
 using Docnet.Core.Models;
 using UglyToad.PdfPig;
+using PaddleOCRInvoice;
+using PaddleOCRInvoice.Models;
 using Excel = Microsoft.Office.Interop.Excel;
 
 
@@ -44,6 +47,34 @@ namespace ExcelAddIn
             clear_pictureBox.Visible = false;
             timer1.Interval = 3000;
             tabControl1.DrawItem += new DrawItemEventHandler(tabControl1_DrawItem);
+            
+            // 初始化PaddleOCR发票识别服务
+            InitializeInvoiceService();
+        }
+        
+        // 初始化发票识别服务
+        private void InitializeInvoiceService()
+        {
+            try
+            {
+                string basePath = AppDomain.CurrentDomain.BaseDirectory;
+                string modelsPath = Path.Combine(basePath, "PaddleOCRInvoice", "Models");
+                
+                System.Diagnostics.Debug.WriteLine($"【调试】初始化路径: {modelsPath}");
+                System.Diagnostics.Debug.WriteLine($"【调试】Models路径是否存在: {Directory.Exists(modelsPath)}");
+                
+                // 初始化发票识别服务（传递Models路径）
+                _invoiceService = new InvoiceRecognitionService(modelsPath);
+                
+                System.Diagnostics.Debug.WriteLine("【调试】PaddleOCR发票识别服务初始化成功");
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"【调试】初始化异常: {ex.ToString()}");
+                MessageBox.Show($"发票识别服务初始化失败：\n\n错误信息: {ex.Message}\n\n内部异常: {ex.InnerException?.Message}\n\n堆栈跟踪:\n{ex.StackTrace}\n\nPDF/图片发票识别功能将不可用。", 
+                    "初始化失败", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                _invoiceService = null;
+            }
         }
 
 
@@ -75,7 +106,6 @@ namespace ExcelAddIn
                     clear_pictureBox.Visible = false;
                     break;
                 case 1:
-                    tabControl1.SelectedIndex = 0; //pdf读取功能未完成，无法使用，暂时强制切换到第一个选项卡
                     sequence_label1.Text = string.Empty;
                     pdf_path_textBox.Text = string.Empty;
                     single_result_label1.Text = "";
@@ -268,6 +298,9 @@ namespace ExcelAddIn
         List<string> folder_FileFullNames = new List<string>();
         List<string> pdfSingle_FileFullNames = new List<string>();
         List<string> pdfFolder_FileFullNames = new List<string>();
+        
+        // PaddleOCR发票识别服务
+        private InvoiceRecognitionService? _invoiceService;
 
         private void xml_path_textBox_DoubleClick(object sender, EventArgs e)
         {
@@ -682,8 +715,8 @@ namespace ExcelAddIn
 
         private void pdf_path_textBox_DoubleClick(object sender, EventArgs e)
         {
-            openFileDialog1.Title = "请选择要导入的电子发票";
-            openFileDialog1.Filter = "电子发票文件(*.pdf)|*.pdf";
+            openFileDialog1.Title = "请选择要导入的电子发票（PDF或图片）";
+            openFileDialog1.Filter = "发票文件(*.pdf;*.jpg;*.jpeg;*.png;*.bmp)|*.pdf;*.jpg;*.jpeg;*.png;*.bmp|PDF文件(*.pdf)|*.pdf|图片文件(*.jpg;*.jpeg;*.png;*.bmp)|*.jpg;*.jpeg;*.png;*.bmp";
             openFileDialog1.Multiselect = true;
             if (openFileDialog1.ShowDialog() == DialogResult.OK)
             {
@@ -692,7 +725,7 @@ namespace ExcelAddIn
                 pdfSingle_FileFullNames = openFileDialog1.FileNames.ToList();
                 pdf_path_textBox.Text = pdfSingle_FileFullNames[0];
                 sequence_label1.Text = "1";
-                single_result_label1.Text = $"共{pdfSingle_FileFullNames.Count}个pdf文件";
+                single_result_label1.Text = $"共{pdfSingle_FileFullNames.Count}个文件";
                 if (pdfSingle_FileFullNames.Count > 1)
                 {
                     int fileCount = pdfSingle_FileFullNames.Count;
@@ -801,14 +834,28 @@ namespace ExcelAddIn
             {
                 try
                 {
-                    var bitmap = RenderPdfToImage(path, pageIndex: 0);
+                    // 判断文件类型
+                    string extension = Path.GetExtension(path).ToLower();
 
+                    if (extension == ".pdf")
+                    {
+                        // PDF文件：渲染为图片
+                        var bitmap = RenderPdfToImage(path, pageIndex: 0);
                     pictureBoxPdf.Image = bitmap;
+                    }
+                    else if (extension == ".jpg" || extension == ".jpeg" || extension == ".png" || extension == ".bmp")
+                    {
+                        // 图片文件：直接加载
+                        // 释放旧图片
+                        pictureBoxPdf.Image?.Dispose();
+                        pictureBoxPdf.Image = Image.FromFile(path);
+                    }
+                    
                     pictureBoxPdf.SizeMode = PictureBoxSizeMode.Zoom; // 设置图片适应PictureBox大小
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show($"加载失败: {ex.Message}");
+                    MessageBox.Show($"加载失败: {ex.Message}", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
             else
@@ -835,15 +882,31 @@ namespace ExcelAddIn
 
         private void pdfFolder_path_textBox_DoubleClick(object sender, EventArgs e)
         {
-            folderBrowserDialog1.Description = "请选择PDF电子发票所在文件夹";
+            folderBrowserDialog1.Description = "请选择发票文件（PDF或图片）所在文件夹";
             folderBrowserDialog1.ShowDialog();
             if (folderBrowserDialog1.SelectedPath != "")
             {
                 folder_FileFullNames.Clear();
+                pdfFolder_FileFullNames.Clear();
                 string selectedFolder = folderBrowserDialog1.SelectedPath;
                 pdfFolder_path_textBox.Text = selectedFolder;
                 DirectoryInfo folder = new DirectoryInfo(selectedFolder);
-                pdfFolder_FileFullNames = folder.GetFiles("*.pdf", pdfSubfolder_checkBox.Checked ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly).Select(file => file.FullName).ToList();
+                
+                // 获取所有支持的文件类型
+                SearchOption searchOption = pdfSubfolder_checkBox.Checked ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly;
+                var pdfFiles = folder.GetFiles("*.pdf", searchOption);
+                var jpgFiles = folder.GetFiles("*.jpg", searchOption);
+                var jpegFiles = folder.GetFiles("*.jpeg", searchOption);
+                var pngFiles = folder.GetFiles("*.png", searchOption);
+                var bmpFiles = folder.GetFiles("*.bmp", searchOption);
+                
+                // 合并所有文件并按名称排序
+                pdfFolder_FileFullNames = pdfFiles.Concat(jpgFiles).Concat(jpegFiles).Concat(pngFiles).Concat(bmpFiles)
+                    .OrderBy(f => f.Name)
+                    .Select(file => file.FullName)
+                    .ToList();
+                    
+                pdfBatch_result_label.Text = $"找到{pdfFolder_FileFullNames.Count}个发票文件";
             }
             else
             {
@@ -857,73 +920,248 @@ namespace ExcelAddIn
             if (pdfFolder_FileFullNames.Count > 0 && Directory.Exists(pdfFolder_path_textBox.Text))
             {
                 int o = 1;
+                int successCount = 0;
+                int failCount = 0;
+                
                 foreach (string file in pdfFolder_FileFullNames)
                 {
-                    pdfBatch_result_label.Text = $"正在导入第{o}/{pdfFolder_FileFullNames.Count}个PDF文件......";
-                    System.Data.DataTable dataTable = GetInvoiceDataFromPDF(file);
+                    string fileName = Path.GetFileName(file);
+                    pdfBatch_result_label.Text = $"正在导入第{o}/{pdfFolder_FileFullNames.Count}个文件：{fileName}...";
+                    Application.DoEvents(); // 强制更新UI
+                    
+                    try
+                    {
+                        System.Data.DataTable dataTable = GetInvoiceDataFromFile(file);
                     if (dataTable.Rows.Count > 0)
                     {
                         WriteToExcel(dataTable);
+                            successCount++;
+                        }
+                        else
+                        {
+                            failCount++;
+                        }
                     }
+                    catch (Exception ex)
+                    {
+                        failCount++;
+                        Console.WriteLine($"处理文件 {fileName} 失败: {ex.Message}");
+                    }
+                    
+                    o++;
                 }
-                pdfBatch_result_label.Text = "PDF电子发票批量导入已完成！";
+                
+                pdfBatch_result_label.Text = $"批量导入完成！共{pdfFolder_FileFullNames.Count}个文件，成功{successCount}个，失败{failCount}个";
                 timer1.Enabled = true;
             }
             else
             {
-                pdfBatch_result_label.Text = "文件夹内没有PDF电子发票文件，请核对！";
+                pdfBatch_result_label.Text = "文件夹内没有发票文件，请核对！";
                 timer1.Enabled = true;
+            }
+        }
+
+        // 单个文件导入按钮
+        private void btnPdfRun_Click(object sender, EventArgs e)
+        {
+            string filePath = pdf_path_textBox.Text.Trim();
+            
+            System.Diagnostics.Debug.WriteLine($"【调试】开始识别发票: {filePath}");
+            
+            if (string.IsNullOrEmpty(filePath) || !File.Exists(filePath))
+            {
+                MessageBox.Show("请先选择一个有效的发票文件！", "提示", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+            
+            try
+            {
+                single_result_label1.Text = "正在识别发票...";
+                Application.DoEvents();
+                
+                System.Diagnostics.Debug.WriteLine($"【调试】调用 GetInvoiceDataFromFile");
+                System.Data.DataTable dataTable = GetInvoiceDataFromFile(filePath);
+                System.Diagnostics.Debug.WriteLine($"【调试】返回的行数: {dataTable.Rows.Count}");
+                
+                if (dataTable.Rows.Count > 0)
+                {
+                    WriteToExcel(dataTable);
+                    single_result_label1.Text = "发票识别并导入成功！";
+                    timer1.Enabled = true;
+                }
+                else
+                {
+                    single_result_label1.Text = "识别失败，未获取到发票数据";
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"【调试】异常: {ex.ToString()}");
+                MessageBox.Show($"导入失败：{ex.Message}", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                single_result_label1.Text = "导入失败";
+            }
+        }
+        
+        // 重置按钮
+        private void btnPdfReset_Click(object sender, EventArgs e)
+        {
+            pdf_path_textBox.Text = "";
+            sequence_label1.Text = "";
+            single_result_label1.Text = "";
+            pdfSingle_FileFullNames.Clear();
+            pictureBoxPdf.Image?.Dispose();
+            pictureBoxPdf.Image = null;
+            
+            // 隐藏导航按钮
+            begin_pictureBox1.Enabled = false;
+            begin_pictureBox1.Visible = false;
+            preview_pictureBox1.Enabled = false;
+            preview_pictureBox1.Visible = false;
+            next_pictureBox1.Enabled = false;
+            next_pictureBox1.Visible = false;
+            last_pictureBox1.Enabled = false;
+            last_pictureBox1.Visible = false;
+        }
+        
+        // 智能识别文件类型并调用相应的处理方法
+        private System.Data.DataTable GetInvoiceDataFromFile(string filePath)
+        {
+            string extension = Path.GetExtension(filePath).ToLower();
+            
+            if (extension == ".pdf")
+            {
+                return GetInvoiceDataFromPDF(filePath);
+            }
+            else if (extension == ".jpg" || extension == ".jpeg" || extension == ".png" || extension == ".bmp")
+            {
+                return GetInvoiceDataFromImage(filePath);
+            }
+            else
+            {
+                // 不支持的文件类型，返回空表
+                DataTable emptyTable = CreateTableSchema();
+                return emptyTable;
             }
         }
 
         private System.Data.DataTable GetInvoiceDataFromPDF(string pdfPath)
         {
+            System.Diagnostics.Debug.WriteLine($"【调试】GetInvoiceDataFromPDF 开始: {pdfPath}");
             DataTable dataTable = CreateTableSchema();
             DataRow row = dataTable.NewRow();
             row["电子发票文件路径"] = pdfPath;
+            
             try
             {
-                using (PdfDocument document = PdfDocument.Open(pdfPath))
+                if (_invoiceService == null)
                 {
-                    //输出抓取文本内容，调试使用
-                    StringBuilder textBuilder = new StringBuilder();
-                    foreach (var pdfPage in document.GetPages())
-                    {
-                        textBuilder.Append(pdfPage.Text);
-                    }
-                    File.WriteAllText($"d:/{Path.GetFileNameWithoutExtension(pdfPath)}.txt ", textBuilder.ToString());
-
-                    //
-                    List<WordInfo> allWords = new List<WordInfo>();
-                    foreach (var page in document.GetPages())
-                    {
-                        var words = page.GetWords();
-                        foreach (var word in words)
-                        {
-
-                            if (word.Text.Contains("发票号码:"))
-                            {
-                                MessageBox.Show($"{word.Text}的坐标：距离顶部{word.BoundingBox.Top}；" +
-                                    $"距离左侧{word.BoundingBox.Left}；距离底部{word.BoundingBox.Bottom}；距离右侧{word.BoundingBox.Right}");
-                            }
-                            if (word.Text.Contains("24427000000002368552"))
-                            {
-                                MessageBox.Show($"{word.Text}的坐标：距离顶部{word.BoundingBox.Top}；" +
-                                    $"距离左侧{word.BoundingBox.Left}；距离底部{word.BoundingBox.Bottom}；距离右侧{word.BoundingBox.Right}");
-                            }
-                        }
-                    }
-
+                    System.Diagnostics.Debug.WriteLine("【调试】错误: _invoiceService 为 null");
+                    MessageBox.Show("发票识别服务未初始化，无法处理PDF文件。", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    dataTable.Rows.Add(row);
+                    return dataTable;
+                }
+                
+                System.Diagnostics.Debug.WriteLine("【调试】调用 RecognizePdfInvoiceFirstPage");
+                // 使用PaddleOCR识别PDF发票
+                var invoiceInfo = _invoiceService.RecognizePdfInvoiceFirstPage(pdfPath);
+                System.Diagnostics.Debug.WriteLine("【调试】RecognizePdfInvoiceFirstPage 返回");
+                
+                if (invoiceInfo != null)
+                {
+                    // 调试：输出识别到的发票类型信息
+                    System.Diagnostics.Debug.WriteLine($"【调试】识别到的发票类型: '{invoiceInfo.InvoiceType}'");
+                    System.Diagnostics.Debug.WriteLine($"【调试】发票号码: '{invoiceInfo.InvoiceNumber}'");
+                    
+                    // 填充数据 - 使用新的InvoiceInfo结构
+                    row["发票号码"] = invoiceInfo.InvoiceNumber ?? "";
+                    row["开票日期"] = invoiceInfo.InvoiceDate ?? "";
+                    row["销售方名称"] = invoiceInfo.Seller?.Name ?? "";
+                    row["销售方纳税识别号"] = invoiceInfo.Seller?.TaxId ?? "";
+                    row["购买方名称"] = invoiceInfo.Buyer?.Name ?? "";
+                    row["购买方纳税识别号"] = invoiceInfo.Buyer?.TaxId ?? "";
+                    row["不含税价格"] = invoiceInfo.Amount.ToString("F2");
+                    row["税额"] = invoiceInfo.TaxAmount.ToString("F2");
+                    row["含税价格"] = invoiceInfo.TotalAmount.ToString("F2");
+                    row["发票类型"] = invoiceInfo.InvoiceType ?? "";
+                    
+                    System.Diagnostics.Debug.WriteLine($"【调试】填充后的发票类型: '{row["发票类型"]}'");
+                }
+                else
+                {
+                    System.Diagnostics.Debug.WriteLine("【调试】警告: invoiceInfo 为 null");
                 }
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"处理异常: {ex}");
+                System.Diagnostics.Debug.WriteLine($"【调试】处理异常: {ex.ToString()}");
+                MessageBox.Show($"识别PDF发票时出错: {ex.Message}\n\n详细:\n{ex.ToString()}", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             finally
             {
                 dataTable.Rows.Add(row);
             }
+            
+            return dataTable;
+        }
+        
+        // 处理图片发票
+        private System.Data.DataTable GetInvoiceDataFromImage(string imagePath)
+        {
+            System.Diagnostics.Debug.WriteLine($"【调试】GetInvoiceDataFromImage 开始: {imagePath}");
+            DataTable dataTable = CreateTableSchema();
+            DataRow row = dataTable.NewRow();
+            row["电子发票文件路径"] = imagePath;
+            
+            try
+            {
+                if (_invoiceService == null)
+                {
+                    System.Diagnostics.Debug.WriteLine("【调试】错误: _invoiceService 为 null");
+                    MessageBox.Show("发票识别服务未初始化，无法处理图片文件。", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    dataTable.Rows.Add(row);
+                    return dataTable;
+                }
+                
+                System.Diagnostics.Debug.WriteLine("【调试】调用 RecognizeImageInvoice");
+                // 使用PaddleOCR识别图片发票
+                var invoiceInfo = _invoiceService.RecognizeImageInvoice(imagePath);
+                System.Diagnostics.Debug.WriteLine("【调试】RecognizeImageInvoice 返回");
+                
+                if (invoiceInfo != null)
+                {
+                    // 调试：输出识别到的发票类型信息
+                    System.Diagnostics.Debug.WriteLine($"【调试】图片-识别到的发票类型: '{invoiceInfo.InvoiceType}'");
+                    System.Diagnostics.Debug.WriteLine($"【调试】图片-发票号码: '{invoiceInfo.InvoiceNumber}'");
+                    
+                    // 填充数据 - 使用新的InvoiceInfo结构
+                    row["发票号码"] = invoiceInfo.InvoiceNumber ?? "";
+                    row["开票日期"] = invoiceInfo.InvoiceDate ?? "";
+                    row["销售方名称"] = invoiceInfo.Seller?.Name ?? "";
+                    row["销售方纳税识别号"] = invoiceInfo.Seller?.TaxId ?? "";
+                    row["购买方名称"] = invoiceInfo.Buyer?.Name ?? "";
+                    row["购买方纳税识别号"] = invoiceInfo.Buyer?.TaxId ?? "";
+                    row["不含税价格"] = invoiceInfo.Amount.ToString("F2");
+                    row["税额"] = invoiceInfo.TaxAmount.ToString("F2");
+                    row["含税价格"] = invoiceInfo.TotalAmount.ToString("F2");
+                    row["发票类型"] = invoiceInfo.InvoiceType ?? "";
+                    
+                    System.Diagnostics.Debug.WriteLine($"【调试】图片-填充后的发票类型: '{row["发票类型"]}'");
+                }
+                else
+                {
+                    System.Diagnostics.Debug.WriteLine("【调试】警告: 图片-invoiceInfo 为 null");
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"【调试】图片-处理异常: {ex.ToString()}");
+                MessageBox.Show($"识别图片发票时出错: {ex.Message}\n\n详细:\n{ex.ToString()}", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+            finally
+            {
+                dataTable.Rows.Add(row);
+            }
+            
             return dataTable;
         }
 
@@ -949,7 +1187,6 @@ namespace ExcelAddIn
             dt.Columns.Add("不含税价格", typeof(string));
             dt.Columns.Add("税额", typeof(string));
             dt.Columns.Add("含税价格", typeof(string));
-            dt.Columns.Add("项目名称", typeof(string));
             dt.Columns.Add("发票类型", typeof(string));
             dt.Columns.Add("电子发票文件路径", typeof(string));
             return dt;

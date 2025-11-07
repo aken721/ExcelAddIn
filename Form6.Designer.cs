@@ -491,6 +491,7 @@
             this.btnPdfRun.TabIndex = 18;
             this.btnPdfRun.Text = "运行";
             this.btnPdfRun.UseVisualStyleBackColor = true;
+            this.btnPdfRun.Click += new System.EventHandler(this.btnPdfRun_Click);
             // 
             // btnPdfReset
             // 
@@ -502,6 +503,7 @@
             this.btnPdfReset.TabIndex = 19;
             this.btnPdfReset.Text = "重置";
             this.btnPdfReset.UseVisualStyleBackColor = true;
+            this.btnPdfReset.Click += new System.EventHandler(this.btnPdfReset_Click);
             // 
             // last_pictureBox1
             // 
