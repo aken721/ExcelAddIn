@@ -131,7 +131,8 @@ v2.3.6 修复一些问题，优化摄像头扫码功能，增加扫码成功提�
 
 #### 安装教程
 
-1. 下载安装版msi文件，https://gitee.com/aken721/excel-addin/release（因gitee不支持上传超过100M文件，如果找不到安装包，请移步到github或gitcode下载，地址：[github](https://github.com/aken721/ExcelAddIn/releases)或[gitcode](https://gitcode.com/aken721/Excel-AddIn/releases)）
+1. 下载安装版msi文件，https://gitee.com/aken721/excel-addin/release（因gitee不支持上传超过100M文件，如果找不到安装包，请移步到github或gitcode下载）
+[github](https://github.com/aken721/ExcelAddIn/releases)，[gitcode](https://gitcode.com/aken721/Excel-AddIn/releases)
 2. 打开Excel后会自动加载
 3. 加载后会在Excel的功能区增加“工具箱”选项卡
 
