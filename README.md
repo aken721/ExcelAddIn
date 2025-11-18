@@ -137,7 +137,7 @@ v2.3.6 修复一些问题，优化摄像头扫码功能，增加扫码成功提�
 #### 安装教程
 
 1. 下载安装版msi文件，https://gitee.com/aken721/excel-addin/release
-因gitee不支持上传超过100M文件，如果找不到安装包，请移步到[github](https://github.com/aken721/ExcelAddIn/releases)或[gitcode](https://gitcode.com/aken721/Excel-AddIn/releases)下载
+因gitee不支持上传超过100M文件，将安装文件和OCR模型分开打包压缩，两个文件都需要下载，安装文件安装后，将模型解压缩到插件安装的目录中即可。如果需要包含OCR模型的完整安装包，请移步到[github](https://github.com/aken721/ExcelAddIn/releases)或[gitcode](https://gitcode.com/aken721/Excel-AddIn/releases)下载
 2. 打开Excel后会自动加载
 3. 加载后会在Excel的功能区增加“工具箱”选项卡
 
@@ -148,9 +148,8 @@ v2.3.6 修复一些问题，优化摄像头扫码功能，增加扫码成功提�
 3.  Email群发功能，支持针对不同收件人自动群发不同的附件；
 4.  批量修改文件名/目录名、批量删除或移动文件/目录：对指定目录下的文件/子目录，读取进入Excel表格，“A列”为源文件/目录路径，“B列”为源文件名/目录名，“C列”为新文件名/目录名。只需通过Excel表的查找、替换、分列等功能，编辑"C列”后，即可高度定制化地批量修改文件名/目录名，或批量删除（移动）文件名/目录名；
 5.  Excel转为PDF功能，可选：当前表转PDF、工作簿所有表转为单一PDF、工作簿所有表转为多个PDF等三种转换方式，并可设定页面大小、页面方向和页面缩放比例等。
-6.  批量修改MP3歌名：将网络下载常见的“演唱者-歌名” 或 “歌名-演唱者”的MP3文件名形式，批量替换为仅显示歌名的形式，缩短文件名长度。
-7.  播放音乐：在操作excel表的同时播放指定文件夹内的音乐，目前支持“mp3、wav、flac、aiff、wma、aac、g711、mp4”等音乐格式。
-8.  接入deepseek。
+6.  播放音乐：在操作excel表的同时播放指定文件夹内的音乐，目前支持“mp3、wav、flac、aiff、wma、aac、g711、mp4”等音乐格式。
+7.  接入deepseek。
 
 #### 联系方式
 如有个性化需求，或对相关功能有优化建议，可发email至aken721@163.com，会及时查看并回复沟通。
