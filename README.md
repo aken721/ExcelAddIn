@@ -5,7 +5,12 @@
 
 #### 本次更新情况
 
-**2025-10-09**
+**2025-11-08**
+v2.4.6.1 主要更新内容：
+1. 增加pdf（或图片）电子发票的数据提取功能，采用PaddleOCR进行图像识别，可批量提取pdf格式或图片格式的电子发票信息到excel表格；新功能支持电子发票的批量管理，结合以前已上线的xml数电票管理，覆盖了xml、pdf、图片等多种格式的电子发票。
+2. 将2.4.5.2新增功能一并打包，发布v2.4.6.1安装版。
+
+**2025-11-06**
 v2.4.5.2 主要更新内容：
 1. 新写了一个Html编辑控件，合并到本项目，替换邮件发送中原有的富文本控件，实现可发送html邮件功能
 2. 优化了邮件发送的信息提示和进度条显示逻辑
@@ -126,9 +131,10 @@ v2.3.6 修复一些问题，优化摄像头扫码功能，增加扫码成功提�
 
 #### 安装教程
 
-1.  下载安装版msi文件，https://gitee.com/aken721/excel-addin/releases
-2.  打开Excel后会自动加载
-3.  加载后会在Excel的功能区增加“工具箱”选项卡
+1. 下载安装版msi文件，https://gitee.com/aken721/excel-addin/release
+因gitee不支持上传超过100M文件，如果找不到安装包，请移步到[github](https://github.com/aken721/ExcelAddIn/releases)或[gitcode](https://gitcode.com/aken721/Excel-AddIn/releases)下载
+2. 打开Excel后会自动加载
+3. 加载后会在Excel的功能区增加“工具箱”选项卡
 
 #### 使用说明
 
