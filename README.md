@@ -137,7 +137,7 @@ v2.3.6 修复一些问题，优化摄像头扫码功能，增加扫码成功提�
 #### 安装教程
 
 1. 下载安装版msi文件，https://gitee.com/aken721/excel-addin/release
-因gitee不支持上传超过100M文件，将安装文件和OCR模型分开打包压缩，两个文件都需要下载，安装文件安装后，将模型解压缩到插件安装的目录中即可。如果需要包含OCR模型的完整安装包，请移步到[github](https://github.com/aken721/ExcelAddIn/releases)或[gitcode](https://gitcode.com/aken721/Excel-AddIn/releases)下载
+因gitee不支持上传超过100M文件，自v2.4.6.2版本开始，安装文件和OCR模型分开打包，两个文件都需要下载，安装文件安装后，将模型解压缩到插件的安装目录中即可。如果需要包含OCR模型的完整安装包，请移步到[github](https://github.com/aken721/ExcelAddIn/releases)或[gitcode](https://gitcode.com/aken721/Excel-AddIn/releases)下载
 2. 打开Excel后会自动加载
 3. 加载后会在Excel的功能区增加“工具箱”选项卡
 
