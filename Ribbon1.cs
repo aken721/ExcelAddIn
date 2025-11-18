@@ -61,13 +61,6 @@ namespace ExcelAddIn
             form2.ShowDialog();
         }
 
-        //MP3批量改名按钮
-        private void Rename_mp3_Click(object sender, RibbonControlEventArgs e)
-        {
-            Form3 form3 = new Form3();
-            form3.ShowDialog();
-        }
-
         //文件删除或移动按钮
         private void delandmove_button_Click(object sender, RibbonControlEventArgs e)
         {

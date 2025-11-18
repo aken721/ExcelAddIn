@@ -457,12 +457,8 @@
             // 
             // Rename_mp3
             // 
-            this.Rename_mp3.ControlSize = Microsoft.Office.Core.RibbonControlSize.RibbonControlSizeLarge;
-            this.Rename_mp3.Image = global::ExcelAddIn.Properties.Resources.MP3;
-            this.Rename_mp3.Label = "MP3批量改名";
+            this.Rename_mp3.Label = "";
             this.Rename_mp3.Name = "Rename_mp3";
-            this.Rename_mp3.ShowImage = true;
-            this.Rename_mp3.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.Rename_mp3_Click);
             // 
             // separator2
             // 
