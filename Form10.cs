@@ -675,31 +675,138 @@ namespace ExcelAddIn
         {
             try
             {
-                // 搜索整个文档
-                Word.Range searchRange = doc.Content;
-                searchRange.Find.ClearFormatting();
-                searchRange.Find.Text = placeholder;
-                searchRange.Find.MatchWholeWord = true;
-                searchRange.Find.MatchCase = true;
+                if (doc == null) return;
 
-                while (searchRange.Find.Execute())
+                // 1. 遍历所有 story ranges（包括正文、页眉、页脚、脚注等）
+                if (doc.StoryRanges != null)
                 {
-                    // 找到占位符，删除它
-                    searchRange.Text = "";
+                    foreach (Word.Range storyRange in doc.StoryRanges)
+                    {
+                        Word.Range current = storyRange;
+                        while (current != null)
+                        {
+                            InsertPictureInRange(current, placeholder, imagePath, heightCm, widthCm, lockAspectRatio);
+                            try
+                            {
+                                current = current.NextStoryRange;
+                            }
+                            catch
+                            {
+                                current = null;
+                            }
+                        }
+                    }
+                }
 
-                    // 在当前位置插入图片
-                    Word.InlineShape shape = searchRange.InlineShapes.AddPicture(imagePath);
+                // 2. 遍历 Shapes（文本框内的占位符）
+                if (doc.Shapes != null && doc.Shapes.Count > 0)
+                {
+                    foreach (Word.Shape shape in doc.Shapes)
+                    {
+                        try
+                        {
+                            if (shape != null && shape.TextFrame != null && shape.TextFrame.HasText != 0)
+                            {
+                                InsertPictureInRange(shape.TextFrame.TextRange, placeholder, imagePath, heightCm, widthCm, lockAspectRatio);
+                            }
+                        }
+                        catch (Exception exShape)
+                        {
+                            Debug.WriteLine($"处理 Shape 时出错: {exShape.Message}");
+                        }
+                    }
+                }
 
-                    // 设置尺寸
-                    SetImageSize(shape, heightCm, widthCm, lockAspectRatio);
-
-                    // 移动搜索范围到图片之后
-                    searchRange = searchRange.Next();
+                // 3. 遍历表格单元格（表格内文本）
+                if (doc.Tables != null && doc.Tables.Count > 0)
+                {
+                    foreach (Word.Table table in doc.Tables)
+                    {
+                        if (table == null) continue;
+                        for (int r = 1; r <= table.Rows.Count; r++)
+                        {
+                            for (int c = 1; c <= table.Columns.Count; c++)
+                            {
+                                try
+                                {
+                                    Word.Cell cell = table.Cell(r, c);
+                                    if (cell != null && cell.Range != null)
+                                    {
+                                        InsertPictureInRange(cell.Range, placeholder, imagePath, heightCm, widthCm, lockAspectRatio);
+                                    }
+                                }
+                                catch (Exception exCell)
+                                {
+                                    Debug.WriteLine($"处理表格单元格({r},{c})时出错: {exCell.Message}");
+                                }
+                            }
+                        }
+                    }
                 }
             }
             catch (Exception ex)
             {
                 Debug.WriteLine($"插入图片时出错: {ex.Message}");
+            }
+        }
+
+        // 在指定 Range 中查找所有占位符并按顺序插入图片（辅助方法）
+        private void InsertPictureInRange(Word.Range range, string placeholder, string imagePath,
+                                          float? heightCm, float? widthCm, bool lockAspectRatio)
+        {
+            if (range == null) return;
+
+            try
+            {
+                // 复制范围以免修改传入范围的边界
+                Word.Range searchRange = range.Duplicate;
+                searchRange.Find.ClearFormatting();
+                searchRange.Find.Replacement.ClearFormatting();
+
+                // 配置查找
+                searchRange.Find.Text = placeholder;
+                searchRange.Find.Forward = true;
+                searchRange.Find.Wrap = Word.WdFindWrap.wdFindStop;
+                searchRange.Find.MatchCase = true;
+                searchRange.Find.MatchWholeWord = true;
+
+                while (searchRange.Find.Execute())
+                {
+                    // 在找到的位置创建一个独立的 Range 表示找到的文本
+                    Word.Range foundRange = range.Document.Range(searchRange.Start, searchRange.End);
+
+                    // 删除占位符文本
+                    foundRange.Text = string.Empty;
+
+                    // 在该位置插入图片（嵌入文档）
+                    Word.InlineShape insertedShape = foundRange.InlineShapes.AddPicture(imagePath, LinkToFile: false, SaveWithDocument: true);
+
+                    // 设置尺寸
+                    SetImageSize(insertedShape, heightCm, widthCm, lockAspectRatio);
+
+                    // 将搜索起点推进到新插入图片之后（避免再次匹配到同一位置）
+                    int newStart = insertedShape.Range.End;
+                    int rangeEnd = range.End;
+                    if (newStart >= rangeEnd)
+                    {
+                        // 已到段落或区域末尾，退出循环
+                        break;
+                    }
+
+                    // 重新设置搜索范围并保持查找设置
+                    searchRange.SetRange(newStart, rangeEnd);
+                    searchRange.Find.ClearFormatting();
+                    searchRange.Find.Replacement.ClearFormatting();
+                    searchRange.Find.Text = placeholder;
+                    searchRange.Find.Forward = true;
+                    searchRange.Find.Wrap = Word.WdFindWrap.wdFindStop;
+                    searchRange.Find.MatchCase = true;
+                    searchRange.Find.MatchWholeWord = true;
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"InsertPictureInRange 错误: {ex.Message}");
             }
         }
 
