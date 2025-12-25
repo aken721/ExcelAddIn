@@ -1863,12 +1863,13 @@ namespace ExcelAddIn
             this.groupBoxDanamic.Controls.Add(this.label26);
             this.groupBoxDanamic.Controls.Add(this.label25);
             this.groupBoxDanamic.Font = new System.Drawing.Font("微软雅黑", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.groupBoxDanamic.Location = new System.Drawing.Point(325, 51);
+            this.groupBoxDanamic.Location = new System.Drawing.Point(345, 51);
             this.groupBoxDanamic.Name = "groupBoxDanamic";
             this.groupBoxDanamic.Size = new System.Drawing.Size(328, 330);
             this.groupBoxDanamic.TabIndex = 12;
             this.groupBoxDanamic.TabStop = false;
             this.groupBoxDanamic.Text = "动态图配置";
+            this.groupBoxDanamic.VisibleChanged += new System.EventHandler(this.groupBoxDanamic_VisibleChanged);
             // 
             // label34
             // 
@@ -2145,9 +2146,9 @@ namespace ExcelAddIn
             // 
             this.label11.Font = new System.Drawing.Font("微软雅黑", 9F, System.Drawing.FontStyle.Italic, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.label11.ForeColor = System.Drawing.Color.DarkRed;
-            this.label11.Location = new System.Drawing.Point(34, 130);
+            this.label11.Location = new System.Drawing.Point(26, 135);
             this.label11.Name = "label11";
-            this.label11.Size = new System.Drawing.Size(285, 25);
+            this.label11.Size = new System.Drawing.Size(295, 25);
             this.label11.TabIndex = 4;
             this.label11.Text = "（如果直接写入数据区域范围，参考格式：A1:C9）\r\n";
             this.label11.TextAlign = System.Drawing.ContentAlignment.MiddleCenter;

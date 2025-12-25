@@ -4999,6 +4999,17 @@ namespace ExcelAddIn
             // 当选择"自定义"时显示自定义输入框
             customPrefix_textBox.Visible = (prefix_comboBox.SelectedIndex == 4);
         }
+
+        private void groupBoxDanamic_VisibleChanged(object sender, EventArgs e)
+        {
+            if (groupBoxDanamic.Visible)
+            {
+                dpType_comboBox.SelectedIndex = 0;                 //图表类型默认选项
+                dpGroupBy_comboBox.SelectedIndex = 0;              //分组依据默认选项
+                dpFormat_comboBox.SelectedIndex = 0;               //数值格式默认选项
+                dpSortType_comboBox.SelectedIndex = 0;             //排序方式默认选项
+            }
+        }
     }
 
 
