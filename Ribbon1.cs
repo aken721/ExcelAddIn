@@ -51,7 +51,7 @@ namespace ExcelAddIn
         private void Excel_extend_Click(object sender, RibbonControlEventArgs e)
         {
             Form1 form1 = new Form1();
-            form1.ShowDialog();
+            form1.Show();
         }
 
         //邮件群发按钮
@@ -804,6 +804,83 @@ namespace ExcelAddIn
             {
                 Select_f_or_d.Image = ExcelAddIn.Properties.Resources.Radio_Button_off;
                 Select_f_or_d.Label = "文件名";
+            }
+
+            // 如果_rename表存在且已读取过文件，则重新加载数据
+            ReloadRenameTableIfNeeded();
+        }
+
+        //子目录选项改变
+        private void checkBoxAll_Click(object sender, RibbonControlEventArgs e)
+        {
+            // 如果_rename表存在且已读取过文件，则重新加载数据
+            ReloadRenameTableIfNeeded();
+        }
+
+        /// <summary>
+        /// 当Select_f_or_d或checkBoxAll状态改变时，重新加载_rename表数据
+        /// </summary>
+        private void ReloadRenameTableIfNeeded()
+        {
+            Excel.Workbook workbook = ThisAddIn.app.ActiveWorkbook;
+
+            // 检查是否已经读取过文件且_rename表存在
+            if (ThisAddIn.Global.readFile == 1 && !string.IsNullOrEmpty(get_directory_path) && IsSheetExist(workbook, "_rename"))
+            {
+                try
+                {
+                    ThisAddIn.app.ScreenUpdating = false;
+                    ThisAddIn.app.DisplayAlerts = false;
+                    ThisAddIn.app.Application.StatusBar = "正在根据新设置重新加载数据...";
+
+                    Excel.Worksheet worksheet = workbook.Worksheets["_rename"];
+
+                    // 清除现有数据（保留标题行）
+                    int lastRow = worksheet.Cells[worksheet.Rows.Count, 1].End[Excel.XlDirection.xlUp].Row;
+                    if (lastRow > 1)
+                    {
+                        worksheet.Range[worksheet.Cells[2, 1], worksheet.Cells[lastRow, 3]].Clear();
+                    }
+
+                    // 更新标题
+                    worksheet.Cells[1, 1] = Select_f_or_d.Checked ? "文件夹路径" : "路径";
+                    worksheet.Cells[1, 2] = Select_f_or_d.Checked ? "旧文件夹名" : "旧文件名";
+                    worksheet.Cells[1, 3] = Select_f_or_d.Checked ? "新文件夹名" : "新文件名";
+
+                    // 重新获取数据
+                    var items = new ConcurrentBag<string>();
+                    bool isDirectoryMode = Select_f_or_d.Checked;
+                    string mode = isDirectoryMode ? "d" : "f";
+
+                    if (checkBoxAll.Checked)
+                    {
+                        GetAllItemsParallel(get_directory_path, items, mode);
+                    }
+                    else
+                    {
+                        GetCurrentItems(get_directory_path, items, mode);
+                    }
+
+                    // 转换为列表并去重
+                    var itemList = items.Distinct().ToList();
+
+                    // 批量写入数据
+                    BulkWriteToExcel(worksheet, itemList, isDirectoryMode);
+
+                    worksheet.Columns.AutoFit();
+                    worksheet.Activate();
+
+                    ThisAddIn.app.Application.StatusBar = $"已重新加载 {itemList.Count} 个{(isDirectoryMode ? "目录" : "文件")}";
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"重新加载数据时发生错误：{ex.Message}", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+                finally
+                {
+                    ThisAddIn.app.ScreenUpdating = true;
+                    ThisAddIn.app.DisplayAlerts = true;
+                }
             }
         }
 

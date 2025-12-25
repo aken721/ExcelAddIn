@@ -17,6 +17,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Timers;
 using System.Windows.Forms;
+using DynamicPic.Core;
 using Microsoft.Office.Core;
 using MySql.Data.MySqlClient;
 using Newtonsoft.Json.Linq;
@@ -231,6 +232,10 @@ namespace ExcelAddIn
                     labelFonts.Visible = false;
                     comboBoxFonts.Visible = false;
                     comboBoxFonts.Text = "微软雅黑";
+                    dpType_comboBox.SelectedIndex = 0;                 //图表类型默认选项
+                    dpGroupBy_comboBox.SelectedIndex = 0;              //分组依据默认选项
+                    dpFormat_comboBox.SelectedIndex = 0;               //数值格式默认选项
+                    dpSortType_comboBox.SelectedIndex = 0;             //排序方式默认选项
                     break;
 
                 //帮助
@@ -3542,6 +3547,31 @@ namespace ExcelAddIn
             CleanupTempFiles();
         }
 
+        /// <summary>
+        /// 获取Excel当前选中的区域并填充到数据区域文本框
+        /// </summary>
+        private void chart_range_select_button_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                Excel.Range selection = ThisAddIn.app.Selection as Excel.Range;
+                if (selection != null)
+                {
+                    // 获取选区地址（不包含工作表名称）
+                    string rangeAddress = selection.Address[false, false];
+                    chart_range_textBox.Text = rangeAddress;
+                }
+                else
+                {
+                    MessageBox.Show("请先在Excel中选择一个数据区域", "提示", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"获取选区失败：{ex.Message}", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
         [STAThread]
         private void chart_create_button_Click(object sender, EventArgs e)
         {
@@ -3563,9 +3593,14 @@ namespace ExcelAddIn
                     staThread.Start();
                     break;
                 case 1:
+                    GenerateDynamicChart();
                     break;
             }
         }
+
+
+
+
 
         // 在窗体类中增加字段
         private string _currentWordCloudTempPath;
@@ -3768,11 +3803,201 @@ namespace ExcelAddIn
                 case 0:
                     chart_range_textBox.Text = "";
                     groupBoxWordCloud.Visible = true;
+                    chart_pictureBox.Visible = true;
+                    groupBoxDanamic.Visible = false;
                     break;
                 case 1:
                     chart_range_textBox.Text = "";
                     groupBoxWordCloud.Visible = false;
+                    chart_pictureBox.Visible = false;
+                    groupBoxDanamic.Visible = true;
                     break;
+            }
+        }
+
+        /// <summary>
+        /// 生成动态图表（GIF/HTML）
+        /// </summary>
+        private void GenerateDynamicChart()
+        {
+            // 验证数据范围
+            if (string.IsNullOrEmpty(chart_range_textBox.Text))
+            {
+                MessageBox.Show("请先选择数据范围");
+                return;
+            }
+
+            // 验证ComboBox选择
+            if (dpType_comboBox.SelectedIndex < 0)
+            {
+                MessageBox.Show("请选择动图类型");
+                return;
+            }
+            if (dpFormat_comboBox.SelectedIndex < 0)
+            {
+                MessageBox.Show("请选择动图格式");
+                return;
+            }
+            if (dpGroupBy_comboBox.SelectedIndex < 0)
+            {
+                MessageBox.Show("请选择分组方式");
+                return;
+            }
+            if (dpSortType_comboBox.SelectedIndex < 0)
+            {
+                MessageBox.Show("请选择排列顺序");
+                return;
+            }
+
+            try
+            {
+                // 获取选中的数据范围
+                Excel.Range dataRange = workbook.ActiveSheet.Range[chart_range_textBox.Text];
+
+                // 获取配置参数
+                // 图表类型：条形图(HorizontalBar) / 柱状图(VerticalBar)
+                ChartType chartType = dpType_comboBox.SelectedIndex == 0 ? ChartType.HorizontalBar : ChartType.VerticalBar;
+
+                // 输出格式：HTML格式 / GIF格式 / 两者都有
+                OutputFormat outputFormat;
+                switch (dpFormat_comboBox.SelectedIndex)
+                {
+                    case 0:
+                        outputFormat = OutputFormat.Html;
+                        break;
+                    case 1:
+                        outputFormat = OutputFormat.Gif;
+                        break;
+                    default:
+                        outputFormat = OutputFormat.Both;
+                        break;
+                }
+
+                // 分组方式：列标题(ByColumn) / 行标题(ByRow)
+                DataOrientation dataOrientation = dpGroupBy_comboBox.SelectedIndex == 0 ? DataOrientation.ByColumn : DataOrientation.ByRow;
+
+                // 排列顺序：降序 / 升序
+                DynamicPic.Core.SortOrder sortOrder = dpSortType_comboBox.SelectedIndex == 0 ? DynamicPic.Core.SortOrder.Descending : DynamicPic.Core.SortOrder.Ascending;
+
+                // 获取标题
+                string chartTitle = dpTitle_textBox.Text;
+                string xAxisTitle = dpXTitle_textBox.Text;
+                string yAxisTitle = dpYTitle_textBox.Text;
+
+                // 配置图表标题模板
+                // 如果用户输入了标题，则使用"标题 - 分组名"格式；否则只显示分组名
+                string titleTemplate;
+                if (string.IsNullOrEmpty(chartTitle))
+                {
+                    titleTemplate = "{0}";
+                }
+                else if (chartTitle.Contains("{0}"))
+                {
+                    // 用户自定义了占位符位置
+                    titleTemplate = chartTitle;
+                }
+                else
+                {
+                    // 标题后追加分组名
+                    titleTemplate = chartTitle + " - {0}";
+                }
+
+                // 配置图表
+                var config = new ChartConfig
+                {
+                    TitleTemplate = titleTemplate,
+                    XAxisTitle = xAxisTitle,
+                    YAxisTitle = yAxisTitle,
+                    ChartType = chartType,
+                    SortOrder = sortOrder,
+                    HtmlSortOrder = sortOrder,
+                    OutputFormat = outputFormat,
+                    DataOrientation = dataOrientation
+                };
+
+                // 从选定区域读取数据
+                var data = ExcelReader.ReadValueDataFromRange(dataRange, dataOrientation);
+
+                if (data == null || data.Count == 0)
+                {
+                    MessageBox.Show("未能从选定区域读取到有效数据，请确保数据格式正确。\n第一行/第一列应为标题。");
+                    return;
+                }
+
+                // 排序数据
+                var sortedData = ExcelReader.GetSortedValueData(data, sortOrder);
+
+                // 输出到Excel文件所在目录
+                string excelDir = Path.GetDirectoryName(excelFilePath);
+                string timestamp = DateTime.Now.ToString("yyyyMMdd_HHmmss");
+                string baseFileName = $"动态图表_{timestamp}";
+
+                // 禁用按钮，显示进度
+                chart_create_button.Enabled = false;
+                chart_reset_button.Enabled = false;
+
+                string outputPath = "";
+
+                try
+                {
+                    // 根据输出格式生成文件
+                    if (outputFormat == OutputFormat.Html || outputFormat == OutputFormat.Both)
+                    {
+                        string htmlPath = Path.Combine(excelDir, baseFileName + ".html");
+                        HtmlGenerator.GenerateInteractiveHtml(sortedData, htmlPath, config);
+                        outputPath = htmlPath;
+                    }
+
+                    if (outputFormat == OutputFormat.Gif || outputFormat == OutputFormat.Both)
+                    {
+                        string gifPath = Path.Combine(excelDir, baseFileName + ".gif");
+
+                        // 创建临时目录存放图表图片
+                        string tempDir = Path.Combine(Path.GetTempPath(), "DynamicChart_" + Guid.NewGuid().ToString("N"));
+                        Directory.CreateDirectory(tempDir);
+
+                        var chartPaths = new List<string>();
+
+                        // 生成每个分组的图表图片
+                        foreach (var group in sortedData.OrderBy(g => g.Key))
+                        {
+                            string title = string.Format(config.TitleTemplate, group.Key);
+                            var chartData = group.Value.ToDictionary(x => x.Key, x => x.Value);
+                            string chartImagePath = Path.Combine(tempDir, $"chart_{group.Key}.png");
+
+                            ChartGenerator.GenerateBarChart(title, chartData, chartImagePath, config);
+                            chartPaths.Add(chartImagePath);
+                        }
+
+                        // 生成GIF
+                        GifCreator.CreateGifWithPause(chartPaths, gifPath, config.GifFrameDelay, config.GifFirstLastDelay);
+
+                        // 清理临时文件
+                        GifCreator.CleanupTempImages(chartPaths);
+                        try { Directory.Delete(tempDir); } catch { }
+
+                        if (string.IsNullOrEmpty(outputPath))
+                            outputPath = gifPath;
+                    }
+
+                    MessageBox.Show($"动态图表生成成功！\n保存位置：{excelDir}", "成功", MessageBoxButtons.OK, MessageBoxIcon.Information);
+
+                    // 打开输出文件所在目录
+                    Process.Start("explorer.exe", $"/select,\"{outputPath}\"");
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"生成动态图表时发生错误：{ex.Message}", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+                finally
+                {
+                    chart_create_button.Enabled = true;
+                    chart_reset_button.Enabled = true;
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"发生错误：{ex.Message}", "错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 

@@ -52,6 +52,8 @@ namespace ExcelAddIn
             {
                 height_textBox.Text = "3";   // 默认高度3厘米
             }
+
+            radioButtonAll.Checked = true;     // 默认处理所有行
         }
 
         private void pictureOriginal_comboBox_SelectedIndexChanged(object sender, EventArgs e)
@@ -114,12 +116,13 @@ namespace ExcelAddIn
             string placeholderPattern = placeholder_comboBox.SelectedItem?.ToString();
             string templatePath = docModel_label.Text;
             string outputFolder = docGenerated_label.Text;
+            bool processSelectedOnly = radioButtonSelected.Checked;
 
             // 在后台执行生成任务，避免阻塞UI
-            await Task.Run(() => GenerateDocuments(sheetName, placeholderPattern, templatePath, outputFolder));
+            await Task.Run(() => GenerateDocuments(sheetName, placeholderPattern, templatePath, outputFolder, processSelectedOnly));
         }
 
-        private void GenerateDocuments(string sheetName, string placeholderPattern, string templatePath, string outputFolder)
+        private void GenerateDocuments(string sheetName, string placeholderPattern, string templatePath, string outputFolder, bool processSelectedOnly = false)
         {
             try
             {
@@ -158,14 +161,54 @@ namespace ExcelAddIn
                 int rowCount = usedRange.Rows.Count;
                 int totalDocuments = 0;
 
-                // 预计算有效行数（第一列为文件名的非空行）
-                for (int row = 2; row <= rowCount; row++)
+                // 获取要处理的行号列表
+                List<int> rowsToProcess = new List<int>();
+
+                if (processSelectedOnly)
                 {
-                    var fileNameCell = usedRange.Cells[row, 1] as Excel.Range;
-                    if (fileNameCell.Value2 != null &&
-                        !string.IsNullOrWhiteSpace(fileNameCell.Value2.ToString()))
+                    // 只处理选中的行
+                    Excel.Range selection = excelApp.Selection as Excel.Range;
+                    if (selection != null)
                     {
-                        totalDocuments++;
+                        foreach (Excel.Range area in selection.Areas)
+                        {
+                            foreach (Excel.Range row in area.Rows)
+                            {
+                                int rowNum = row.Row;
+                                // 跳过标题行（第1行）且确保在数据范围内
+                                if (rowNum > 1 && rowNum <= rowCount && !rowsToProcess.Contains(rowNum))
+                                {
+                                    var fileNameCell = usedRange.Cells[rowNum, 1] as Excel.Range;
+                                    if (fileNameCell.Value2 != null &&
+                                        !string.IsNullOrWhiteSpace(fileNameCell.Value2.ToString()))
+                                    {
+                                        rowsToProcess.Add(rowNum);
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    if (rowsToProcess.Count == 0)
+                    {
+                        ShowErrorMessage("请先在Excel中选择要处理的数据行（不包括标题行）");
+                        return;
+                    }
+
+                    totalDocuments = rowsToProcess.Count;
+                }
+                else
+                {
+                    // 处理所有行 - 预计算有效行数（第一列为文件名的非空行）
+                    for (int row = 2; row <= rowCount; row++)
+                    {
+                        var fileNameCell = usedRange.Cells[row, 1] as Excel.Range;
+                        if (fileNameCell.Value2 != null &&
+                            !string.IsNullOrWhiteSpace(fileNameCell.Value2.ToString()))
+                        {
+                            rowsToProcess.Add(row);
+                            totalDocuments++;
+                        }
                     }
                 }
 
@@ -191,16 +234,11 @@ namespace ExcelAddIn
                 int errorCount = 0;
                 int currentDocument = 0;
 
-                // 处理数据行（从第二行开始）
-                for (int row = 2; row <= rowCount; row++)
+                // 处理数据行（使用预先计算的行号列表）
+                foreach (int row in rowsToProcess)
                 {
-                    // 检查文件名是否为空（跳过无效行）
+                    // 获取文件名单元格
                     var fileNameCell = usedRange.Cells[row, 1] as Excel.Range;
-                    if (fileNameCell.Value2 == null ||
-                        string.IsNullOrWhiteSpace(fileNameCell.Value2.ToString()))
-                    {
-                        continue; // 跳过空文件名行
-                    }
 
                     currentDocument++;
                     try

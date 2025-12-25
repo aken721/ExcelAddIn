@@ -48,6 +48,7 @@
             this.timer1 = new System.Windows.Forms.Timer(this.components);
             this.label5 = new System.Windows.Forms.Label();
             this.flowLayoutPanel1 = new System.Windows.Forms.FlowLayoutPanel();
+            this.pictureOriginal_comboBox = new System.Windows.Forms.ComboBox();
             this.flowLayoutPanel2 = new System.Windows.Forms.FlowLayoutPanel();
             this.label6 = new System.Windows.Forms.Label();
             this.height_textBox = new System.Windows.Forms.TextBox();
@@ -57,11 +58,14 @@
             this.width_textBox = new System.Windows.Forms.TextBox();
             this.label9 = new System.Windows.Forms.Label();
             this.pictureSize_checkBox = new System.Windows.Forms.CheckBox();
-            this.pictureOriginal_comboBox = new System.Windows.Forms.ComboBox();
             this.docQuit_button = new System.Windows.Forms.Button();
+            this.flowLayoutPanel4 = new System.Windows.Forms.FlowLayoutPanel();
+            this.radioButtonAll = new System.Windows.Forms.RadioButton();
+            this.radioButtonSelected = new System.Windows.Forms.RadioButton();
             this.flowLayoutPanel1.SuspendLayout();
             this.flowLayoutPanel2.SuspendLayout();
             this.flowLayoutPanel3.SuspendLayout();
+            this.flowLayoutPanel4.SuspendLayout();
             this.SuspendLayout();
             // 
             // label1
@@ -93,7 +97,7 @@
             this.sheets_name_comboBox.FormattingEnabled = true;
             this.sheets_name_comboBox.Location = new System.Drawing.Point(169, 53);
             this.sheets_name_comboBox.Name = "sheets_name_comboBox";
-            this.sheets_name_comboBox.Size = new System.Drawing.Size(352, 28);
+            this.sheets_name_comboBox.Size = new System.Drawing.Size(302, 28);
             this.sheets_name_comboBox.TabIndex = 2;
             // 
             // model_select_button
@@ -125,7 +129,7 @@
             this.docModel_label.Font = new System.Drawing.Font("微软雅黑", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.docModel_label.Location = new System.Drawing.Point(166, 131);
             this.docModel_label.Name = "docModel_label";
-            this.docModel_label.Size = new System.Drawing.Size(352, 35);
+            this.docModel_label.Size = new System.Drawing.Size(305, 35);
             this.docModel_label.TabIndex = 6;
             // 
             // docGenerated_label
@@ -133,23 +137,23 @@
             this.docGenerated_label.Font = new System.Drawing.Font("微软雅黑", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.docGenerated_label.Location = new System.Drawing.Point(164, 180);
             this.docGenerated_label.Name = "docGenerated_label";
-            this.docGenerated_label.Size = new System.Drawing.Size(354, 35);
+            this.docGenerated_label.Size = new System.Drawing.Size(307, 35);
             this.docGenerated_label.TabIndex = 7;
             // 
             // result_doc_label
             // 
             this.result_doc_label.Font = new System.Drawing.Font("微软雅黑", 9F, System.Drawing.FontStyle.Italic, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.result_doc_label.ForeColor = System.Drawing.Color.SaddleBrown;
-            this.result_doc_label.Location = new System.Drawing.Point(65, 218);
+            this.result_doc_label.Location = new System.Drawing.Point(65, 220);
             this.result_doc_label.Name = "result_doc_label";
-            this.result_doc_label.Size = new System.Drawing.Size(456, 54);
+            this.result_doc_label.Size = new System.Drawing.Size(481, 54);
             this.result_doc_label.TabIndex = 8;
             // 
             // docRun_button
             // 
             this.docRun_button.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.docRun_button.ForeColor = System.Drawing.Color.SeaGreen;
-            this.docRun_button.Location = new System.Drawing.Point(137, 381);
+            this.docRun_button.Location = new System.Drawing.Point(137, 385);
             this.docRun_button.Name = "docRun_button";
             this.docRun_button.Size = new System.Drawing.Size(75, 29);
             this.docRun_button.TabIndex = 9;
@@ -161,7 +165,7 @@
             // 
             this.docReset_button.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.docReset_button.ForeColor = System.Drawing.Color.SeaGreen;
-            this.docReset_button.Location = new System.Drawing.Point(323, 381);
+            this.docReset_button.Location = new System.Drawing.Point(323, 385);
             this.docReset_button.Name = "docReset_button";
             this.docReset_button.Size = new System.Drawing.Size(75, 29);
             this.docReset_button.TabIndex = 10;
@@ -177,13 +181,13 @@
             // 
             this.label3.Font = new System.Drawing.Font("微软雅黑", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.label3.ForeColor = System.Drawing.Color.Teal;
-            this.label3.Location = new System.Drawing.Point(65, 272);
+            this.label3.Location = new System.Drawing.Point(65, 276);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(562, 104);
             this.label3.TabIndex = 11;
-            this.label3.Text = "使用说明：\r\n1. 在excel表格中准备数据（第一行为列标题，第一列为生成的文件名）；\r\n2. 利用word编辑模板文件，需要批量修改部分用占位符+列名标记。示" +
-    "例：尊敬的【客户姓名】，您的合同金额为【合同金额】元；\r\n3. 占位符可根据习惯选定使用，并在本窗口内选择对应的占位符标识；\r\n4. 选择文档批量生成的输出路径" +
-    "。";
+            this.label3.Text = "使用说明：\r\n1. 在excel表格中准备数据（第一行为列标题，第一列为生成的文件名，第一列不参与占位符替换）；\r\n2. 利用word编辑模板文件，需要批量修改部" +
+    "分用占位符+列名标记。示例：尊敬的【客户姓名】，您的合同金额为【合同金额】元；\r\n3. 占位符可根据习惯选定使用，并在本窗口内选择对应的占位符标识；\r\n4. 选" +
+    "择文档批量生成的输出路径。";
             // 
             // label4
             // 
@@ -212,7 +216,7 @@
             "##列名##"});
             this.placeholder_comboBox.Location = new System.Drawing.Point(169, 93);
             this.placeholder_comboBox.Name = "placeholder_comboBox";
-            this.placeholder_comboBox.Size = new System.Drawing.Size(349, 28);
+            this.placeholder_comboBox.Size = new System.Drawing.Size(302, 28);
             this.placeholder_comboBox.TabIndex = 13;
             // 
             // label5
@@ -240,12 +244,26 @@
             this.flowLayoutPanel1.Size = new System.Drawing.Size(134, 173);
             this.flowLayoutPanel1.TabIndex = 15;
             // 
+            // pictureOriginal_comboBox
+            // 
+            this.pictureOriginal_comboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.pictureOriginal_comboBox.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.pictureOriginal_comboBox.FormattingEnabled = true;
+            this.pictureOriginal_comboBox.Items.AddRange(new object[] {
+            "原尺寸插入",
+            "缩放插入"});
+            this.pictureOriginal_comboBox.Location = new System.Drawing.Point(3, 26);
+            this.pictureOriginal_comboBox.Name = "pictureOriginal_comboBox";
+            this.pictureOriginal_comboBox.Size = new System.Drawing.Size(121, 28);
+            this.pictureOriginal_comboBox.TabIndex = 18;
+            this.pictureOriginal_comboBox.SelectedIndexChanged += new System.EventHandler(this.pictureOriginal_comboBox_SelectedIndexChanged);
+            // 
             // flowLayoutPanel2
             // 
             this.flowLayoutPanel2.Controls.Add(this.label6);
             this.flowLayoutPanel2.Controls.Add(this.height_textBox);
             this.flowLayoutPanel2.Controls.Add(this.label7);
-            this.flowLayoutPanel2.Location = new System.Drawing.Point(3, 52);
+            this.flowLayoutPanel2.Location = new System.Drawing.Point(3, 60);
             this.flowLayoutPanel2.Name = "flowLayoutPanel2";
             this.flowLayoutPanel2.Size = new System.Drawing.Size(127, 33);
             this.flowLayoutPanel2.TabIndex = 15;
@@ -286,7 +304,7 @@
             this.flowLayoutPanel3.Controls.Add(this.label8);
             this.flowLayoutPanel3.Controls.Add(this.width_textBox);
             this.flowLayoutPanel3.Controls.Add(this.label9);
-            this.flowLayoutPanel3.Location = new System.Drawing.Point(3, 91);
+            this.flowLayoutPanel3.Location = new System.Drawing.Point(3, 99);
             this.flowLayoutPanel3.Name = "flowLayoutPanel3";
             this.flowLayoutPanel3.Size = new System.Drawing.Size(127, 29);
             this.flowLayoutPanel3.TabIndex = 16;
@@ -329,7 +347,7 @@
             this.pictureSize_checkBox.Checked = true;
             this.pictureSize_checkBox.CheckState = System.Windows.Forms.CheckState.Checked;
             this.pictureSize_checkBox.Font = new System.Drawing.Font("微软雅黑", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.pictureSize_checkBox.Location = new System.Drawing.Point(3, 126);
+            this.pictureSize_checkBox.Location = new System.Drawing.Point(3, 134);
             this.pictureSize_checkBox.Name = "pictureSize_checkBox";
             this.pictureSize_checkBox.Size = new System.Drawing.Size(99, 21);
             this.pictureSize_checkBox.TabIndex = 17;
@@ -337,25 +355,11 @@
             this.pictureSize_checkBox.UseVisualStyleBackColor = true;
             this.pictureSize_checkBox.CheckedChanged += new System.EventHandler(this.pictureSize_checkBox_CheckedChanged);
             // 
-            // pictureOriginal_comboBox
-            // 
-            this.pictureOriginal_comboBox.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
-            this.pictureOriginal_comboBox.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.pictureOriginal_comboBox.FormattingEnabled = true;
-            this.pictureOriginal_comboBox.Items.AddRange(new object[] {
-            "原尺寸插入",
-            "缩放插入"});
-            this.pictureOriginal_comboBox.Location = new System.Drawing.Point(3, 26);
-            this.pictureOriginal_comboBox.Name = "pictureOriginal_comboBox";
-            this.pictureOriginal_comboBox.Size = new System.Drawing.Size(121, 28);
-            this.pictureOriginal_comboBox.TabIndex = 18;
-            this.pictureOriginal_comboBox.SelectedIndexChanged += new System.EventHandler(this.pictureOriginal_comboBox_SelectedIndexChanged);
-            // 
             // docQuit_button
             // 
             this.docQuit_button.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.docQuit_button.ForeColor = System.Drawing.Color.SeaGreen;
-            this.docQuit_button.Location = new System.Drawing.Point(489, 379);
+            this.docQuit_button.Location = new System.Drawing.Point(489, 383);
             this.docQuit_button.Name = "docQuit_button";
             this.docQuit_button.Size = new System.Drawing.Size(75, 29);
             this.docQuit_button.TabIndex = 16;
@@ -363,11 +367,45 @@
             this.docQuit_button.UseVisualStyleBackColor = true;
             this.docQuit_button.Click += new System.EventHandler(this.docQuit_button_Click);
             // 
+            // flowLayoutPanel4
+            // 
+            this.flowLayoutPanel4.Controls.Add(this.radioButtonAll);
+            this.flowLayoutPanel4.Controls.Add(this.radioButtonSelected);
+            this.flowLayoutPanel4.Location = new System.Drawing.Point(477, 55);
+            this.flowLayoutPanel4.Name = "flowLayoutPanel4";
+            this.flowLayoutPanel4.Size = new System.Drawing.Size(69, 160);
+            this.flowLayoutPanel4.TabIndex = 17;
+            // 
+            // radioButtonAll
+            // 
+            this.radioButtonAll.AutoSize = true;
+            this.radioButtonAll.Location = new System.Drawing.Point(3, 6);
+            this.radioButtonAll.Margin = new System.Windows.Forms.Padding(3, 6, 3, 6);
+            this.radioButtonAll.Name = "radioButtonAll";
+            this.radioButtonAll.Size = new System.Drawing.Size(59, 16);
+            this.radioButtonAll.TabIndex = 0;
+            this.radioButtonAll.TabStop = true;
+            this.radioButtonAll.Text = "所有行";
+            this.radioButtonAll.UseVisualStyleBackColor = true;
+            // 
+            // radioButtonSelected
+            // 
+            this.radioButtonSelected.AutoSize = true;
+            this.radioButtonSelected.Location = new System.Drawing.Point(3, 34);
+            this.radioButtonSelected.Margin = new System.Windows.Forms.Padding(3, 6, 3, 6);
+            this.radioButtonSelected.Name = "radioButtonSelected";
+            this.radioButtonSelected.Size = new System.Drawing.Size(59, 16);
+            this.radioButtonSelected.TabIndex = 1;
+            this.radioButtonSelected.TabStop = true;
+            this.radioButtonSelected.Text = "选中行";
+            this.radioButtonSelected.UseVisualStyleBackColor = true;
+            // 
             // Form10
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(698, 426);
+            this.Controls.Add(this.flowLayoutPanel4);
             this.Controls.Add(this.docQuit_button);
             this.Controls.Add(this.flowLayoutPanel1);
             this.Controls.Add(this.placeholder_comboBox);
@@ -395,6 +433,8 @@
             this.flowLayoutPanel2.PerformLayout();
             this.flowLayoutPanel3.ResumeLayout(false);
             this.flowLayoutPanel3.PerformLayout();
+            this.flowLayoutPanel4.ResumeLayout(false);
+            this.flowLayoutPanel4.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -431,5 +471,8 @@
         private System.Windows.Forms.CheckBox pictureSize_checkBox;
         private System.Windows.Forms.ComboBox pictureOriginal_comboBox;
         private System.Windows.Forms.Button docQuit_button;
+        private System.Windows.Forms.FlowLayoutPanel flowLayoutPanel4;
+        private System.Windows.Forms.RadioButton radioButtonAll;
+        private System.Windows.Forms.RadioButton radioButtonSelected;
     }
 }
