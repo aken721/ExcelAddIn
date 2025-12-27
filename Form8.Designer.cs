@@ -127,6 +127,7 @@
             this.txbUrl.Size = new System.Drawing.Size(198, 23);
             this.txbUrl.TabIndex = 11;
             this.txbUrl.DoubleClick += new System.EventHandler(this.txbUrl_DoubleClick);
+            this.txbUrl.TextChanged += new System.EventHandler(this.txbUrl_TextChanged);
             // 
             // label6
             // 

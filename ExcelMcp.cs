@@ -177,6 +177,34 @@ namespace ExcelAddIn
             return names;
         }
 
+        /// <summary>
+        /// 激活指定的工作表（使其成为当前活跃工作表）
+        /// </summary>
+        /// <param name="fileName">工作簿文件名</param>
+        /// <param name="sheetName">要激活的工作表名称</param>
+        /// <returns>被激活的工作表名称</returns>
+        public string ActivateWorksheet(string fileName, string sheetName)
+        {
+            Worksheet worksheet = GetWorksheetById(fileName, sheetName);
+            worksheet.Activate();
+            Marshal.ReleaseComObject(worksheet);
+            return sheetName;
+        }
+
+        /// <summary>
+        /// 获取当前活跃的工作表名称
+        /// </summary>
+        /// <param name="fileName">工作簿文件名</param>
+        /// <returns>当前活跃工作表的名称</returns>
+        public string GetActiveWorksheetName(string fileName)
+        {
+            var workbook = GetWorkbookById(fileName);
+            Worksheet activeSheet = (Worksheet)workbook.ActiveSheet;
+            string name = activeSheet.Name;
+            Marshal.ReleaseComObject(activeSheet);
+            return name;
+        }
+
         #endregion
 
         #region 数据操作 (Data Operations)
@@ -546,6 +574,89 @@ namespace ExcelAddIn
 
             Marshal.ReleaseComObject(workbook);
             return metadata.ToString();
+        }
+
+        /// <summary>
+        /// 获取当前Excel应用程序信息（活跃工作簿、工作表等）
+        /// 注意：此方法依赖ThisAddIn.app，仅在Excel插件环境中可用
+        /// </summary>
+        /// <returns>当前Excel信息的字符串描述</returns>
+        public string GetCurrentExcelInfo()
+        {
+            var sb = new System.Text.StringBuilder();
+            
+            if (ThisAddIn.app == null)
+            {
+                return "Excel应用程序未初始化";
+            }
+
+            try
+            {
+                sb.AppendLine($"Excel版本: {ThisAddIn.app.Version}");
+                
+                if (ThisAddIn.app.Workbooks.Count > 0)
+                {
+                    sb.AppendLine($"打开的工作簿数量: {ThisAddIn.app.Workbooks.Count}");
+                    
+                    if (ThisAddIn.app.ActiveWorkbook != null)
+                    {
+                        var activeWb = ThisAddIn.app.ActiveWorkbook;
+                        sb.AppendLine($"当前活跃工作簿: {activeWb.Name}");
+                        sb.AppendLine($"工作表数量: {activeWb.Worksheets.Count}");
+                        
+                        sb.AppendLine("工作表列表:");
+                        foreach (Worksheet ws in activeWb.Worksheets)
+                        {
+                            sb.AppendLine($"  - {ws.Name}");
+                        }
+                        
+                        if (ThisAddIn.app.ActiveSheet != null)
+                        {
+                            Worksheet activeSheet = ThisAddIn.app.ActiveSheet;
+                            sb.AppendLine($"当前活跃工作表: {activeSheet.Name}");
+                        }
+                    }
+                }
+                else
+                {
+                    sb.AppendLine("没有打开的工作簿");
+                }
+            }
+            catch (Exception ex)
+            {
+                sb.AppendLine($"获取Excel信息时出错: {ex.Message}");
+            }
+
+            return sb.ToString();
+        }
+
+        /// <summary>
+        /// 获取当前选中的单元格地址
+        /// 注意：此方法依赖ThisAddIn.app，仅在Excel插件环境中可用
+        /// </summary>
+        /// <returns>当前选中单元格的地址</returns>
+        public string GetCurrentSelection()
+        {
+            if (ThisAddIn.app == null)
+            {
+                return "Excel应用程序未初始化";
+            }
+
+            try
+            {
+                Range selection = ThisAddIn.app.Selection as Range;
+                if (selection != null)
+                {
+                    string address = selection.Address;
+                    string sheetName = ((Worksheet)selection.Worksheet).Name;
+                    return $"当前选中: {sheetName}!{address}";
+                }
+                return "没有选中的单元格";
+            }
+            catch (Exception ex)
+            {
+                return $"获取选中单元格时出错: {ex.Message}";
+            }
         }
 
         #endregion
@@ -1179,6 +1290,28 @@ namespace ExcelAddIn
                     Address: url,
                     TextToDisplay: displayText ?? url);
             }
+            
+            Marshal.ReleaseComObject(cell);
+            Marshal.ReleaseComObject(worksheet);
+        }
+
+        /// <summary>
+        /// 使用HYPERLINK公式设置内部跳转链接
+        /// </summary>
+        /// <param name="fileName">工作簿文件名</param>
+        /// <param name="sheetName">工作表名</param>
+        /// <param name="cellAddress">单元格地址</param>
+        /// <param name="targetLocation">目标位置（如"Sheet2!A1"）</param>
+        /// <param name="displayText">显示文本</param>
+        public void SetHyperlinkFormula(string fileName, string sheetName, string cellAddress, string targetLocation, string displayText)
+        {
+            Worksheet worksheet = GetWorksheetById(fileName, sheetName);
+            Range cell = worksheet.get_Range(cellAddress);
+            
+            // 使用HYPERLINK公式创建内部跳转
+            // 格式: =HYPERLINK("#Sheet2!A1", "显示文本")
+            string formula = $"=HYPERLINK(\"#{targetLocation}\", \"{displayText}\")";
+            cell.Formula = formula;
             
             Marshal.ReleaseComObject(cell);
             Marshal.ReleaseComObject(worksheet);

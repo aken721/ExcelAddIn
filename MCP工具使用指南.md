@@ -2,30 +2,31 @@
 
 ## 📋 概述
 
-本文档提供Excel插件中所有MCP（Model Context Protocol）工具的完整使用指南。系统包含**63个**强大的Excel自动化工具，涵盖从基础操作到高级分析的所有常用功能。
+本文档提供Excel插件中所有MCP（Model Context Protocol）工具的完整使用指南。系统包含**72个**强大的Excel自动化工具，涵盖从基础操作到高级分析的所有常用功能。
 
 **核心特性**：
 - 🤖 AI自动理解自然语言指令
 - 🔧 涵盖Excel 90%以上常用操作
-- ⚡ 云端DeepSeek和本地Ollama双模型支持
-- 🎯 智能选择最优工具组合
+- ⚡ 云端DeepSeek和本地Ollama/LM Studio双模型支持
+- 🎯 智能工具分组，按需加载减少上下文占用
 - 🎯 智能理解"当前单元格"等自然语言
 - 🔗 区分工作簿内部跳转和外部链接
+- 📦 ExcelMcp.cs可作为独立MCP工具集供其他项目复用
 
 ---
 
-## 📊 工具分类总览（2025-10-09更新）
+## 📊 工具分类总览（2025-12-27更新）
 
 | 分类 | 工具数量 | 主要功能 |
 |------|---------|---------|
-| 工作簿操作 | 7 | 创建、打开、保存、关闭工作簿 |
-| 工作表操作 | 9 | 创建、重命名、删除、复制、移动、隐藏工作表 |
+| 工作簿操作 | 9 | 创建、打开、保存、关闭工作簿、获取信息 |
+| 工作表操作 | 11 | 创建、重命名、删除、复制、移动、隐藏、激活工作表 |
 | 数据操作 | 8 | 读写单元格、范围、公式 |
 | 格式化 | 14 | 字体、颜色、边框、合并单元格、文本换行、缩进、旋转 |
 | 命名区域 | 4 | 创建、删除、获取命名区域 |
-| 行列操作 | 8 | 插入、删除、显示/隐藏、调整大小 |
+| 行列操作 | 10 | 插入、删除、显示/隐藏、调整大小、自动适应 |
 | 查找搜索 | 2 | 查找值、查找替换 |
-| 视图布局 | 6 | 冻结窗格、自动调整大小 |
+| 视图布局 | 2 | 冻结窗格、取消冻结 |
 | 批注管理 | 3 | 添加、删除、获取批注 |
 | 超链接 | 3 | 添加超链接对象、HYPERLINK公式、删除超链接 |
 | 数据分析 | 4 | 统计信息、获取范围、最后行列 |
@@ -34,24 +35,29 @@
 | 数据透视表 | 1 | 创建数据透视表 |
 | 表格操作 | 2 | 创建表格、获取表格名 |
 | 当前选择 | 1 | 获取当前选中单元格信息 |
-| 其他高级 | 6 | 数据验证、条件格式、公式验证等 |
+| 其他高级 | 4 | 数据验证、条件格式、公式验证等 |
 
-**总计**: **63个工具**
+**总计**: **72个工具**
 
-### 🆕 最新更新（2025-10-09）
+### 🆕 最新更新（2025-12-27）
 
-#### 第一批（24个基础工具）
-- ✅ 查找搜索、视图布局、批注、数据分析、排序筛选等工具
-- ✅ 新增 `get_current_selection` 工具，支持获取当前选中单元格
-- ✅ 新增 `set_hyperlink_formula` 工具，支持HYPERLINK公式（工作簿内部跳转）
-- ✅ 优化 `add_hyperlink` 工具，明确用于外部链接
-- ✅ AI能够智能理解"当前单元格"等自然语言表达
+#### 新增工具
+- ✅ `activate_worksheet` - 激活/切换到指定工作表
+- ✅ `get_active_worksheet_name` - 获取当前活跃工作表名称
+- ✅ `set_hyperlink_formula` - 使用HYPERLINK公式设置内部跳转链接
+- ✅ `get_current_excel_info` - 获取当前Excel应用程序信息
+- ✅ `get_current_selection` - 获取当前选中单元格地址
 
-#### 第二批（8个高优先级工具）⭐
-- ✅ **命名区域操作**（4个工具）：create_named_range、delete_named_range、get_named_ranges、get_named_range_address
-- ✅ **单元格格式增强**（4个工具）：set_cell_text_wrap、set_cell_indent、set_cell_orientation、set_cell_shrink_to_fit
-- ✅ 使公式更易读，支持`=SUM(销售额)`代替`=SUM(A2:A100)`
-- ✅ 完善文本格式控制：换行、缩进、旋转、缩小填充
+#### 智能工具分组功能
+- ✅ 将72个工具分为8个组：单元格读写、格式设置、行列操作、工作表操作、工作簿操作、数据处理、命名区域、批注超链接
+- ✅ 根据用户输入关键词智能选择相关工具组
+- ✅ 大幅减少系统提示词长度，解决本地模型上下文溢出问题
+- ✅ 所有工具支持可选的`sheetName`参数，可直接指定目标工作表
+
+#### ExcelMcp独立工具集
+- ✅ ExcelMcp.cs现在包含所有72个工具的完整实现
+- ✅ 可作为独立MCP工具集供其他项目复用
+- ✅ 完善的COM对象管理和内存释放
 
 ---
 
@@ -89,6 +95,23 @@ AI调用: create_workbook(fileName="销售报表.xlsx")
 ---
 
 ### 2️⃣ 工作表操作（Worksheet Operations）
+
+#### activate_worksheet ⭐⭐⭐ 【2025-12-27新增】
+**功能**: 激活/切换到指定工作表（在该表上进行后续操作前必须先激活）  
+**参数**:
+- `fileName` (可选) - 工作簿文件名
+- `sheetName` (必需) - 要激活的工作表名称
+
+**使用示例**:
+```
+用户: "切换到'销售数据'表"
+AI调用: activate_worksheet(sheetName="销售数据")
+返回: "成功激活工作表: 销售数据，后续操作将在此表上执行"
+```
+
+**重要说明**:
+- 激活工作表后，后续的单元格操作将默认在该表上执行
+- 也可以在单元格操作时直接指定`sheetName`参数，无需先激活
 
 #### create_worksheet ⭐
 **功能**: 在工作簿中创建新工作表（**自动添加到第一个位置**）  
@@ -1656,16 +1679,18 @@ AI使用: add_hyperlink(url="https://www.baidu.com")
 6. `get_excel_files` - 获取文件列表
 7. `delete_excel_file` - 删除文件
 
-### 工作表操作（9个）
-8. `create_worksheet` - 创建工作表（在第一位置）
-9. `rename_worksheet` - 重命名工作表
-10. `delete_worksheet` - 删除工作表
-11. `get_worksheet_names` - 获取工作表名称列表
-12. `copy_worksheet` - 复制工作表
-13. `move_worksheet` - 移动工作表位置
-14. `set_worksheet_visible` - 显示/隐藏工作表
-15. `get_worksheet_index` - 获取工作表索引
-16. `get_current_excel_info` - 获取当前Excel信息
+### 工作表操作（11个）
+8. `activate_worksheet` - 激活/切换工作表 **[新增]**
+9. `get_active_worksheet_name` - 获取当前活跃工作表名称 **[新增]**
+10. `create_worksheet` - 创建工作表（在第一位置）
+11. `rename_worksheet` - 重命名工作表
+12. `delete_worksheet` - 删除工作表
+13. `get_worksheet_names` - 获取工作表名称列表
+14. `copy_worksheet` - 复制工作表
+15. `move_worksheet` - 移动工作表位置
+16. `set_worksheet_visible` - 显示/隐藏工作表
+17. `get_worksheet_index` - 获取工作表索引
+18. `get_current_excel_info` - 获取当前Excel信息
 
 ### 数据操作（8个）
 17. `set_cell_value` - 设置单元格值
@@ -1714,9 +1739,10 @@ AI使用: add_hyperlink(url="https://www.baidu.com")
 50. `delete_comment` - 删除批注
 51. `get_comment` - 获取批注
 
-### 超链接（2个）
-52. `add_hyperlink` - 添加超链接
-53. `delete_hyperlink` - 删除超链接
+### 超链接（3个）
+52. `add_hyperlink` - 添加外部超链接
+53. `set_hyperlink_formula` - 使用HYPERLINK公式设置内部跳转 **[新增]**
+54. `delete_hyperlink` - 删除超链接
 
 ### 数据分析（4个）
 54. `get_used_range` - 获取已使用范围
@@ -2048,33 +2074,33 @@ set_data_validation(
 
 ---
 
-## ✅ 验证清单（2025-10-09更新）
+## ✅ 验证清单（2025-12-27更新）
+
+### 最新更新
+- [x] 新增 `activate_worksheet` 工具 - 激活/切换工作表
+- [x] 新增 `get_active_worksheet_name` 工具 - 获取当前活跃工作表名称
+- [x] 新增 `set_hyperlink_formula` 工具 - HYPERLINK公式内部跳转
+- [x] 新增 `get_current_excel_info` 工具 - 获取Excel应用信息
+- [x] 新增 `get_current_selection` 工具 - 获取当前选中单元格
+- [x] 所有工具支持可选的 `sheetName` 参数
+- [x] 智能工具分组功能，解决本地模型上下文溢出问题
+- [x] ExcelMcp.cs 包含所有72个工具的完整实现
 
 ### 第一批更新（25个工具）
-- [x] 55个工具全部实现并注册
-- [x] 所有工具已在Form7.cs中完整注册
-- [x] 新增24个工具（查找、视图、批注、数据分析、排序筛选等）
-- [x] 新增get_current_selection工具，支持"当前单元格"理解
-- [x] 新增set_hyperlink_formula工具，支持工作簿内部跳转
-- [x] 优化add_hyperlink工具，明确用于外部链接
+- [x] 查找搜索、视图布局、批注、数据分析、排序筛选等工具
 - [x] AI能够智能区分两种超链接方式
 - [x] AI能够理解"当前单元格"等自然语言表达
 
-### 第二批更新（8个高优先级工具）⭐
+### 第二批更新（8个高优先级工具）
 - [x] **命名区域工具**（4个）：create_named_range、delete_named_range、get_named_ranges、get_named_range_address
 - [x] **单元格格式增强**（4个）：set_cell_text_wrap、set_cell_indent、set_cell_orientation、set_cell_shrink_to_fit
-- [x] 所有新工具已在ExcelMcp.cs中实现
-- [x] 所有新工具已在Form7.cs中注册和执行
-- [x] 工具总数提升至63个
-- [x] 支持命名区域使公式更易读
-- [x] 支持文本换行、缩进、旋转、缩小填充等高级格式
 
 ### 通用验证
-- [x] 所有工具执行逻辑已实现
+- [x] 所有72个工具执行逻辑已实现
 - [x] 超链接双方式支持
 - [x] 数据透视表已添加
 - [x] 云端模型Function Calling支持
-- [x] 本地模型特殊JSON格式支持
+- [x] 本地模型Prompt Engineering模式支持（Ollama + LM Studio）
 - [x] 代码编译通过，无错误
 - [x] 完整的错误处理
 - [x] 详细的使用文档
@@ -2085,11 +2111,13 @@ set_data_validation(
 
 Excel MCP工具集已经达到**生产级别**，具备：
 
-✅ **63个专业工具** - 涵盖Excel几乎所有常用操作  
+✅ **72个专业工具** - 涵盖Excel几乎所有常用操作  
+✅ **智能工具分组** - 按需加载，解决上下文溢出问题  
 ✅ **命名区域支持** - 使公式更易读易维护  
 ✅ **完善格式控制** - 文本换行、缩进、旋转等高级格式  
-✅ **双模型支持** - 云端和本地都能完美使用  
+✅ **双模型支持** - 云端DeepSeek和本地Ollama/LM Studio都能完美使用  
 ✅ **智能化操作** - AI自动理解和执行复杂任务  
+✅ **独立工具集** - ExcelMcp.cs可供其他项目复用  
 ✅ **高度可扩展** - 模块化设计，易于添加新功能  
 ✅ **生产就绪** - 完善的错误处理和性能优化  
 
@@ -2097,7 +2125,7 @@ Excel MCP工具集已经达到**生产级别**，具备：
 
 ---
 
-**文档版本**: v2.0  
-**最后更新**: 2025-10-08  
+**文档版本**: v3.0  
+**最后更新**: 2025-12-27  
 **维护者**: Excel AddIn开发团队
 

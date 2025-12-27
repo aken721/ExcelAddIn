@@ -34,10 +34,12 @@
             this.flowLayoutPanelChat = new System.Windows.Forms.FlowLayoutPanel();
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.settingsMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.clearHistoryMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.exitMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.label1 = new System.Windows.Forms.Label();
             this.send_button = new System.Windows.Forms.Button();
             this.checkBoxUseMcp = new System.Windows.Forms.CheckBox();
+            this.labelModelInfo = new System.Windows.Forms.Label();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -79,6 +81,7 @@
             // 
             this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.settingsMenuItem,
+            this.clearHistoryMenuItem,
             this.exitMenuItem});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
@@ -92,6 +95,13 @@
             this.settingsMenuItem.Size = new System.Drawing.Size(44, 21);
             this.settingsMenuItem.Text = "设置";
             this.settingsMenuItem.Click += new System.EventHandler(this.settingsMenuItem_Click);
+            // 
+            // clearHistoryMenuItem
+            // 
+            this.clearHistoryMenuItem.Name = "clearHistoryMenuItem";
+            this.clearHistoryMenuItem.Size = new System.Drawing.Size(68, 21);
+            this.clearHistoryMenuItem.Text = "清除历史";
+            this.clearHistoryMenuItem.Click += new System.EventHandler(this.clearHistoryMenuItem_Click);
             // 
             // exitMenuItem
             // 
@@ -137,11 +147,24 @@
             this.checkBoxUseMcp.Text = "使用MCP";
             this.checkBoxUseMcp.UseVisualStyleBackColor = true;
             // 
+            // labelModelInfo
+            // 
+            this.labelModelInfo.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.labelModelInfo.Font = new System.Drawing.Font("微软雅黑", 8F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.labelModelInfo.ForeColor = System.Drawing.Color.Gray;
+            this.labelModelInfo.Location = new System.Drawing.Point(500, 5);
+            this.labelModelInfo.Name = "labelModelInfo";
+            this.labelModelInfo.Size = new System.Drawing.Size(288, 18);
+            this.labelModelInfo.TabIndex = 10;
+            this.labelModelInfo.Text = "未配置模型";
+            this.labelModelInfo.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
+            // 
             // Form7
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
             this.ClientSize = new System.Drawing.Size(800, 450);
+            this.Controls.Add(this.labelModelInfo);
             this.Controls.Add(this.checkBoxUseMcp);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.flowLayoutPanelChat);
@@ -169,8 +192,10 @@
         private System.Windows.Forms.FlowLayoutPanel flowLayoutPanelChat;
         private System.Windows.Forms.MenuStrip menuStrip1;
         private System.Windows.Forms.ToolStripMenuItem settingsMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem clearHistoryMenuItem;
         private System.Windows.Forms.ToolStripMenuItem exitMenuItem;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.CheckBox checkBoxUseMcp;
+        private System.Windows.Forms.Label labelModelInfo;
     }
 }

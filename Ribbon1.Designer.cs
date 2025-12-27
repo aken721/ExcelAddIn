@@ -542,8 +542,8 @@
             // deepseek_api_button
             // 
             this.deepseek_api_button.ControlSize = Microsoft.Office.Core.RibbonControlSize.RibbonControlSizeLarge;
-            this.deepseek_api_button.Image = global::ExcelAddIn.Properties.Resources.deepseek;
-            this.deepseek_api_button.Label = "DeepSeek";
+            this.deepseek_api_button.Image = global::ExcelAddIn.Properties.Resources.ai;
+            this.deepseek_api_button.Label = "AI对话";
             this.deepseek_api_button.Name = "deepseek_api_button";
             this.deepseek_api_button.ShowImage = true;
             this.deepseek_api_button.Click += new Microsoft.Office.Tools.Ribbon.RibbonControlEventHandler(this.deepseek_api_button_Click);
