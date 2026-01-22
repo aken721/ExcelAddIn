@@ -41,7 +41,7 @@
     <PublishUrl>ftp://localhost/</PublishUrl>
     <InstallUrl>http://localhost/ExcelAddIn/</InstallUrl>
     <TargetCulture>zh-chs</TargetCulture>
-    <ApplicationVersion>2.4.7.0</ApplicationVersion>
+    <ApplicationVersion>2.4.7.1</ApplicationVersion>
     <AutoIncrementApplicationRevision>true</AutoIncrementApplicationRevision>
     <UpdateEnabled>true</UpdateEnabled>
     <UpdateInterval>7</UpdateInterval>

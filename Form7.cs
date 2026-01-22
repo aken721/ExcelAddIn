@@ -36,6 +36,259 @@ namespace ExcelAddIn
 
         // 缓存MCP工具定义，避免重复创建
         private List<object> _cachedMcpTools = null;
+        
+        // 跟踪当前会话中已执行的一次性工具（如create_chart），防止递归时重复执行
+        private HashSet<string> _executedOneTimeTools = new HashSet<string>();
+        // 一次性工具列表（这些工具在一次用户请求中只应执行一次）
+        private static readonly HashSet<string> _oneTimeTools = new HashSet<string> 
+        { 
+            "create_chart", "create_table", "create_workbook", "create_worksheet", 
+            "create_named_range", "save_workbook", "save_workbook_as" 
+        };
+        
+        // 两阶段工具调用：是否启用工具分组模式（用于减少小模型的处理负担）
+        private bool _useToolGrouping = true;
+        // 当前选中的工具组（第一阶段选择后填充）
+        private List<string> _selectedToolGroups = null;
+        
+        // 工具分组定义（用于原生Function Calling的两阶段调用）
+        private static readonly Dictionary<string, (string Description, string[] Tools)> _nativeToolGroups = new Dictionary<string, (string Description, string[] Tools)>
+        {
+            ["cell_rw"] = (
+                "单元格读写：读取/写入单元格值、公式、批量操作、查找替换、统计",
+                new[] { "set_cell_value", "get_cell_value", "set_range_values", "get_range_values", "set_formula", "get_formula", "validate_formula", "clear_range", "copy_range", "get_current_selection", "get_used_range", "get_last_row", "get_last_column", "get_range_statistics", "find_value", "find_and_replace" }
+            ),
+            ["format"] = (
+                "格式设置：字体、颜色、边框、合并单元格、对齐、条件格式、数字格式",
+                new[] { "set_cell_format", "set_border", "set_number_format", "merge_cells", "unmerge_cells", "set_cell_text_wrap", "set_cell_indent", "set_cell_orientation", "set_cell_shrink_to_fit", "apply_conditional_formatting" }
+            ),
+            ["row_col"] = (
+                "行列操作：行高、列宽、插入/删除行列、自动调整、隐藏/显示",
+                new[] { "set_row_height", "set_column_width", "insert_rows", "insert_columns", "delete_rows", "delete_columns", "autofit_columns", "autofit_rows", "set_row_visible", "set_column_visible" }
+            ),
+            ["sheet"] = (
+                "工作表操作：创建/删除/重命名/复制/移动工作表、冻结窗格",
+                new[] { "get_worksheet_names", "create_worksheet", "rename_worksheet", "delete_worksheet", "copy_worksheet", "move_worksheet", "set_worksheet_visible", "get_worksheet_index", "freeze_panes", "unfreeze_panes" }
+            ),
+            ["workbook"] = (
+                "工作簿操作：创建/打开/保存/关闭工作簿、获取文件信息",
+                new[] { "create_workbook", "open_workbook", "save_workbook", "save_workbook_as", "close_workbook", "get_workbook_metadata", "get_current_excel_info", "get_excel_files", "delete_excel_file" }
+            ),
+            ["data"] = (
+                "数据处理：排序、筛选、去重、数据验证、创建表格和图表",
+                new[] { "sort_range", "set_auto_filter", "remove_duplicates", "set_data_validation", "get_validation_rules", "create_table", "get_table_names", "create_chart" }
+            ),
+            ["named"] = (
+                "命名区域：创建/删除/查询命名区域",
+                new[] { "create_named_range", "delete_named_range", "get_named_ranges", "get_named_range_address" }
+            ),
+            ["link"] = (
+                "批注和超链接：添加/删除批注、内部跳转、外部链接",
+                new[] { "add_comment", "get_comment", "delete_comment", "add_hyperlink", "set_hyperlink_formula", "delete_hyperlink" }
+            )
+        };
+
+        // 检测是否为小模型（参数量小于3B的模型）
+        // 小模型处理Function Calling很慢，建议直接使用Prompt Engineering模式
+        private bool IsSmallModel(string modelName)
+        {
+            if (string.IsNullOrEmpty(modelName)) return false;
+            
+            string nameLower = modelName.ToLower();
+            
+            // 检测常见的小模型标识
+            // 格式通常是: model:0.5b, model:1b, model:1.5b, model:2b 等
+            var smallPatterns = new[] { 
+                ":0.", ":1b", ":1.5b", ":2b", 
+                "-0.", "-1b", "-1.5b", "-2b",
+                "0.5b", "0.6b", "1b", "1.5b", "2b",
+                "tiny", "mini", "small"
+            };
+            
+            foreach (var pattern in smallPatterns)
+            {
+                if (nameLower.Contains(pattern))
+                {
+                    return true;
+                }
+            }
+            
+            return false;
+        }
+
+        // 日志文件路径（使用用户文档目录，确保可写入）
+        private static string _logFilePath = null;
+        
+        // 获取日志文件路径
+        private static string GetLogFilePath()
+        {
+            if (_logFilePath == null)
+            {
+                try
+                {
+                    // 优先使用插件安装目录
+                    string assemblyPath = System.Reflection.Assembly.GetExecutingAssembly().Location;
+                    if (!string.IsNullOrEmpty(assemblyPath))
+                    {
+                        string dir = Path.GetDirectoryName(assemblyPath);
+                        if (!string.IsNullOrEmpty(dir) && Directory.Exists(dir))
+                        {
+                            _logFilePath = Path.Combine(dir, "aiDialog.txt");
+                            // 测试是否可写
+                            try
+                            {
+                                File.AppendAllText(_logFilePath, "");
+                                return _logFilePath;
+                            }
+                            catch { }
+                        }
+                    }
+                }
+                catch { }
+                
+                // 备用：使用用户文档目录
+                try
+                {
+                    string docPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+                    _logFilePath = Path.Combine(docPath, "ExcelAddIn_aiDialog.txt");
+                }
+                catch
+                {
+                    // 最后备用：使用临时目录
+                    _logFilePath = Path.Combine(Path.GetTempPath(), "ExcelAddIn_aiDialog.txt");
+                }
+            }
+            return _logFilePath;
+        }
+
+        // 写入日志的方法（追加模式，不删除历史记录）
+        private void WriteLog(string category, string message)
+        {
+            try
+            {
+                string logPath = GetLogFilePath();
+                string timestamp = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff");
+                string logEntry = $"[{timestamp}] [{category}]\n{message}\n{"".PadRight(80, '-')}\n";
+                File.AppendAllText(logPath, logEntry, Encoding.UTF8);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"写入日志失败: {ex.Message}");
+            }
+        }
+
+        // 获取简化的请求体用于日志记录（排除tools定义和系统提示词中的工具说明）
+        private string GetSimplifiedRequestBodyForLog(Dictionary<string, object> requestBody)
+        {
+            try
+            {
+                var simplifiedBody = new Dictionary<string, object>();
+                
+                foreach (var kvp in requestBody)
+                {
+                    if (kvp.Key == "tools")
+                    {
+                        // 只记录工具数量，不记录完整定义
+                        if (kvp.Value is List<object> toolsList)
+                        {
+                            simplifiedBody["tools"] = $"[已省略 {toolsList.Count} 个工具定义]";
+                        }
+                        else
+                        {
+                            simplifiedBody["tools"] = "[已省略工具定义]";
+                        }
+                    }
+                    else if (kvp.Key == "messages")
+                    {
+                        // 简化消息列表，只保留用户消息内容
+                        var simplifiedMessages = new List<object>();
+                        if (kvp.Value is List<object> messages)
+                        {
+                            foreach (var msg in messages)
+                            {
+                                var msgDict = msg as dynamic;
+                                if (msgDict != null)
+                                {
+                                    string role = "";
+                                    string content = "";
+                                    
+                                    // 使用反射获取属性
+                                    var roleProperty = msg.GetType().GetProperty("role");
+                                    var contentProperty = msg.GetType().GetProperty("content");
+                                    
+                                    if (roleProperty != null)
+                                        role = roleProperty.GetValue(msg)?.ToString() ?? "";
+                                    if (contentProperty != null)
+                                        content = contentProperty.GetValue(msg)?.ToString() ?? "";
+                                    
+                                    if (role == "system")
+                                    {
+                                        // 系统提示词只记录前100个字符
+                                        simplifiedMessages.Add(new
+                                        {
+                                            role = role,
+                                            content = content.Length > 100 
+                                                ? content.Substring(0, 100) + $"... [已省略，共{content.Length}字符]" 
+                                                : content
+                                        });
+                                    }
+                                    else
+                                    {
+                                        // 其他消息保持原样
+                                        simplifiedMessages.Add(msg);
+                                    }
+                                }
+                            }
+                        }
+                        simplifiedBody["messages"] = simplifiedMessages;
+                    }
+                    else
+                    {
+                        // 其他字段保持原样
+                        simplifiedBody[kvp.Key] = kvp.Value;
+                    }
+                }
+                
+                return JsonSerializer.Serialize(simplifiedBody, new JsonSerializerOptions { WriteIndented = true });
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"简化请求体失败: {ex.Message}");
+                // 如果简化失败，返回原始序列化结果
+                return JsonSerializer.Serialize(requestBody, new JsonSerializerOptions { WriteIndented = true });
+            }
+        }
+
+        // 初始化日志文件（不清空，只添加会话分隔符）
+        private void InitLog()
+        {
+            try
+            {
+                string logPath = GetLogFilePath();
+                var sb = new StringBuilder();
+                sb.AppendLine();
+                sb.AppendLine("".PadRight(80, '='));
+                sb.AppendLine($"=== 新会话开始 ===");
+                sb.AppendLine($"时间: {DateTime.Now:yyyy-MM-dd HH:mm:ss}");
+                sb.AppendLine($"日志路径: {logPath}");
+                sb.AppendLine($"模型: {(string.IsNullOrEmpty(_model) ? "未配置" : _model)}");
+                sb.AppendLine($"API地址: {(string.IsNullOrEmpty(_apiUrl) ? "未配置" : _apiUrl)}");
+                sb.AppendLine($"连接类型: {(_isCloudConnection ? "云端" : "本地")}");
+                sb.AppendLine($"Prompt Engineering模式: {_usePromptEngineering}");
+                sb.AppendLine($"Ollama API: {_isOllamaApi}");
+                sb.AppendLine("".PadRight(80, '='));
+                sb.AppendLine();
+                
+                File.AppendAllText(logPath, sb.ToString(), Encoding.UTF8);
+                
+                // 在调试输出中显示日志路径
+                System.Diagnostics.Debug.WriteLine($"AI对话日志路径: {logPath}");
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"初始化日志失败: {ex.Message}");
+            }
+        }
 
         // 安全更新prompt_label的方法（确保在UI线程上执行）
         private void SafeUpdatePromptLabel(string text)
@@ -64,6 +317,11 @@ namespace ExcelAddIn
             flowLayoutPanelChat.AutoSize = false;
             flowLayoutPanelChat.FlowDirection = FlowDirection.TopDown;
             flowLayoutPanelChat.WrapContents = false;
+            // 确保滚动条能正常显示
+            flowLayoutPanelChat.HorizontalScroll.Enabled = false;
+            flowLayoutPanelChat.HorizontalScroll.Visible = false;
+            flowLayoutPanelChat.VerticalScroll.Enabled = true;
+            flowLayoutPanelChat.VerticalScroll.Visible = true;
 
             // 创建自定义右键菜单
             ContextMenuStrip customContextMenu = new ContextMenuStrip();
@@ -138,6 +396,9 @@ namespace ExcelAddIn
 
             // 等待所有任务完成
             await Task.WhenAll(configTask, mcpTask, excelInfoTask);
+
+            // 配置加载完成后，初始化日志文件（此时配置信息已可用）
+            InitLog();
 
             // 所有任务完成后，在UI线程统一更新界面
             if (_excelMcp == null)
@@ -253,6 +514,7 @@ namespace ExcelAddIn
             if (string.IsNullOrEmpty(_apiKey) || string.IsNullOrEmpty(_model))
             {
                 prompt_label.Text = "没有获取到API KEY或选择模型，请先使用配置功能进行配置";
+                WriteLog("发送失败", "API KEY或模型未配置");
                 return;
             }
             string userInput = richTextBoxInput.Text.Trim();
@@ -261,6 +523,12 @@ namespace ExcelAddIn
                 prompt_label.Text = "请输入问题！";
                 return;
             }
+
+            // 记录用户输入
+            WriteLog("用户输入", $"内容: {userInput}\n当前模型: {_model}\nAPI地址: {_apiUrl}\n连接类型: {(_isCloudConnection ? "云端" : "本地")}\nPrompt Engineering模式: {_usePromptEngineering}");
+
+            // 清空已执行的一次性工具记录（每次新请求重新开始）
+            _executedOneTimeTools.Clear();
 
             try
             {
@@ -282,31 +550,38 @@ namespace ExcelAddIn
                 // 添加AI回复
                 AddChatItem(response, false);
                 prompt_label.Text = "";
+                
+                WriteLog("对话完成", $"AI回复长度: {response?.Length ?? 0}字符");
             }
             catch (TaskCanceledException ex) when (ex.InnerException is TimeoutException)
             {
                 RemoveThinkingPlaceholder();
                 prompt_label.Text = "请求超时：模型响应时间过长，请稍后重试或尝试更小的模型";
+                WriteLog("异常-超时", $"TaskCanceledException(Timeout): {ex.Message}\n内部异常: {ex.InnerException?.Message}");
             }
-            catch (TaskCanceledException)
+            catch (TaskCanceledException ex)
             {
                 RemoveThinkingPlaceholder();
                 prompt_label.Text = "请求已取消：可能是网络问题或模型响应超时，请重试";
+                WriteLog("异常-取消", $"TaskCanceledException: {ex.Message}\n堆栈: {ex.StackTrace}");
             }
-            catch (OperationCanceledException)
+            catch (OperationCanceledException ex)
             {
                 RemoveThinkingPlaceholder();
                 prompt_label.Text = "操作已取消：请检查网络连接后重试";
+                WriteLog("异常-操作取消", $"OperationCanceledException: {ex.Message}\n堆栈: {ex.StackTrace}");
             }
             catch (HttpRequestException ex)
             {
                 RemoveThinkingPlaceholder();
                 prompt_label.Text = $"网络错误: {ex.Message}";
+                WriteLog("异常-网络错误", $"HttpRequestException: {ex.Message}\n堆栈: {ex.StackTrace}");
             }
             catch (JsonException ex)
             {
                 RemoveThinkingPlaceholder();
                 prompt_label.Text = $"解析响应失败: {ex.Message}";
+                WriteLog("异常-JSON解析", $"JsonException: {ex.Message}\n堆栈: {ex.StackTrace}");
             }
             catch (Exception ex)
             {
@@ -315,10 +590,12 @@ namespace ExcelAddIn
                 if (ex.Message.Contains("取消") || ex.Message.Contains("cancel") || ex.Message.Contains("Cancel"))
                 {
                     prompt_label.Text = "请求已取消：模型响应时间过长或网络问题，请重试";
+                    WriteLog("异常-取消相关", $"Exception: {ex.Message}\n堆栈: {ex.StackTrace}");
                 }
                 else
                 {
                     prompt_label.Text = $"未知错误: {ex.Message}";
+                    WriteLog("异常-未知错误", $"Exception: {ex.GetType().Name}: {ex.Message}\n堆栈: {ex.StackTrace}");
                 }
             }
             finally
@@ -331,66 +608,82 @@ namespace ExcelAddIn
         // 添加思考中占位符
         private void AddThinkingPlaceholder()
         {
-            int scrollBarWidth = SystemInformation.VerticalScrollBarWidth;
-            int availableWidth = flowLayoutPanelChat.ClientSize.Width - scrollBarWidth - 20;
-            int cornerRadius = 12;
-
-            // 创建占位符面板
-            Panel chatBubble = new Panel
+            flowLayoutPanelChat.SuspendLayout();
+            try
             {
-                Size = new Size(80, 36),
-                BackColor = Color.LightGreen,
-                Tag = "thinking_placeholder"
-            };
+                int scrollBarWidth = SystemInformation.VerticalScrollBarWidth;
+                int availableWidth = flowLayoutPanelChat.ClientSize.Width - scrollBarWidth - 20;
+                int cornerRadius = 12;
 
-            // 设置圆角
-            System.Drawing.Drawing2D.GraphicsPath path = new System.Drawing.Drawing2D.GraphicsPath();
-            path.AddArc(0, 0, cornerRadius, cornerRadius, 180, 90);
-            path.AddArc(chatBubble.Width - cornerRadius, 0, cornerRadius, cornerRadius, 270, 90);
-            path.AddArc(chatBubble.Width - cornerRadius, chatBubble.Height - cornerRadius, cornerRadius, cornerRadius, 0, 90);
-            path.AddArc(0, chatBubble.Height - cornerRadius, cornerRadius, cornerRadius, 90, 90);
-            path.CloseAllFigures();
-            chatBubble.Region = new Region(path);
+                // 创建占位符面板
+                Panel chatBubble = new Panel
+                {
+                    Size = new Size(80, 36),
+                    BackColor = Color.LightGreen,
+                    Tag = "thinking_placeholder"
+                };
 
-            // 添加"......"文本
-            Label thinkingLabel = new Label
+                // 设置圆角
+                System.Drawing.Drawing2D.GraphicsPath path = new System.Drawing.Drawing2D.GraphicsPath();
+                path.AddArc(0, 0, cornerRadius, cornerRadius, 180, 90);
+                path.AddArc(chatBubble.Width - cornerRadius, 0, cornerRadius, cornerRadius, 270, 90);
+                path.AddArc(chatBubble.Width - cornerRadius, chatBubble.Height - cornerRadius, cornerRadius, cornerRadius, 0, 90);
+                path.AddArc(0, chatBubble.Height - cornerRadius, cornerRadius, cornerRadius, 90, 90);
+                path.CloseAllFigures();
+                chatBubble.Region = new Region(path);
+
+                // 添加"......"文本
+                Label thinkingLabel = new Label
+                {
+                    Text = "......",
+                    AutoSize = false,
+                    Size = new Size(76, 32),
+                    Location = new Point(2, 2),
+                    TextAlign = ContentAlignment.MiddleCenter,
+                    BackColor = Color.LightGreen,
+                    Font = new Font("微软雅黑", 12, FontStyle.Bold)
+                };
+                chatBubble.Controls.Add(thinkingLabel);
+
+                // 创建行容器
+                Panel rowPanel = new Panel
+                {
+                    Size = new Size(availableWidth, 36),
+                    BackColor = Color.Transparent,
+                    Tag = "thinking_row"
+                };
+
+                chatBubble.Location = new Point(0, 0);
+                rowPanel.Controls.Add(chatBubble);
+                rowPanel.Margin = new Padding(10, 5, 10, 10);
+
+                flowLayoutPanelChat.Controls.Add(rowPanel);
+                flowLayoutPanelChat.ScrollControlIntoView(rowPanel);
+
+                _thinkingPlaceholder = rowPanel;
+            }
+            finally
             {
-                Text = "......",
-                AutoSize = false,
-                Size = new Size(76, 32),
-                Location = new Point(2, 2),
-                TextAlign = ContentAlignment.MiddleCenter,
-                BackColor = Color.LightGreen,
-                Font = new Font("微软雅黑", 12, FontStyle.Bold)
-            };
-            chatBubble.Controls.Add(thinkingLabel);
-
-            // 创建行容器
-            Panel rowPanel = new Panel
-            {
-                Size = new Size(availableWidth, 36),
-                BackColor = Color.Transparent,
-                Tag = "thinking_row"
-            };
-
-            chatBubble.Location = new Point(0, 0);
-            rowPanel.Controls.Add(chatBubble);
-            rowPanel.Margin = new Padding(10, 5, 10, 10);
-
-            flowLayoutPanelChat.Controls.Add(rowPanel);
-            flowLayoutPanelChat.ScrollControlIntoView(rowPanel);
-
-            _thinkingPlaceholder = rowPanel;
+                flowLayoutPanelChat.ResumeLayout(true);
+            }
         }
 
         // 移除思考中占位符
         private void RemoveThinkingPlaceholder()
         {
-            if (_thinkingPlaceholder != null && flowLayoutPanelChat.Controls.Contains(_thinkingPlaceholder))
+            flowLayoutPanelChat.SuspendLayout();
+            try
             {
-                flowLayoutPanelChat.Controls.Remove(_thinkingPlaceholder);
-                _thinkingPlaceholder.Dispose();
-                _thinkingPlaceholder = null;
+                if (_thinkingPlaceholder != null && flowLayoutPanelChat.Controls.Contains(_thinkingPlaceholder))
+                {
+                    flowLayoutPanelChat.Controls.Remove(_thinkingPlaceholder);
+                    _thinkingPlaceholder.Dispose();
+                    _thinkingPlaceholder = null;
+                }
+            }
+            finally
+            {
+                flowLayoutPanelChat.ResumeLayout(true);
             }
         }
 
@@ -478,7 +771,7 @@ namespace ExcelAddIn
             ["find_value"] = "查找值。参数: searchValue, sheetName(可选)",
             ["find_and_replace"] = "查找替换。参数: findValue, replaceValue, sheetName(可选)",
             // 格式设置
-            ["set_cell_format"] = "设置格式。参数: rangeAddress, fontColor, backgroundColor, bold, italic, fontSize, horizontalAlignment(left/center/right), verticalAlignment(top/center/bottom), sheetName(可选)",
+            ["set_cell_format"] = "设置单元格格式。参数: rangeAddress(如\"A1\"或\"F9\"), backgroundColor(背景色,如\"#FFFF00\"黄色), fontColor(字体颜色), bold, italic, fontSize, sheetName(可选)",
             ["set_border"] = "设置边框。参数: rangeAddress, borderType(all/outline), lineStyle(continuous/dash/dot), sheetName(可选)",
             ["set_number_format"] = "数字格式。参数: rangeAddress, formatCode, sheetName(可选)",
             ["merge_cells"] = "合并单元格。参数: rangeAddress",
@@ -530,7 +823,7 @@ namespace ExcelAddIn
             ["get_validation_rules"] = "获取验证规则。参数: rangeAddress",
             ["create_table"] = "创建表格。参数: rangeAddress, tableName",
             ["get_table_names"] = "获取表格名。无参数",
-            ["create_chart"] = "创建图表。参数: dataRange, chartType, title",
+            ["create_chart"] = "创建图表。参数: dataRange(必需), chartType(可选,默认column), title(可选)",
             // 命名区域
             ["create_named_range"] = "创建命名区域。参数: rangeName, rangeAddress",
             ["delete_named_range"] = "删除命名区域。参数: rangeName",
@@ -566,6 +859,19 @@ namespace ExcelAddIn
                 }
             }
 
+            // 如果选择了"数据处理"组（图表、排序等），必须同时包含"单元格读写"组（find_value、get_range_values）
+            if (selectedGroups.Contains("数据处理") && !selectedGroups.Contains("单元格读写"))
+            {
+                selectedGroups.Insert(0, "单元格读写"); // 插入到最前面，强调先查找
+            }
+            
+            // 如果用户提到分析、报告等，也需要单元格读写组
+            if ((inputLower.Contains("分析") || inputLower.Contains("报告") || inputLower.Contains("变化") || inputLower.Contains("趋势")) 
+                && !selectedGroups.Contains("单元格读写"))
+            {
+                selectedGroups.Insert(0, "单元格读写");
+            }
+
             // 如果没有匹配到任何组，默认返回"单元格读写"组（最常用）
             if (selectedGroups.Count == 0)
             {
@@ -579,9 +885,49 @@ namespace ExcelAddIn
         private string GetPromptEngineeringSystemPrompt(string userInput = null)
         {
             var sb = new StringBuilder();
-            sb.AppendLine("你是Excel助手。通过输出工具调用JSON来操作Excel。");
+            
+            // 获取当前环境信息
+            string currentCell = "A1";
+            int currentRow = 1;
+            int currentCol = 1;
+            string selectionAddress = "A1";
+            try
+            {
+                if (ThisAddIn.app?.Selection != null)
+                {
+                    Microsoft.Office.Interop.Excel.Range selection = ThisAddIn.app.Selection;
+                    currentCell = selection.Address.Replace("$", "");
+                    selectionAddress = currentCell;
+                    currentRow = selection.Row;
+                    currentCol = selection.Column;
+                }
+            }
+            catch { }
+
+            // 更新活跃工作表信息
+            try
+            {
+                if (ThisAddIn.app?.ActiveWorkbook != null)
+                {
+                    _activeWorkbook = ThisAddIn.app.ActiveWorkbook.Name;
+                    if (ThisAddIn.app.ActiveSheet != null)
+                    {
+                        Microsoft.Office.Interop.Excel.Worksheet ws = ThisAddIn.app.ActiveSheet;
+                        _activeWorksheet = ws.Name;
+                    }
+                }
+            }
+            catch { }
+
+            string sheetName = string.IsNullOrEmpty(_activeWorksheet) ? "Sheet1" : _activeWorksheet;
+            string colLetter = GetColumnLetter(currentCol);
+
+            // 极简提示词，强调直接输出工具调用
+            sb.AppendLine("你是Excel工具调用助手。收到指令后，直接输出工具调用JSON，不要解释。");
             sb.AppendLine();
-            sb.AppendLine("【格式】必须用<tool_calls>标签包裹JSON数组：");
+            sb.AppendLine($"当前：工作表=\"{sheetName}\"，选中区域={selectionAddress}");
+            sb.AppendLine();
+            sb.AppendLine("输出格式：");
             sb.AppendLine("<tool_calls>");
             sb.AppendLine("[{\"name\": \"工具名\", \"arguments\": {参数}}]");
             sb.AppendLine("</tool_calls>");
@@ -595,11 +941,10 @@ namespace ExcelAddIn
             }
             else
             {
-                // 默认加载最常用的组
                 relevantGroups = new List<string> { "单元格读写", "格式设置", "工作表操作" };
             }
 
-            sb.AppendLine("【工具】");
+            sb.AppendLine("可用工具：");
             foreach (var groupName in relevantGroups)
             {
                 if (_toolGroups.TryGetValue(groupName, out var groupInfo))
@@ -614,31 +959,64 @@ namespace ExcelAddIn
                 }
             }
             sb.AppendLine();
-
-            sb.AppendLine("【列号】A=1, B=2, C=3, D=4, E=5...");
-            sb.AppendLine();
             
-            sb.AppendLine("【示例1】在Table3的B列写入1到5：");
-            sb.AppendLine("<tool_calls>");
-            sb.AppendLine("[{\"name\": \"set_cell_value\", \"arguments\": {\"row\": 1, \"column\": 2, \"value\": \"1\", \"sheetName\": \"Table3\"}},");
-            sb.AppendLine("{\"name\": \"set_cell_value\", \"arguments\": {\"row\": 2, \"column\": 2, \"value\": \"2\", \"sheetName\": \"Table3\"}},");
-            sb.AppendLine("{\"name\": \"set_cell_value\", \"arguments\": {\"row\": 3, \"column\": 2, \"value\": \"3\", \"sheetName\": \"Table3\"}},");
-            sb.AppendLine("{\"name\": \"set_cell_value\", \"arguments\": {\"row\": 4, \"column\": 2, \"value\": \"4\", \"sheetName\": \"Table3\"}},");
-            sb.AppendLine("{\"name\": \"set_cell_value\", \"arguments\": {\"row\": 5, \"column\": 2, \"value\": \"5\", \"sheetName\": \"Table3\"}}]");
-            sb.AppendLine("</tool_calls>");
-            sb.AppendLine();
+            // 检测用户意图，提供针对性指导
+            string inputLower = userInput?.ToLower() ?? "";
+            bool wantsChart = inputLower.Contains("图表") || inputLower.Contains("折线") || inputLower.Contains("曲线") || 
+                             inputLower.Contains("柱状") || inputLower.Contains("饼图") || inputLower.Contains("chart");
+            bool wantsAnalysis = inputLower.Contains("分析") || inputLower.Contains("报告") || inputLower.Contains("变化");
+            bool wantsRead = inputLower.Contains("读取") || inputLower.Contains("获取") || inputLower.Contains("查看") || inputLower.Contains("是多少");
+            bool hasSelectedRange = inputLower.Contains("选中") || inputLower.Contains("选择") || inputLower.Contains("当前区域");
             
-            sb.AppendLine("【示例2】在Table3的第二列(C列)写入数据：");
-            sb.AppendLine("<tool_calls>");
-            sb.AppendLine("[{\"name\": \"set_cell_value\", \"arguments\": {\"row\": 1, \"column\": 3, \"value\": \"数据\", \"sheetName\": \"Table3\"}}]");
-            sb.AppendLine("</tool_calls>");
+            if (wantsChart && hasSelectedRange)
+            {
+                // 用户要基于选中区域创建图表
+                sb.AppendLine("📊 图表创建任务（选中区域）：");
+                sb.AppendLine($"直接用选中区域创建图表：");
+                sb.AppendLine("<tool_calls>");
+                sb.AppendLine($"[{{\"name\": \"create_chart\", \"arguments\": {{\"dataRange\": \"{selectionAddress}\", \"chartType\": \"line\", \"title\": \"数据图表\"}}}}]");
+                sb.AppendLine("</tool_calls>");
+            }
+            else if (wantsChart || wantsAnalysis || wantsRead)
+            {
+                // 用户要创建图表/分析/读取数据，必须先查找
+                sb.AppendLine("⚠️ 重要：必须先查找数据位置，禁止编造数据！");
+                sb.AppendLine();
+                sb.AppendLine("标准流程：");
+                sb.AppendLine("第1步：用find_value查找用户提到的关键词位置");
+                sb.AppendLine("<tool_calls>");
+                sb.AppendLine("[{\"name\": \"find_value\", \"arguments\": {\"searchValue\": \"用户提到的关键词\"}}]");
+                sb.AppendLine("</tool_calls>");
+                sb.AppendLine();
+                sb.AppendLine("第2步：根据find_value返回的位置，用get_range_values读取数据");
+                if (wantsChart)
+                {
+                    sb.AppendLine("第3步：用create_chart创建图表（dataRange填实际数据范围）");
+                }
+                sb.AppendLine();
+                sb.AppendLine("每次只执行一步，等待结果后再继续。");
+            }
+            
             sb.AppendLine();
-
-            sb.AppendLine($"【当前】工作簿：{(string.IsNullOrEmpty(_activeWorkbook) ? "无" : _activeWorkbook)}，工作表：{(string.IsNullOrEmpty(_activeWorksheet) ? "无" : _activeWorksheet)}");
-            sb.AppendLine();
-            sb.AppendLine("注意：第一列=A=1，第二列=B=2，第三列=C=3。必须输出<tool_calls>标签！");
+            sb.AppendLine("规则：");
+            sb.AppendLine("1. 直接输出<tool_calls>JSON");
+            sb.AppendLine("2. 禁止编造数据，必须从Excel读取");
+            sb.AppendLine("3. 每次只输出一个工具调用，等待结果");
 
             return sb.ToString();
+        }
+        
+        // 将列号转换为字母（1=A, 2=B, 3=C...）
+        private string GetColumnLetter(int columnNumber)
+        {
+            string result = "";
+            while (columnNumber > 0)
+            {
+                columnNumber--;
+                result = (char)('A' + columnNumber % 26) + result;
+                columnNumber /= 26;
+            }
+            return result;
         }
 
         // 解析Prompt Engineering模式下AI响应中的工具调用
@@ -819,6 +1197,7 @@ namespace ExcelAddIn
         private List<PromptToolCall> ParseJsonToolCalls(string jsonContent)
         {
             var toolCalls = new List<PromptToolCall>();
+            WriteLog("JSON解析", $"原始JSON内容:\n{jsonContent}");
 
             try
             {
@@ -829,9 +1208,28 @@ namespace ExcelAddIn
                 jsonContent = jsonContent.Replace("\u201c", "\"").Replace("\u201d", "\"");
                 jsonContent = jsonContent.Replace("\u2018", "'").Replace("\u2019", "'");
                 
+                // 修复不完整的JSON数组（缺少闭合的]）
+                if (jsonContent.StartsWith("[") && !jsonContent.EndsWith("]"))
+                {
+                    // 计算括号数量
+                    int openBrackets = jsonContent.Count(c => c == '[');
+                    int closeBrackets = jsonContent.Count(c => c == ']');
+                    int openBraces = jsonContent.Count(c => c == '{');
+                    int closeBraces = jsonContent.Count(c => c == '}');
+                    
+                    // 补全缺少的闭合括号
+                    for (int i = 0; i < openBraces - closeBraces; i++)
+                        jsonContent += "}";
+                    for (int i = 0; i < openBrackets - closeBrackets; i++)
+                        jsonContent += "]";
+                    
+                    WriteLog("JSON修复", $"补全闭合括号后:\n{jsonContent}");
+                }
+                
                 // 替换全角字符
                 jsonContent = jsonContent.Replace("\uff1a", ":").Replace("\uff0c", ",");
                 
+                WriteLog("JSON解析", $"清理后的JSON:\n{jsonContent}");
                 System.Diagnostics.Debug.WriteLine($"清理后的JSON: {jsonContent}");
                 
                 // 处理多个JSON数组连续的情况（如 [...][...]）
@@ -856,6 +1254,7 @@ namespace ExcelAddIn
                     {
                         // 有多余内容，只取第一个数组
                         jsonContent = jsonContent.Substring(0, firstArrayEnd + 1);
+                        WriteLog("JSON解析", $"截取第一个数组后:\n{jsonContent}");
                     }
                 }
 
@@ -867,17 +1266,40 @@ namespace ExcelAddIn
                         {
                             try
                             {
-                                var toolCall = new PromptToolCall
+                                // 标准格式: {"name": "xxx", "arguments": {...}}
+                                if (element.ValueKind == JsonValueKind.Object)
                                 {
-                                    Id = Guid.NewGuid().ToString(),
-                                    Name = element.GetProperty("name").GetString(),
-                                    ArgumentsJson = element.TryGetProperty("arguments", out var args) ? args.GetRawText() : "{}"
-                                };
-                                toolCalls.Add(toolCall);
-                                System.Diagnostics.Debug.WriteLine($"成功解析工具: {toolCall.Name}, 参数: {toolCall.ArgumentsJson}");
+                                    var toolCall = new PromptToolCall
+                                    {
+                                        Id = Guid.NewGuid().ToString(),
+                                        Name = element.GetProperty("name").GetString(),
+                                        ArgumentsJson = element.TryGetProperty("arguments", out var args) ? args.GetRawText() : "{}"
+                                    };
+                                    toolCalls.Add(toolCall);
+                                    WriteLog("JSON解析成功", $"工具: {toolCall.Name}, 参数: {toolCall.ArgumentsJson}");
+                                    System.Diagnostics.Debug.WriteLine($"成功解析工具: {toolCall.Name}, 参数: {toolCall.ArgumentsJson}");
+                                }
+                                // 错误格式: ["tool_name", {...}] - 尝试修复
+                                else if (element.ValueKind == JsonValueKind.Array)
+                                {
+                                    var arr = element.EnumerateArray().ToArray();
+                                    if (arr.Length >= 2 && arr[0].ValueKind == JsonValueKind.String)
+                                    {
+                                        var toolCall = new PromptToolCall
+                                        {
+                                            Id = Guid.NewGuid().ToString(),
+                                            Name = arr[0].GetString(),
+                                            ArgumentsJson = arr[1].ValueKind == JsonValueKind.Object ? arr[1].GetRawText() : "{}"
+                                        };
+                                        toolCalls.Add(toolCall);
+                                        WriteLog("JSON解析成功(修复数组格式)", $"工具: {toolCall.Name}, 参数: {toolCall.ArgumentsJson}");
+                                        System.Diagnostics.Debug.WriteLine($"成功解析工具(修复数组格式): {toolCall.Name}, 参数: {toolCall.ArgumentsJson}");
+                                    }
+                                }
                             }
                             catch (Exception innerEx)
                             {
+                                WriteLog("JSON解析失败", $"解析单个工具调用失败: {innerEx.Message}, 元素: {element.GetRawText()}");
                                 System.Diagnostics.Debug.WriteLine($"解析单个工具调用失败: {innerEx.Message}");
                             }
                         }
@@ -887,29 +1309,82 @@ namespace ExcelAddIn
             catch (Exception ex)
             {
                 System.Diagnostics.Debug.WriteLine($"JSON解析失败: {ex.Message}, 内容: {jsonContent}");
+                WriteLog("JSON解析异常", $"错误: {ex.Message}\n内容: {jsonContent}");
                 
                 // 尝试使用正则表达式提取工具调用
                 try
                 {
-                    // 更宽松的正则表达式
-                    var regex = new System.Text.RegularExpressions.Regex(@"""name""\s*:\s*""([^""]+)""\s*,\s*""arguments""\s*:\s*(\{[^}]*\})");
-                    var matches = regex.Matches(jsonContent);
-                    foreach (System.Text.RegularExpressions.Match match in matches)
+                    // 提取工具名称
+                    var nameRegex = new System.Text.RegularExpressions.Regex(@"""name""\s*:\s*""([^""]+)""");
+                    var nameMatch = nameRegex.Match(jsonContent);
+                    
+                    if (nameMatch.Success)
                     {
-                        if (match.Success && match.Groups.Count >= 3)
+                        string toolName = nameMatch.Groups[1].Value;
+                        
+                        // 提取arguments部分（支持嵌套大括号）
+                        int argsStart = jsonContent.IndexOf("\"arguments\"");
+                        if (argsStart != -1)
                         {
+                            int braceStart = jsonContent.IndexOf('{', argsStart);
+                            if (braceStart != -1)
+                            {
+                                int braceCount = 0;
+                                int braceEnd = -1;
+                                for (int i = braceStart; i < jsonContent.Length; i++)
+                                {
+                                    if (jsonContent[i] == '{') braceCount++;
+                                    else if (jsonContent[i] == '}') braceCount--;
+                                    if (braceCount == 0)
+                                    {
+                                        braceEnd = i;
+                                        break;
+                                    }
+                                }
+                                
+                                if (braceEnd != -1)
+                                {
+                                    string argsJson = jsonContent.Substring(braceStart, braceEnd - braceStart + 1);
+                                    toolCalls.Add(new PromptToolCall
+                                    {
+                                        Id = Guid.NewGuid().ToString(),
+                                        Name = toolName,
+                                        ArgumentsJson = argsJson
+                                    });
+                                    WriteLog("正则提取成功", $"工具: {toolName}, 参数: {argsJson}");
+                                    System.Diagnostics.Debug.WriteLine($"正则提取工具: {toolName}, 参数: {argsJson}");
+                                }
+                                else
+                                {
+                                    // 无法找到完整的arguments，使用空对象
+                                    toolCalls.Add(new PromptToolCall
+                                    {
+                                        Id = Guid.NewGuid().ToString(),
+                                        Name = toolName,
+                                        ArgumentsJson = "{}"
+                                    });
+                                    WriteLog("正则提取(无参数)", $"工具: {toolName}");
+                                    System.Diagnostics.Debug.WriteLine($"正则提取工具(无参数): {toolName}");
+                                }
+                            }
+                        }
+                        else
+                        {
+                            // 没有arguments字段
                             toolCalls.Add(new PromptToolCall
                             {
                                 Id = Guid.NewGuid().ToString(),
-                                Name = match.Groups[1].Value,
-                                ArgumentsJson = match.Groups[2].Value
+                                Name = toolName,
+                                ArgumentsJson = "{}"
                             });
-                            System.Diagnostics.Debug.WriteLine($"正则提取工具: {match.Groups[1].Value}");
+                            WriteLog("正则提取(无arguments)", $"工具: {toolName}");
+                            System.Diagnostics.Debug.WriteLine($"正则提取工具(无arguments): {toolName}");
                         }
                     }
                 }
                 catch (Exception regexEx)
                 {
+                    WriteLog("正则提取失败", $"错误: {regexEx.Message}");
                     System.Diagnostics.Debug.WriteLine($"正则提取也失败: {regexEx.Message}");
                 }
             }
@@ -985,6 +1460,122 @@ namespace ExcelAddIn
             public string Id { get; set; }
             public string Name { get; set; }
             public string ArgumentsJson { get; set; }  // 存储JSON字符串而不是JsonElement
+        }
+
+        // 获取工具组选择器（第一阶段：让模型选择需要的工具组）
+        private List<object> GetToolGroupSelector()
+        {
+            return new List<object>
+            {
+                new
+                {
+                    type = "function",
+                    function = new
+                    {
+                        name = "select_tool_groups",
+                        description = "根据用户需求选择需要使用的工具组。必须先调用此工具选择工具组，然后才能使用具体工具。",
+                        parameters = new
+                        {
+                            type = "object",
+                            properties = new
+                            {
+                                groups = new
+                                {
+                                    type = "array",
+                                    items = new
+                                    {
+                                        type = "string",
+                                        @enum = _nativeToolGroups.Keys.ToArray()
+                                    },
+                                    description = $"选择需要的工具组ID列表。可选值：\n" + string.Join("\n", _nativeToolGroups.Select(g => $"- {g.Key}: {g.Value.Description}"))
+                                }
+                            },
+                            required = new[] { "groups" }
+                        }
+                    }
+                }
+            };
+        }
+
+        // 根据选中的工具组获取具体工具定义
+        private List<object> GetToolsByGroups(List<string> groupIds)
+        {
+            var tools = new List<object>();
+            var allTools = GetMcpTools();
+            var selectedToolNames = new HashSet<string>();
+
+            // 收集所有选中组的工具名称
+            foreach (var groupId in groupIds)
+            {
+                if (_nativeToolGroups.TryGetValue(groupId, out var groupInfo))
+                {
+                    foreach (var toolName in groupInfo.Tools)
+                    {
+                        selectedToolNames.Add(toolName);
+                    }
+                }
+            }
+
+            // 从完整工具列表中筛选
+            foreach (var tool in allTools)
+            {
+                try
+                {
+                    var json = JsonSerializer.Serialize(tool);
+                    using var doc = JsonDocument.Parse(json);
+                    var funcName = doc.RootElement.GetProperty("function").GetProperty("name").GetString();
+                    if (selectedToolNames.Contains(funcName))
+                    {
+                        tools.Add(tool);
+                    }
+                }
+                catch { }
+            }
+
+            return tools;
+        }
+
+        // 根据用户输入智能预选工具组（减少第一阶段的必要性）
+        private List<string> PreSelectToolGroups(string userInput)
+        {
+            var selected = new List<string>();
+            string inputLower = userInput.ToLower();
+
+            // 关键词映射
+            var keywordMap = new Dictionary<string, string[]>
+            {
+                ["cell_rw"] = new[] { "写入", "输入", "设置值", "读取", "获取", "单元格", "公式", "清除", "复制", "范围", "查找", "替换", "统计", "最后", "区域" },
+                ["format"] = new[] { "格式", "颜色", "字体", "背景", "加粗", "斜体", "边框", "合并", "对齐", "居中", "换行", "条件格式" },
+                ["row_col"] = new[] { "行高", "列宽", "插入行", "插入列", "删除行", "删除列", "隐藏", "显示" },
+                ["sheet"] = new[] { "工作表", "表名", "创建表", "新建表", "重命名", "删除表", "复制表", "冻结", "sheet" },
+                ["workbook"] = new[] { "工作簿", "文件", "新建", "打开", "保存", "关闭" },
+                ["data"] = new[] { "排序", "筛选", "去重", "验证", "表格", "图表", "chart", "折线", "柱形", "饼图", "曲线", "柱状", "散点", "面积", "雷达", "生成图", "创建图", "画图", "可视化", "分析" },
+                ["named"] = new[] { "命名区域", "命名范围" },
+                ["link"] = new[] { "批注", "注释", "超链接", "链接", "跳转" }
+            };
+
+            foreach (var kv in keywordMap)
+            {
+                foreach (var keyword in kv.Value)
+                {
+                    if (inputLower.Contains(keyword))
+                    {
+                        if (!selected.Contains(kv.Key))
+                        {
+                            selected.Add(kv.Key);
+                        }
+                        break;
+                    }
+                }
+            }
+
+            // 默认包含单元格读写（最常用）
+            if (selected.Count == 0)
+            {
+                selected.Add("cell_rw");
+            }
+
+            return selected;
         }
 
         // 获取MCP工具定义（带缓存优化）
@@ -1741,14 +2332,14 @@ namespace ExcelAddIn
                             {
                                 fileName = new { type = "string", description = "工作簿文件名（可选）" },
                                 sheetName = new { type = "string", description = "工作表名称（可选）" },
-                                chartType = new { type = "string", description = "图表类型：line/bar/column/pie/scatter/area/radar" },
-                                dataRange = new { type = "string", description = "数据源范围（如'A1:D10'）" },
-                                chartPosition = new { type = "string", description = "图表位置（如'F1'）" },
+                                chartType = new { type = "string", description = "图表类型：line/bar/column/pie/scatter/area/radar（默认column）" },
+                                dataRange = new { type = "string", description = "数据源范围（如'A1:D10'），也可用rangeAddress" },
+                                chartPosition = new { type = "string", description = "图表位置（如'F1'，可选，默认在数据右侧）" },
                                 title = new { type = "string", description = "图表标题（可选）" },
                                 width = new { type = "integer", description = "图表宽度（默认400）" },
                                 height = new { type = "integer", description = "图表高度（默认300）" }
                             },
-                            required = new[] { "chartType", "dataRange", "chartPosition" }
+                            required = new[] { "dataRange" }
                         }
                     }
                 },
@@ -3029,7 +3620,27 @@ namespace ExcelAddIn
                         {
                             var fileName = GetFileName();
                             var sheetName = GetSheetName();
-                            var rangeAddress = arguments.GetProperty("rangeAddress").GetString();
+                            
+                            // 获取rangeAddress，如果未提供则使用当前选中的单元格
+                            string rangeAddress;
+                            if (arguments.TryGetProperty("rangeAddress", out var rangeAddressProp))
+                            {
+                                rangeAddress = rangeAddressProp.GetString();
+                            }
+                            else
+                            {
+                                // 未提供rangeAddress，使用当前选中的单元格
+                                if (ThisAddIn.app?.Selection != null)
+                                {
+                                    Microsoft.Office.Interop.Excel.Range selection = ThisAddIn.app.Selection;
+                                    rangeAddress = selection.Address.Replace("$", "");
+                                }
+                                else
+                                {
+                                    throw new Exception("未提供rangeAddress参数，且无法获取当前选中的单元格");
+                                }
+                            }
+                            
                             var worksheet = GetWorksheet(fileName, sheetName);
                             var range = worksheet.Range[rangeAddress];
 
@@ -3515,16 +4126,38 @@ namespace ExcelAddIn
                         {
                             var fileName = GetFileName();
                             var sheetName = GetSheetName();
-                            var chartType = arguments.GetProperty("chartType").GetString();
-                            var dataRange = arguments.GetProperty("dataRange").GetString();
-                            var chartPosition = arguments.GetProperty("chartPosition").GetString();
+                            var chartType = arguments.TryGetProperty("chartType", out var chartTypeProp) ? chartTypeProp.GetString() : "column";
+                            
+                            // 支持 dataRange 或 rangeAddress 作为数据范围参数
+                            string dataRange = null;
+                            if (arguments.TryGetProperty("dataRange", out var dataRangeProp))
+                                dataRange = dataRangeProp.GetString();
+                            else if (arguments.TryGetProperty("rangeAddress", out var rangeAddressProp))
+                                dataRange = rangeAddressProp.GetString();
+                            else if (arguments.TryGetProperty("range", out var rangeProp))
+                                dataRange = rangeProp.GetString();
+                            
+                            if (string.IsNullOrEmpty(dataRange))
+                                return "错误: 缺少数据范围参数 (dataRange 或 rangeAddress)";
+                            
                             var title = arguments.TryGetProperty("title", out var titleProp) ? titleProp.GetString() : null;
                             var width = arguments.TryGetProperty("width", out var widthProp) ? widthProp.GetInt32() : 400;
                             var height = arguments.TryGetProperty("height", out var heightProp) ? heightProp.GetInt32() : 300;
 
                             var worksheet = GetWorksheet(fileName, sheetName);
                             var dataRangeObj = worksheet.Range[dataRange];
-                            var chartPositionObj = worksheet.Range[chartPosition];
+                            
+                            // chartPosition 可选，默认放在数据区域右侧
+                            Microsoft.Office.Interop.Excel.Range chartPositionObj;
+                            if (arguments.TryGetProperty("chartPosition", out var chartPosProp) && !string.IsNullOrEmpty(chartPosProp.GetString()))
+                            {
+                                chartPositionObj = worksheet.Range[chartPosProp.GetString()];
+                            }
+                            else
+                            {
+                                // 默认位置：数据区域右侧偏移一列
+                                chartPositionObj = dataRangeObj.Offset[0, dataRangeObj.Columns.Count + 1];
+                            }
 
                             // 创建图表
                             var chartObjects = worksheet.ChartObjects(Type.Missing);
@@ -4292,6 +4925,9 @@ namespace ExcelAddIn
             string apiUrl = _apiUrl;
             bool useMcp = checkBoxUseMcp.Checked;
 
+            // 记录用户输入
+            WriteLog("用户输入", userInput);
+
             // 将用户消息加入历史
             _chatHistory.Add(new ChatMessage
             {
@@ -4333,14 +4969,44 @@ namespace ExcelAddIn
                     requestBody["think"] = false;
                 }
 
+                // 检测是否为小模型（参数量小于3B），小模型直接使用Prompt Engineering模式
+                bool isSmallModel = !_isCloudConnection && IsSmallModel(_model);
+                if (isSmallModel && useMcp && !_usePromptEngineering)
+                {
+                    WriteLog("小模型检测", $"检测到小模型 {_model}，自动切换到Prompt Engineering模式以提高响应速度");
+                    _usePromptEngineering = true;
+                    // 重新构建消息（包含Prompt Engineering系统提示）
+                    requestBody["messages"] = BuildMessages(useMcp, userInput);
+                }
+
                 // 如果启用MCP且ExcelMcp可用，且不是Prompt Engineering模式，添加工具定义
                 if (useMcp && _excelMcp != null && !_usePromptEngineering)
                 {
-                    requestBody["tools"] = GetMcpTools();
+                    // 对于本地模型，使用智能工具选择减少token数量
+                    if (!_isCloudConnection && _useToolGrouping)
+                    {
+                        // 根据用户输入预选相关工具组
+                        var preSelectedGroups = PreSelectToolGroups(userInput);
+                        var selectedTools = GetToolsByGroups(preSelectedGroups);
+                        requestBody["tools"] = selectedTools;
+                        WriteLog("智能工具选择", $"根据用户输入预选工具组: [{string.Join(", ", preSelectedGroups)}], 工具数量: {selectedTools.Count}");
+                    }
+                    else
+                    {
+                        // 云端模型或禁用分组时，发送全部工具
+                        requestBody["tools"] = GetMcpTools();
+                    }
                 }
+
+                // 记录请求信息（简化版，不包含完整工具定义）
+                var requestJsonForLog = GetSimplifiedRequestBodyForLog(requestBody);
+                WriteLog("API请求", $"URL: {apiUrl}\n模型: {_model}\nPrompt Engineering模式: {_usePromptEngineering}\n请求体:\n{requestJsonForLog}");
 
                 var response = await client.PostAsJsonAsync(apiUrl, requestBody);
                 var responseContent = await response.Content.ReadAsStringAsync();
+
+                // 记录响应信息
+                WriteLog("API响应", $"状态码: {response.StatusCode}\n响应内容:\n{responseContent}");
 
                 System.Diagnostics.Debug.WriteLine($"API响应状态: {response.StatusCode}");
                 System.Diagnostics.Debug.WriteLine($"API响应内容: {responseContent.Substring(0, Math.Min(500, responseContent.Length))}");
@@ -4355,9 +5021,12 @@ namespace ExcelAddIn
                          responseContent.Contains("function") || responseContent.Contains("not supported") ||
                          responseContent.Contains("invalid") || responseContent.Contains("unknown"));
 
+                    WriteLog("模式检测", $"请求失败，状态码: {response.StatusCode}\n是否应切换到Prompt Engineering: {shouldSwitchToPromptEngineering}\n原因: 本地模型={!_isCloudConnection}, 使用MCP={useMcp}, 当前非PE模式={!_usePromptEngineering}");
+
                     if (shouldSwitchToPromptEngineering)
                     {
                         // 本地模型不支持function calling，切换到Prompt Engineering模式
+                        WriteLog("模式切换", "本地模型不支持function calling或请求格式不兼容，切换到Prompt Engineering模式");
                         System.Diagnostics.Debug.WriteLine("本地模型不支持function calling或请求格式不兼容，切换到Prompt Engineering模式");
                         _usePromptEngineering = true;
 
@@ -4365,9 +5034,14 @@ namespace ExcelAddIn
                         requestBody.Remove("tools");
                         requestBody["messages"] = BuildMessages(useMcp, userInput);
 
+                        // 记录重试请求（简化版）
+                        var retryRequestJsonForLog = GetSimplifiedRequestBodyForLog(requestBody);
+                        WriteLog("重试请求(Prompt Engineering)", $"URL: {apiUrl}\n请求体:\n{retryRequestJsonForLog}");
+
                         response = await client.PostAsJsonAsync(apiUrl, requestBody);
                         responseContent = await response.Content.ReadAsStringAsync();
 
+                        WriteLog("重试响应", $"状态码: {response.StatusCode}\n响应内容:\n{responseContent}");
                         System.Diagnostics.Debug.WriteLine($"重试后API响应状态: {response.StatusCode}");
 
                         if (!response.IsSuccessStatusCode)
@@ -4389,14 +5063,38 @@ namespace ExcelAddIn
                 System.Diagnostics.Debug.WriteLine($"工具调用数量: {choice?.message?.tool_calls?.Length ?? 0}");
                 System.Diagnostics.Debug.WriteLine($"Prompt Engineering模式: {_usePromptEngineering}");
 
+                WriteLog("响应解析", $"AI响应内容: {choice?.message?.content}\n原生tool_calls数量: {choice?.message?.tool_calls?.Length ?? 0}\n当前Prompt Engineering模式: {_usePromptEngineering}");
+
                 // 检查本地模型是否支持function calling
-                // 如果是本地模型，发送了tools参数但没有返回tool_calls，说明模型不支持function calling
+                // 如果是本地模型，发送了tools参数但没有返回tool_calls，需要判断是模型不支持还是模型主动选择不调用工具
                 if (!_isCloudConnection && useMcp && _excelMcp != null && !_usePromptEngineering)
                 {
                     bool hasToolCalls = choice?.message?.tool_calls != null && choice.message.tool_calls.Length > 0;
+                    string responseText = choice?.message?.content?.Trim() ?? "";
+                    bool hasMeaningfulContent = !string.IsNullOrEmpty(responseText) && responseText.Length > 10;
+                    
+                    WriteLog("Function Calling检测", $"本地模型是否返回tool_calls: {hasToolCalls}, 是否有有意义的文本内容: {hasMeaningfulContent}, 内容长度: {responseText.Length}");
+                    
                     if (!hasToolCalls)
                     {
+                        // 如果模型返回了有意义的文本内容（如澄清问题），直接返回给用户，不切换模式
+                        if (hasMeaningfulContent)
+                        {
+                            WriteLog("响应处理", "本地模型未返回tool_calls但有有意义的文本内容，直接返回给用户（可能是澄清问题）");
+                            System.Diagnostics.Debug.WriteLine($"本地模型返回文本响应（非工具调用）: {responseText}");
+                            
+                            // 将AI回复加入历史
+                            _chatHistory.Add(new ChatMessage
+                            {
+                                Role = "assistant",
+                                Content = responseText
+                            });
+                            
+                            return responseText;
+                        }
+                        
                         // 本地模型不支持function calling，切换到Prompt Engineering模式
+                        WriteLog("模式切换", "本地模型未返回tool_calls且无有意义内容，切换到Prompt Engineering模式");
                         System.Diagnostics.Debug.WriteLine("本地模型未返回tool_calls，切换到Prompt Engineering模式");
                         _usePromptEngineering = true;
 
@@ -4418,8 +5116,14 @@ namespace ExcelAddIn
                         requestBody.Remove("tools");
                         requestBody["messages"] = BuildMessages(useMcp, userInput);
 
+                        // 记录重试请求（简化版）
+                        var retryRequestJsonForLog2 = GetSimplifiedRequestBodyForLog(requestBody);
+                        WriteLog("重试请求(Prompt Engineering)", $"URL: {apiUrl}\n请求体:\n{retryRequestJsonForLog2}");
+
                         response = await client.PostAsJsonAsync(apiUrl, requestBody);
                         responseContent = await response.Content.ReadAsStringAsync();
+
+                        WriteLog("重试响应", $"状态码: {response.StatusCode}\n响应内容:\n{responseContent}");
 
                         if (!response.IsSuccessStatusCode)
                         {
@@ -4469,6 +5173,21 @@ namespace ExcelAddIn
                     foreach (var toolCall in toolCalls)
                     {
                         var functionName = toolCall.function.name;
+                        
+                        // 检查是否为一次性工具且已执行过
+                        if (_oneTimeTools.Contains(functionName) && _executedOneTimeTools.Contains(functionName))
+                        {
+                            WriteLog("跳过重复工具", $"工具 {functionName} 已在本次请求中执行过，跳过重复执行");
+                            // 将跳过信息作为工具结果加入历史
+                            _chatHistory.Add(new ChatMessage
+                            {
+                                Role = "tool",
+                                Content = $"工具 {functionName} 已执行过，跳过重复调用",
+                                ToolCallId = toolCall.id
+                            });
+                            continue;
+                        }
+                        
                         var arguments = JsonSerializer.Deserialize<JsonElement>(toolCall.function.arguments);
 
                         System.Diagnostics.Debug.WriteLine($"执行工具: {functionName}");
@@ -4479,6 +5198,12 @@ namespace ExcelAddIn
                         var toolResult = ExecuteMcpTool(functionName, arguments);
 
                         System.Diagnostics.Debug.WriteLine($"工具执行结果: {toolResult}");
+                        
+                        // 记录一次性工具已执行
+                        if (_oneTimeTools.Contains(functionName))
+                        {
+                            _executedOneTimeTools.Add(functionName);
+                        }
 
                         // 将工具结果加入历史
                         _chatHistory.Add(new ChatMessage
@@ -4514,7 +5239,16 @@ namespace ExcelAddIn
 
                         if (useMcp && _excelMcp != null)
                         {
-                            finalRequestBody["tools"] = GetMcpTools();
+                            // 对于本地模型，使用智能工具选择
+                            if (!_isCloudConnection && _useToolGrouping)
+                            {
+                                var preSelectedGroups = PreSelectToolGroups(userInput);
+                                finalRequestBody["tools"] = GetToolsByGroups(preSelectedGroups);
+                            }
+                            else
+                            {
+                                finalRequestBody["tools"] = GetMcpTools();
+                            }
                         }
 
                         SafeUpdatePromptLabel("等待AI响应...");
@@ -4561,6 +5295,21 @@ namespace ExcelAddIn
                             foreach (var toolCall in moreToolCalls)
                             {
                                 var functionName = toolCall.function.name;
+                                
+                                // 检查是否为一次性工具且已执行过
+                                if (_oneTimeTools.Contains(functionName) && _executedOneTimeTools.Contains(functionName))
+                                {
+                                    WriteLog("跳过重复工具", $"工具 {functionName} 已在本次请求中执行过，跳过重复执行");
+                                    // 将跳过信息作为工具结果加入历史
+                                    _chatHistory.Add(new ChatMessage
+                                    {
+                                        Role = "tool",
+                                        Content = $"工具 {functionName} 已执行过，跳过重复调用",
+                                        ToolCallId = toolCall.id
+                                    });
+                                    continue;
+                                }
+                                
                                 var arguments = JsonSerializer.Deserialize<JsonElement>(toolCall.function.arguments);
 
                                 System.Diagnostics.Debug.WriteLine($"执行工具: {functionName}");
@@ -4571,6 +5320,12 @@ namespace ExcelAddIn
                                 var toolResult = ExecuteMcpTool(functionName, arguments);
 
                                 System.Diagnostics.Debug.WriteLine($"工具执行结果: {toolResult}");
+                                
+                                // 记录一次性工具已执行
+                                if (_oneTimeTools.Contains(functionName))
+                                {
+                                    _executedOneTimeTools.Add(functionName);
+                                }
 
                                 // 将工具结果加入历史
                                 _chatHistory.Add(new ChatMessage
@@ -4625,10 +5380,14 @@ namespace ExcelAddIn
         // 处理Prompt Engineering模式的响应（用于不支持原生Function Calling的本地模型）
         private async Task<string> HandlePromptEngineeringResponse(HttpClient client, string apiUrl, string aiResponse, string userInput = null, int depth = 0, bool hasExecutedTools = false)
         {
+            // 记录AI响应
+            WriteLog("AI响应(Prompt Engineering)", $"递归深度: {depth}\n响应内容:\n{aiResponse}");
+
             // 限制递归深度，防止无限循环
             const int maxDepth = 3;
             if (depth >= maxDepth)
             {
+                WriteLog("调试", "已达到最大递归深度，停止处理");
                 _chatHistory.Add(new ChatMessage
                 {
                     Role = "assistant",
@@ -4644,10 +5403,12 @@ namespace ExcelAddIn
 
             // 解析响应中的工具调用
             var toolCalls = ParsePromptToolCalls(aiResponse);
+            WriteLog("工具调用解析", $"解析到 {toolCalls.Count} 个工具调用");
 
             // 如果没有工具调用，检查是否模型错误地用文字描述了操作
             if (toolCalls.Count == 0)
             {
+                WriteLog("调试", "未检测到工具调用");
                 // 检测模型是否错误地用文字描述操作而没有输出工具调用
                 bool seemsLikeFailedToolCall = aiResponse.Contains("已") && 
                     (aiResponse.Contains("写入") || aiResponse.Contains("设置") || aiResponse.Contains("创建") || 
@@ -4655,6 +5416,7 @@ namespace ExcelAddIn
                 
                 if (seemsLikeFailedToolCall)
                 {
+                    WriteLog("警告", "模型似乎在描述操作但未输出工具调用格式");
                     // 模型似乎在描述操作但没有实际调用工具，添加提示
                     var warningResponse = aiResponse + "\n\n⚠️ [系统提示：当前本地模型未能正确输出工具调用格式，操作可能未实际执行。建议使用支持Function Calling的模型，或尝试更大参数的本地模型。]";
                     
@@ -4675,6 +5437,14 @@ namespace ExcelAddIn
                 return aiResponse;
             }
 
+            // 记录解析到的工具调用详情
+            var toolCallsDetail = new StringBuilder();
+            foreach (var tc in toolCalls)
+            {
+                toolCallsDetail.AppendLine($"  - {tc.Name}: {tc.ArgumentsJson}");
+            }
+            WriteLog("工具调用详情", toolCallsDetail.ToString());
+
             // 获取纯文本内容（移除工具调用标签）
             string textContent = RemoveToolCallTags(aiResponse);
 
@@ -4692,6 +5462,14 @@ namespace ExcelAddIn
             var toolResults = new StringBuilder();
             foreach (var toolCall in toolCalls)
             {
+                // 检查是否为一次性工具且已执行过
+                if (_oneTimeTools.Contains(toolCall.Name) && _executedOneTimeTools.Contains(toolCall.Name))
+                {
+                    WriteLog("跳过重复工具", $"工具 {toolCall.Name} 已在本次请求中执行过，跳过重复执行");
+                    toolResults.AppendLine($"工具 {toolCall.Name}: 已执行过，跳过重复调用");
+                    continue;
+                }
+
                 System.Diagnostics.Debug.WriteLine($"执行工具: {toolCall.Name}");
                 SafeUpdatePromptLabel($"正在执行工具: {toolCall.Name}...");
 
@@ -4703,23 +5481,42 @@ namespace ExcelAddIn
                         // 执行工具
                         var toolResult = ExecuteMcpTool(toolCall.Name, argDoc.RootElement);
                         System.Diagnostics.Debug.WriteLine($"工具执行结果: {toolResult}");
+                        WriteLog("工具执行", $"工具: {toolCall.Name}\n参数: {toolCall.ArgumentsJson}\n结果: {toolResult}");
 
                         toolResults.AppendLine($"工具 {toolCall.Name} 执行结果: {toolResult}");
+                        
+                        // 记录一次性工具已执行
+                        if (_oneTimeTools.Contains(toolCall.Name))
+                        {
+                            _executedOneTimeTools.Add(toolCall.Name);
+                        }
                     }
                 }
                 catch (Exception ex)
                 {
                     System.Diagnostics.Debug.WriteLine($"工具执行失败: {ex.Message}");
+                    WriteLog("工具执行失败", $"工具: {toolCall.Name}\n参数: {toolCall.ArgumentsJson}\n错误: {ex.Message}");
                     toolResults.AppendLine($"工具 {toolCall.Name} 执行失败: {ex.Message}");
                 }
             }
 
             // 将工具执行结果作为用户消息加入历史，让AI继续处理
-            var toolResultMessage = $"工具执行完成，结果如下：\n{toolResults}\n请根据执行结果回复用户。";
+            // 构建更清晰的结果消息，明确告知已完成的操作
+            var toolResultMessage = new StringBuilder();
+            toolResultMessage.AppendLine("工具执行完成，结果如下：");
+            toolResultMessage.AppendLine(toolResults.ToString());
+            
+            // 如果执行了一次性工具，明确告知不要重复
+            if (_executedOneTimeTools.Count > 0)
+            {
+                toolResultMessage.AppendLine($"⚠️ 以下工具已执行完成，请勿重复调用：{string.Join(", ", _executedOneTimeTools)}");
+            }
+            toolResultMessage.AppendLine("请根据执行结果用文字回复用户，不要再调用已执行的工具。");
+            
             _chatHistory.Add(new ChatMessage
             {
                 Role = "user",
-                Content = toolResultMessage
+                Content = toolResultMessage.ToString()
             });
 
             // 再次调用API获取最终回复
@@ -4792,6 +5589,24 @@ namespace ExcelAddIn
                 }
                 else
                 {
+                    // 获取当前选中单元格信息
+                    string currentCell = "A1";
+                    int currentRow = 1;
+                    int currentCol = 1;
+                    try
+                    {
+                        if (ThisAddIn.app?.Selection != null)
+                        {
+                            Microsoft.Office.Interop.Excel.Range selection = ThisAddIn.app.Selection;
+                            currentCell = selection.Address.Replace("$", "");
+                            currentRow = selection.Row;
+                            currentCol = selection.Column;
+                        }
+                    }
+                    catch { }
+                    
+                    string colLetter = GetColumnLetter(currentCol);
+                    
                     // 原生Function Calling模式
                     systemPrompt = @"你是一个Excel操作助手。你必须通过调用工具来操作Excel文件。
 
@@ -4801,15 +5616,15 @@ namespace ExcelAddIn
 
 **重要规则**：
 1. **必须直接调用工具，不要只是描述要做什么**：
-   - 错误示例：""我将在A1单元格写入测试"" ❌
+   - 错误示例：""我将在A1单元格写入xxx"" ❌
    - 错误示例：""现在我将这些工作表名称写入当前表的A列"" ❌
-   - 正确示例：直接调用 set_cell_value 工具，参数为 row=1, column=1, value=""测试"" ✅
+   - 正确示例：直接调用 set_cell_value 工具，参数为 row=行号, column=列号, value=用户指定的内容 ✅
    - 正确示例：循环调用 set_cell_value 工具，将每个工作表名称写入 A1、A2、A3... ✅
 
 2. **对于需要多步操作的任务，必须调用多次工具**：
    - 例如：要将5个工作表名称写入A1-A5，必须调用5次 set_cell_value 工具
-   - 第一次：set_cell_value(row=1, column=1, value=""Sheet1"")
-   - 第二次：set_cell_value(row=2, column=1, value=""Sheet2"")
+   - 第一次：set_cell_value(row=1, column=1, value=第一个表名)
+   - 第二次：set_cell_value(row=2, column=1, value=第二个表名)
    - ...以此类推
 
 3. **""表""默认指工作表（worksheet）**：
@@ -4821,16 +5636,16 @@ namespace ExcelAddIn
 
 4. **创建目录表的正确方式**：
    - 当用户要求创建目录表并写入表名时，注意行号分配：
-   - 如果需要添加标题（如""工作表目录""），标题应在A1，表名从A2开始
-   - 例如：创建目录表 → 先在A1写入""工作表目录"" → 表名从A2、A3、A4...开始写入
+   - 如果需要添加标题，标题应在A1，表名从A2开始
+   - 例如：创建目录表 → 先在A1写入标题 → 表名从A2、A3、A4...开始写入
    - **错误做法**：标题在A1，第一个表名也在A1 ❌
    - **正确做法**：标题在A1（row=1），第一个表名在A2（row=2），第二个在A3（row=3）✅
 
 5. **理解""当前单元格""的含义**：
    - 当用户说""当前单元格""、""选中的单元格""、""这个单元格""时，指的是用户在Excel中当前选中的单元格或区域
-   - 首先调用 get_current_selection 工具获取当前选中的单元格信息
-   - 然后根据返回的行号、列号或地址来操作该单元格
-   - 例如：""在当前单元格输入测试"" → 先调用 get_current_selection，获得行号和列号，再调用 set_cell_value
+   - 当前选中单元格：" + currentCell + @"（行=" + currentRow + @", 列=" + currentCol + @"即" + colLetter + @"列）
+   - 操作当前单元格时，直接使用 row=" + currentRow + @", column=" + currentCol + @"
+   - 例如：""在当前单元格输入xxx"" → 调用 set_cell_value(row=" + currentRow + @", column=" + currentCol + @", value=用户指定的内容)
 
 6. **区分两种超链接方式及其应用场景**：
    
@@ -4855,7 +5670,7 @@ namespace ExcelAddIn
      * 打开网络共享文件
    - 优点：可以链接到任何外部资源
    - 示例用法：
-     * 用户说""在A1添加百度的链接"" → 使用 add_hyperlink
+     * 用户说""在A1添加某网站的链接"" → 使用 add_hyperlink
      * 用户说""链接到本地的报告文档"" → 使用 add_hyperlink
      * 用户说""添加公司网站链接"" → 使用 add_hyperlink
    
@@ -4875,60 +5690,138 @@ namespace ExcelAddIn
 
 **当前环境**：
 - 这是Excel插件环境，用户在Excel中打开了工作簿并启动了对话框
-- 当前活跃工作簿：" + (string.IsNullOrEmpty(_activeWorkbook) ? "无" : _activeWorkbook) + @"
-- 当前活跃工作表：" + (string.IsNullOrEmpty(_activeWorksheet) ? "无" : _activeWorksheet) + @"
+- 当前活跃工作簿（文件名）：" + (string.IsNullOrEmpty(_activeWorkbook) ? "无" : _activeWorkbook) + @"
+- 当前活跃工作表（表名）：" + (string.IsNullOrEmpty(_activeWorksheet) ? "无" : _activeWorksheet) + @"
+- 当前选中单元格：" + currentCell + @"（行=" + currentRow + @", 列=" + currentCol + @"）
+- 注意：工作表名≠工作簿名！sheetName参数应填写工作表名（如""" + _activeWorksheet + @"""）
 
 **重要提示**：
 - 如果当前活跃工作簿为""无""，请先使用 get_current_excel_info 工具获取最新的Excel环境信息
 - 获取信息后，你就能知道用户当前打开的工作簿和工作表，然后可以直接对其进行操作
 - 不要只是告诉用户你将要做什么，必须实际调用工具来执行操作
 - 每个操作都必须对应一个工具调用，不能省略
-- 当用户提到""当前单元格""时，先调用 get_current_selection 获取选中信息
+- value参数必须填写用户实际指定的内容，不要使用示例中的占位符
 
 **操作流程示例**：
 用户：""请将当前工作簿中所有表的名称写入当前表的A列""
 正确做法：
 1. 调用 get_worksheet_names 获取所有工作表名称
-2. 对每个工作表名称，调用 set_cell_value(row=行号, column=1, value=表名)
+2. 对每个工作表名称，调用 set_cell_value(row=行号, column=1, value=实际表名)
 3. 完成后告诉用户操作完成
 
 错误做法：
 只回复""现在我将这些工作表名称写入当前表的A列""但不调用任何工具 ❌
 
 用户：""在所有表前新建一个目录表，写入所有表名，并加上超链接""
-正确做法（假设有Sheet1、Sheet2、Sheet3三个表）：
-1. 调用 create_worksheet(sheetName=""目录"") → 自动在最前面创建目录表
-2. 调用 get_worksheet_names() → 获取所有表名：[""目录"", ""Sheet1"", ""Sheet2"", ""Sheet3""]
-3. 调用 set_cell_value(row=1, column=1, value=""工作表目录"") → 在A1写入标题
-4. 调用 set_hyperlink_formula(cellAddress=""A2"", targetLocation=""Sheet1!A1"", displayText=""Sheet1"") → 第一个表名在A2
-5. 调用 set_hyperlink_formula(cellAddress=""A3"", targetLocation=""Sheet2!A1"", displayText=""Sheet2"") → 第二个表名在A3
-6. 调用 set_hyperlink_formula(cellAddress=""A4"", targetLocation=""Sheet3!A1"", displayText=""Sheet3"") → 第三个表名在A4
-7. 告诉用户完成
+正确做法：
+1. 调用 create_worksheet(sheetName=用户指定的表名) → 自动在最前面创建目录表
+2. 调用 get_worksheet_names() → 获取所有表名
+3. 调用 set_cell_value(row=1, column=1, value=标题内容) → 在A1写入标题
+4. 对每个表名，调用 set_hyperlink_formula(cellAddress=对应单元格, targetLocation=表名!A1, displayText=表名) → 从A2开始
+5. 告诉用户完成
 
 **重要**：注意行号从2开始（跳过标题行A1），避免标题被覆盖
 
-用户：""在当前单元格输入测试""
+用户：""在当前单元格输入xxx""
 正确做法：
-1. 调用 get_current_selection 获取当前选中的单元格信息
-2. 从返回信息中提取行号和列号
-3. 调用 set_cell_value(row=行号, column=列号, value=""测试"")
-4. 告诉用户操作完成
+1. 直接调用 set_cell_value(row=" + currentRow + @", column=" + currentCol + @", value=用户指定的内容)
+2. 告诉用户操作完成
 
-用户：""在A1创建跳转到销售数据表的链接""
+用户：""在A1创建跳转到某工作表的链接""
 正确做法：
-1. 调用 set_hyperlink_formula(cellAddress=""A1"", targetLocation=""销售数据!A1"", displayText=""查看销售数据"")
+1. 调用 set_hyperlink_formula(cellAddress=""A1"", targetLocation=""目标表名!A1"", displayText=用户指定的显示文本)
 2. 告诉用户已创建工作簿内部跳转链接
 
 错误做法：
 使用 add_hyperlink 添加外部链接 ❌（这会导致无法正确跳转）
 
-用户：""在B2添加百度搜索的链接""
+用户：""在B2添加某网站的链接""
 正确做法：
-1. 调用 add_hyperlink(cellAddress=""B2"", url=""https://www.baidu.com"", displayText=""百度搜索"")
+1. 调用 add_hyperlink(cellAddress=""B2"", url=用户指定的网址, displayText=用户指定的显示文本)
 2. 告诉用户已添加外部网址链接
 
 错误做法：
 使用 set_hyperlink_formula ❌（这只适用于工作簿内部跳转）
+
+用户：""根据河南省数据生成图表"" 或 ""将某某数据生成折线图/柱状图""
+正确做法（必须按顺序执行）：
+1. **先查找数据位置**：调用 find_value(searchValue=""河南省"") → 找到数据所在行/列
+2. **再获取数据内容**：调用 get_range_values(rangeAddress=根据find_value结果确定的范围) → 获取完整数据
+3. **最后创建图表**：调用 create_chart(dataRange=数据范围, chartType=图表类型, title=标题)
+4. 告诉用户图表已创建，并简要分析数据
+
+错误做法：
+- 直接调用 create_chart 而不先查找和确认数据位置 ❌
+- 假设数据在某个固定位置而不验证 ❌
+- 只描述要创建图表但不调用工具 ❌
+
+用户：""分析当前选中区域的数据并生成图表""
+正确做法：
+1. 调用 get_range_values(rangeAddress=""" + currentCell + @""") → 获取选中区域数据
+2. 根据数据内容决定合适的图表类型
+3. 调用 create_chart(dataRange=选中区域, chartType=合适的类型, title=描述性标题)
+4. 分析数据并生成报告
+
+**⚠️ 数据操作的核心原则：先查找，再操作**
+
+当用户提到特定数据（如""河南省""、""销售额""、""2024年""等）时，必须遵循以下流程：
+
+**11. 数据查找与定位规则**：
+- **永远不要假设数据位置**：即使用户说""A列的数据""，也应先验证
+- **使用 find_value 定位**：根据关键词找到数据的确切位置
+- **使用 get_range_values 获取数据**：确认数据内容后再进行后续操作
+
+**数据操作标准流程**：
+| 操作类型 | 第一步 | 第二步 | 第三步 |
+|---------|--------|--------|--------|
+| 读取特定数据 | find_value 查找位置 | get_range_values 获取数据 | 返回结果给用户 |
+| 分析数据 | find_value 查找位置 | get_range_values 获取数据 | 分析并生成报告 |
+| 创建图表 | find_value 查找位置 | get_range_values 确认数据 | create_chart 创建图表 |
+| 修改特定数据 | find_value 查找位置 | 确认目标单元格 | set_cell_value 修改 |
+| 格式化特定区域 | find_value 查找位置 | 确定范围 | set_cell_format 等格式工具 |
+| 排序/筛选 | find_value 查找表头 | 确定数据范围 | sort_range/set_auto_filter |
+| 删除特定行/列 | find_value 查找位置 | 确认行号/列号 | delete_rows/delete_columns |
+
+用户：""读取北京市的GDP数据"" 或 ""获取某某的销售额""
+正确做法：
+1. 调用 find_value(searchValue=""北京市"") → 找到数据位置
+2. 根据返回的行列信息，调用 get_range_values 获取相关数据
+3. 返回数据给用户
+
+错误做法：
+- 直接调用 get_range_values(""A1:D10"") 假设数据位置 ❌
+- 不查找就直接读取 ❌
+
+用户：""分析2020-2024年的收入变化""
+正确做法：
+1. 调用 find_value(searchValue=""2020"") → 找到年份数据起始位置
+2. 调用 find_value(searchValue=""收入"") → 找到收入数据位置
+3. 调用 get_range_values 获取完整数据范围
+4. 分析数据趋势并生成报告
+
+用户：""将河南省的数据标红"" 或 ""给某某数据加粗""
+正确做法：
+1. 调用 find_value(searchValue=""河南省"") → 找到数据位置
+2. 根据返回的位置，调用 set_cell_format 设置格式
+
+错误做法：
+- 假设河南省在某行直接设置格式 ❌
+
+用户：""删除空白行"" 或 ""删除包含某某的行""
+正确做法：
+1. 如果是删除特定内容的行，先调用 find_value 查找位置
+2. 确认行号后调用 delete_rows
+
+用户：""对销售数据进行排序""
+正确做法：
+1. 调用 find_value(searchValue=""销售"") → 找到销售数据列
+2. 调用 get_range_values 确定数据范围
+3. 调用 sort_range 进行排序
+
+**特殊情况**：
+- 如果用户明确指定了单元格地址（如""读取A1:D10的数据""），可以直接操作
+- 如果用户说""当前选中区域""，使用当前选中单元格：" + currentCell + @"
+- 如果 find_value 返回""未找到""，应告知用户并询问正确的关键词
 
 请根据用户的自然语言指令，**立即调用**相应的工具完成任务，而不是仅仅描述你要做什么。";
                 }
@@ -5033,141 +5926,149 @@ namespace ExcelAddIn
 
         private void AddChatItem(string text, bool isUser)
         {
-            int scrollBarWidth = SystemInformation.VerticalScrollBarWidth;
-            int availableWidth = flowLayoutPanelChat.ClientSize.Width - scrollBarWidth - 20;
-            // 最大宽度为容器宽度的75%
-            int maxWidth = (int)(availableWidth * 0.75);
-            int minWidth = 80; // 最小宽度
-            int maxHeight = 300; // 最大高度，超过则显示滚动条
-            int cornerRadius = 12; // 圆角半径
-            int buttonPanelWidth = isUser ? 68 : 46; // 用户消息3个按钮，模型消息2个按钮
-            int buttonHeight = 20; // 按钮高度
-
-            RichTextBox richTextBox = new RichTextBox
-            {
-                Text = text,
-                BorderStyle = BorderStyle.None,
-                ReadOnly = true,
-                WordWrap = true,
-                Padding = new Padding(8),
-                ContextMenuStrip = CreateMessageContextMenu(isUser),
-                ScrollBars = RichTextBoxScrollBars.None
-            };
-
-            int finalWidth, finalHeight;
-            bool needScroll = false;
-
-            // 计算文本实际需要的宽度和高度
-            using (Graphics g = richTextBox.CreateGraphics())
-            {
-                // 先计算单行文本的宽度
-                SizeF singleLineSize = g.MeasureString(text, richTextBox.Font);
-                int textWidth = (int)Math.Ceiling(singleLineSize.Width) + richTextBox.Padding.Horizontal + 10;
-
-                // 限制宽度在最小和最大之间
-                finalWidth = Math.Max(minWidth, Math.Min(textWidth, maxWidth));
-
-                // 根据最终宽度计算高度
-                SizeF textSize = g.MeasureString(text, richTextBox.Font, finalWidth - richTextBox.Padding.Horizontal);
-                int calculatedHeight = (int)Math.Ceiling(textSize.Height) + richTextBox.Padding.Vertical + 6;
-                
-                // 如果高度超过最大高度，启用滚动条
-                if (calculatedHeight > maxHeight)
-                {
-                    finalHeight = maxHeight;
-                    needScroll = true;
-                }
-                else
-                {
-                    finalHeight = Math.Max(calculatedHeight, 30);
-                }
-            }
-
-            // 创建圆角对话框容器Panel
-            Panel chatBubble = new Panel
-            {
-                Size = new Size(finalWidth, finalHeight),
-                BackColor = isUser ? Color.LightBlue : Color.LightGreen,
-                Tag = isUser ? "user_container" : "model_container"
-            };
-
-            // 设置圆角
-            System.Drawing.Drawing2D.GraphicsPath path = new System.Drawing.Drawing2D.GraphicsPath();
-            path.AddArc(0, 0, cornerRadius, cornerRadius, 180, 90);
-            path.AddArc(chatBubble.Width - cornerRadius, 0, cornerRadius, cornerRadius, 270, 90);
-            path.AddArc(chatBubble.Width - cornerRadius, chatBubble.Height - cornerRadius, cornerRadius, cornerRadius, 0, 90);
-            path.AddArc(0, chatBubble.Height - cornerRadius, cornerRadius, cornerRadius, 90, 90);
-            path.CloseAllFigures();
-            chatBubble.Region = new Region(path);
-
-            // 配置RichTextBox - 实现文本垂直居中
-            int rtbWidth = finalWidth - 4;
-            int rtbHeight = finalHeight - 4;
+            // 暂停布局更新，避免闪烁
+            flowLayoutPanelChat.SuspendLayout();
             
-            // 计算实际文本高度，用于垂直居中
-            int textTopPadding = 0;
-            if (!needScroll)
+            try
             {
-                using (Graphics g = richTextBox.CreateGraphics())
+                int scrollBarWidth = SystemInformation.VerticalScrollBarWidth;
+                int availableWidth = flowLayoutPanelChat.ClientSize.Width - scrollBarWidth - 20;
+                // 最大宽度为容器宽度的75%
+                int maxWidth = (int)(availableWidth * 0.75);
+                int minWidth = 80; // 最小宽度
+                int maxHeight = 300; // 最大高度，超过则显示滚动条
+                int cornerRadius = 12; // 圆角半径
+                int buttonPanelWidth = isUser ? 68 : 46; // 用户消息3个按钮，模型消息2个按钮
+                int buttonHeight = 20; // 按钮高度
+
+                // 先创建RichTextBox但不设置Text，避免触发布局
+                RichTextBox richTextBox = new RichTextBox
                 {
-                    SizeF textSize = g.MeasureString(text, richTextBox.Font, rtbWidth - richTextBox.Padding.Horizontal);
-                    int actualTextHeight = (int)Math.Ceiling(textSize.Height) + richTextBox.Padding.Vertical;
-                    if (actualTextHeight < rtbHeight)
+                    BorderStyle = BorderStyle.None,
+                    ReadOnly = true,
+                    WordWrap = true,
+                    Padding = new Padding(8),
+                    ContextMenuStrip = CreateMessageContextMenu(isUser),
+                    ScrollBars = RichTextBoxScrollBars.None
+                };
+
+                int finalWidth, finalHeight;
+                bool needScroll = false;
+
+                // 使用临时字体计算文本尺寸
+                using (Graphics g = flowLayoutPanelChat.CreateGraphics())
+                {
+                    // 先计算单行文本的宽度
+                    SizeF singleLineSize = g.MeasureString(text, richTextBox.Font);
+                    int textWidth = (int)Math.Ceiling(singleLineSize.Width) + richTextBox.Padding.Horizontal + 10;
+
+                    // 限制宽度在最小和最大之间
+                    finalWidth = Math.Max(minWidth, Math.Min(textWidth, maxWidth));
+
+                    // 根据最终宽度计算高度
+                    SizeF textSize = g.MeasureString(text, richTextBox.Font, finalWidth - richTextBox.Padding.Horizontal);
+                    int calculatedHeight = (int)Math.Ceiling(textSize.Height) + richTextBox.Padding.Vertical + 6;
+                    
+                    // 如果高度超过最大高度，启用滚动条
+                    if (calculatedHeight > maxHeight)
                     {
-                        textTopPadding = (rtbHeight - actualTextHeight) / 2;
+                        finalHeight = maxHeight;
+                        needScroll = true;
+                    }
+                    else
+                    {
+                        finalHeight = Math.Max(calculatedHeight, 30);
                     }
                 }
-            }
-            
-            richTextBox.Size = new Size(rtbWidth, rtbHeight);
-            richTextBox.Location = new Point(2, 2);
-            richTextBox.BackColor = chatBubble.BackColor;
-            richTextBox.ScrollBars = needScroll ? RichTextBoxScrollBars.Vertical : RichTextBoxScrollBars.None;
-            richTextBox.SelectionAlignment = HorizontalAlignment.Left;
-            richTextBox.Tag = isUser ? "user_message" : "model_message";
-            
-            // 通过设置上边距实现垂直居中效果
-            if (textTopPadding > 0)
-            {
-                richTextBox.Padding = new Padding(8, 8 + textTopPadding, 8, 8);
-            }
 
-            chatBubble.Controls.Add(richTextBox);
-
-            // 创建按钮面板
-            Panel buttonPanel = new Panel
-            {
-                Size = new Size(buttonPanelWidth, buttonHeight),
-                BackColor = Color.Transparent,
-                Tag = isUser ? "user_button_panel" : "model_button_panel"
-            };
-
-            // 创建按钮
-            Button btn1, btn2, btn3 = null;
-            ToolTip toolTip = new ToolTip();
-            
-            if (isUser)
-            {
-                // 用户消息：编辑、重发、删除
-                btn1 = new Button
+                // 创建圆角对话框容器Panel
+                Panel chatBubble = new Panel
                 {
-                    Text = "✎",
-                    Size = new Size(20, 20),
-                    Location = new Point(0, 0),
-                    FlatStyle = FlatStyle.Flat,
-                    Font = new Font("Segoe UI Symbol", 7),
-                    Cursor = Cursors.Hand
+                    Size = new Size(finalWidth, finalHeight),
+                    BackColor = isUser ? Color.LightBlue : Color.LightGreen,
+                    Tag = isUser ? "user_container" : "model_container"
                 };
-                btn1.FlatAppearance.BorderSize = 1;
-                btn1.Click += (s, e) => { richTextBoxInput.Text = text; richTextBoxInput.Focus(); richTextBoxInput.SelectAll(); };
-                toolTip.SetToolTip(btn1, "编辑");
 
-                btn2 = new Button
+                // 设置圆角
+                System.Drawing.Drawing2D.GraphicsPath path = new System.Drawing.Drawing2D.GraphicsPath();
+                path.AddArc(0, 0, cornerRadius, cornerRadius, 180, 90);
+                path.AddArc(chatBubble.Width - cornerRadius, 0, cornerRadius, cornerRadius, 270, 90);
+                path.AddArc(chatBubble.Width - cornerRadius, chatBubble.Height - cornerRadius, cornerRadius, cornerRadius, 0, 90);
+                path.AddArc(0, chatBubble.Height - cornerRadius, cornerRadius, cornerRadius, 90, 90);
+                path.CloseAllFigures();
+                chatBubble.Region = new Region(path);
+
+                // 配置RichTextBox - 实现文本垂直居中
+                int rtbWidth = finalWidth - 4;
+                int rtbHeight = finalHeight - 4;
+                
+                // 计算实际文本高度，用于垂直居中
+                int textTopPadding = 0;
+                if (!needScroll)
                 {
-                    Text = "↻",
-                    Size = new Size(20, 20),
-                    Location = new Point(22, 0),
-                    FlatStyle = FlatStyle.Flat,
+                    using (Graphics g = flowLayoutPanelChat.CreateGraphics())
+                    {
+                        SizeF textSize = g.MeasureString(text, richTextBox.Font, rtbWidth - richTextBox.Padding.Horizontal);
+                        int actualTextHeight = (int)Math.Ceiling(textSize.Height) + richTextBox.Padding.Vertical;
+                        if (actualTextHeight < rtbHeight)
+                        {
+                            textTopPadding = (rtbHeight - actualTextHeight) / 2;
+                        }
+                    }
+                }
+                
+                richTextBox.Size = new Size(rtbWidth, rtbHeight);
+                richTextBox.Location = new Point(2, 2);
+                richTextBox.BackColor = chatBubble.BackColor;
+                richTextBox.ScrollBars = needScroll ? RichTextBoxScrollBars.Vertical : RichTextBoxScrollBars.None;
+                richTextBox.SelectionAlignment = HorizontalAlignment.Left;
+                richTextBox.Tag = isUser ? "user_message" : "model_message";
+                
+                // 通过设置上边距实现垂直居中效果
+                if (textTopPadding > 0)
+                {
+                    richTextBox.Padding = new Padding(8, 8 + textTopPadding, 8, 8);
+                }
+                
+                // 最后设置文本，避免提前触发布局
+                richTextBox.Text = text;
+
+                chatBubble.Controls.Add(richTextBox);
+
+                // 创建按钮面板
+                Panel buttonPanel = new Panel
+                {
+                    Size = new Size(buttonPanelWidth, buttonHeight),
+                    BackColor = Color.Transparent,
+                    Tag = isUser ? "user_button_panel" : "model_button_panel"
+                };
+
+                // 创建按钮
+                Button btn1, btn2, btn3 = null;
+                ToolTip toolTip = new ToolTip();
+                
+                if (isUser)
+                {
+                    // 用户消息：编辑、重发、删除
+                    btn1 = new Button
+                    {
+                        Text = "✎",
+                        Size = new Size(20, 20),
+                        Location = new Point(0, 0),
+                        FlatStyle = FlatStyle.Flat,
+                        Font = new Font("Segoe UI Symbol", 7),
+                        Cursor = Cursors.Hand
+                    };
+                    btn1.FlatAppearance.BorderSize = 1;
+                    btn1.Click += (s, e) => { richTextBoxInput.Text = text; richTextBoxInput.Focus(); richTextBoxInput.SelectAll(); };
+                    toolTip.SetToolTip(btn1, "编辑");
+
+                    btn2 = new Button
+                    {
+                        Text = "↻",
+                        Size = new Size(20, 20),
+                        Location = new Point(22, 0),
+                        FlatStyle = FlatStyle.Flat,
                     Font = new Font("Segoe UI Symbol", 7),
                     Cursor = Cursors.Hand
                 };
@@ -5266,6 +6167,12 @@ namespace ExcelAddIn
             rowPanel.Margin = new Padding(10, 5, 10, 10);
             flowLayoutPanelChat.Controls.Add(rowPanel);
             flowLayoutPanelChat.ScrollControlIntoView(rowPanel);
+            }
+            finally
+            {
+                // 恢复布局更新
+                flowLayoutPanelChat.ResumeLayout(true);
+            }
         }
 
         private ContextMenuStrip CreateMessageContextMenu(bool isUserMessage)
@@ -5365,6 +6272,9 @@ namespace ExcelAddIn
                 // 配置有变化，重新初始化
                 // 重置Prompt Engineering模式标志（因为可能切换了云端/本地模型）
                 _usePromptEngineering = false;
+
+                // 记录配置变化
+                WriteLog("配置更新", $"模型: {_model}\nAPI地址: {_apiUrl}\n是否云端: {_isCloudConnection}\n是否Ollama: {_isOllamaApi}\nPrompt Engineering模式已重置为: false");
 
                 // 更新提示信息
                 if (string.IsNullOrEmpty(_apiKey) && _isCloudConnection)
@@ -5562,7 +6472,10 @@ namespace ExcelAddIn
 
         private void richTextBoxInput_KeyDown(object sender, KeyEventArgs e)
         {
-            switch (_enterMode)
+            // 如果_enterMode为空，默认使用模式0（回车发送）
+            string enterMode = string.IsNullOrEmpty(_enterMode) ? "0" : _enterMode;
+            
+            switch (enterMode)
             {
                 case "0":
                     if (e.KeyCode == Keys.Enter)
