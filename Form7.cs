@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Drawing;
@@ -29,6 +29,9 @@ namespace ExcelAddIn
         private bool _isCloudConnection = true;       //是否为云端连接（true=云端，false=本地）
         private bool _usePromptEngineering = false;   //是否使用Prompt Engineering模式（本地模型不支持function calling时自动启用）
         private bool _isOllamaApi = false;            //是否为Ollama API（用于添加Ollama特有参数）
+        private int _timeoutMinutes = 5;            //请求超时时间，默认5分钟
+
+        private bool _isPromptEngineeringChecked = false;  // 是否勾选了"优先Prompt Engineering"
 
         private ExcelMcp _excelMcp = null;  // Excel MCP实例
         private string _activeWorkbook = string.Empty;  // 当前活跃的工作簿
@@ -48,8 +51,6 @@ namespace ExcelAddIn
         
         // 两阶段工具调用：是否启用工具分组模式（用于减少小模型的处理负担）
         private bool _useToolGrouping = true;
-        // 当前选中的工具组（第一阶段选择后填充）
-        private List<string> _selectedToolGroups = null;
         
         // 工具分组定义（用于原生Function Calling的两阶段调用）
         private static readonly Dictionary<string, (string Description, string[] Tools)> _nativeToolGroups = new Dictionary<string, (string Description, string[] Tools)>
@@ -345,6 +346,9 @@ namespace ExcelAddIn
             richTextBoxInput.ScrollBars = RichTextBoxScrollBars.Vertical;
             // 将自定义上下文菜单绑定到 RichTextBox
             richTextBoxInput.ContextMenuStrip = customContextMenu;
+
+            // 初始化时默认不勾选"优先Prompt Engineering"
+            checkBoxPromptEngineering.Checked = false;
         }
 
         private async void Form7_Load(object sender, EventArgs e)
@@ -420,6 +424,9 @@ namespace ExcelAddIn
 
             // 更新模型信息标签
             UpdateModelInfoLabel();
+
+            // 根据连接类型设置"优先提示工程"复选框的状态
+            UpdatePromptEngineeringCheckBoxState();
 
             // 添加窗体大小变化事件，用于调整对话框宽度
             this.Resize += Form7_Resize;
@@ -525,7 +532,7 @@ namespace ExcelAddIn
             }
 
             // 记录用户输入
-            WriteLog("用户输入", $"内容: {userInput}\n当前模型: {_model}\nAPI地址: {_apiUrl}\n连接类型: {(_isCloudConnection ? "云端" : "本地")}\nPrompt Engineering模式: {_usePromptEngineering}");
+            WriteLog("用户输入", $"内容: {userInput}\n当前模型: {_model}\nAPI地址: {_apiUrl}\n连接类型: {(_isCloudConnection ? "云端" : "本地")}\n用户勾选'优先提示工程': {_isPromptEngineeringChecked}\nPrompt Engineering模式: {_usePromptEngineering}");
 
             // 清空已执行的一次性工具记录（每次新请求重新开始）
             _executedOneTimeTools.Clear();
@@ -4925,6 +4932,18 @@ namespace ExcelAddIn
             string apiUrl = _apiUrl;
             bool useMcp = checkBoxUseMcp.Checked;
 
+            // 根据用户勾选情况设置Prompt Engineering模式
+            if (_isPromptEngineeringChecked)
+            {
+                // 用户勾选了"优先提示工程"，强制使用Prompt Engineering模式
+                _usePromptEngineering = true;
+            }
+            else
+            {
+                // 用户没有勾选，重置为自动判断模式（后续会根据模型大小自动判断）
+                _usePromptEngineering = false;
+            }
+
             // 记录用户输入
             WriteLog("用户输入", userInput);
 
@@ -4938,7 +4957,7 @@ namespace ExcelAddIn
             using (var client = new HttpClient())
             {
                 // 设置较长的超时时间，本地模型可能需要更长时间响应
-                client.Timeout = TimeSpan.FromMinutes(5);
+                client.Timeout = TimeSpan.FromMinutes(_timeoutMinutes);
 
                 // 只有云端连接时才添加Authorization头
                 if (_isCloudConnection && !string.IsNullOrEmpty(apiKey))
@@ -4970,10 +4989,12 @@ namespace ExcelAddIn
                 }
 
                 // 检测是否为小模型（参数量小于3B），小模型直接使用Prompt Engineering模式
+                // 或者用户勾选了"优先提示工程"，强制使用Prompt Engineering模式
                 bool isSmallModel = !_isCloudConnection && IsSmallModel(_model);
-                if (isSmallModel && useMcp && !_usePromptEngineering)
+                if ((isSmallModel || _isPromptEngineeringChecked) && useMcp && !_usePromptEngineering)
                 {
-                    WriteLog("小模型检测", $"检测到小模型 {_model}，自动切换到Prompt Engineering模式以提高响应速度");
+                    string reason = _isPromptEngineeringChecked ? "用户勾选了'优先提示工程'" : $"检测到小模型 {_model}";
+                    WriteLog("模式切换", $"{reason}，切换到Prompt Engineering模式");
                     _usePromptEngineering = true;
                     // 重新构建消息（包含Prompt Engineering系统提示）
                     requestBody["messages"] = BuildMessages(useMcp, userInput);
@@ -6270,11 +6291,11 @@ namespace ExcelAddIn
             if (_configBeforeSettings != newConfig)
             {
                 // 配置有变化，重新初始化
-                // 重置Prompt Engineering模式标志（因为可能切换了云端/本地模型）
-                _usePromptEngineering = false;
+                // 根据用户勾选状态设置Prompt Engineering模式标志
+                _usePromptEngineering = _isPromptEngineeringChecked;
 
                 // 记录配置变化
-                WriteLog("配置更新", $"模型: {_model}\nAPI地址: {_apiUrl}\n是否云端: {_isCloudConnection}\n是否Ollama: {_isOllamaApi}\nPrompt Engineering模式已重置为: false");
+                WriteLog("配置更新", $"模型: {_model}\nAPI地址: {_apiUrl}\n是否云端: {_isCloudConnection}\n是否Ollama: {_isOllamaApi}\n用户勾选'优先提示工程': {_isPromptEngineeringChecked}\nPrompt Engineering模式设置为: {_usePromptEngineering}");
 
                 // 更新提示信息
                 if (string.IsNullOrEmpty(_apiKey) && _isCloudConnection)
@@ -6292,6 +6313,9 @@ namespace ExcelAddIn
 
                 // 更新模型信息标签
                 UpdateModelInfoLabel();
+
+                // 根据连接类型设置"优先提示工程"复选框的状态
+                UpdatePromptEngineeringCheckBoxState();
             }
             // 配置没有变化，不做任何操作
         }
@@ -6368,6 +6392,23 @@ namespace ExcelAddIn
 
                 // 检测是否为Ollama API（通过端口或URL特征判断）
                 _isOllamaApi = IsOllamaApi(_apiUrl);
+
+                if (parts.Length >= 7)
+                {
+                    string timeoutMinutes = parts[6].Split('^')[1];
+                    if (!string.IsNullOrEmpty(timeoutMinutes))
+                    {
+                        _timeoutMinutes = int.Parse(timeoutMinutes);
+                    }
+                    else
+                    {
+                        _timeoutMinutes = 5;
+                    }
+                }
+                else
+                {
+                    _timeoutMinutes = 5;
+                }
 
                 // 不在这里更新UI
             }
@@ -6526,6 +6567,28 @@ namespace ExcelAddIn
                         e.SuppressKeyPress = true; // 阻止控件处理按键（避免“叮”声或其他默认行为）
                     }
                     break;
+            }
+        }
+
+        private void checkBoxPromptEngineering_CheckedChanged(object sender, EventArgs e)
+        {
+            _isPromptEngineeringChecked= checkBoxPromptEngineering.Checked;
+        }
+
+        // 根据连接类型设置checkboxPromptEngineering的状态
+        private void UpdatePromptEngineeringCheckBoxState()
+        {
+            if (_isCloudConnection)
+            {
+                // 云端模型时，禁用"优先提示工程"复选框
+                checkBoxPromptEngineering.Enabled = false;
+                checkBoxPromptEngineering.Checked = false;
+                _isPromptEngineeringChecked = false;
+            }
+            else
+            {
+                // 本地模型时，启用"优先提示工程"复选框
+                checkBoxPromptEngineering.Enabled = true;
             }
         }
     }

@@ -252,7 +252,7 @@ namespace ExcelAddIn
                 return;
             }
 
-            string content = $"api-key^{apiKey};model^{model};api-url^{apiUrl};enter-mode^{enterMode};connection-type^{connectionType};is-cloud-model^{isCloudModel}";
+            string content = $"api-key^{apiKey};model^{model};api-url^{apiUrl};enter-mode^{enterMode};connection-type^{connectionType};is-cloud-model^{isCloudModel};timeout-minutes^{txbWaitingTime.Text.Trim()}";
 
             try
             {
@@ -352,6 +352,23 @@ namespace ExcelAddIn
                     case "2":
                         cbxEnterKey.SelectedIndex = 2;
                         break;
+                }
+
+                if (parts.Length >= 7)
+                {
+                    string timeoutMinutes = parts[6].Split('^')[1];
+                    if (!string.IsNullOrEmpty(timeoutMinutes))
+                    {
+                        txbWaitingTime.Text = timeoutMinutes;
+                    }
+                    else
+                    {
+                        txbWaitingTime.Text = "5";
+                    }
+                }
+                else
+                {
+                    txbWaitingTime.Text = "5";
                 }
             }
             catch (Exception ex)

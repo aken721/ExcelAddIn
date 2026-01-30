@@ -40,6 +40,7 @@
             this.send_button = new System.Windows.Forms.Button();
             this.checkBoxUseMcp = new System.Windows.Forms.CheckBox();
             this.labelModelInfo = new System.Windows.Forms.Label();
+            this.checkBoxPromptEngineering = new System.Windows.Forms.CheckBox();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -117,7 +118,7 @@
             this.label1.AutoSize = true;
             this.label1.Font = new System.Drawing.Font("微软雅黑", 10.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.label1.ForeColor = System.Drawing.Color.DarkSlateBlue;
-            this.label1.Location = new System.Drawing.Point(66, 332);
+            this.label1.Location = new System.Drawing.Point(66, 326);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(79, 20);
             this.label1.TabIndex = 8;
@@ -140,7 +141,7 @@
             this.checkBoxUseMcp.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
             this.checkBoxUseMcp.AutoSize = true;
             this.checkBoxUseMcp.Font = new System.Drawing.Font("微软雅黑", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.checkBoxUseMcp.Location = new System.Drawing.Point(70, 376);
+            this.checkBoxUseMcp.Location = new System.Drawing.Point(70, 356);
             this.checkBoxUseMcp.Name = "checkBoxUseMcp";
             this.checkBoxUseMcp.Size = new System.Drawing.Size(78, 21);
             this.checkBoxUseMcp.TabIndex = 9;
@@ -159,11 +160,27 @@
             this.labelModelInfo.Text = "未配置模型";
             this.labelModelInfo.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
             // 
+            // checkBoxPromptEngineering
+            // 
+            this.checkBoxPromptEngineering.Appearance = System.Windows.Forms.Appearance.Button;
+            this.checkBoxPromptEngineering.AutoSize = true;
+            this.checkBoxPromptEngineering.BackColor = System.Drawing.Color.Transparent;
+            this.checkBoxPromptEngineering.Font = new System.Drawing.Font("微软雅黑", 7.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.checkBoxPromptEngineering.ForeColor = System.Drawing.Color.DarkSlateBlue;
+            this.checkBoxPromptEngineering.Location = new System.Drawing.Point(33, 383);
+            this.checkBoxPromptEngineering.Name = "checkBoxPromptEngineering";
+            this.checkBoxPromptEngineering.Size = new System.Drawing.Size(117, 26);
+            this.checkBoxPromptEngineering.TabIndex = 11;
+            this.checkBoxPromptEngineering.Text = "优先使用提示工程模式";
+            this.checkBoxPromptEngineering.UseVisualStyleBackColor = false;
+            this.checkBoxPromptEngineering.CheckedChanged += new System.EventHandler(this.checkBoxPromptEngineering_CheckedChanged);
+            // 
             // Form7
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
             this.ClientSize = new System.Drawing.Size(800, 450);
+            this.Controls.Add(this.checkBoxPromptEngineering);
             this.Controls.Add(this.labelModelInfo);
             this.Controls.Add(this.checkBoxUseMcp);
             this.Controls.Add(this.label1);
@@ -197,5 +214,6 @@
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.CheckBox checkBoxUseMcp;
         private System.Windows.Forms.Label labelModelInfo;
+        private System.Windows.Forms.CheckBox checkBoxPromptEngineering;
     }
 }
