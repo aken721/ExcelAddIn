@@ -1,11 +1,14 @@
-﻿using System;
+using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.IO;
+using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Security.Cryptography;
 using System.Text;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -15,7 +18,6 @@ namespace ExcelAddIn
 {
     public partial class Form8 : Form
     {
-        int i = 0;
         private bool _isCloudConnection = true; // 标识连接类型（true=云端，false=本地）
         private CancellationTokenSource _modelFetchCts = null; // 用于取消模型获取请求
         private System.Windows.Forms.Timer _debounceTimer = null; // 防抖定时器
@@ -25,14 +27,515 @@ namespace ExcelAddIn
             InitializeComponent();
             pbxPassword.BackgroundImage = Properties.Resources.eye_hide;
             txbKey.UseSystemPasswordChar = true;
-            txbUrl.Text = @"https://api.deepseek.com/v1/chat/completions";
-            txbUrl.ReadOnly = true;
+            
+            // 初始化 cbxLLM 下拉框选项
+            InitializeLLMOptions();
+            
+            // 初始化防抖定时器
+            _debounceTimer = new System.Windows.Forms.Timer();
+            _debounceTimer.Interval = 1000; // 1秒防抖
+            _debounceTimer.Tick += DebounceTimer_Tick;
+            
+            // 添加事件处理
+            cbxLLM.SelectedIndexChanged += CbxLLM_SelectedIndexChanged;
+        }
+
+        // 初始化 LLM 提供商选项
+        private void InitializeLLMOptions()
+        {
+            cbxLLM.Items.Clear();
+            cbxLLM.Items.AddRange(new string[]
+            {
+                "DeepSeek",
+                "Qwen", 
+                "Kimi", 
+                "GLM", 
+                "MinMax", 
+                "OpenRoute", 
+                "Claude Code", 
+                "Gemini", 
+                "OpenAI", 
+                "Ollama", 
+                "vLLM", 
+                "LM Studio", 
+                "llama.cpp", 
+                "自定义"
+            });
+            
+            // 默认选择 DeepSeek
+            cbxLLM.SelectedIndex = 0;
+        }
+
+        // LLM 提供商选择变化事件
+        private void CbxLLM_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (cbxLLM == null) return;
+
+            string provider = cbxLLM.Text;
+            string defaultUrl = GetDefaultApiUrl(provider);
+            txbUrl.Text = defaultUrl;
+            
+            // 自定义提供商允许编辑URL
+            txbUrl.ReadOnly = provider != "自定义";
+            
+            // 清除模型列表，准备获取新的模型
+            cbxModel.Items.Clear();
+            cbxModel.Text = "";
+            
+            // 无论是本地部署还是云端，都在选择服务商后请求一次可选模型列表
+            if (provider != "自定义")
+            {
+                // 在UI线程上获取所需值，然后传递给后台任务
+                string apiKey = txbKey.Text ?? "";
+                string apiUrl = txbUrl.Text;
+                Task.Run(() => FetchModelsAsync(provider, apiKey, apiUrl));
+            }
+        }
+
+        // 根据模型提供商获取默认API地址
+        private string GetDefaultApiUrl(string provider)
+        {
+            switch (provider)
+            {
+                case "DeepSeek":
+                    return "https://api.deepseek.com/v1/chat/completions";
+                case "Qwen":
+                    return "https://dashscope.aliyuncs.com/compatible-mode/v1/chat/completions";
+                case "Kimi":
+                    return "https://api.moonshot.cn/v1/chat/completions";
+                case "GLM":
+                    return "https://open.bigmodel.cn/api/paas/v4/chat/completions";
+                case "MinMax":
+                    return "https://api.minimax.chat/v1/text/chatcompletion_pro";
+                case "OpenRoute":
+                    return "https://openrouter.ai/api/v1/chat/completions";
+                case "Claude Code":
+                    return "https://api.anthropic.com/v1/messages";
+                case "Gemini":
+                    return "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro:generateContent";
+                case "OpenAI":
+                    return "https://api.openai.com/v1/chat/completions";
+                case "Ollama":
+                    return "http://localhost:11434/v1/chat/completions";
+                case "vLLM":
+                    return "http://localhost:8000/v1/chat/completions";
+                case "LM Studio":
+                    return "http://localhost:1234/v1/chat/completions";
+                case "llama.cpp":
+                    return "http://localhost:8080/v1/chat/completions";
+                case "自定义":
+                    return "";
+                default:
+                    return "";
+            }
         }
 
         private void Form8_Load(object sender, EventArgs e)
         {
             DecodeConfig();
-            i = 0;
+            
+            // 添加API Key输入变化事件，用于自动获取模型列表
+            txbKey.TextChanged += TxbKey_TextChanged;
+        }
+
+        // API Key输入变化事件
+        private void TxbKey_TextChanged(object sender, EventArgs e)
+        {
+            // 重启防抖定时器
+            _debounceTimer.Stop();
+            _debounceTimer.Start();
+        }
+
+        // 防抖定时器触发事件
+        private void DebounceTimer_Tick(object sender, EventArgs e)
+        {
+            _debounceTimer.Stop();
+            // 在UI线程上获取所需值，然后传递给后台任务
+            string provider = cbxLLM.Text;
+            string apiKey = txbKey.Text;
+            string apiUrl = txbUrl.Text;
+            Task.Run(() => FetchModelsAsync(provider, apiKey, apiUrl));
+        }
+
+        // 获取模型列表
+        private async Task FetchModelsAsync(string provider, string apiKey, string apiUrl)
+        {
+            // 本地部署的模型提供商不需要API Key
+            string[] localProviders = { "Ollama", "vLLM", "LM Studio", "llama.cpp" };
+            bool isLocalProvider = localProviders.Contains(provider);
+            
+            // 自定义提供商或云端模型没有API Key时，不获取模型列表
+            if (provider == "自定义" || (!isLocalProvider && string.IsNullOrEmpty(apiKey)) || string.IsNullOrEmpty(apiUrl))
+                return;
+
+            // 取消之前的请求
+            if (_modelFetchCts != null)
+            {
+                _modelFetchCts.Cancel();
+                _modelFetchCts.Dispose();
+            }
+
+            _modelFetchCts = new CancellationTokenSource();
+            CancellationToken token = _modelFetchCts.Token;
+
+            try
+            {
+                // 在UI线程上更新状态
+                this.Invoke(new Action(() =>
+                {
+                    lblResult.Text = "正在获取模型列表...";
+                    cbxModel.Items.Clear();
+                    cbxModel.Text = "";
+                }));
+
+                var (models, errorType, errorMessage) = await GetModelsAsync(provider, apiKey, apiUrl, token);
+
+                if (token.IsCancellationRequested)
+                    return;
+
+                // 在UI线程上更新控件
+                this.Invoke(new Action(() =>
+                {
+                    if (models.Count > 0)
+                    {
+                        cbxModel.Items.AddRange(models.ToArray());
+                        cbxModel.SelectedIndex = 0;
+                        lblResult.Text = $"成功获取 {models.Count} 个模型";
+                    }
+                    else if (!string.IsNullOrEmpty(errorType))
+                    {
+                        // 根据错误类型显示不同的提示信息
+                        switch (errorType)
+                        {
+                            case "api_key_error":
+                                lblResult.Text = "需要填写正确的API Key后才能选择模型";
+                                break;
+                            case "network_error":
+                            case "timeout":
+                                lblResult.Text = "API地址无法访问，请检查API地址是否正确";
+                                break;
+                            case "endpoint_not_found":
+                                lblResult.Text = "API地址不正确，请检查API地址";
+                                break;
+                            default:
+                                lblResult.Text = errorMessage ?? "未获取到模型列表";
+                                break;
+                        }
+                    }
+                    else
+                    {
+                        lblResult.Text = "未获取到模型列表";
+                    }
+                }));
+            }
+            catch (Exception ex)
+            {
+                if (!token.IsCancellationRequested)
+                {
+                    this.Invoke(new Action(() =>
+                    {
+                        lblResult.Text = $"获取模型列表失败: {ex.Message}";
+                    }));
+                }
+            }
+            finally
+            {
+                if (_modelFetchCts != null)
+                {
+                    _modelFetchCts.Dispose();
+                    _modelFetchCts = null;
+                }
+            }
+        }
+
+        // 根据提供商获取模型列表
+        private async Task<(List<string> models, string errorType, string errorMessage)> GetModelsAsync(string provider, string apiKey, string apiUrl, CancellationToken token)
+        {
+            List<string> models = new List<string>();
+            string errorType = null;
+            string errorMessage = null;
+
+            try
+            {
+                using (var client = new HttpClient())
+                {
+                    client.Timeout = TimeSpan.FromSeconds(15);
+
+                    // 添加认证头（云端API需要）
+                    if (provider != "Ollama" && provider != "vLLM" && provider != "LM Studio" && provider != "llama.cpp")
+                    {
+                        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", apiKey);
+                    }
+
+                    string modelsEndpoint = GetModelsEndpoint(provider, apiUrl);
+                    if (string.IsNullOrEmpty(modelsEndpoint))
+                    {
+                        System.Diagnostics.Debug.WriteLine($"[模型获取] 未找到模型端点，provider: {provider}");
+                        errorType = "endpoint_not_found";
+                        errorMessage = "未找到模型列表API端点";
+                        return (models, errorType, errorMessage);
+                    }
+
+                    System.Diagnostics.Debug.WriteLine($"[模型获取] 请求端点: {modelsEndpoint}");
+                    
+                    var response = await client.GetAsync(modelsEndpoint, token);
+                    System.Diagnostics.Debug.WriteLine($"[模型获取] 响应状态码: {response.StatusCode}");
+                    
+                    if (!response.IsSuccessStatusCode)
+                    {
+                        string errorContent = await response.Content.ReadAsStringAsync();
+                        System.Diagnostics.Debug.WriteLine($"[模型获取] 请求失败: {response.StatusCode}, 错误: {errorContent}");
+                        
+                        // 根据状态码和错误内容判断错误类型
+                        if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized || 
+                            errorContent.Contains("api_key") || errorContent.Contains("apiKey") ||
+                            errorContent.Contains("invalid") || errorContent.Contains("unauthorized") ||
+                            errorContent.Contains("authentication") || errorContent.Contains("Authorization"))
+                        {
+                            errorType = "api_key_error";
+                            errorMessage = "API Key 无效或未填写，请检查API Key是否正确";
+                        }
+                        else if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
+                        {
+                            errorType = "endpoint_not_found";
+                            errorMessage = "API地址不正确，请检查API地址";
+                        }
+                        else
+                        {
+                            errorType = "api_error";
+                            errorMessage = $"API错误: {response.StatusCode}";
+                        }
+                        
+                        return (models, errorType, errorMessage);
+                    }
+
+                    string responseContent = await response.Content.ReadAsStringAsync();
+                    System.Diagnostics.Debug.WriteLine($"[模型获取] 响应内容: {responseContent.Substring(0, Math.Min(500, responseContent.Length))}...");
+                    
+                    models = ParseModelsResponse(provider, responseContent);
+                    System.Diagnostics.Debug.WriteLine($"[模型获取] 解析到 {models.Count} 个模型");
+                }
+            }
+            catch (HttpRequestException ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[模型获取] 网络异常: {ex.Message}");
+                errorType = "network_error";
+                errorMessage = "无法连接到API地址，请检查网络连接和API地址是否正确";
+            }
+            catch (TaskCanceledException)
+            {
+                System.Diagnostics.Debug.WriteLine($"[模型获取] 请求超时");
+                errorType = "timeout";
+                errorMessage = "请求超时，请检查API地址是否正确或网络是否畅通";
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[模型获取] 异常: {ex.GetType().Name} - {ex.Message}");
+                if (ex.InnerException != null)
+                {
+                    System.Diagnostics.Debug.WriteLine($"[模型获取] 内部异常: {ex.InnerException.Message}");
+                }
+                errorType = "unknown_error";
+                errorMessage = $"未知错误: {ex.Message}";
+            }
+
+            return (models, errorType, errorMessage);
+        }
+
+        // 获取模型列表的API端点
+        private string GetModelsEndpoint(string provider, string apiUrl)
+        {
+            switch (provider)
+            {
+                case "DeepSeek":
+                    return "https://api.deepseek.com/v1/models";
+                case "Qwen":
+                    return "https://dashscope.aliyuncs.com/compatible-mode/v1/models";
+                case "Kimi":
+                    return "https://api.moonshot.cn/v1/models";
+                case "OpenAI":
+                    return "https://api.openai.com/v1/models";
+                case "OpenRoute":
+                    return "https://openrouter.ai/api/v1/models";
+                case "GLM":
+                    return "https://open.bigmodel.cn/api/paas/v4/models";
+                case "MinMax":
+                    return "https://api.minimax.chat/v1/models";
+                case "Claude Code":
+                    return "https://api.anthropic.com/v1/models";
+                case "Gemini":
+                    return "https://generativelanguage.googleapis.com/v1beta/models";
+                case "Ollama":
+                    return "http://localhost:11434/api/tags";
+                case "vLLM":
+                case "LM Studio":
+                case "llama.cpp":
+                    return apiUrl.Replace("/chat/completions", "/models");
+                default:
+                    return "";
+            }
+        }
+
+        // 解析模型列表响应（使用动态解析，更加健壮）
+        private List<string> ParseModelsResponse(string provider, string responseContent)
+        {
+            List<string> models = new List<string>();
+
+            try
+            {
+                using (var jsonDoc = System.Text.Json.JsonDocument.Parse(responseContent))
+                {
+                    var root = jsonDoc.RootElement;
+
+                    switch (provider)
+                    {
+                        case "DeepSeek":
+                        case "Qwen":
+                        case "Kimi":
+                        case "OpenAI":
+                        case "OpenRoute":
+                        case "GLM":
+                        case "vLLM":
+                        case "LM Studio":
+                        case "llama.cpp":
+                            // 标准OpenAI格式: {"data": [{"id": "model-name", ...}, ...]}
+                            if (root.TryGetProperty("data", out var dataArray) && dataArray.ValueKind == JsonValueKind.Array)
+                            {
+                                foreach (var item in dataArray.EnumerateArray())
+                                {
+                                    if (item.TryGetProperty("id", out var idProp))
+                                    {
+                                        models.Add(idProp.GetString());
+                                    }
+                                }
+                            }
+                            break;
+
+                        case "MinMax":
+                            // MinMax格式: {"models": [{"model": "model-name", ...}, ...]}
+                            if (root.TryGetProperty("models", out var minMaxModels) && minMaxModels.ValueKind == JsonValueKind.Array)
+                            {
+                                foreach (var item in minMaxModels.EnumerateArray())
+                                {
+                                    // 优先使用 model 字段，其次使用 name 字段
+                                    if (item.TryGetProperty("model", out var modelProp))
+                                    {
+                                        models.Add(modelProp.GetString());
+                                    }
+                                    else if (item.TryGetProperty("name", out var nameProp))
+                                    {
+                                        models.Add(nameProp.GetString());
+                                    }
+                                }
+                            }
+                            break;
+
+                        case "Ollama":
+                            // Ollama格式: {"models": [{"name": "model-name", ...}, ...]}
+                            System.Diagnostics.Debug.WriteLine($"[模型获取] Ollama响应内容: {responseContent}");
+                            if (root.TryGetProperty("models", out var ollamaModels) && ollamaModels.ValueKind == JsonValueKind.Array)
+                            {
+                                foreach (var item in ollamaModels.EnumerateArray())
+                                {
+                                    // 优先使用 name 字段，其次使用 model 字段
+                                    if (item.TryGetProperty("name", out var nameProp))
+                                    {
+                                        models.Add(nameProp.GetString());
+                                    }
+                                    else if (item.TryGetProperty("model", out var modelProp))
+                                    {
+                                        models.Add(modelProp.GetString());
+                                    }
+                                }
+                            }
+                            System.Diagnostics.Debug.WriteLine($"[模型获取] Ollama解析结果: {models.Count} 个模型");
+                            break;
+
+                        default:
+                            // 尝试通用解析：查找常见的模型列表字段
+                            if (root.TryGetProperty("data", out var genericData) && genericData.ValueKind == JsonValueKind.Array)
+                            {
+                                foreach (var item in genericData.EnumerateArray())
+                                {
+                                    if (item.TryGetProperty("id", out var idProp))
+                                        models.Add(idProp.GetString());
+                                    else if (item.TryGetProperty("name", out var nameProp))
+                                        models.Add(nameProp.GetString());
+                                    else if (item.TryGetProperty("model", out var modelProp))
+                                        models.Add(modelProp.GetString());
+                                }
+                            }
+                            else if (root.TryGetProperty("models", out var genericModels) && genericModels.ValueKind == JsonValueKind.Array)
+                            {
+                                foreach (var item in genericModels.EnumerateArray())
+                                {
+                                    if (item.TryGetProperty("name", out var nameProp))
+                                        models.Add(nameProp.GetString());
+                                    else if (item.TryGetProperty("model", out var modelProp))
+                                        models.Add(modelProp.GetString());
+                                    else if (item.TryGetProperty("id", out var idProp))
+                                        models.Add(idProp.GetString());
+                                }
+                            }
+                            break;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"[模型获取] 解析异常: {ex.Message}");
+                // 解析失败，返回空列表
+            }
+
+            return models;
+        }
+
+        // 模型响应相关类
+        public class OpenAIModelsResponse
+        {
+            public List<OpenAIModel> data { get; set; }
+        }
+
+        public class OpenAIModel
+        {
+            public string id { get; set; }
+            public string type { get; set; }
+            public int created { get; set; }
+            public string owned_by { get; set; }
+        }
+
+        public class MinMaxModelsResponse
+        {
+            public List<MinMaxModel> models { get; set; }
+        }
+
+        public class MinMaxModel
+        {
+            public string model { get; set; }
+            public string name { get; set; }
+            public string description { get; set; }
+        }
+
+        public class OllamaModelsResponse
+        {
+            public List<OllamaModel> models { get; set; }
+        }
+
+        public class OllamaModel
+        {
+            public string name { get; set; }
+            public string model { get; set; }
+            public OllamaModelDetails details { get; set; }
+        }
+
+        public class OllamaModelDetails
+        {
+            public string parent_model { get; set; }
+            public string format { get; set; }
+            public string family { get; set; }
+            public List<string> families { get; set; }
+            public string parameter_size { get; set; }
+            public string quantization_level { get; set; }
         }
         //重绘选项页布局
         private void tabControl1_DrawItem(object sender, DrawItemEventArgs e)
@@ -46,7 +549,7 @@ namespace ExcelAddIn
             e.Graphics.DrawString(tabControl1.Controls[e.Index].Text, SystemInformation.MenuFont, _Brush, _TabTextArea, _sf);
         }
 
-        private async Task<string> GetDeepSeekResponse(string apiKey, string model)
+        private async Task<string> GetAIResponse(string apiKey, string model)
         {
             string apiUrl = txbUrl.Text;
 
@@ -61,7 +564,7 @@ namespace ExcelAddIn
                     model = model, // 选择的模型
                     messages = new[]
                     {
-                        new { role = "user", content = "Hello, DeepSeek!" }
+                        new { role = "user", content = "Hello!" }
                     }
                 };
 
@@ -91,6 +594,8 @@ namespace ExcelAddIn
 
         private async void btnTest_Click(object sender, EventArgs e)
         {
+            string provider = cbxLLM.Text;
+            
             lblResult.Text = "开始检测......";
             txbKey.ReadOnly = true;
             cbxModel.Enabled = false;
@@ -102,7 +607,7 @@ namespace ExcelAddIn
 
             string result;
 
-            if (!_isCloudConnection)
+            if (!_isCloudConnection || provider == "Ollama" || provider == "vLLM" || provider == "LM Studio" || provider == "llama.cpp")
             {
                 // 本地API连接测试
                 string apiUrl = txbUrl.Text;
@@ -115,6 +620,10 @@ namespace ExcelAddIn
                 else if (apiUrl.EndsWith("/chat/completions"))
                 {
                     modelsUrl = apiUrl.Replace("/chat/completions", "/models");
+                }
+                else if (provider == "Ollama")
+                {
+                    modelsUrl = "http://localhost:11434/api/tags";
                 }
 
                 try
@@ -141,19 +650,7 @@ namespace ExcelAddIn
             else
             {
                 // 云端API连接测试
-                string model;
-                switch (cbxModel.Text)
-                {
-                    case "deepseek-v3":
-                        model = "deepseek-chat";
-                        break;
-                    case "deepseek-r1":
-                        model = "deepseek-reasoner";
-                        break;
-                    default:
-                        model = cbxModel.Text;
-                        break;
-                }
+                string model = cbxModel.Text;
 
                 if (string.IsNullOrEmpty(model))
                 {
@@ -166,7 +663,7 @@ namespace ExcelAddIn
                     btnQuit.Enabled = true;
                     return;
                 }
-                result = await GetDeepSeekResponse(txbKey.Text, model);
+                result = await TestCloudConnection(txbKey.Text, model, provider);
             }
 
             if (!string.IsNullOrEmpty(result))
@@ -181,37 +678,99 @@ namespace ExcelAddIn
             btnSave.Enabled = true;
             btnQuit.Enabled = true;
         }
+
+        // 测试云端连接
+        private async Task<string> TestCloudConnection(string apiKey, string model, string provider)
+        {
+            string apiUrl = txbUrl.Text;
+
+            using (var client = new HttpClient())
+            {
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", apiKey);
+
+                // 根据提供商构造请求体
+                var requestBody = GetRequestBodyForProvider(provider, model);
+
+                try
+                {
+                    var response = await client.PostAsJsonAsync(apiUrl, requestBody);
+                    var responseContent = await response.Content.ReadAsStringAsync();
+
+                    if (response.IsSuccessStatusCode)
+                    {
+                        return "连接成功";
+                    }
+                    else
+                    {
+                        // 返回错误信息和错误代码
+                        return $"测试失败，错误代码：{response.StatusCode}，错误信息：{responseContent}";
+                    }
+                }
+                catch (HttpRequestException ex)
+                {
+                    // 返回异常信息
+                    return $"测试失败，发生异常：{ex.Message}";
+                }
+            }
+        }
+
+        // 根据提供商获取请求体
+        private object GetRequestBodyForProvider(string provider, string model)
+        {
+            switch (provider)
+            {
+                case "Claude Code":
+                    // Anthropic Claude格式
+                    return new
+                    {
+                        model = model,
+                        messages = new[]
+                        {
+                            new { role = "user", content = "Hello, Claude!" }
+                        },
+                        max_tokens = 100
+                    };
+                case "Gemini":
+                    // Google Gemini格式
+                    return new
+                    {
+                        contents = new[]
+                        {
+                            new {
+                                parts = new[]
+                                {
+                                    new { text = "Hello, Gemini!" }
+                                }
+                            }
+                        }
+                    };
+                case "DeepSeek":
+                default:
+                    // 标准OpenAI格式
+                    return new
+                    {
+                        model = model,
+                        messages = new[]
+                        {
+                            new { role = "user", content = "Hello!" }
+                        },
+                        max_tokens = 100
+                    };
+            }
+        }
         private const string KeyFilePath = "encryption.key"; // 保存密钥和IV的文件路径
         private const string ConfigFilePath = "config.encrypted"; // 保存加密配置信息的文件路径
 
         //加密保存配置信息
         private void btnSave_Click(object sender, EventArgs e)
         {
+            string provider = cbxLLM.Text;
+            
             string apiKey = txbKey.Text.Trim();
-            string model = string.Empty;
-
-            // 判断是否为本地模型
-            if (!_isCloudConnection)
-            {
-                // 本地模型直接保存模型名称
-                model = cbxModel.Text;
-            }
-            else
-            {
-                // DeepSeek云端模型按原有逻辑
-                switch (cbxModel.SelectedIndex)
-                {
-                    case 0:
-                        model = "deepseek-chat";
-                        break;
-                    case 1:
-                        model = "deepseek-reasoner";
-                        break;
-                }
-            }
-
+            string model = cbxModel.Text;
             string apiUrl = txbUrl.Text.Trim();
             string enterMode = "0";
+            
             switch (cbxEnterKey.SelectedIndex)
             {
                 case 0:
@@ -229,7 +788,7 @@ namespace ExcelAddIn
             string connectionType = _isCloudConnection ? "cloud" : "local";
             string isCloudModel = _isCloudConnection ? "true" : "false";
 
-            if (string.IsNullOrEmpty(apiKey) && _isCloudConnection)
+            if (string.IsNullOrEmpty(apiKey) && _isCloudConnection && provider != "Ollama" && provider != "vLLM" && provider != "LM Studio" && provider != "llama.cpp")
             {
                 lblResult.Text = "API KEY不能为空";
                 return;
@@ -245,14 +804,7 @@ namespace ExcelAddIn
                 return;
             }
 
-            // 验证远程API地址
-            if (_isCloudConnection && apiUrl != "https://api.deepseek.com/v1/chat/completions")
-            {
-                lblResult.Text = "远程连接地址必须是: https://api.deepseek.com/v1/chat/completions";
-                return;
-            }
-
-            string content = $"api-key^{apiKey};model^{model};api-url^{apiUrl};enter-mode^{enterMode};connection-type^{connectionType};is-cloud-model^{isCloudModel};timeout-minutes^{txbWaitingTime.Text.Trim()}";
+            string content = $"api-key^{apiKey};model^{model};api-url^{apiUrl};enter-mode^{enterMode};connection-type^{connectionType};is-cloud-model^{isCloudModel};timeout-minutes^{txbWaitingTime.Text.Trim()};provider^{provider}";
 
             try
             {
@@ -283,8 +835,8 @@ namespace ExcelAddIn
             {
                 lblResult.Text = "未初始化配置";
                 txbKey.Text = "";
-                cbxModel.SelectedIndex = 0;
                 cbxEnterKey.SelectedIndex = 0;
+                txbWaitingTime.Text = "5";
                 return;
             }
 
@@ -300,48 +852,49 @@ namespace ExcelAddIn
                 string decryptedContent = DecryptString(encryptedContent, key, iv);
 
                 // 解析配置信息
-                txbKey.Text = decryptedContent.Split(';')[0].Split('^')[1];
-                string model = decryptedContent.Split(';')[1].Split('^')[1];
-                txbUrl.Text = decryptedContent.Split(';')[2].Split('^')[1];
-
-                // 读取连接类型(如果配置文件中有的话)
-                string connectionType = "cloud"; // 默认为云端
                 var parts = decryptedContent.Split(';');
+                string apiKey = parts[0].Split('^')[1];
+                string model = parts[1].Split('^')[1];
+                string apiUrl = parts[2].Split('^')[1];
+                string enterMode = parts[3].Split('^')[1];
+                
+                // 读取连接类型
+                string connectionType = "cloud"; // 默认为云端
                 if (parts.Length >= 5)
                 {
                     connectionType = parts[4].Split('^')[1];
                 }
 
+                // 读取模型提供商
+                string provider = "Qwen"; // 默认为Qwen
+                if (parts.Length >= 8)
+                {
+                    provider = parts[7].Split('^')[1];
+                }
+
                 // 设置连接类型标志
                 _isCloudConnection = (connectionType == "cloud");
 
-                // 判断是否为本地API
-                if (IsLocalApiUrl(txbUrl.Text))
+                // 设置UI控件值
+                txbKey.Text = apiKey;
+                txbUrl.Text = apiUrl;
+                
+                // 设置模型提供商
+                int providerIndex = cbxLLM.FindStringExact(provider);
+                if (providerIndex >= 0)
                 {
-                    _isCloudConnection = false;
-                    // 本地模型直接显示模型名称
-                    cbxModel.Text = model;
+                    cbxLLM.SelectedIndex = providerIndex;
                 }
                 else
                 {
-                    _isCloudConnection = true;
-                    // DeepSeek云端模型
-                    switch (model)
-                    {
-                        case "deepseek-chat":
-                            cbxModel.Text = "deepseek-v3";
-                            break;
-                        case "deepseek-reasoner":
-                            cbxModel.Text = "deepseek-r1";
-                            break;
-                        default:
-                            // 其他情况也显示
-                            cbxModel.Text = model;
-                            break;
-                    }
+                    cbxLLM.SelectedIndex = 0; // 默认选择第一个
                 }
 
-                switch (decryptedContent.Split(';')[3].Split('^')[1])
+                // 设置模型
+                cbxModel.Text = model;
+
+                // 设置回车模式
+                switch (enterMode)
                 {
                     case "0":
                         cbxEnterKey.SelectedIndex = 0;
@@ -354,6 +907,7 @@ namespace ExcelAddIn
                         break;
                 }
 
+                // 设置等待时间
                 if (parts.Length >= 7)
                 {
                     string timeoutMinutes = parts[6].Split('^')[1];
@@ -369,6 +923,13 @@ namespace ExcelAddIn
                 else
                 {
                     txbWaitingTime.Text = "5";
+                }
+
+                // 如果有API Key，尝试获取模型列表
+                if (!string.IsNullOrEmpty(apiKey))
+                {
+                    // 使用已定义的变量，传递给后台任务
+                    Task.Run(() => FetchModelsAsync(provider, apiKey, apiUrl));
                 }
             }
             catch (Exception ex)
@@ -465,10 +1026,10 @@ namespace ExcelAddIn
             cbxModel.SelectedIndex = 0;
             cbxEnterKey.SelectedIndex = 0;
             lblResult.Text = "";
-            txbUrl.Text = @"https://api.deepseek.com/v1/chat/completions";
-            txbUrl.ReadOnly = true;
-            _isCloudConnection = true;
-            txbKey.Enabled = true;
+            txbUrl.Text = ""; // 清空 API 地址，让用户自行选择
+            txbUrl.ReadOnly = false;
+            _isCloudConnection = false;
+            txbKey.Enabled = false;
         }
 
         private void pbxPassword_Click(object sender, EventArgs e)
@@ -485,26 +1046,7 @@ namespace ExcelAddIn
             }
         }
 
-        //apiUrl文本框保护机制，双击3次，激活文本框可编辑
-        private void txbUrl_DoubleClick(object sender, EventArgs e)
-        {
-            if (i < 2)
-            {
-                i++;
-                lblResult.Text = $"警告{i}：请不要轻易修改api地址";
-            }
-            else if (i == 2)
-            {
-                i++;
-                lblResult.Text = $"警告{i}：修改api地址可能导致访问失败，除非你知道必须修改它了，那就再双击我1次试试";
 
-            }
-            else
-            {
-                txbUrl.ReadOnly = false;
-                lblResult.Text = "请输入api地址";
-            }
-        }
 
         // 验证是否为本地API地址
         private bool IsLocalApiUrl(string url)
@@ -809,26 +1351,21 @@ namespace ExcelAddIn
                 };
                 _debounceTimer.Start();
             }
-            else if (url == "https://api.deepseek.com/v1/chat/completions")
-            {
-                // DeepSeek官方API
-                _isCloudConnection = true;
-                // 云端连接时启用API Key输入框
-                txbKey.Enabled = true;
-                cbxModel.Items.Clear();
-                cbxModel.Items.Add("deepseek-v3");
-                cbxModel.Items.Add("deepseek-r1");
-                cbxModel.SelectedIndex = 0;
-                lblResult.Text = "DeepSeek官方API";
-            }
             else
             {
-                // 其他远程地址,必须是DeepSeek官方地址
+                // 其他云端 API 地址（包括 DeepSeek、OpenAI 等）
                 _isCloudConnection = true;
-                // 云端连接时启用API Key输入框
+                // 云端连接时启用 API Key 输入框
                 txbKey.Enabled = true;
-                lblResult.Text = "远程连接地址必须是: https://api.deepseek.com/v1/chat/completions";
+                lblResult.Text = "云端 API 地址";
             }
+        }
+
+        // API 地址文本框双击事件（清空内容以便用户输入自定义地址）
+        private void txbUrl_DoubleClick(object sender, EventArgs e)
+        {
+            txbUrl.Clear();
+            txbUrl.Focus();
         }
     }
 }

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
@@ -36,6 +36,17 @@ namespace ExcelAddIn
         #region Internal Helpers
         private Workbook GetWorkbookById(string fileName)
         {
+            // 如果 fileName 为 null 或空，使用当前活动的工作簿
+            if (string.IsNullOrEmpty(fileName))
+            {
+                var activeWorkbook = ThisAddIn.app.ActiveWorkbook;
+                if (activeWorkbook == null)
+                {
+                    throw new ArgumentException("当前没有活动的工作簿。请先打开或创建一个工作簿。");
+                }
+                return activeWorkbook;
+            }
+            
             if (!_openWorkbooks.TryGetValue(fileName, out var workbook))
             {
                 throw new ArgumentException($"工作簿 '{fileName}' 未打开或不存在。请先调用OpenWorkbook。");
@@ -46,6 +57,19 @@ namespace ExcelAddIn
         private Worksheet GetWorksheetById(string fileName, string sheetName)
         {
             var workbook = GetWorkbookById(fileName);
+            
+            // 如果 sheetName 为 null 或空，使用当前活动的工作表
+            if (string.IsNullOrEmpty(sheetName))
+            {
+                var activeSheet = ThisAddIn.app.ActiveSheet as Worksheet;
+                if (activeSheet == null)
+                {
+                    // 如果没有活动工作表，返回第一个工作表
+                    return (Worksheet)workbook.Worksheets[1];
+                }
+                return activeSheet;
+            }
+            
             try
             {
                 return (Worksheet)workbook.Worksheets[sheetName];

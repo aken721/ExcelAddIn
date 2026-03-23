@@ -1,4 +1,4 @@
-﻿namespace ExcelAddIn
+﻿﻿﻿﻿namespace ExcelAddIn
 {
     partial class Form7
     {
@@ -40,7 +40,6 @@
             this.send_button = new System.Windows.Forms.Button();
             this.checkBoxUseMcp = new System.Windows.Forms.CheckBox();
             this.labelModelInfo = new System.Windows.Forms.Label();
-            this.checkBoxPromptEngineering = new System.Windows.Forms.CheckBox();
             this.menuStrip1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -67,6 +66,7 @@
             this.prompt_label.Name = "prompt_label";
             this.prompt_label.Size = new System.Drawing.Size(679, 29);
             this.prompt_label.TabIndex = 5;
+            this.prompt_label.DoubleClick += new System.EventHandler(this.prompt_label_DoubleClick);
             // 
             // flowLayoutPanelChat
             // 
@@ -143,9 +143,9 @@
             this.checkBoxUseMcp.Font = new System.Drawing.Font("微软雅黑", 9F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.checkBoxUseMcp.Location = new System.Drawing.Point(70, 356);
             this.checkBoxUseMcp.Name = "checkBoxUseMcp";
-            this.checkBoxUseMcp.Size = new System.Drawing.Size(78, 21);
+            this.checkBoxUseMcp.Size = new System.Drawing.Size(80, 21);
             this.checkBoxUseMcp.TabIndex = 9;
-            this.checkBoxUseMcp.Text = "使用MCP";
+            this.checkBoxUseMcp.Text = "使用Skills";
             this.checkBoxUseMcp.UseVisualStyleBackColor = true;
             // 
             // labelModelInfo
@@ -160,27 +160,11 @@
             this.labelModelInfo.Text = "未配置模型";
             this.labelModelInfo.TextAlign = System.Drawing.ContentAlignment.MiddleRight;
             // 
-            // checkBoxPromptEngineering
-            // 
-            this.checkBoxPromptEngineering.Appearance = System.Windows.Forms.Appearance.Button;
-            this.checkBoxPromptEngineering.AutoSize = true;
-            this.checkBoxPromptEngineering.BackColor = System.Drawing.Color.Transparent;
-            this.checkBoxPromptEngineering.Font = new System.Drawing.Font("微软雅黑", 7.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
-            this.checkBoxPromptEngineering.ForeColor = System.Drawing.Color.DarkSlateBlue;
-            this.checkBoxPromptEngineering.Location = new System.Drawing.Point(33, 383);
-            this.checkBoxPromptEngineering.Name = "checkBoxPromptEngineering";
-            this.checkBoxPromptEngineering.Size = new System.Drawing.Size(117, 26);
-            this.checkBoxPromptEngineering.TabIndex = 11;
-            this.checkBoxPromptEngineering.Text = "优先使用提示工程模式";
-            this.checkBoxPromptEngineering.UseVisualStyleBackColor = false;
-            this.checkBoxPromptEngineering.CheckedChanged += new System.EventHandler(this.checkBoxPromptEngineering_CheckedChanged);
-            // 
             // Form7
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(96F, 96F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Dpi;
             this.ClientSize = new System.Drawing.Size(800, 450);
-            this.Controls.Add(this.checkBoxPromptEngineering);
             this.Controls.Add(this.labelModelInfo);
             this.Controls.Add(this.checkBoxUseMcp);
             this.Controls.Add(this.label1);
@@ -193,7 +177,7 @@
             this.MainMenuStrip = this.menuStrip1;
             this.Name = "Form7";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Text = "DeepSeek对话框";
+            this.Text = "AI 对话框";
             this.Load += new System.EventHandler(this.Form7_Load);
             this.menuStrip1.ResumeLayout(false);
             this.menuStrip1.PerformLayout();
@@ -214,6 +198,5 @@
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.CheckBox checkBoxUseMcp;
         private System.Windows.Forms.Label labelModelInfo;
-        private System.Windows.Forms.CheckBox checkBoxPromptEngineering;
     }
 }

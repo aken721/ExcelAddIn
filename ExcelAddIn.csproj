@@ -41,7 +41,7 @@
     <PublishUrl>ftp://localhost/</PublishUrl>
     <InstallUrl>http://localhost/ExcelAddIn/</InstallUrl>
     <TargetCulture>zh-chs</TargetCulture>
-    <ApplicationVersion>2.4.7.3</ApplicationVersion>
+    <ApplicationVersion>2.5.0.0</ApplicationVersion>
     <AutoIncrementApplicationRevision>true</AutoIncrementApplicationRevision>
     <UpdateEnabled>true</UpdateEnabled>
     <UpdateInterval>7</UpdateInterval>
@@ -384,6 +384,19 @@
     <Compile Include="ThisAddIn.Designer.cs">
       <DependentUpon>ThisAddIn.Designer.xml</DependentUpon>
     </Compile>
+    <Compile Include="Skills\ISkill.cs" />
+    <Compile Include="Skills\SkillManager.cs" />
+    <Compile Include="Skills\PluginLoader.cs" />
+    <Compile Include="Skills\ExcelBaseSkill.cs" />
+    <Compile Include="Skills\ExcelWorkbookSkill.cs" />
+    <Compile Include="Skills\ExcelCellSkill.cs" />
+    <Compile Include="Skills\ExcelAnalysisSkill.cs" />
+    <Compile Include="Skills\ExcelFinanceSkill.cs" />
+    <Compile Include="Skills\ExcelFormatSkill.cs" />
+    <Compile Include="Skills\ExcelSheetSkill.cs" />
+    <Compile Include="Skills\ExcelRangeSkill.cs" />
+    <Compile Include="Skills\ExcelChartSkill.cs" />
+    <Compile Include="Skills\ExcelPivotSkill.cs" />
     <AppDesigner Include="Properties\" />
   </ItemGroup>
   <ItemGroup>

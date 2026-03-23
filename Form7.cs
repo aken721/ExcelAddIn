@@ -1,17 +1,16 @@
 using System;
 using System.Collections.Generic;
-using System.Data;
 using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
-using System.Net.Http.Json;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using ExcelAddIn.Skills;
 
 
 
@@ -19,8 +18,6 @@ namespace ExcelAddIn
 {
     public partial class Form7 : Form
     {
-        // 初始化 HttpClient（推荐使用 IHttpClientFactory 生产环境）
-        private static readonly HttpClient _httpClient = new HttpClient();
 
         private string _apiKey = string.Empty;           //api key变量
         private string _model = string.Empty;           //模型变量
@@ -31,18 +28,18 @@ namespace ExcelAddIn
         private bool _isOllamaApi = false;            //是否为Ollama API（用于添加Ollama特有参数）
         private int _timeoutMinutes = 5;            //请求超时时间，默认5分钟
 
-        private bool _isPromptEngineeringChecked = false;  // 是否勾选了"优先Prompt Engineering"
+        private bool _isStreamingChatItemCreated = false; // 标记流式聊天项是否已创建
 
         private ExcelMcp _excelMcp = null;  // Excel MCP实例
         private string _activeWorkbook = string.Empty;  // 当前活跃的工作簿
         private string _activeWorksheet = string.Empty;  // 当前活跃的工作表
 
-        // 缓存MCP工具定义，避免重复创建
-        private List<object> _cachedMcpTools = null;
+        // 缓存Excel工具定义，避免重复创建
+        private List<object> _cachedExcelTools = null;
         
         // 跟踪当前会话中已执行的一次性工具（如create_chart），防止递归时重复执行
         private HashSet<string> _executedOneTimeTools = new HashSet<string>();
-        // 一次性工具列表（这些工具在一次用户请求中只应执行一次）
+        // 一次性工具列表（这些工具在一次用户请求中只应执行一次，但参数不同时可以重复执行）
         private static readonly HashSet<string> _oneTimeTools = new HashSet<string> 
         { 
             "create_chart", "create_table", "create_workbook", "create_worksheet", 
@@ -51,6 +48,13 @@ namespace ExcelAddIn
         
         // 两阶段工具调用：是否启用工具分组模式（用于减少小模型的处理负担）
         private bool _useToolGrouping = true;
+        
+        // 性能优化相关变量
+        private bool _hasSentDetailedSystemPrompt = false;  // 是否已发送详细系统提示词
+        private bool _enableVerboseLogging = false;  // 是否启用详细日志（默认关闭以提升性能）
+        
+        // Skills系统相关
+        private SkillManager _skillManager = null;  // 技能管理器
         
         // 工具分组定义（用于原生Function Calling的两阶段调用）
         private static readonly Dictionary<string, (string Description, string[] Tools)> _nativeToolGroups = new Dictionary<string, (string Description, string[] Tools)>
@@ -163,10 +167,24 @@ namespace ExcelAddIn
         }
 
         // 写入日志的方法（追加模式，不删除历史记录）
+        // 性能优化：可通过 _enableVerboseLogging 控制日志详细程度
         private void WriteLog(string category, string message)
         {
             try
             {
+                // 性能优化：如果关闭详细日志，则跳过某些日志记录
+                if (!_enableVerboseLogging)
+                {
+                    // 跳过详细的请求体和响应体日志，只记录摘要
+                    if (category.Contains("请求体") || category.Contains("响应体") || 
+                        category.Contains("API请求") || category.Contains("API响应"))
+                    {
+                        // 只在调试模式下输出到调试窗口
+                        System.Diagnostics.Debug.WriteLine($"[{category}] 已跳过详细日志记录（详细日志已关闭）");
+                        return;
+                    }
+                }
+                
                 string logPath = GetLogFilePath();
                 string timestamp = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff");
                 string logEntry = $"[{timestamp}] [{category}]\n{message}\n{"".PadRight(80, '-')}\n";
@@ -347,8 +365,6 @@ namespace ExcelAddIn
             // 将自定义上下文菜单绑定到 RichTextBox
             richTextBoxInput.ContextMenuStrip = customContextMenu;
 
-            // 初始化时默认不勾选"优先Prompt Engineering"
-            checkBoxPromptEngineering.Checked = false;
         }
 
         private async void Form7_Load(object sender, EventArgs e)
@@ -401,6 +417,9 @@ namespace ExcelAddIn
             // 等待所有任务完成
             await Task.WhenAll(configTask, mcpTask, excelInfoTask);
 
+            // 初始化Skills系统
+            InitializeSkills();
+
             // 配置加载完成后，初始化日志文件（此时配置信息已可用）
             InitLog();
 
@@ -424,9 +443,6 @@ namespace ExcelAddIn
 
             // 更新模型信息标签
             UpdateModelInfoLabel();
-
-            // 根据连接类型设置"优先提示工程"复选框的状态
-            UpdatePromptEngineeringCheckBoxState();
 
             // 添加窗体大小变化事件，用于调整对话框宽度
             this.Resize += Form7_Resize;
@@ -532,7 +548,7 @@ namespace ExcelAddIn
             }
 
             // 记录用户输入
-            WriteLog("用户输入", $"内容: {userInput}\n当前模型: {_model}\nAPI地址: {_apiUrl}\n连接类型: {(_isCloudConnection ? "云端" : "本地")}\n用户勾选'优先提示工程': {_isPromptEngineeringChecked}\nPrompt Engineering模式: {_usePromptEngineering}");
+            WriteLog("用户输入", $"内容: {userInput}\n当前模型: {_model}\nAPI地址: {_apiUrl}\n连接类型: {(_isCloudConnection ? "云端" : "本地")}\nPrompt Engineering模式: {_usePromptEngineering}");
 
             // 清空已执行的一次性工具记录（每次新请求重新开始）
             _executedOneTimeTools.Clear();
@@ -548,14 +564,24 @@ namespace ExcelAddIn
                 // 添加思考中占位符
                 AddThinkingPlaceholder();
 
-                // 调用DeepSeek API
-                var response = await GetDeepSeekResponse(userInput);
+                // 调用 AI API
+                var response = await GetAIResponse(userInput);
 
-                // 移除思考中占位符
-                RemoveThinkingPlaceholder();
+                // 不再移除思考中占位符，而是直接在同一个容器中更新内容
+                // 注意：如果流式响应创建了聊天项，则不需要处理思考占位符
+                if (!_isStreamingChatItemCreated)
+                {
+                    // 将思考占位符转换为AI回复容器，并填入内容
+                    ConvertThinkingPlaceholderToResponse(response);
+                }
+                else
+                {
+                    // 流式响应创建了聊天项，需要移除思考占位符
+                    RemoveThinkingPlaceholder();
+                }
 
-                // 添加AI回复
-                AddChatItem(response, false);
+                // 重置标记
+                _isStreamingChatItemCreated = false;
                 prompt_label.Text = "";
                 
                 WriteLog("对话完成", $"AI回复长度: {response?.Length ?? 0}字符");
@@ -612,7 +638,7 @@ namespace ExcelAddIn
             }
         }
 
-        // 添加思考中占位符
+        // 添加思考中占位符（创建一个可复用的对话气泡容器）
         private void AddThinkingPlaceholder()
         {
             flowLayoutPanelChat.SuspendLayout();
@@ -620,14 +646,34 @@ namespace ExcelAddIn
             {
                 int scrollBarWidth = SystemInformation.VerticalScrollBarWidth;
                 int availableWidth = flowLayoutPanelChat.ClientSize.Width - scrollBarWidth - 20;
+                int minWidth = 80;
                 int cornerRadius = 12;
 
-                // 创建占位符面板
+                // 创建RichTextBox（用于显示内容，后续可复用）
+                RichTextBox richTextBox = new RichTextBox
+                {
+                    BorderStyle = BorderStyle.None,
+                    ReadOnly = true,
+                    WordWrap = true,
+                    Padding = new Padding(8),
+                    ScrollBars = RichTextBoxScrollBars.None,
+                    Text = "......",
+                    Size = new Size(minWidth - 4, 26),
+                    Location = new Point(2, 2),
+                    BackColor = Color.LightGreen,
+                    Font = new Font("微软雅黑", 12, FontStyle.Bold),
+                    Tag = "thinking_content"
+                };
+                richTextBox.SelectAll();
+                richTextBox.SelectionAlignment = HorizontalAlignment.Center;
+
+                // 创建圆角对话框容器Panel
                 Panel chatBubble = new Panel
                 {
-                    Size = new Size(80, 36),
+                    Size = new Size(minWidth, 30),
                     BackColor = Color.LightGreen,
-                    Tag = "thinking_placeholder"
+                    Tag = "thinking_container",
+                    Visible = false
                 };
 
                 // 设置圆角
@@ -639,23 +685,12 @@ namespace ExcelAddIn
                 path.CloseAllFigures();
                 chatBubble.Region = new Region(path);
 
-                // 添加"......"文本
-                Label thinkingLabel = new Label
-                {
-                    Text = "......",
-                    AutoSize = false,
-                    Size = new Size(76, 32),
-                    Location = new Point(2, 2),
-                    TextAlign = ContentAlignment.MiddleCenter,
-                    BackColor = Color.LightGreen,
-                    Font = new Font("微软雅黑", 12, FontStyle.Bold)
-                };
-                chatBubble.Controls.Add(thinkingLabel);
+                chatBubble.Controls.Add(richTextBox);
 
                 // 创建行容器
                 Panel rowPanel = new Panel
                 {
-                    Size = new Size(availableWidth, 36),
+                    Size = new Size(availableWidth, 30),
                     BackColor = Color.Transparent,
                     Tag = "thinking_row"
                 };
@@ -666,6 +701,9 @@ namespace ExcelAddIn
 
                 flowLayoutPanelChat.Controls.Add(rowPanel);
                 flowLayoutPanelChat.ScrollControlIntoView(rowPanel);
+                
+                // 显示对话气泡
+                chatBubble.Visible = true;
 
                 _thinkingPlaceholder = rowPanel;
             }
@@ -675,24 +713,7 @@ namespace ExcelAddIn
             }
         }
 
-        // 移除思考中占位符
-        private void RemoveThinkingPlaceholder()
-        {
-            flowLayoutPanelChat.SuspendLayout();
-            try
-            {
-                if (_thinkingPlaceholder != null && flowLayoutPanelChat.Controls.Contains(_thinkingPlaceholder))
-                {
-                    flowLayoutPanelChat.Controls.Remove(_thinkingPlaceholder);
-                    _thinkingPlaceholder.Dispose();
-                    _thinkingPlaceholder = null;
-                }
-            }
-            finally
-            {
-                flowLayoutPanelChat.ResumeLayout(true);
-            }
-        }
+
 
         // 对话历史记录
         private List<ChatMessage> _chatHistory = new List<ChatMessage>();
@@ -720,7 +741,58 @@ namespace ExcelAddIn
             public string Arguments { get; set; }
         }
 
-        // 工具分组定义：组名 -> (关键词列表, 工具列表)
+        // 流式响应相关类
+        public class StreamResponse
+        {
+            public string id { get; set; }
+            public string @object { get; set; }
+            public int created { get; set; }
+            public string model { get; set; }
+            public StreamChoice[] choices { get; set; }
+        }
+
+        public class StreamChoice
+        {
+            public int index { get; set; }
+            public StreamDelta delta { get; set; }
+            public string finish_reason { get; set; }
+        }
+
+        public class StreamDelta
+        {
+            public string role { get; set; }
+            public string content { get; set; }
+            public StreamToolCall[] tool_calls { get; set; }
+        }
+        
+        // 流式响应中的工具调用
+        public class StreamToolCall
+        {
+            public int index { get; set; }
+            public string id { get; set; }
+            public string type { get; set; }
+            public StreamFunctionCall function { get; set; }
+        }
+        
+        public class StreamFunctionCall
+        {
+            public string name { get; set; }
+            public string arguments { get; set; }
+        }
+
+        // 非流式响应的 Choice 和 Message 类（用于 Prompt Engineering 模式）
+        public class AIChoice
+        {
+            public AIMessage message { get; set; }
+        }
+
+        public class AIMessage
+        {
+            public string role { get; set; }
+            public string content { get; set; }
+        }
+
+        // 工具分组定义：组名 -> (关键词列表，工具列表)
         private static readonly Dictionary<string, (string[] Keywords, string[] Tools)> _toolGroups = new Dictionary<string, (string[] Keywords, string[] Tools)>
         {
             ["单元格读写"] = (
@@ -736,7 +808,7 @@ namespace ExcelAddIn
                 new[] { "set_row_height", "set_column_width", "insert_rows", "insert_columns", "delete_rows", "delete_columns", "autofit_columns", "autofit_rows", "set_row_visible", "set_column_visible" }
             ),
             ["工作表操作"] = (
-                new[] { "工作表", "表名", "创建表", "新建表", "重命名", "删除表", "复制表", "移动表", "隐藏表", "显示表", "冻结", "取消冻结", "sheet", "切换", "激活", "跳转到" },
+                new[] { "工作表", "表名", "创建表", "新建表", "新表", "创建", "重命名", "删除表", "复制表", "移动表", "隐藏表", "显示表", "冻结", "取消冻结", "sheet", "切换", "激活", "跳转到", "添加表", "添加工作表" },
                 new[] { "activate_worksheet", "get_worksheet_names", "create_worksheet", "rename_worksheet", "delete_worksheet", "copy_worksheet", "move_worksheet", "set_worksheet_visible", "get_worksheet_index", "freeze_panes", "unfreeze_panes" }
             ),
             ["工作簿操作"] = (
@@ -931,6 +1003,7 @@ namespace ExcelAddIn
 
             // 极简提示词，强调直接输出工具调用
             sb.AppendLine("你是Excel工具调用助手。收到指令后，直接输出工具调用JSON，不要解释。");
+            sb.AppendLine("注意：你是Excel操作助手，不是Claude或其他AI模型。");
             sb.AppendLine();
             sb.AppendLine($"当前：工作表=\"{sheetName}\"，选中区域={selectionAddress}");
             sb.AppendLine();
@@ -974,8 +1047,22 @@ namespace ExcelAddIn
             bool wantsAnalysis = inputLower.Contains("分析") || inputLower.Contains("报告") || inputLower.Contains("变化");
             bool wantsRead = inputLower.Contains("读取") || inputLower.Contains("获取") || inputLower.Contains("查看") || inputLower.Contains("是多少");
             bool hasSelectedRange = inputLower.Contains("选中") || inputLower.Contains("选择") || inputLower.Contains("当前区域");
+            bool wantsCreateSheet = inputLower.Contains("新建") && (inputLower.Contains("表") || inputLower.Contains("sheet") || inputLower.Contains("工作表")) ||
+                                   inputLower.Contains("创建") && (inputLower.Contains("表") || inputLower.Contains("sheet") || inputLower.Contains("工作表")) ||
+                                   inputLower.Contains("添加") && (inputLower.Contains("表") || inputLower.Contains("sheet") || inputLower.Contains("工作表"));
             
-            if (wantsChart && hasSelectedRange)
+            if (wantsCreateSheet)
+            {
+                // 用户要创建新工作表
+                sb.AppendLine("📋 创建工作表任务：");
+                sb.AppendLine("使用 create_worksheet 工具创建新工作表：");
+                sb.AppendLine("<tool_calls>");
+                sb.AppendLine("[{\"name\": \"create_worksheet\", \"arguments\": {\"sheetName\": \"新工作表名称\"}}]");
+                sb.AppendLine("</tool_calls>");
+                sb.AppendLine();
+                sb.AppendLine("注意：每次只创建一个工作表，等待结果后再创建下一个。");
+            }
+            else if (wantsChart && hasSelectedRange)
             {
                 // 用户要基于选中区域创建图表
                 sb.AppendLine("📊 图表创建任务（选中区域）：");
@@ -1508,7 +1595,7 @@ namespace ExcelAddIn
         private List<object> GetToolsByGroups(List<string> groupIds)
         {
             var tools = new List<object>();
-            var allTools = GetMcpTools();
+            var allTools = GetExcelTools();
             var selectedToolNames = new HashSet<string>();
 
             // 收集所有选中组的工具名称
@@ -1548,17 +1635,81 @@ namespace ExcelAddIn
             var selected = new List<string>();
             string inputLower = userInput.ToLower();
 
-            // 关键词映射
+            // 关键词映射（扩展版，覆盖更多自然语言表达）
             var keywordMap = new Dictionary<string, string[]>
             {
-                ["cell_rw"] = new[] { "写入", "输入", "设置值", "读取", "获取", "单元格", "公式", "清除", "复制", "范围", "查找", "替换", "统计", "最后", "区域" },
-                ["format"] = new[] { "格式", "颜色", "字体", "背景", "加粗", "斜体", "边框", "合并", "对齐", "居中", "换行", "条件格式" },
-                ["row_col"] = new[] { "行高", "列宽", "插入行", "插入列", "删除行", "删除列", "隐藏", "显示" },
-                ["sheet"] = new[] { "工作表", "表名", "创建表", "新建表", "重命名", "删除表", "复制表", "冻结", "sheet" },
-                ["workbook"] = new[] { "工作簿", "文件", "新建", "打开", "保存", "关闭" },
-                ["data"] = new[] { "排序", "筛选", "去重", "验证", "表格", "图表", "chart", "折线", "柱形", "饼图", "曲线", "柱状", "散点", "面积", "雷达", "生成图", "创建图", "画图", "可视化", "分析" },
-                ["named"] = new[] { "命名区域", "命名范围" },
-                ["link"] = new[] { "批注", "注释", "超链接", "链接", "跳转" }
+                ["cell_rw"] = new[] { 
+                    "写入", "输入", "设置值", "读取", "获取", "单元格", "公式", "清除", "复制", "范围", "查找", "替换", "统计", "最后", "区域", "填写", "填充", "修改值", "更改值",
+                    "写入数据", "填写数据", "输入数据", "修改数据", "更改数据", "设置内容", "修改内容", "更改内容",
+                    "查看", "显示", "读取数据", "获取数据", "获取值", "读取值", "查看值",
+                    "函数", "计算", "求和", "平均值", "最大值", "最小值", "计数", "sum", "average", "max", "min", "count",
+                    "批量", "区域数据", "多行多列", "批量写入", "批量读取",
+                    "填充区域", "写入区域", "读取区域", "获取区域",
+                    "复制区域", "复制数据", "复制粘贴", "粘贴",
+                    "清空", "清空数据", "清空区域", "清空单元格", "清空内容",
+                    "删除内容", "清除内容", "删除数据", "清除数据"
+                },
+                ["format"] = new[] { 
+                    "格式", "颜色", "字体", "背景", "加粗", "斜体", "边框", "合并", "对齐", "居中", "换行", "条件格式", "样式", "美化", 
+                    "底纹", "填充色", "背景色", "底色", "字体颜色", "字体大小", "字号",
+                    "画边框", "加边框", "设置边框", "边框线",
+                    "合并单元格", "合并区域", "取消合并", "拆分单元格",
+                    "自动换行", "设置换行",
+                    "水平对齐", "垂直对齐", "左对齐", "右对齐", "居中对齐",
+                    "下划线", "删除线", "粗体", "斜体字"
+                },
+                ["row_col"] = new[] { 
+                    "行高", "列宽", "插入行", "插入列", "删除行", "删除列", "隐藏", "显示", "行", "列",
+                    "调整行高", "调整列宽", "设置行高", "设置列宽", "改变行高", "改变列宽",
+                    "插入一行", "插入一列", "删除一行", "删除一列", "添加行", "添加列",
+                    "隐藏行", "隐藏列", "显示行", "显示列", "取消隐藏",
+                    "行数", "列数", "多少行", "多少列"
+                },
+                ["sheet"] = new[] { 
+                    "工作表", "表名", "创建表", "新建表", "新表", "重命名", "删除表", "复制表", "冻结", "sheet", 
+                    "添加表", "增加表", "建表", "建一个表", "建几个表", "建三个表", "建多个表", "建2个表", "建两个表", "新建2个表", "新建两个表",
+                    "创建新表", "创建工作表", "新建工作表", "添加工作表", "增加工作表",
+                    "切换表", "激活表", "跳转表", "转到表", "选择表",
+                    "重命名表", "改名", "修改表名", "更改表名",
+                    "删除工作表", "移除表", "移除工作表",
+                    "复制工作表", "拷贝表",
+                    "移动表", "移动工作表", "调整表顺序",
+                    "隐藏表", "显示表", "隐藏工作表", "显示工作表",
+                    "冻结窗格", "冻结行", "冻结列", "取消冻结",
+                    "标签", "工作表标签", "底部标签",
+                    "表", "个工作表", "个表"
+                },
+                ["workbook"] = new[] { 
+                    "工作簿", "文件", "打开", "保存", "关闭", "工作本",
+                    "新建文件", "创建文件", "新建工作簿", "创建工作簿", "新建excel", "创建excel",
+                    "打开文件", "打开工作簿", "打开excel",
+                    "关闭文件", "关闭工作簿", "关闭excel",
+                    "保存文件", "保存工作簿", "保存excel",
+                    "另存为", "另存", "保存副本", "保存为",
+                    "excel文件", "表格文件",
+                    "新工作簿", "新文件", "创建新工作簿"
+                },
+                ["data"] = new[] { 
+                    "排序", "筛选", "去重", "验证", "表格", "图表", "chart", 
+                    "折线", "柱形", "饼图", "曲线", "柱状", "散点", "面积", "雷达", 
+                    "生成图", "创建图", "画图", "可视化", "分析",
+                    "升序", "降序", "从小到大", "从大到小", "排序方式",
+                    "过滤", "筛选数据", "筛选条件",
+                    "去重复", "删除重复", "重复值",
+                    "数据验证", "数据有效性",
+                    "创建图表", "生成图表", "画图表", "插入图表",
+                    "柱状图", "折线图", "饼状图", "条形图", "面积图", "散点图", "雷达图",
+                    "数据透视", "透视表", "pivot", "数据透视表", "创建透视表", "生成透视表", "插入透视表"
+                },
+                ["named"] = new[] { 
+                    "命名区域", "命名范围", "命名单元格", "定义名称", "名称管理",
+                    "命名", "定义名称", "创建名称", "设置名称"
+                },
+                ["link"] = new[] { 
+                    "批注", "注释", "超链接", "链接", "跳转",
+                    "添加批注", "添加注释", "插入批注", "插入注释",
+                    "添加链接", "插入链接", "设置链接", "添加超链接"
+                }
             };
 
             foreach (var kv in keywordMap)
@@ -1570,6 +1721,7 @@ namespace ExcelAddIn
                         if (!selected.Contains(kv.Key))
                         {
                             selected.Add(kv.Key);
+                            WriteLog("关键词匹配调试", $"关键词 '{keyword}' 匹配到工具组: {kv.Key}");
                         }
                         break;
                     }
@@ -1585,1503 +1737,42 @@ namespace ExcelAddIn
             return selected;
         }
 
-        // 获取MCP工具定义（带缓存优化）
-        private List<object> GetMcpTools()
+        // 获取Excel工具定义（带缓存优化）
+        private List<object> GetExcelTools()
         {
             // 如果已缓存，直接返回
-            if (_cachedMcpTools != null)
+            if (_cachedExcelTools != null)
             {
-                return _cachedMcpTools;
+                return _cachedExcelTools;
             }
 
-            // 首次调用时创建并缓存
-            _cachedMcpTools = new List<object>
-            {
-                new
-                {
-                    type = "function",
-                    function = new
-                    {
-                        name = "create_workbook",
-                        description = "创建一个新的Excel工作簿文件",
-                        parameters = new
-                        {
-                            type = "object",
-                            properties = new
-                            {
-                                fileName = new { type = "string", description = "工作簿文件名（包含.xlsx扩展名）" },
-                                sheetName = new { type = "string", description = "初始工作表名称，默认为Sheet1" }
-                            },
-                            required = new[] { "fileName" }
-                        }
-                    }
-                },
-                new
-                {
-                    type = "function",
-                    function = new
-                    {
-                        name = "open_workbook",
-                        description = "打开一个已存在的Excel工作簿文件",
-                        parameters = new
-                        {
-                            type = "object",
-                            properties = new
-                            {
-                                fileName = new { type = "string", description = "要打开的工作簿文件名" }
-                            },
-                            required = new[] { "fileName" }
-                        }
-                    }
-                },
-                new
-                {
-                    type = "function",
-                    function = new
-                    {
-                        name = "set_cell_value",
-                        description = "设置Excel工作表中指定单元格的值。如果未指定工作簿或工作表名称，将使用当前活跃的工作簿和工作表。",
-                        parameters = new
-                        {
-                            type = "object",
-                            properties = new
-                            {
-                                fileName = new { type = "string", description = "工作簿文件名（可选，默认使用当前活跃工作簿）" },
-                                sheetName = new { type = "string", description = "工作表名称（可选，默认使用当前活跃工作表）" },
-                                row = new { type = "integer", description = "行号（从1开始）" },
-                                column = new { type = "integer", description = "列号（从1开始）" },
-                                value = new { type = "string", description = "要设置的值" }
-                            },
-                            required = new[] { "row", "column", "value" }
-                        }
-                    }
-                },
-                new
-                {
-                    type = "function",
-                    function = new
-                    {
-                        name = "get_cell_value",
-                        description = "获取Excel工作表中指定单元格的值。如果未指定工作簿或工作表名称，将使用当前活跃的工作簿和工作表。",
-                        parameters = new
-                        {
-                            type = "object",
-                            properties = new
-                            {
-                                fileName = new { type = "string", description = "工作簿文件名（可选，默认使用当前活跃工作簿）" },
-                                sheetName = new { type = "string", description = "工作表名称（可选，默认使用当前活跃工作表）" },
-                                row = new { type = "integer", description = "行号（从1开始）" },
-                                column = new { type = "integer", description = "列号（从1开始）" }
-                            },
-                            required = new[] { "row", "column" }
-                        }
-                    }
-                },
-                new
-                {
-                    type = "function",
-                    function = new
-                    {
-                        name = "save_workbook",
-                        description = "保存Excel工作簿。如果未指定工作簿名称，将保存当前活跃的工作簿。",
-                        parameters = new
-                        {
-                            type = "object",
-                            properties = new
-                            {
-                                fileName = new { type = "string", description = "工作簿文件名（可选，默认使用当前活跃工作簿）" }
-                            },
-                            required = new string[] { }
-                        }
-                    }
-                },
-                new
-                {
-                    type = "function",
-                    function = new
-                    {
-                        name = "get_worksheet_names",
-                        description = "获取工作簿中所有工作表的名称列表。如果未指定工作簿名称，将使用当前活跃的工作簿。",
-                        parameters = new
-                        {
-                            type = "object",
-                            properties = new
-                            {
-                                fileName = new { type = "string", description = "工作簿文件名（可选，默认使用当前活跃工作簿）" }
-                            },
-                            required = new string[] { }
-                        }
-                    }
-                },
-                new
-                {
-                    type = "function",
-                    function = new
-                    {
-                        name = "close_workbook",
-                        description = "关闭已打开的Excel工作簿（自动保存）。如果未指定工作簿名称，将关闭当前活跃的工作簿。",
-                        parameters = new
-                        {
-                            type = "object",
-                            properties = new
-                            {
-                                fileName = new { type = "string", description = "工作簿文件名（可选，默认使用当前活跃工作簿）" }
-                            },
-                            required = new string[] { }
-                        }
-                    }
-                },
-                new
-                {
-                    type = "function",
-                    function = new
-                    {
-                        name = "save_workbook_as",
-                        description = "将工作簿另存为新文件",
-                        parameters = new
-                        {
-                            type = "object",
-                            properties = new
-                            {
-                                fileName = new { type = "string", description = "当前工作簿文件名" },
-                                newFileName = new { type = "string", description = "新文件名" }
-                            },
-                            required = new[] { "fileName", "newFileName" }
-                        }
-                    }
-                },
-                new
-                {
-                    type = "function",
-                    function = new
-                    {
-                        name = "create_worksheet",
-                        description = "在工作簿中创建新的工作表。如果未指定工作簿名称，将在当前活跃工作簿中创建。",
-                        parameters = new
-                        {
-                            type = "object",
-                            properties = new
-                            {
-                                fileName = new { type = "string", description = "工作簿文件名（可选，默认使用当前活跃工作簿）" },
-                                sheetName = new { type = "string", description = "新工作表的名称" }
-                            },
-                            required = new[] { "sheetName" }
-                        }
-                    }
-                },
-                new
-                {
-                    type = "function",
-                    function = new
-                    {
-                        name = "rename_worksheet",
-                        description = "重命名工作表。如果未指定工作簿名称，将在当前活跃工作簿中操作。",
-                        parameters = new
-                        {
-                            type = "object",
-                            properties = new
-                            {
-                                fileName = new { type = "string", description = "工作簿文件名（可选，默认使用当前活跃工作簿）" },
-                                oldSheetName = new { type = "string", description = "原工作表名称" },
-                                newSheetName = new { type = "string", description = "新工作表名称" }
-                            },
-                            required = new[] { "oldSheetName", "newSheetName" }
-                        }
-                    }
-                },
-                new
-                {
-                    type = "function",
-                    function = new
-                    {
-                        name = "delete_worksheet",
-                        description = "删除工作表。如果未指定工作簿名称，将在当前活跃工作簿中操作。",
-                        parameters = new
-                        {
-                            type = "object",
-                            properties = new
-                            {
-                                fileName = new { type = "string", description = "工作簿文件名（可选，默认使用当前活跃工作簿）" },
-                                sheetName = new { type = "string", description = "要删除的工作表名称" }
-                            },
-                            required = new[] { "sheetName" }
-                        }
-                    }
-                },
-                new
-                {
-                    type = "function",
-                    function = new
-                    {
-                        name = "set_range_values",
-                        description = "设置单元格区域的值（批量设置）。如果未指定工作簿或工作表名称，将使用当前活跃的工作簿和工作表。",
-                        parameters = new
-                        {
-                            type = "object",
-                            properties = new
-                            {
-                                fileName = new { type = "string", description = "工作簿文件名（可选，默认使用当前活跃工作簿）" },
-                                sheetName = new { type = "string", description = "工作表名称（可选，默认使用当前活跃工作表）" },
-                                rangeAddress = new { type = "string", description = "单元格区域地址，如'A1:C3'" },
-                                data = new { type = "string", description = "JSON格式的二维数组数据，如'[[1,2,3],[4,5,6]]'" }
-                            },
-                            required = new[] { "rangeAddress", "data" }
-                        }
-                    }
-                },
-                new
-                {
-                    type = "function",
-                    function = new
-                    {
-                        name = "get_range_values",
-                        description = "获取单元格区域的值（批量获取）。如果未指定工作簿或工作表名称，将使用当前活跃的工作簿和工作表。",
-                        parameters = new
-                        {
-                            type = "object",
-                            properties = new
-                            {
-                                fileName = new { type = "string", description = "工作簿文件名（可选，默认使用当前活跃工作簿）" },
-                                sheetName = new { type = "string", description = "工作表名称（可选，默认使用当前活跃工作表）" },
-                                rangeAddress = new { type = "string", description = "单元格区域地址，如'A1:C3'" }
-                            },
-                            required = new[] { "rangeAddress" }
-                        }
-                    }
-                },
-                new
-                {
-                    type = "function",
-                    function = new
-                    {
-                        name = "set_formula",
-                        description = "设置单元格的公式。如果未指定工作簿或工作表名称，将使用当前活跃的工作簿和工作表。",
-                        parameters = new
-                        {
-                            type = "object",
-                            properties = new
-                            {
-                                fileName = new { type = "string", description = "工作簿文件名（可选，默认使用当前活跃工作簿）" },
-                                sheetName = new { type = "string", description = "工作表名称（可选，默认使用当前活跃工作表）" },
-                                cellAddress = new { type = "string", description = "单元格地址，如'A1'" },
-                                formula = new { type = "string", description = "Excel公式，如'=SUM(A1:A10)'" }
-                            },
-                            required = new[] { "cellAddress", "formula" }
-                        }
-                    }
-                },
-                new
-                {
-                    type = "function",
-                    function = new
-                    {
-                        name = "get_formula",
-                        description = "获取单元格的公式。如果未指定工作簿或工作表名称，将使用当前活跃的工作簿和工作表。",
-                        parameters = new
-                        {
-                            type = "object",
-                            properties = new
-                            {
-                                fileName = new { type = "string", description = "工作簿文件名（可选，默认使用当前活跃工作簿）" },
-                                sheetName = new { type = "string", description = "工作表名称（可选，默认使用当前活跃工作表）" },
-                                cellAddress = new { type = "string", description = "单元格地址，如'A1'" }
-                            },
-                            required = new[] { "cellAddress" }
-                        }
-                    }
-                },
-                new
-                {
-                    type = "function",
-                    function = new
-                    {
-                        name = "get_excel_files",
-                        description = "获取excel_files目录下所有Excel文件列表",
-                        parameters = new
-                        {
-                            type = "object",
-                            properties = new { }
-                        }
-                    }
-                },
-                new
-                {
-                    type = "function",
-                    function = new
-                    {
-                        name = "delete_excel_file",
-                        description = "删除Excel文件（文件必须已关闭）",
-                        parameters = new
-                        {
-                            type = "object",
-                            properties = new
-                            {
-                                fileName = new { type = "string", description = "要删除的文件名" }
-                            },
-                            required = new[] { "fileName" }
-                        }
-                    }
-                },
-                new
-                {
-                    type = "function",
-                    function = new
-                    {
-                        name = "get_current_excel_info",
-                        description = "获取当前Excel应用程序中打开的工作簿和活跃工作表信息",
-                        parameters = new
-                        {
-                            type = "object",
-                            properties = new { }
-                        }
-                    }
-                },
-                new
-                {
-                    type = "function",
-                    function = new
-                    {
-                        name = "set_cell_format",
-                        description = "设置单元格或区域的格式（字体颜色、背景色、对齐方式等）",
-                        parameters = new
-                        {
-                            type = "object",
-                            properties = new
-                            {
-                                fileName = new { type = "string", description = "工作簿文件名（可选）" },
-                                sheetName = new { type = "string", description = "工作表名称（可选）" },
-                                rangeAddress = new { type = "string", description = "单元格区域地址，如'A1'或'A1:C3'" },
-                                fontColor = new { type = "string", description = "字体颜色（可选），如'红色'、'#FF0000'" },
-                                backgroundColor = new { type = "string", description = "背景色（可选），如'黄色'、'#FFFF00'" },
-                                fontSize = new { type = "integer", description = "字号（可选），如12" },
-                                bold = new { type = "boolean", description = "是否加粗（可选）" },
-                                italic = new { type = "boolean", description = "是否斜体（可选）" },
-                                horizontalAlignment = new { type = "string", description = "水平对齐（可选）：left/center/right" },
-                                verticalAlignment = new { type = "string", description = "垂直对齐（可选）：top/center/bottom" }
-                            },
-                            required = new[] { "rangeAddress" }
-                        }
-                    }
-                },
-                new
-                {
-                    type = "function",
-                    function = new
-                    {
-                        name = "set_border",
-                        description = "设置单元格或区域的边框",
-                        parameters = new
-                        {
-                            type = "object",
-                            properties = new
-                            {
-                                fileName = new { type = "string", description = "工作簿文件名（可选）" },
-                                sheetName = new { type = "string", description = "工作表名称（可选）" },
-                                rangeAddress = new { type = "string", description = "单元格区域地址，如'A1:C3'" },
-                                borderType = new { type = "string", description = "边框类型：all(全部)/outline(外框)/horizontal(横线)/vertical(竖线)" },
-                                lineStyle = new { type = "string", description = "线型（可选）：continuous(实线)/dash(虚线)/dot(点线)" }
-                            },
-                            required = new[] { "rangeAddress", "borderType" }
-                        }
-                    }
-                },
-                new
-                {
-                    type = "function",
-                    function = new
-                    {
-                        name = "merge_cells",
-                        description = "合并单元格",
-                        parameters = new
-                        {
-                            type = "object",
-                            properties = new
-                            {
-                                fileName = new { type = "string", description = "工作簿文件名（可选）" },
-                                sheetName = new { type = "string", description = "工作表名称（可选）" },
-                                rangeAddress = new { type = "string", description = "要合并的单元格区域，如'A1:C3'" }
-                            },
-                            required = new[] { "rangeAddress" }
-                        }
-                    }
-                },
-                new
-                {
-                    type = "function",
-                    function = new
-                    {
-                        name = "unmerge_cells",
-                        description = "取消合并单元格",
-                        parameters = new
-                        {
-                            type = "object",
-                            properties = new
-                            {
-                                fileName = new { type = "string", description = "工作簿文件名（可选）" },
-                                sheetName = new { type = "string", description = "工作表名称（可选）" },
-                                rangeAddress = new { type = "string", description = "要取消合并的单元格区域，如'A1:C3'" }
-                            },
-                            required = new[] { "rangeAddress" }
-                        }
-                    }
-                },
-                new
-                {
-                    type = "function",
-                    function = new
-                    {
-                        name = "set_row_height",
-                        description = "设置行高",
-                        parameters = new
-                        {
-                            type = "object",
-                            properties = new
-                            {
-                                fileName = new { type = "string", description = "工作簿文件名（可选）" },
-                                sheetName = new { type = "string", description = "工作表名称（可选）" },
-                                rowNumber = new { type = "integer", description = "行号" },
-                                height = new { type = "number", description = "行高（磅）" }
-                            },
-                            required = new[] { "rowNumber", "height" }
-                        }
-                    }
-                },
-                new
-                {
-                    type = "function",
-                    function = new
-                    {
-                        name = "set_column_width",
-                        description = "设置列宽",
-                        parameters = new
-                        {
-                            type = "object",
-                            properties = new
-                            {
-                                fileName = new { type = "string", description = "工作簿文件名（可选）" },
-                                sheetName = new { type = "string", description = "工作表名称（可选）" },
-                                columnNumber = new { type = "integer", description = "列号（A=1, B=2...）" },
-                                width = new { type = "number", description = "列宽（字符）" }
-                            },
-                            required = new[] { "columnNumber", "width" }
-                        }
-                    }
-                },
-                new
-                {
-                    type = "function",
-                    function = new
-                    {
-                        name = "insert_rows",
-                        description = "在指定位置插入行",
-                        parameters = new
-                        {
-                            type = "object",
-                            properties = new
-                            {
-                                fileName = new { type = "string", description = "工作簿文件名（可选）" },
-                                sheetName = new { type = "string", description = "工作表名称（可选）" },
-                                rowIndex = new { type = "integer", description = "插入位置的行号" },
-                                count = new { type = "integer", description = "插入的行数（默认1）" }
-                            },
-                            required = new[] { "rowIndex" }
-                        }
-                    }
-                },
-                new
-                {
-                    type = "function",
-                    function = new
-                    {
-                        name = "insert_columns",
-                        description = "在指定位置插入列",
-                        parameters = new
-                        {
-                            type = "object",
-                            properties = new
-                            {
-                                fileName = new { type = "string", description = "工作簿文件名（可选）" },
-                                sheetName = new { type = "string", description = "工作表名称（可选）" },
-                                columnIndex = new { type = "integer", description = "插入位置的列号" },
-                                count = new { type = "integer", description = "插入的列数（默认1）" }
-                            },
-                            required = new[] { "columnIndex" }
-                        }
-                    }
-                },
-                new
-                {
-                    type = "function",
-                    function = new
-                    {
-                        name = "delete_rows",
-                        description = "删除指定的行",
-                        parameters = new
-                        {
-                            type = "object",
-                            properties = new
-                            {
-                                fileName = new { type = "string", description = "工作簿文件名（可选）" },
-                                sheetName = new { type = "string", description = "工作表名称（可选）" },
-                                rowIndex = new { type = "integer", description = "起始行号" },
-                                count = new { type = "integer", description = "删除的行数（默认1）" }
-                            },
-                            required = new[] { "rowIndex" }
-                        }
-                    }
-                },
-                new
-                {
-                    type = "function",
-                    function = new
-                    {
-                        name = "delete_columns",
-                        description = "删除指定的列",
-                        parameters = new
-                        {
-                            type = "object",
-                            properties = new
-                            {
-                                fileName = new { type = "string", description = "工作簿文件名（可选）" },
-                                sheetName = new { type = "string", description = "工作表名称（可选）" },
-                                columnIndex = new { type = "integer", description = "起始列号" },
-                                count = new { type = "integer", description = "删除的列数（默认1）" }
-                            },
-                            required = new[] { "columnIndex" }
-                        }
-                    }
-                },
-                new
-                {
-                    type = "function",
-                    function = new
-                    {
-                        name = "copy_worksheet",
-                        description = "复制工作表",
-                        parameters = new
-                        {
-                            type = "object",
-                            properties = new
-                            {
-                                fileName = new { type = "string", description = "工作簿文件名（可选）" },
-                                sourceSheetName = new { type = "string", description = "源工作表名称" },
-                                targetSheetName = new { type = "string", description = "目标工作表名称" }
-                            },
-                            required = new[] { "sourceSheetName", "targetSheetName" }
-                        }
-                    }
-                },
-                new
-                {
-                    type = "function",
-                    function = new
-                    {
-                        name = "copy_range",
-                        description = "复制单元格范围",
-                        parameters = new
-                        {
-                            type = "object",
-                            properties = new
-                            {
-                                fileName = new { type = "string", description = "工作簿文件名（可选）" },
-                                sheetName = new { type = "string", description = "工作表名称（可选）" },
-                                sourceRange = new { type = "string", description = "源范围地址（如'A1:C3'）" },
-                                targetRange = new { type = "string", description = "目标范围地址（如'E1'）" }
-                            },
-                            required = new[] { "sourceRange", "targetRange" }
-                        }
-                    }
-                },
-                new
-                {
-                    type = "function",
-                    function = new
-                    {
-                        name = "clear_range",
-                        description = "清除范围内容或格式",
-                        parameters = new
-                        {
-                            type = "object",
-                            properties = new
-                            {
-                                fileName = new { type = "string", description = "工作簿文件名（可选）" },
-                                sheetName = new { type = "string", description = "工作表名称（可选）" },
-                                rangeAddress = new { type = "string", description = "单元格范围地址" },
-                                clearType = new { type = "string", description = "清除类型：all(全部)/contents(内容)/formats(格式)" }
-                            },
-                            required = new[] { "rangeAddress" }
-                        }
-                    }
-                },
-                new
-                {
-                    type = "function",
-                    function = new
-                    {
-                        name = "get_workbook_metadata",
-                        description = "获取工作簿元数据信息",
-                        parameters = new
-                        {
-                            type = "object",
-                            properties = new
-                            {
-                                fileName = new { type = "string", description = "工作簿文件名（可选）" },
-                                includeRanges = new { type = "boolean", description = "是否包含范围信息（默认false）" }
-                            },
-                            required = new string[] { }
-                        }
-                    }
-                },
-                new
-                {
-                    type = "function",
-                    function = new
-                    {
-                        name = "set_data_validation",
-                        description = "设置数据验证规则（下拉列表、数值限制等）",
-                        parameters = new
-                        {
-                            type = "object",
-                            properties = new
-                            {
-                                fileName = new { type = "string", description = "工作簿文件名（可选）" },
-                                sheetName = new { type = "string", description = "工作表名称（可选）" },
-                                rangeAddress = new { type = "string", description = "单元格范围地址" },
-                                validationType = new { type = "string", description = "验证类型：whole/decimal/list/date/time/textlength/custom" },
-                                operatorType = new { type = "string", description = "操作符：between/equal/greater/less等" },
-                                formula1 = new { type = "string", description = "公式1或列表值" },
-                                formula2 = new { type = "string", description = "公式2（范围时使用）" },
-                                inputMessage = new { type = "string", description = "输入提示" },
-                                errorMessage = new { type = "string", description = "错误提示" }
-                            },
-                            required = new[] { "rangeAddress", "validationType" }
-                        }
-                    }
-                },
-                new
-                {
-                    type = "function",
-                    function = new
-                    {
-                        name = "get_validation_rules",
-                        description = "获取单元格范围的数据验证规则",
-                        parameters = new
-                        {
-                            type = "object",
-                            properties = new
-                            {
-                                fileName = new { type = "string", description = "工作簿文件名（可选）" },
-                                sheetName = new { type = "string", description = "工作表名称（可选）" },
-                                rangeAddress = new { type = "string", description = "单元格范围地址（可选）" }
-                            },
-                            required = new string[] { }
-                        }
-                    }
-                },
-                new
-                {
-                    type = "function",
-                    function = new
-                    {
-                        name = "set_number_format",
-                        description = "设置单元格数字格式",
-                        parameters = new
-                        {
-                            type = "object",
-                            properties = new
-                            {
-                                fileName = new { type = "string", description = "工作簿文件名（可选）" },
-                                sheetName = new { type = "string", description = "工作表名称（可选）" },
-                                rangeAddress = new { type = "string", description = "单元格范围地址" },
-                                formatCode = new { type = "string", description = "格式代码（如'0.00','#,##0','yyyy-mm-dd'）" }
-                            },
-                            required = new[] { "rangeAddress", "formatCode" }
-                        }
-                    }
-                },
-                new
-                {
-                    type = "function",
-                    function = new
-                    {
-                        name = "apply_conditional_formatting",
-                        description = "应用条件格式（色阶、数据条、图标集等）",
-                        parameters = new
-                        {
-                            type = "object",
-                            properties = new
-                            {
-                                fileName = new { type = "string", description = "工作簿文件名（可选）" },
-                                sheetName = new { type = "string", description = "工作表名称（可选）" },
-                                rangeAddress = new { type = "string", description = "单元格范围地址" },
-                                ruleType = new { type = "string", description = "规则类型：cellvalue/colorscale/databar/iconset/expression" },
-                                formula1 = new { type = "string", description = "公式或条件值" },
-                                formula2 = new { type = "string", description = "公式2（可选）" },
-                                color1 = new { type = "string", description = "颜色1（可选）" },
-                                color2 = new { type = "string", description = "颜色2（可选）" },
-                                color3 = new { type = "string", description = "颜色3（可选）" }
-                            },
-                            required = new[] { "rangeAddress", "ruleType" }
-                        }
-                    }
-                },
-                new
-                {
-                    type = "function",
-                    function = new
-                    {
-                        name = "create_chart",
-                        description = "创建图表（折线图、柱状图、饼图等）",
-                        parameters = new
-                        {
-                            type = "object",
-                            properties = new
-                            {
-                                fileName = new { type = "string", description = "工作簿文件名（可选）" },
-                                sheetName = new { type = "string", description = "工作表名称（可选）" },
-                                chartType = new { type = "string", description = "图表类型：line/bar/column/pie/scatter/area/radar（默认column）" },
-                                dataRange = new { type = "string", description = "数据源范围（如'A1:D10'），也可用rangeAddress" },
-                                chartPosition = new { type = "string", description = "图表位置（如'F1'，可选，默认在数据右侧）" },
-                                title = new { type = "string", description = "图表标题（可选）" },
-                                width = new { type = "integer", description = "图表宽度（默认400）" },
-                                height = new { type = "integer", description = "图表高度（默认300）" }
-                            },
-                            required = new[] { "dataRange" }
-                        }
-                    }
-                },
-                new
-                {
-                    type = "function",
-                    function = new
-                    {
-                        name = "create_table",
-                        description = "创建Excel原生表格(ListObject)",
-                        parameters = new
-                        {
-                            type = "object",
-                            properties = new
-                            {
-                                fileName = new { type = "string", description = "工作簿文件名（可选）" },
-                                sheetName = new { type = "string", description = "工作表名称（可选）" },
-                                rangeAddress = new { type = "string", description = "表格数据范围" },
-                                tableName = new { type = "string", description = "表格名称" },
-                                hasHeaders = new { type = "boolean", description = "是否包含标题行（默认true）" },
-                                tableStyle = new { type = "string", description = "表格样式（默认TableStyleMedium2）" }
-                            },
-                            required = new[] { "rangeAddress", "tableName" }
-                        }
-                    }
-                },
-                new
-                {
-                    type = "function",
-                    function = new
-                    {
-                        name = "get_table_names",
-                        description = "获取工作表中所有表格名称",
-                        parameters = new
-                        {
-                            type = "object",
-                            properties = new
-                            {
-                                fileName = new { type = "string", description = "工作簿文件名（可选）" },
-                                sheetName = new { type = "string", description = "工作表名称（可选）" }
-                            },
-                            required = new string[] { }
-                        }
-                    }
-                },
-                new
-                {
-                    type = "function",
-                    function = new
-                    {
-                        name = "validate_formula",
-                        description = "验证Excel公式语法是否正确",
-                        parameters = new
-                        {
-                            type = "object",
-                            properties = new
-                            {
-                                formula = new { type = "string", description = "要验证的公式（如'=SUM(A1:A10)'）" }
-                            },
-                            required = new[] { "formula" }
-                        }
-                    }
-                },
-                new
-                {
-                    type = "function",
-                    function = new
-                    {
-                        name = "find_value",
-                        description = "在工作表中查找指定值的所有位置",
-                        parameters = new
-                        {
-                            type = "object",
-                            properties = new
-                            {
-                                fileName = new { type = "string", description = "工作簿文件名（可选）" },
-                                sheetName = new { type = "string", description = "工作表名称（可选）" },
-                                searchValue = new { type = "string", description = "要查找的值" },
-                                matchCase = new { type = "boolean", description = "是否区分大小写（默认false）" }
-                            },
-                            required = new[] { "searchValue" }
-                        }
-                    }
-                },
-                new
-                {
-                    type = "function",
-                    function = new
-                    {
-                        name = "find_and_replace",
-                        description = "在工作表中查找并替换所有匹配的值",
-                        parameters = new
-                        {
-                            type = "object",
-                            properties = new
-                            {
-                                fileName = new { type = "string", description = "工作簿文件名（可选）" },
-                                sheetName = new { type = "string", description = "工作表名称（可选）" },
-                                findWhat = new { type = "string", description = "要查找的值" },
-                                replaceWith = new { type = "string", description = "替换后的值" },
-                                matchCase = new { type = "boolean", description = "是否区分大小写（默认false）" }
-                            },
-                            required = new[] { "findWhat", "replaceWith" }
-                        }
-                    }
-                },
-                new
-                {
-                    type = "function",
-                    function = new
-                    {
-                        name = "freeze_panes",
-                        description = "冻结窗格（冻结指定行和列之前的部分）",
-                        parameters = new
-                        {
-                            type = "object",
-                            properties = new
-                            {
-                                fileName = new { type = "string", description = "工作簿文件名（可选）" },
-                                sheetName = new { type = "string", description = "工作表名称（可选）" },
-                                row = new { type = "integer", description = "冻结行号（在此行之前的行将被冻结）" },
-                                column = new { type = "integer", description = "冻结列号（在此列之前的列将被冻结）" }
-                            },
-                            required = new[] { "row", "column" }
-                        }
-                    }
-                },
-                new
-                {
-                    type = "function",
-                    function = new
-                    {
-                        name = "unfreeze_panes",
-                        description = "取消冻结窗格",
-                        parameters = new
-                        {
-                            type = "object",
-                            properties = new
-                            {
-                                fileName = new { type = "string", description = "工作簿文件名（可选）" },
-                                sheetName = new { type = "string", description = "工作表名称（可选）" }
-                            },
-                            required = new string[] { }
-                        }
-                    }
-                },
-                new
-                {
-                    type = "function",
-                    function = new
-                    {
-                        name = "autofit_columns",
-                        description = "自动调整列宽以适应内容",
-                        parameters = new
-                        {
-                            type = "object",
-                            properties = new
-                            {
-                                fileName = new { type = "string", description = "工作簿文件名（可选）" },
-                                sheetName = new { type = "string", description = "工作表名称（可选）" },
-                                rangeAddress = new { type = "string", description = "要调整的范围地址（如'A:A'或'A1:C10'）" }
-                            },
-                            required = new[] { "rangeAddress" }
-                        }
-                    }
-                },
-                new
-                {
-                    type = "function",
-                    function = new
-                    {
-                        name = "autofit_rows",
-                        description = "自动调整行高以适应内容",
-                        parameters = new
-                        {
-                            type = "object",
-                            properties = new
-                            {
-                                fileName = new { type = "string", description = "工作簿文件名（可选）" },
-                                sheetName = new { type = "string", description = "工作表名称（可选）" },
-                                rangeAddress = new { type = "string", description = "要调整的范围地址（如'1:1'或'A1:C10'）" }
-                            },
-                            required = new[] { "rangeAddress" }
-                        }
-                    }
-                },
-                new
-                {
-                    type = "function",
-                    function = new
-                    {
-                        name = "set_column_visible",
-                        description = "设置列的可见性（隐藏或显示列）",
-                        parameters = new
-                        {
-                            type = "object",
-                            properties = new
-                            {
-                                fileName = new { type = "string", description = "工作簿文件名（可选）" },
-                                sheetName = new { type = "string", description = "工作表名称（可选）" },
-                                columnIndex = new { type = "integer", description = "列号（A=1, B=2...）" },
-                                visible = new { type = "boolean", description = "是否可见（true显示，false隐藏）" }
-                            },
-                            required = new[] { "columnIndex", "visible" }
-                        }
-                    }
-                },
-                new
-                {
-                    type = "function",
-                    function = new
-                    {
-                        name = "set_row_visible",
-                        description = "设置行的可见性（隐藏或显示行）",
-                        parameters = new
-                        {
-                            type = "object",
-                            properties = new
-                            {
-                                fileName = new { type = "string", description = "工作簿文件名（可选）" },
-                                sheetName = new { type = "string", description = "工作表名称（可选）" },
-                                rowIndex = new { type = "integer", description = "行号" },
-                                visible = new { type = "boolean", description = "是否可见（true显示，false隐藏）" }
-                            },
-                            required = new[] { "rowIndex", "visible" }
-                        }
-                    }
-                },
-                new
-                {
-                    type = "function",
-                    function = new
-                    {
-                        name = "add_comment",
-                        description = "为单元格添加批注",
-                        parameters = new
-                        {
-                            type = "object",
-                            properties = new
-                            {
-                                fileName = new { type = "string", description = "工作簿文件名（可选）" },
-                                sheetName = new { type = "string", description = "工作表名称（可选）" },
-                                cellAddress = new { type = "string", description = "单元格地址（如'A1'）" },
-                                commentText = new { type = "string", description = "批注文本" }
-                            },
-                            required = new[] { "cellAddress", "commentText" }
-                        }
-                    }
-                },
-                new
-                {
-                    type = "function",
-                    function = new
-                    {
-                        name = "delete_comment",
-                        description = "删除单元格的批注",
-                        parameters = new
-                        {
-                            type = "object",
-                            properties = new
-                            {
-                                fileName = new { type = "string", description = "工作簿文件名（可选）" },
-                                sheetName = new { type = "string", description = "工作表名称（可选）" },
-                                cellAddress = new { type = "string", description = "单元格地址（如'A1'）" }
-                            },
-                            required = new[] { "cellAddress" }
-                        }
-                    }
-                },
-                new
-                {
-                    type = "function",
-                    function = new
-                    {
-                        name = "get_comment",
-                        description = "获取单元格的批注内容",
-                        parameters = new
-                        {
-                            type = "object",
-                            properties = new
-                            {
-                                fileName = new { type = "string", description = "工作簿文件名（可选）" },
-                                sheetName = new { type = "string", description = "工作表名称（可选）" },
-                                cellAddress = new { type = "string", description = "单元格地址（如'A1'）" }
-                            },
-                            required = new[] { "cellAddress" }
-                        }
-                    }
-                },
-                new
-                {
-                    type = "function",
-                    function = new
-                    {
-                        name = "add_hyperlink",
-                        description = "为单元格添加超链接对象（非公式方式）。适用于外部链接，如网址（会用浏览器打开）、本地文件路径、网络文件路径等。不适用于工作簿内部跳转。",
-                        parameters = new
-                        {
-                            type = "object",
-                            properties = new
-                            {
-                                fileName = new { type = "string", description = "工作簿文件名（可选）" },
-                                sheetName = new { type = "string", description = "工作表名称（可选）" },
-                                cellAddress = new { type = "string", description = "单元格地址（如'A1'）" },
-                                url = new { type = "string", description = "链接地址：网址（如'https://www.baidu.com'）或本地/网络文件路径（如'C:\\Documents\\file.xlsx'）" },
-                                displayText = new { type = "string", description = "显示文本（可选）" }
-                            },
-                            required = new[] { "cellAddress", "url" }
-                        }
-                    }
-                },
-                new
-                {
-                    type = "function",
-                    function = new
-                    {
-                        name = "set_hyperlink_formula",
-                        description = "使用HYPERLINK公式为单元格设置超链接。适用于工作簿内部跳转（如跳转到其他工作表的某个单元格），此类链接在Excel内打开，不会打开浏览器。",
-                        parameters = new
-                        {
-                            type = "object",
-                            properties = new
-                            {
-                                fileName = new { type = "string", description = "工作簿文件名（可选）" },
-                                sheetName = new { type = "string", description = "工作表名称（可选）" },
-                                cellAddress = new { type = "string", description = "要设置公式的单元格地址（如'A1'）" },
-                                targetLocation = new { type = "string", description = "目标位置，格式为'工作表名!单元格地址'，如'Sheet2!A1'、'销售数据!B5'" },
-                                displayText = new { type = "string", description = "显示文本，如'跳转到Sheet2'、'查看详情'" }
-                            },
-                            required = new[] { "cellAddress", "targetLocation", "displayText" }
-                        }
-                    }
-                },
-                new
-                {
-                    type = "function",
-                    function = new
-                    {
-                        name = "delete_hyperlink",
-                        description = "删除单元格的超链接",
-                        parameters = new
-                        {
-                            type = "object",
-                            properties = new
-                            {
-                                fileName = new { type = "string", description = "工作簿文件名（可选）" },
-                                sheetName = new { type = "string", description = "工作表名称（可选）" },
-                                cellAddress = new { type = "string", description = "单元格地址（如'A1'）" }
-                            },
-                            required = new[] { "cellAddress" }
-                        }
-                    }
-                },
-                new
-                {
-                    type = "function",
-                    function = new
-                    {
-                        name = "get_used_range",
-                        description = "获取工作表中已使用的单元格范围",
-                        parameters = new
-                        {
-                            type = "object",
-                            properties = new
-                            {
-                                fileName = new { type = "string", description = "工作簿文件名（可选）" },
-                                sheetName = new { type = "string", description = "工作表名称（可选）" }
-                            },
-                            required = new string[] { }
-                        }
-                    }
-                },
-                new
-                {
-                    type = "function",
-                    function = new
-                    {
-                        name = "get_range_statistics",
-                        description = "获取单元格范围的统计信息（总和、平均值、最大值、最小值等）",
-                        parameters = new
-                        {
-                            type = "object",
-                            properties = new
-                            {
-                                fileName = new { type = "string", description = "工作簿文件名（可选）" },
-                                sheetName = new { type = "string", description = "工作表名称（可选）" },
-                                rangeAddress = new { type = "string", description = "单元格范围地址（如'A1:A10'）" }
-                            },
-                            required = new[] { "rangeAddress" }
-                        }
-                    }
-                },
-                new
-                {
-                    type = "function",
-                    function = new
-                    {
-                        name = "get_last_row",
-                        description = "获取指定列中最后一个有数据的行号",
-                        parameters = new
-                        {
-                            type = "object",
-                            properties = new
-                            {
-                                fileName = new { type = "string", description = "工作簿文件名（可选）" },
-                                sheetName = new { type = "string", description = "工作表名称（可选）" },
-                                columnIndex = new { type = "integer", description = "列号（默认为1，即A列）" }
-                            },
-                            required = new string[] { }
-                        }
-                    }
-                },
-                new
-                {
-                    type = "function",
-                    function = new
-                    {
-                        name = "get_last_column",
-                        description = "获取指定行中最后一个有数据的列号",
-                        parameters = new
-                        {
-                            type = "object",
-                            properties = new
-                            {
-                                fileName = new { type = "string", description = "工作簿文件名（可选）" },
-                                sheetName = new { type = "string", description = "工作表名称（可选）" },
-                                rowIndex = new { type = "integer", description = "行号（默认为1）" }
-                            },
-                            required = new string[] { }
-                        }
-                    }
-                },
-                new
-                {
-                    type = "function",
-                    function = new
-                    {
-                        name = "sort_range",
-                        description = "对单元格范围进行排序",
-                        parameters = new
-                        {
-                            type = "object",
-                            properties = new
-                            {
-                                fileName = new { type = "string", description = "工作簿文件名（可选）" },
-                                sheetName = new { type = "string", description = "工作表名称（可选）" },
-                                rangeAddress = new { type = "string", description = "要排序的范围地址（如'A1:C10'）" },
-                                sortColumnIndex = new { type = "integer", description = "排序依据的列索引（相对于范围的列，1表示第一列）" },
-                                ascending = new { type = "boolean", description = "是否升序排列（true升序，false降序，默认true）" }
-                            },
-                            required = new[] { "rangeAddress", "sortColumnIndex" }
-                        }
-                    }
-                },
-                new
-                {
-                    type = "function",
-                    function = new
-                    {
-                        name = "set_auto_filter",
-                        description = "为范围设置自动筛选",
-                        parameters = new
-                        {
-                            type = "object",
-                            properties = new
-                            {
-                                fileName = new { type = "string", description = "工作簿文件名（可选）" },
-                                sheetName = new { type = "string", description = "工作表名称（可选）" },
-                                rangeAddress = new { type = "string", description = "要筛选的范围地址（如'A1:C10'）" },
-                                columnIndex = new { type = "integer", description = "筛选列索引（可选，0表示不筛选）" },
-                                criteria = new { type = "string", description = "筛选条件（可选）" }
-                            },
-                            required = new[] { "rangeAddress" }
-                        }
-                    }
-                },
-                new
-                {
-                    type = "function",
-                    function = new
-                    {
-                        name = "remove_duplicates",
-                        description = "删除范围中的重复行",
-                        parameters = new
-                        {
-                            type = "object",
-                            properties = new
-                            {
-                                fileName = new { type = "string", description = "工作簿文件名（可选）" },
-                                sheetName = new { type = "string", description = "工作表名称（可选）" },
-                                rangeAddress = new { type = "string", description = "要处理的范围地址（如'A1:C10'）" },
-                                columnIndices = new { type = "string", description = "用于判断重复的列索引数组（JSON格式，如'[1,2]'表示第1和第2列）" }
-                            },
-                            required = new[] { "rangeAddress", "columnIndices" }
-                        }
-                    }
-                },
-                new
-                {
-                    type = "function",
-                    function = new
-                    {
-                        name = "move_worksheet",
-                        description = "移动工作表到指定位置",
-                        parameters = new
-                        {
-                            type = "object",
-                            properties = new
-                            {
-                                fileName = new { type = "string", description = "工作簿文件名（可选）" },
-                                sheetName = new { type = "string", description = "要移动的工作表名称" },
-                                position = new { type = "integer", description = "目标位置（1表示第一个位置）" }
-                            },
-                            required = new[] { "sheetName", "position" }
-                        }
-                    }
-                },
-                new
-                {
-                    type = "function",
-                    function = new
-                    {
-                        name = "set_worksheet_visible",
-                        description = "设置工作表的可见性（隐藏或显示工作表）",
-                        parameters = new
-                        {
-                            type = "object",
-                            properties = new
-                            {
-                                fileName = new { type = "string", description = "工作簿文件名（可选）" },
-                                sheetName = new { type = "string", description = "工作表名称" },
-                                visible = new { type = "boolean", description = "是否可见（true显示，false隐藏）" }
-                            },
-                            required = new[] { "sheetName", "visible" }
-                        }
-                    }
-                },
-                new
-                {
-                    type = "function",
-                    function = new
-                    {
-                        name = "get_worksheet_index",
-                        description = "获取工作表在工作簿中的位置索引",
-                        parameters = new
-                        {
-                            type = "object",
-                            properties = new
-                            {
-                                fileName = new { type = "string", description = "工作簿文件名（可选）" },
-                                sheetName = new { type = "string", description = "工作表名称" }
-                            },
-                            required = new[] { "sheetName" }
-                        }
-                    }
-                },
-                // 命名区域工具
-                new
-                {
-                    type = "function",
-                    function = new
-                    {
-                        name = "create_named_range",
-                        description = "创建命名区域，使公式更易读。例如将A2:A100命名为'销售额'，之后可以使用=SUM(销售额)代替=SUM(A2:A100)",
-                        parameters = new
-                        {
-                            type = "object",
-                            properties = new
-                            {
-                                fileName = new { type = "string", description = "工作簿文件名（可选）" },
-                                sheetName = new { type = "string", description = "工作表名称（可选）" },
-                                rangeName = new { type = "string", description = "命名区域的名称，如'销售额'、'成本'" },
-                                rangeAddress = new { type = "string", description = "区域地址，如'A2:A100'、'B1:D10'" }
-                            },
-                            required = new[] { "rangeName", "rangeAddress" }
-                        }
-                    }
-                },
-                new
-                {
-                    type = "function",
-                    function = new
-                    {
-                        name = "delete_named_range",
-                        description = "删除命名区域",
-                        parameters = new
-                        {
-                            type = "object",
-                            properties = new
-                            {
-                                fileName = new { type = "string", description = "工作簿文件名（可选）" },
-                                rangeName = new { type = "string", description = "要删除的命名区域的名称" }
-                            },
-                            required = new[] { "rangeName" }
-                        }
-                    }
-                },
-                new
-                {
-                    type = "function",
-                    function = new
-                    {
-                        name = "get_named_ranges",
-                        description = "获取工作簿中所有命名区域的列表",
-                        parameters = new
-                        {
-                            type = "object",
-                            properties = new
-                            {
-                                fileName = new { type = "string", description = "工作簿文件名（可选）" }
-                            }
-                        }
-                    }
-                },
-                new
-                {
-                    type = "function",
-                    function = new
-                    {
-                        name = "get_named_range_address",
-                        description = "获取命名区域的引用地址",
-                        parameters = new
-                        {
-                            type = "object",
-                            properties = new
-                            {
-                                fileName = new { type = "string", description = "工作簿文件名（可选）" },
-                                rangeName = new { type = "string", description = "命名区域的名称" }
-                            },
-                            required = new[] { "rangeName" }
-                        }
-                    }
-                },
-                // 单元格格式增强工具
-                new
-                {
-                    type = "function",
-                    function = new
-                    {
-                        name = "set_cell_text_wrap",
-                        description = "设置单元格文本自动换行，适用于长文本内容",
-                        parameters = new
-                        {
-                            type = "object",
-                            properties = new
-                            {
-                                fileName = new { type = "string", description = "工作簿文件名（可选）" },
-                                sheetName = new { type = "string", description = "工作表名称（可选）" },
-                                rangeAddress = new { type = "string", description = "单元格或区域地址，如'A1'或'A1:C10'" },
-                                wrap = new { type = "boolean", description = "true=自动换行，false=不换行" }
-                            },
-                            required = new[] { "rangeAddress", "wrap" }
-                        }
-                    }
-                },
-                new
-                {
-                    type = "function",
-                    function = new
-                    {
-                        name = "set_cell_indent",
-                        description = "设置单元格的缩进级别，用于层级显示",
-                        parameters = new
-                        {
-                            type = "object",
-                            properties = new
-                            {
-                                fileName = new { type = "string", description = "工作簿文件名（可选）" },
-                                sheetName = new { type = "string", description = "工作表名称（可选）" },
-                                rangeAddress = new { type = "string", description = "单元格或区域地址" },
-                                indentLevel = new { type = "integer", description = "缩进级别（0-15）" }
-                            },
-                            required = new[] { "rangeAddress", "indentLevel" }
-                        }
-                    }
-                },
-                new
-                {
-                    type = "function",
-                    function = new
-                    {
-                        name = "set_cell_orientation",
-                        description = "设置单元格文本的旋转角度，常用于表头设计",
-                        parameters = new
-                        {
-                            type = "object",
-                            properties = new
-                            {
-                                fileName = new { type = "string", description = "工作簿文件名（可选）" },
-                                sheetName = new { type = "string", description = "工作表名称（可选）" },
-                                rangeAddress = new { type = "string", description = "单元格或区域地址" },
-                                degrees = new { type = "integer", description = "旋转角度（-90到90），正数逆时针，负数顺时针" }
-                            },
-                            required = new[] { "rangeAddress", "degrees" }
-                        }
-                    }
-                },
-                new
-                {
-                    type = "function",
-                    function = new
-                    {
-                        name = "set_cell_shrink_to_fit",
-                        description = "设置单元格缩小字体以适应单元格宽度",
-                        parameters = new
-                        {
-                            type = "object",
-                            properties = new
-                            {
-                                fileName = new { type = "string", description = "工作簿文件名（可选）" },
-                                sheetName = new { type = "string", description = "工作表名称（可选）" },
-                                rangeAddress = new { type = "string", description = "单元格或区域地址" },
-                                shrink = new { type = "boolean", description = "true=缩小字体填充，false=不缩小" }
-                            },
-                            required = new[] { "rangeAddress", "shrink" }
-                        }
-                    }
-                },
-                new
-                {
-                    type = "function",
-                    function = new
-                    {
-                        name = "get_current_selection",
-                        description = "获取当前选中的单元格或区域的信息（地址、行号、列号、值等）",
-                        parameters = new
-                        {
-                            type = "object",
-                            properties = new { }
-                        }
-                    }
-                }
-            };
+            // 首次调用时从技能系统动态获取并缓存
+            var toolsFromSkills = _skillManager.GetAllTools();
+            _cachedExcelTools = new List<object>();
 
-            return _cachedMcpTools;
+            foreach (var tool in toolsFromSkills)
+            {
+                // 构建正确的参数格式
+                var parameters = tool.Parameters as Dictionary<string, object>;
+                if (parameters != null && tool.RequiredParameters != null && tool.RequiredParameters.Count > 0)
+                {
+                    // 添加 required 字段到参数定义中
+                    parameters["required"] = tool.RequiredParameters;
+                }
+                
+                _cachedExcelTools.Add(new
+                {
+                    type = "function",
+                    function = new
+                    {
+                        name = tool.Name,
+                        description = tool.Description,
+                        parameters = parameters
+                    }
+                });
+            }
+
+            return _cachedExcelTools;
         }
 
         // 工具名称规范化：将模型可能输出的变体名称映射到正确的工具名
@@ -3138,6 +1829,57 @@ namespace ExcelAddIn
             return toolName;
         }
 
+        // 辅助方法：将 JsonElement 转换为 Dictionary<string, object>
+        private Dictionary<string, object> JsonElementToDictionary(JsonElement element)
+        {
+            var dict = new Dictionary<string, object>();
+            
+            foreach (var prop in element.EnumerateObject())
+            {
+                dict[prop.Name] = JsonValueToObject(prop.Value);
+            }
+            
+            return dict;
+        }
+
+        // 辅助方法：将 JsonValue 转换为 object
+        private object JsonValueToObject(JsonElement element)
+        {
+            switch (element.ValueKind)
+            {
+                case JsonValueKind.String:
+                    return element.GetString();
+                case JsonValueKind.Number:
+                    if (element.TryGetInt32(out var intVal))
+                        return intVal;
+                    if (element.TryGetInt64(out var longVal))
+                        return longVal;
+                    return element.GetDouble();
+                case JsonValueKind.True:
+                    return true;
+                case JsonValueKind.False:
+                    return false;
+                case JsonValueKind.Null:
+                    return null;
+                case JsonValueKind.Array:
+                    var list = new List<object>();
+                    foreach (var item in element.EnumerateArray())
+                    {
+                        list.Add(JsonValueToObject(item));
+                    }
+                    return list;
+                case JsonValueKind.Object:
+                    var objDict = new Dictionary<string, object>();
+                    foreach (var prop in element.EnumerateObject())
+                    {
+                        objDict[prop.Name] = JsonValueToObject(prop.Value);
+                    }
+                    return objDict;
+                default:
+                    return element.ToString();
+            }
+        }
+
         // 执行MCP工具调用（确保在UI线程上执行Excel COM操作）
         private string ExecuteMcpTool(string toolName, JsonElement arguments)
         {
@@ -3162,1733 +1904,26 @@ namespace ExcelAddIn
                 // 工具名称规范化：处理模型可能输出的变体名称
                 toolName = NormalizeToolName(toolName);
 
-                // 辅助方法：获取文件名（如果未提供，使用活跃工作簿）
-                string GetFileName()
+                // 直接使用技能系统执行所有工具
+                var argumentsDict = JsonElementToDictionary(arguments);
+                var result = _skillManager.ExecuteToolAsync(toolName, argumentsDict).Result;
+                
+                if (result.Success)
                 {
-                    if (arguments.TryGetProperty("fileName", out var fileNameProp))
-                    {
-                        var fn = fileNameProp.GetString();
-                        if (!string.IsNullOrEmpty(fn)) return fn;
-                    }
-                    if (string.IsNullOrEmpty(_activeWorkbook))
-                        throw new Exception("未指定工作簿名称且没有活跃的工作簿");
-                    return _activeWorkbook;
+                    return result.Content;
                 }
-
-                // 辅助方法：获取工作表名（如果未提供，使用活跃工作表）
-                string GetSheetName()
+                else
                 {
-                    if (arguments.TryGetProperty("sheetName", out var sheetNameProp))
-                    {
-                        var sn = sheetNameProp.GetString();
-                        if (!string.IsNullOrEmpty(sn)) return sn;
-                    }
-                    if (string.IsNullOrEmpty(_activeWorksheet))
-                        throw new Exception("未指定工作表名称且没有活跃的工作表");
-                    return _activeWorksheet;
+                    return $"错误：{result.Error}";
                 }
-
-                // 辅助方法：获取当前Excel工作簿
-                Microsoft.Office.Interop.Excel.Workbook GetCurrentWorkbook(string fileName = null)
-                {
-                    if (ThisAddIn.app == null)
-                        throw new Exception("Excel应用程序未初始化");
-
-                    var targetFileName = fileName ?? _activeWorkbook;
-                    if (string.IsNullOrEmpty(targetFileName))
-                        throw new Exception("未指定工作簿且没有活跃工作簿");
-
-                    // 查找指定的工作簿
-                    foreach (Microsoft.Office.Interop.Excel.Workbook wb in ThisAddIn.app.Workbooks)
-                    {
-                        if (wb.Name == targetFileName)
-                            return wb;
-                    }
-
-                    throw new Exception($"未找到工作簿: {targetFileName}");
-                }
-
-                // 辅助方法：获取工作表
-                Microsoft.Office.Interop.Excel.Worksheet GetWorksheet(string fileName = null, string sheetName = null)
-                {
-                    var workbook = GetCurrentWorkbook(fileName);
-                    var targetSheetName = sheetName ?? _activeWorksheet;
-
-                    if (string.IsNullOrEmpty(targetSheetName))
-                        throw new Exception("未指定工作表且没有活跃工作表");
-
-                    foreach (Microsoft.Office.Interop.Excel.Worksheet ws in workbook.Worksheets)
-                    {
-                        if (ws.Name == targetSheetName)
-                            return ws;
-                    }
-
-                    throw new Exception($"未找到工作表: {targetSheetName}");
-                }
-
-                switch (toolName)
-                {
-                    case "create_workbook":
-                        {
-                            var fileName = arguments.GetProperty("fileName").GetString();
-                            var sheetName = arguments.TryGetProperty("sheetName", out var sheet) ? sheet.GetString() : "Sheet1";
-
-                            // 使用ExcelMcp创建独立文件
-                            var result = _excelMcp.CreateWorkbook(fileName, sheetName);
-
-                            // 注意：这里创建的是独立文件，不会在当前Excel中打开
-                            return $"成功创建工作簿文件: {result}（保存在excel_files目录）";
-                        }
-
-                    case "open_workbook":
-                        {
-                            var fileName = arguments.GetProperty("fileName").GetString();
-
-                            // 使用Excel应用程序打开文件
-                            var filePath = System.IO.Path.Combine(_excelMcp.GetType().GetField("_excelFilesPath",
-                                System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance)
-                                ?.GetValue(_excelMcp)?.ToString() ?? "./excel_files", fileName);
-
-                            if (!System.IO.File.Exists(filePath))
-                                throw new Exception($"文件不存在: {filePath}");
-
-                            var wb = ThisAddIn.app.Workbooks.Open(filePath);
-                            _activeWorkbook = wb.Name;
-
-                            if (wb.Worksheets.Count > 0)
-                            {
-                                Microsoft.Office.Interop.Excel.Worksheet ws = wb.Worksheets[1];
-                                _activeWorksheet = ws.Name;
-                            }
-
-                            return $"成功打开工作簿: {fileName}，当前活跃工作簿已设置为 {_activeWorkbook}" +
-                                   (!string.IsNullOrEmpty(_activeWorksheet) ? $"，活跃工作表为 {_activeWorksheet}" : "");
-                        }
-
-                    case "close_workbook":
-                        {
-                            var fileName = GetFileName();
-                            var workbook = GetCurrentWorkbook(fileName);
-                            workbook.Close(true);
-
-                            if (_activeWorkbook == fileName)
-                            {
-                                _activeWorkbook = string.Empty;
-                                _activeWorksheet = string.Empty;
-                            }
-
-                            return $"成功关闭工作簿: {fileName}";
-                        }
-
-                    case "save_workbook":
-                        {
-                            var fileName = GetFileName();
-                            var workbook = GetCurrentWorkbook(fileName);
-                            workbook.Save();
-                            return $"成功保存工作簿: {fileName}";
-                        }
-
-                    case "save_workbook_as":
-                        {
-                            var fileName = arguments.GetProperty("fileName").GetString();
-                            var newFileName = arguments.GetProperty("newFileName").GetString();
-                            var workbook = GetCurrentWorkbook(fileName);
-
-                            var newFilePath = System.IO.Path.Combine(
-                                System.IO.Path.GetDirectoryName(workbook.FullName), newFileName);
-
-                            workbook.SaveAs(newFilePath);
-
-                            if (_activeWorkbook == fileName)
-                                _activeWorkbook = newFileName;
-
-                            return $"成功将工作簿 {fileName} 另存为 {newFileName}";
-                        }
-
-                    case "activate_worksheet":
-                        {
-                            var fileName = GetFileName();
-                            var sheetName = arguments.GetProperty("sheetName").GetString();
-                            var workbook = GetCurrentWorkbook(fileName);
-
-                            // 查找并激活指定工作表
-                            Microsoft.Office.Interop.Excel.Worksheet targetSheet = null;
-                            foreach (Microsoft.Office.Interop.Excel.Worksheet ws in workbook.Worksheets)
-                            {
-                                if (ws.Name == sheetName)
-                                {
-                                    targetSheet = ws;
-                                    break;
-                                }
-                            }
-
-                            if (targetSheet == null)
-                                throw new Exception($"未找到工作表: {sheetName}");
-
-                            targetSheet.Activate();
-                            _activeWorksheet = sheetName;
-
-                            return $"成功激活工作表: {sheetName}，后续操作将在此表上执行";
-                        }
-
-                    case "create_worksheet":
-                        {
-                            var fileName = GetFileName();
-                            var sheetName = arguments.GetProperty("sheetName").GetString();
-                            var workbook = GetCurrentWorkbook(fileName);
-
-                            Microsoft.Office.Interop.Excel.Worksheet newSheet = workbook.Worksheets.Add();
-                            newSheet.Name = sheetName;
-
-                            _activeWorksheet = sheetName;
-
-                            return $"成功创建工作表: {sheetName}，当前活跃工作表已设置为 {sheetName}";
-                        }
-
-                    case "rename_worksheet":
-                        {
-                            var fileName = GetFileName();
-                            var oldSheetName = arguments.GetProperty("oldSheetName").GetString();
-                            var newSheetName = arguments.GetProperty("newSheetName").GetString();
-
-                            var worksheet = GetWorksheet(fileName, oldSheetName);
-                            worksheet.Name = newSheetName;
-
-                            if (_activeWorksheet == oldSheetName)
-                                _activeWorksheet = newSheetName;
-
-                            return $"成功将工作表 {oldSheetName} 重命名为 {newSheetName}";
-                        }
-
-                    case "delete_worksheet":
-                        {
-                            var fileName = GetFileName();
-                            var sheetName = arguments.GetProperty("sheetName").GetString();
-
-                            var worksheet = GetWorksheet(fileName, sheetName);
-                            worksheet.Delete();
-
-                            if (_activeWorksheet == sheetName)
-                                _activeWorksheet = string.Empty;
-
-                            return $"成功删除工作表: {sheetName}";
-                        }
-
-                    case "get_worksheet_names":
-                        {
-                            var fileName = GetFileName();
-                            var workbook = GetCurrentWorkbook(fileName);
-
-                            var names = new List<string>();
-                            foreach (Microsoft.Office.Interop.Excel.Worksheet ws in workbook.Worksheets)
-                            {
-                                names.Add(ws.Name);
-                            }
-
-                            return $"工作表列表: {string.Join(", ", names)}";
-                        }
-
-                    case "set_cell_value":
-                        {
-                            var fileName = GetFileName();
-                            var sheetName = GetSheetName();
-                            var row = arguments.GetProperty("row").GetInt32();
-                            var column = arguments.GetProperty("column").GetInt32();
-                            
-                            // 支持value为字符串或数字类型
-                            object value;
-                            var valueProp = arguments.GetProperty("value");
-                            if (valueProp.ValueKind == JsonValueKind.Number)
-                            {
-                                value = valueProp.GetDouble();
-                            }
-                            else if (valueProp.ValueKind == JsonValueKind.String)
-                            {
-                                value = valueProp.GetString();
-                            }
-                            else
-                            {
-                                value = valueProp.ToString();
-                            }
-
-                            var worksheet = GetWorksheet(fileName, sheetName);
-                            Microsoft.Office.Interop.Excel.Range cell = worksheet.Cells[row, column];
-                            cell.Value = value;
-
-                            return $"成功设置单元格 ({row},{column}) 的值为: {value}";
-                        }
-
-                    case "get_cell_value":
-                        {
-                            var fileName = GetFileName();
-                            var sheetName = GetSheetName();
-                            var row = arguments.GetProperty("row").GetInt32();
-                            var column = arguments.GetProperty("column").GetInt32();
-
-                            var worksheet = GetWorksheet(fileName, sheetName);
-                            Microsoft.Office.Interop.Excel.Range cell = worksheet.Cells[row, column];
-                            var value = cell.Value?.ToString() ?? "";
-
-                            return $"单元格 ({row},{column}) 的值为: {value}";
-                        }
-
-                    case "set_range_values":
-                        {
-                            var fileName = GetFileName();
-                            var sheetName = GetSheetName();
-                            var rangeAddress = arguments.GetProperty("rangeAddress").GetString();
-                            var dataProp = arguments.GetProperty("data");
-
-                            var worksheet = GetWorksheet(fileName, sheetName);
-                            var range = worksheet.Range[rangeAddress];
-
-                            // 支持data为字符串（JSON）或直接数组
-                            List<List<object>> dataList;
-                            if (dataProp.ValueKind == JsonValueKind.String)
-                            {
-                                // data是JSON字符串
-                                var dataJson = dataProp.GetString();
-                                dataList = JsonSerializer.Deserialize<List<List<object>>>(dataJson);
-                            }
-                            else if (dataProp.ValueKind == JsonValueKind.Array)
-                            {
-                                // data是直接的数组
-                                dataList = new List<List<object>>();
-                                foreach (var row in dataProp.EnumerateArray())
-                                {
-                                    var rowList = new List<object>();
-                                    if (row.ValueKind == JsonValueKind.Array)
-                                    {
-                                        foreach (var cell in row.EnumerateArray())
-                                        {
-                                            if (cell.ValueKind == JsonValueKind.Number)
-                                                rowList.Add(cell.GetDouble());
-                                            else if (cell.ValueKind == JsonValueKind.String)
-                                                rowList.Add(cell.GetString());
-                                            else
-                                                rowList.Add(cell.ToString());
-                                        }
-                                    }
-                                    else
-                                    {
-                                        // 单个值，作为一列
-                                        if (row.ValueKind == JsonValueKind.Number)
-                                            rowList.Add(row.GetDouble());
-                                        else if (row.ValueKind == JsonValueKind.String)
-                                            rowList.Add(row.GetString());
-                                        else
-                                            rowList.Add(row.ToString());
-                                    }
-                                    dataList.Add(rowList);
-                                }
-                            }
-                            else
-                            {
-                                throw new Exception("data参数格式不正确，应为JSON字符串或数组");
-                            }
-
-                            var rows = dataList.Count;
-                            var cols = dataList[0].Count;
-                            var data = new object[rows, cols];
-                            for (int i = 0; i < rows; i++)
-                            {
-                                for (int j = 0; j < cols; j++)
-                                {
-                                    data[i, j] = dataList[i][j];
-                                }
-                            }
-
-                            range.Value = data;
-                            return $"成功设置区域 {rangeAddress} 的值";
-                        }
-
-                    case "get_range_values":
-                        {
-                            var fileName = GetFileName();
-                            var sheetName = GetSheetName();
-                            var rangeAddress = arguments.GetProperty("rangeAddress").GetString();
-
-                            var worksheet = GetWorksheet(fileName, sheetName);
-                            var range = worksheet.Range[rangeAddress];
-                            var values = range.Value as object[,];
-
-                            if (values == null)
-                            {
-                                return $"区域 {rangeAddress} 为空";
-                            }
-
-                            // 转换为JSON字符串
-                            var result = new List<List<object>>();
-                            for (int i = values.GetLowerBound(0); i <= values.GetUpperBound(0); i++)
-                            {
-                                var row = new List<object>();
-                                for (int j = values.GetLowerBound(1); j <= values.GetUpperBound(1); j++)
-                                {
-                                    row.Add(values[i, j]);
-                                }
-                                result.Add(row);
-                            }
-                            var jsonResult = JsonSerializer.Serialize(result);
-                            return $"区域 {rangeAddress} 的值: {jsonResult}";
-                        }
-
-                    case "set_formula":
-                        {
-                            var fileName = GetFileName();
-                            var sheetName = GetSheetName();
-                            var cellAddress = arguments.GetProperty("cellAddress").GetString();
-                            var formula = arguments.GetProperty("formula").GetString();
-
-                            var worksheet = GetWorksheet(fileName, sheetName);
-                            var range = worksheet.Range[cellAddress];
-                            range.Formula = formula;
-
-                            return $"成功设置单元格 {cellAddress} 的公式: {formula}";
-                        }
-
-                    case "get_formula":
-                        {
-                            var fileName = GetFileName();
-                            var sheetName = GetSheetName();
-                            var cellAddress = arguments.GetProperty("cellAddress").GetString();
-
-                            var worksheet = GetWorksheet(fileName, sheetName);
-                            var range = worksheet.Range[cellAddress];
-                            var formula = range.Formula?.ToString() ?? "";
-
-                            return $"单元格 {cellAddress} 的公式为: {formula}";
-                        }
-
-                    case "get_excel_files":
-                        {
-                            var files = _excelMcp.GetExcelFiles();
-                            return $"Excel文件列表: {string.Join(", ", files)}";
-                        }
-
-                    case "delete_excel_file":
-                        {
-                            var fileName = arguments.GetProperty("fileName").GetString();
-                            _excelMcp.DeleteExcelFile(fileName);
-
-                            if (_activeWorkbook == fileName)
-                            {
-                                _activeWorkbook = string.Empty;
-                                _activeWorksheet = string.Empty;
-                            }
-
-                            return $"成功删除文件: {fileName}";
-                        }
-
-                    case "get_current_excel_info":
-                        {
-                            try
-                            {
-                                if (ThisAddIn.app == null)
-                                    return "Excel应用程序未初始化";
-
-                                var info = new System.Text.StringBuilder();
-                                info.AppendLine("当前Excel环境信息：");
-
-                                if (ThisAddIn.app.ActiveWorkbook != null)
-                                {
-                                    var wb = ThisAddIn.app.ActiveWorkbook;
-                                    info.AppendLine($"- 活跃工作簿: {wb.Name}");
-                                    _activeWorkbook = wb.Name;
-
-                                    if (ThisAddIn.app.ActiveSheet != null)
-                                    {
-                                        Microsoft.Office.Interop.Excel.Worksheet ws = ThisAddIn.app.ActiveSheet;
-                                        info.AppendLine($"- 活跃工作表: {ws.Name}");
-                                        _activeWorksheet = ws.Name;
-
-                                        info.Append("- 所有工作表: ");
-                                        var sheetNames = new List<string>();
-                                        foreach (Microsoft.Office.Interop.Excel.Worksheet sheet in wb.Worksheets)
-                                        {
-                                            sheetNames.Add(sheet.Name);
-                                        }
-                                        info.AppendLine(string.Join(", ", sheetNames));
-                                    }
-                                }
-                                else
-                                {
-                                    info.AppendLine("- 当前没有打开的工作簿");
-                                }
-
-                                return info.ToString();
-                            }
-                            catch (Exception ex)
-                            {
-                                return $"获取Excel信息失败: {ex.Message}";
-                            }
-                        }
-
-                    case "set_cell_format":
-                        {
-                            var fileName = GetFileName();
-                            var sheetName = GetSheetName();
-                            
-                            // 获取rangeAddress，如果未提供则使用当前选中的单元格
-                            string rangeAddress;
-                            if (arguments.TryGetProperty("rangeAddress", out var rangeAddressProp))
-                            {
-                                rangeAddress = rangeAddressProp.GetString();
-                            }
-                            else
-                            {
-                                // 未提供rangeAddress，使用当前选中的单元格
-                                if (ThisAddIn.app?.Selection != null)
-                                {
-                                    Microsoft.Office.Interop.Excel.Range selection = ThisAddIn.app.Selection;
-                                    rangeAddress = selection.Address.Replace("$", "");
-                                }
-                                else
-                                {
-                                    throw new Exception("未提供rangeAddress参数，且无法获取当前选中的单元格");
-                                }
-                            }
-                            
-                            var worksheet = GetWorksheet(fileName, sheetName);
-                            var range = worksheet.Range[rangeAddress];
-
-                            // 字体颜色
-                            if (arguments.TryGetProperty("fontColor", out var fontColorProp))
-                            {
-                                var color = ParseColor(fontColorProp.GetString());
-                                range.Font.Color = color;
-                            }
-
-                            // 背景色
-                            if (arguments.TryGetProperty("backgroundColor", out var bgColorProp))
-                            {
-                                var color = ParseColor(bgColorProp.GetString());
-                                range.Interior.Color = color;
-                            }
-
-                            // 字号
-                            if (arguments.TryGetProperty("fontSize", out var fontSizeProp))
-                            {
-                                range.Font.Size = fontSizeProp.GetInt32();
-                            }
-
-                            // 加粗
-                            if (arguments.TryGetProperty("bold", out var boldProp))
-                            {
-                                range.Font.Bold = boldProp.GetBoolean();
-                            }
-
-                            // 斜体
-                            if (arguments.TryGetProperty("italic", out var italicProp))
-                            {
-                                range.Font.Italic = italicProp.GetBoolean();
-                            }
-
-                            // 水平对齐
-                            if (arguments.TryGetProperty("horizontalAlignment", out var hAlignProp))
-                            {
-                                var align = hAlignProp.GetString().ToLower();
-                                range.HorizontalAlignment = align switch
-                                {
-                                    "left" => Microsoft.Office.Interop.Excel.XlHAlign.xlHAlignLeft,
-                                    "center" => Microsoft.Office.Interop.Excel.XlHAlign.xlHAlignCenter,
-                                    "right" => Microsoft.Office.Interop.Excel.XlHAlign.xlHAlignRight,
-                                    _ => Microsoft.Office.Interop.Excel.XlHAlign.xlHAlignGeneral
-                                };
-                            }
-
-                            // 垂直对齐
-                            if (arguments.TryGetProperty("verticalAlignment", out var vAlignProp))
-                            {
-                                var align = vAlignProp.GetString().ToLower();
-                                range.VerticalAlignment = align switch
-                                {
-                                    "top" => Microsoft.Office.Interop.Excel.XlVAlign.xlVAlignTop,
-                                    "center" => Microsoft.Office.Interop.Excel.XlVAlign.xlVAlignCenter,
-                                    "bottom" => Microsoft.Office.Interop.Excel.XlVAlign.xlVAlignBottom,
-                                    _ => Microsoft.Office.Interop.Excel.XlVAlign.xlVAlignCenter
-                                };
-                            }
-
-                            return $"成功设置区域 {rangeAddress} 的格式";
-                        }
-
-                    case "set_border":
-                        {
-                            var fileName = GetFileName();
-                            var sheetName = GetSheetName();
-                            var rangeAddress = arguments.GetProperty("rangeAddress").GetString();
-                            var borderType = arguments.GetProperty("borderType").GetString().ToLower();
-                            var worksheet = GetWorksheet(fileName, sheetName);
-                            var range = worksheet.Range[rangeAddress];
-
-                            var lineStyle = Microsoft.Office.Interop.Excel.XlLineStyle.xlContinuous;
-                            if (arguments.TryGetProperty("lineStyle", out var lineStyleProp))
-                            {
-                                lineStyle = lineStyleProp.GetString().ToLower() switch
-                                {
-                                    "dash" => Microsoft.Office.Interop.Excel.XlLineStyle.xlDash,
-                                    "dot" => Microsoft.Office.Interop.Excel.XlLineStyle.xlDot,
-                                    _ => Microsoft.Office.Interop.Excel.XlLineStyle.xlContinuous
-                                };
-                            }
-
-                            switch (borderType)
-                            {
-                                case "all":
-                                    range.Borders.LineStyle = lineStyle;
-                                    break;
-                                case "outline":
-                                    range.BorderAround(lineStyle);
-                                    break;
-                                case "horizontal":
-                                    range.Borders[Microsoft.Office.Interop.Excel.XlBordersIndex.xlInsideHorizontal].LineStyle = lineStyle;
-                                    break;
-                                case "vertical":
-                                    range.Borders[Microsoft.Office.Interop.Excel.XlBordersIndex.xlInsideVertical].LineStyle = lineStyle;
-                                    break;
-                            }
-
-                            return $"成功设置区域 {rangeAddress} 的边框";
-                        }
-
-                    case "merge_cells":
-                        {
-                            var fileName = GetFileName();
-                            var sheetName = GetSheetName();
-                            var rangeAddress = arguments.GetProperty("rangeAddress").GetString();
-                            var worksheet = GetWorksheet(fileName, sheetName);
-                            var range = worksheet.Range[rangeAddress];
-
-                            range.Merge();
-
-                            return $"成功合并单元格 {rangeAddress}";
-                        }
-
-                    case "unmerge_cells":
-                        {
-                            var fileName = GetFileName();
-                            var sheetName = GetSheetName();
-                            var rangeAddress = arguments.GetProperty("rangeAddress").GetString();
-                            var worksheet = GetWorksheet(fileName, sheetName);
-                            var range = worksheet.Range[rangeAddress];
-
-                            range.UnMerge();
-
-                            return $"成功取消合并单元格 {rangeAddress}";
-                        }
-
-                    case "set_row_height":
-                        {
-                            var fileName = GetFileName();
-                            var sheetName = GetSheetName();
-                            var rowNumber = arguments.GetProperty("rowNumber").GetInt32();
-                            var height = arguments.GetProperty("height").GetDouble();
-                            var worksheet = GetWorksheet(fileName, sheetName);
-
-                            Microsoft.Office.Interop.Excel.Range row = worksheet.Rows[rowNumber];
-                            row.RowHeight = height;
-
-                            return $"成功设置第 {rowNumber} 行的行高为 {height}";
-                        }
-
-                    case "set_column_width":
-                        {
-                            var fileName = GetFileName();
-                            var sheetName = GetSheetName();
-                            var columnNumber = arguments.GetProperty("columnNumber").GetInt32();
-                            var width = arguments.GetProperty("width").GetDouble();
-                            var worksheet = GetWorksheet(fileName, sheetName);
-
-                            Microsoft.Office.Interop.Excel.Range column = worksheet.Columns[columnNumber];
-                            column.ColumnWidth = width;
-
-                            return $"成功设置第 {columnNumber} 列的列宽为 {width}";
-                        }
-
-                    case "insert_rows":
-                        {
-                            var fileName = GetFileName();
-                            var sheetName = GetSheetName();
-                            var rowIndex = arguments.GetProperty("rowIndex").GetInt32();
-                            var count = arguments.TryGetProperty("count", out var countProp) ? countProp.GetInt32() : 1;
-                            var worksheet = GetWorksheet(fileName, sheetName);
-
-                            Microsoft.Office.Interop.Excel.Range row = worksheet.Rows[rowIndex];
-                            for (int i = 0; i < count; i++)
-                            {
-                                row.Insert(Microsoft.Office.Interop.Excel.XlInsertShiftDirection.xlShiftDown, Type.Missing);
-                            }
-
-                            return $"成功在第 {rowIndex} 行插入了 {count} 行";
-                        }
-
-                    case "insert_columns":
-                        {
-                            var fileName = GetFileName();
-                            var sheetName = GetSheetName();
-                            var columnIndex = arguments.GetProperty("columnIndex").GetInt32();
-                            var count = arguments.TryGetProperty("count", out var countProp) ? countProp.GetInt32() : 1;
-                            var worksheet = GetWorksheet(fileName, sheetName);
-
-                            Microsoft.Office.Interop.Excel.Range column = worksheet.Columns[columnIndex];
-                            for (int i = 0; i < count; i++)
-                            {
-                                column.Insert(Microsoft.Office.Interop.Excel.XlInsertShiftDirection.xlShiftToRight, Type.Missing);
-                            }
-
-                            return $"成功在第 {columnIndex} 列插入了 {count} 列";
-                        }
-
-                    case "delete_rows":
-                        {
-                            var fileName = GetFileName();
-                            var sheetName = GetSheetName();
-                            var rowIndex = arguments.GetProperty("rowIndex").GetInt32();
-                            var count = arguments.TryGetProperty("count", out var countProp) ? countProp.GetInt32() : 1;
-                            var worksheet = GetWorksheet(fileName, sheetName);
-
-                            Microsoft.Office.Interop.Excel.Range rows = worksheet.Range[worksheet.Rows[rowIndex], worksheet.Rows[rowIndex + count - 1]];
-                            rows.Delete(Microsoft.Office.Interop.Excel.XlDeleteShiftDirection.xlShiftUp);
-
-                            return $"成功删除从第 {rowIndex} 行开始的 {count} 行";
-                        }
-
-                    case "delete_columns":
-                        {
-                            var fileName = GetFileName();
-                            var sheetName = GetSheetName();
-                            var columnIndex = arguments.GetProperty("columnIndex").GetInt32();
-                            var count = arguments.TryGetProperty("count", out var countProp) ? countProp.GetInt32() : 1;
-                            var worksheet = GetWorksheet(fileName, sheetName);
-
-                            Microsoft.Office.Interop.Excel.Range columns = worksheet.Range[worksheet.Columns[columnIndex], worksheet.Columns[columnIndex + count - 1]];
-                            columns.Delete(Microsoft.Office.Interop.Excel.XlDeleteShiftDirection.xlShiftToLeft);
-
-                            return $"成功删除从第 {columnIndex} 列开始的 {count} 列";
-                        }
-
-                    case "copy_worksheet":
-                        {
-                            var fileName = GetFileName();
-                            var sourceSheetName = arguments.GetProperty("sourceSheetName").GetString();
-                            var targetSheetName = arguments.GetProperty("targetSheetName").GetString();
-                            var workbook = GetCurrentWorkbook(fileName);
-
-                            Microsoft.Office.Interop.Excel.Worksheet sourceSheet = workbook.Worksheets[sourceSheetName];
-                            sourceSheet.Copy(Type.Missing, workbook.Worksheets[workbook.Worksheets.Count]);
-                            Microsoft.Office.Interop.Excel.Worksheet newSheet = workbook.Worksheets[workbook.Worksheets.Count];
-                            newSheet.Name = targetSheetName;
-
-                            _activeWorksheet = targetSheetName;
-                            return $"成功将工作表 {sourceSheetName} 复制为 {targetSheetName}";
-                        }
-
-                    case "copy_range":
-                        {
-                            var fileName = GetFileName();
-                            var sheetName = GetSheetName();
-                            var sourceRange = arguments.GetProperty("sourceRange").GetString();
-                            var targetRange = arguments.GetProperty("targetRange").GetString();
-                            var worksheet = GetWorksheet(fileName, sheetName);
-
-                            Microsoft.Office.Interop.Excel.Range source = worksheet.Range[sourceRange];
-                            Microsoft.Office.Interop.Excel.Range target = worksheet.Range[targetRange];
-                            source.Copy(target);
-
-                            return $"成功将范围 {sourceRange} 复制到 {targetRange}";
-                        }
-
-                    case "clear_range":
-                        {
-                            var fileName = GetFileName();
-                            var sheetName = GetSheetName();
-                            var rangeAddress = arguments.GetProperty("rangeAddress").GetString();
-                            var clearType = arguments.TryGetProperty("clearType", out var typeProp) ? typeProp.GetString() : "all";
-                            var worksheet = GetWorksheet(fileName, sheetName);
-                            var range = worksheet.Range[rangeAddress];
-
-                            switch (clearType.ToLower())
-                            {
-                                case "contents":
-                                    range.ClearContents();
-                                    break;
-                                case "formats":
-                                    range.ClearFormats();
-                                    break;
-                                case "all":
-                                default:
-                                    range.Clear();
-                                    break;
-                            }
-
-                            return $"成功清除范围 {rangeAddress} 的{clearType}";
-                        }
-
-                    case "get_workbook_metadata":
-                        {
-                            var fileName = GetFileName();
-                            var includeRanges = arguments.TryGetProperty("includeRanges", out var includeProp) && includeProp.GetBoolean();
-                            var workbook = GetCurrentWorkbook(fileName);
-
-                            var metadata = new System.Text.StringBuilder();
-                            metadata.AppendLine($"工作簿名称: {workbook.Name}");
-                            metadata.AppendLine($"工作表数量: {workbook.Worksheets.Count}");
-                            metadata.AppendLine($"完整路径: {workbook.FullName}");
-                            metadata.AppendLine("工作表列表:");
-
-                            foreach (Microsoft.Office.Interop.Excel.Worksheet ws in workbook.Worksheets)
-                            {
-                                metadata.AppendLine($"  - {ws.Name}");
-
-                                if (includeRanges)
-                                {
-                                    Microsoft.Office.Interop.Excel.Range usedRange = ws.UsedRange;
-                                    metadata.AppendLine($"    已使用范围: {usedRange.Address}");
-                                    metadata.AppendLine($"    行数: {usedRange.Rows.Count}, 列数: {usedRange.Columns.Count}");
-                                }
-                            }
-
-                            return metadata.ToString();
-                        }
-
-                    case "set_data_validation":
-                        {
-                            var fileName = GetFileName();
-                            var sheetName = GetSheetName();
-                            var rangeAddress = arguments.GetProperty("rangeAddress").GetString();
-                            var validationType = arguments.GetProperty("validationType").GetString();
-                            var operatorType = arguments.TryGetProperty("operatorType", out var opProp) ? opProp.GetString() : "between";
-                            var formula1 = arguments.TryGetProperty("formula1", out var f1Prop) ? f1Prop.GetString() : null;
-                            var formula2 = arguments.TryGetProperty("formula2", out var f2Prop) ? f2Prop.GetString() : null;
-                            var inputMessage = arguments.TryGetProperty("inputMessage", out var imProp) ? imProp.GetString() : null;
-                            var errorMessage = arguments.TryGetProperty("errorMessage", out var emProp) ? emProp.GetString() : null;
-
-                            var worksheet = GetWorksheet(fileName, sheetName);
-                            var range = worksheet.Range[rangeAddress];
-
-                            // 删除现有验证
-                            range.Validation.Delete();
-
-                            // 设置验证类型
-                            Microsoft.Office.Interop.Excel.XlDVType xlType = validationType.ToLower() switch
-                            {
-                                "whole" => Microsoft.Office.Interop.Excel.XlDVType.xlValidateWholeNumber,
-                                "decimal" => Microsoft.Office.Interop.Excel.XlDVType.xlValidateDecimal,
-                                "list" => Microsoft.Office.Interop.Excel.XlDVType.xlValidateList,
-                                "date" => Microsoft.Office.Interop.Excel.XlDVType.xlValidateDate,
-                                "time" => Microsoft.Office.Interop.Excel.XlDVType.xlValidateTime,
-                                "textlength" => Microsoft.Office.Interop.Excel.XlDVType.xlValidateTextLength,
-                                "custom" => Microsoft.Office.Interop.Excel.XlDVType.xlValidateCustom,
-                                _ => Microsoft.Office.Interop.Excel.XlDVType.xlValidateInputOnly
-                            };
-
-                            // 设置操作符类型
-                            Microsoft.Office.Interop.Excel.XlFormatConditionOperator xlOperator = operatorType.ToLower() switch
-                            {
-                                "between" => Microsoft.Office.Interop.Excel.XlFormatConditionOperator.xlBetween,
-                                "notbetween" => Microsoft.Office.Interop.Excel.XlFormatConditionOperator.xlNotBetween,
-                                "equal" => Microsoft.Office.Interop.Excel.XlFormatConditionOperator.xlEqual,
-                                "notequal" => Microsoft.Office.Interop.Excel.XlFormatConditionOperator.xlNotEqual,
-                                "greater" => Microsoft.Office.Interop.Excel.XlFormatConditionOperator.xlGreater,
-                                "less" => Microsoft.Office.Interop.Excel.XlFormatConditionOperator.xlLess,
-                                "greaterorequal" => Microsoft.Office.Interop.Excel.XlFormatConditionOperator.xlGreaterEqual,
-                                "lessorequal" => Microsoft.Office.Interop.Excel.XlFormatConditionOperator.xlLessEqual,
-                                _ => Microsoft.Office.Interop.Excel.XlFormatConditionOperator.xlBetween
-                            };
-
-                            // 添加验证
-                            range.Validation.Add(xlType, Microsoft.Office.Interop.Excel.XlDVAlertStyle.xlValidAlertStop, xlOperator, formula1, formula2);
-
-                            // 设置输入提示
-                            if (!string.IsNullOrEmpty(inputMessage))
-                            {
-                                range.Validation.IgnoreBlank = true;
-                                range.Validation.InCellDropdown = true;
-                                range.Validation.ShowInput = true;
-                                range.Validation.InputTitle = "输入提示";
-                                range.Validation.InputMessage = inputMessage;
-                            }
-
-                            // 设置错误提示
-                            if (!string.IsNullOrEmpty(errorMessage))
-                            {
-                                range.Validation.ShowError = true;
-                                range.Validation.ErrorTitle = "输入错误";
-                                range.Validation.ErrorMessage = errorMessage;
-                            }
-
-                            return $"成功为范围 {rangeAddress} 设置数据验证规则";
-                        }
-
-                    case "get_validation_rules":
-                        {
-                            var fileName = GetFileName();
-                            var sheetName = GetSheetName();
-                            var rangeAddress = arguments.TryGetProperty("rangeAddress", out var raProp) ? raProp.GetString() : null;
-                            var worksheet = GetWorksheet(fileName, sheetName);
-                            var range = string.IsNullOrEmpty(rangeAddress) ? worksheet.UsedRange : worksheet.Range[rangeAddress];
-
-                            var result = new System.Text.StringBuilder();
-                            result.AppendLine($"范围 {range.Address} 的数据验证规则:");
-
-                            try
-                            {
-                                if (range.Validation != null)
-                                {
-                                    result.AppendLine($"  类型: {range.Validation.Type}");
-                                    result.AppendLine($"  公式1: {range.Validation.Formula1}");
-                                    result.AppendLine($"  输入提示: {range.Validation.InputMessage}");
-                                    result.AppendLine($"  错误提示: {range.Validation.ErrorMessage}");
-                                }
-                                else
-                                {
-                                    result.AppendLine("  无验证规则");
-                                }
-                            }
-                            catch
-                            {
-                                result.AppendLine("  无验证规则");
-                            }
-
-                            return result.ToString();
-                        }
-
-                    case "set_number_format":
-                        {
-                            var fileName = GetFileName();
-                            var sheetName = GetSheetName();
-                            var rangeAddress = arguments.GetProperty("rangeAddress").GetString();
-                            var formatCode = arguments.GetProperty("formatCode").GetString();
-                            var worksheet = GetWorksheet(fileName, sheetName);
-                            var range = worksheet.Range[rangeAddress];
-
-                            range.NumberFormat = formatCode;
-
-                            return $"成功设置范围 {rangeAddress} 的数字格式为 {formatCode}";
-                        }
-
-                    case "apply_conditional_formatting":
-                        {
-                            var fileName = GetFileName();
-                            var sheetName = GetSheetName();
-                            var rangeAddress = arguments.GetProperty("rangeAddress").GetString();
-                            var ruleType = arguments.GetProperty("ruleType").GetString();
-                            var formula1 = arguments.TryGetProperty("formula1", out var f1) ? f1.GetString() : null;
-                            var formula2 = arguments.TryGetProperty("formula2", out var f2) ? f2.GetString() : null;
-                            var color1 = arguments.TryGetProperty("color1", out var c1) ? c1.GetString() : null;
-                            var color2 = arguments.TryGetProperty("color2", out var c2) ? c2.GetString() : null;
-                            var color3 = arguments.TryGetProperty("color3", out var c3) ? c3.GetString() : null;
-
-                            var worksheet = GetWorksheet(fileName, sheetName);
-                            var range = worksheet.Range[rangeAddress];
-
-                            // 清除现有条件格式
-                            range.FormatConditions.Delete();
-
-                            switch (ruleType.ToLower())
-                            {
-                                case "cellvalue":
-                                    var condition = range.FormatConditions.Add(
-                                        Microsoft.Office.Interop.Excel.XlFormatConditionType.xlCellValue,
-                                        Microsoft.Office.Interop.Excel.XlFormatConditionOperator.xlGreater,
-                                        formula1);
-                                    condition.Interior.Color = ParseColor(color1 ?? "yellow");
-                                    break;
-
-                                case "colorscale":
-                                    var colorScale = range.FormatConditions.AddColorScale(3);
-                                    colorScale.ColorScaleCriteria[1].Type = Microsoft.Office.Interop.Excel.XlConditionValueTypes.xlConditionValueLowestValue;
-                                    colorScale.ColorScaleCriteria[1].FormatColor.Color = ParseColor(color1 ?? "red");
-                                    colorScale.ColorScaleCriteria[2].Type = Microsoft.Office.Interop.Excel.XlConditionValueTypes.xlConditionValuePercentile;
-                                    colorScale.ColorScaleCriteria[2].Value = 50;
-                                    colorScale.ColorScaleCriteria[2].FormatColor.Color = ParseColor(color2 ?? "yellow");
-                                    colorScale.ColorScaleCriteria[3].Type = Microsoft.Office.Interop.Excel.XlConditionValueTypes.xlConditionValueHighestValue;
-                                    colorScale.ColorScaleCriteria[3].FormatColor.Color = ParseColor(color3 ?? "green");
-                                    break;
-
-                                case "databar":
-                                    var databar = range.FormatConditions.AddDatabar();
-                                    databar.BarColor.Color = ParseColor(color1 ?? "blue");
-                                    break;
-
-                                case "iconset":
-                                    // 图标集 - AddIconSetCondition会自动应用默认图标集(3个交通灯)
-                                    var iconSet = range.FormatConditions.AddIconSetCondition();
-                                    // 默认已经是3个交通灯图标集，无需额外设置
-                                    break;
-
-                                case "expression":
-                                    var exprCondition = range.FormatConditions.Add(
-                                        Microsoft.Office.Interop.Excel.XlFormatConditionType.xlExpression,
-                                        Type.Missing,
-                                        formula1);
-                                    exprCondition.Interior.Color = ParseColor(color1 ?? "yellow");
-                                    break;
-                            }
-
-                            return $"成功为范围 {rangeAddress} 应用条件格式 ({ruleType})";
-                        }
-
-                    case "create_chart":
-                        {
-                            var fileName = GetFileName();
-                            var sheetName = GetSheetName();
-                            var chartType = arguments.TryGetProperty("chartType", out var chartTypeProp) ? chartTypeProp.GetString() : "column";
-                            
-                            // 支持 dataRange 或 rangeAddress 作为数据范围参数
-                            string dataRange = null;
-                            if (arguments.TryGetProperty("dataRange", out var dataRangeProp))
-                                dataRange = dataRangeProp.GetString();
-                            else if (arguments.TryGetProperty("rangeAddress", out var rangeAddressProp))
-                                dataRange = rangeAddressProp.GetString();
-                            else if (arguments.TryGetProperty("range", out var rangeProp))
-                                dataRange = rangeProp.GetString();
-                            
-                            if (string.IsNullOrEmpty(dataRange))
-                                return "错误: 缺少数据范围参数 (dataRange 或 rangeAddress)";
-                            
-                            var title = arguments.TryGetProperty("title", out var titleProp) ? titleProp.GetString() : null;
-                            var width = arguments.TryGetProperty("width", out var widthProp) ? widthProp.GetInt32() : 400;
-                            var height = arguments.TryGetProperty("height", out var heightProp) ? heightProp.GetInt32() : 300;
-
-                            var worksheet = GetWorksheet(fileName, sheetName);
-                            var dataRangeObj = worksheet.Range[dataRange];
-                            
-                            // chartPosition 可选，默认放在数据区域右侧
-                            Microsoft.Office.Interop.Excel.Range chartPositionObj;
-                            if (arguments.TryGetProperty("chartPosition", out var chartPosProp) && !string.IsNullOrEmpty(chartPosProp.GetString()))
-                            {
-                                chartPositionObj = worksheet.Range[chartPosProp.GetString()];
-                            }
-                            else
-                            {
-                                // 默认位置：数据区域右侧偏移一列
-                                chartPositionObj = dataRangeObj.Offset[0, dataRangeObj.Columns.Count + 1];
-                            }
-
-                            // 创建图表
-                            var chartObjects = worksheet.ChartObjects(Type.Missing);
-                            var chartObject = chartObjects.Add(
-                                (double)chartPositionObj.Left,
-                                (double)chartPositionObj.Top,
-                                width,
-                                height);
-
-                            var chart = chartObject.Chart;
-
-                            // 设置图表类型
-                            Microsoft.Office.Interop.Excel.XlChartType xlChartType = chartType.ToLower() switch
-                            {
-                                "line" => Microsoft.Office.Interop.Excel.XlChartType.xlLine,
-                                "bar" => Microsoft.Office.Interop.Excel.XlChartType.xlBarClustered,
-                                "column" => Microsoft.Office.Interop.Excel.XlChartType.xlColumnClustered,
-                                "pie" => Microsoft.Office.Interop.Excel.XlChartType.xlPie,
-                                "scatter" => Microsoft.Office.Interop.Excel.XlChartType.xlXYScatter,
-                                "area" => Microsoft.Office.Interop.Excel.XlChartType.xlArea,
-                                "radar" => Microsoft.Office.Interop.Excel.XlChartType.xlRadar,
-                                _ => Microsoft.Office.Interop.Excel.XlChartType.xlColumnClustered
-                            };
-
-                            chart.ChartType = xlChartType;
-                            chart.SetSourceData(dataRangeObj);
-
-                            // 设置标题
-                            if (!string.IsNullOrEmpty(title))
-                            {
-                                chart.HasTitle = true;
-                                chart.ChartTitle.Text = title;
-                            }
-
-                            return $"成功创建 {chartType} 图表";
-                        }
-
-                    case "create_table":
-                        {
-                            var fileName = GetFileName();
-                            var sheetName = GetSheetName();
-                            var rangeAddress = arguments.GetProperty("rangeAddress").GetString();
-                            var tableName = arguments.GetProperty("tableName").GetString();
-                            var hasHeaders = arguments.TryGetProperty("hasHeaders", out var headersProp) ? headersProp.GetBoolean() : true;
-                            var tableStyle = arguments.TryGetProperty("tableStyle", out var styleProp) ? styleProp.GetString() : "TableStyleMedium2";
-
-                            var worksheet = GetWorksheet(fileName, sheetName);
-                            var range = worksheet.Range[rangeAddress];
-
-                            // 创建表格
-                            var table = worksheet.ListObjects.Add(
-                                Microsoft.Office.Interop.Excel.XlListObjectSourceType.xlSrcRange,
-                                range,
-                                Type.Missing,
-                                hasHeaders ? Microsoft.Office.Interop.Excel.XlYesNoGuess.xlYes : Microsoft.Office.Interop.Excel.XlYesNoGuess.xlNo,
-                                Type.Missing);
-
-                            table.Name = tableName;
-
-                            // 设置表格样式
-                            try
-                            {
-                                table.TableStyle = tableStyle;
-                            }
-                            catch
-                            {
-                                // 如果样式不存在，使用默认样式
-                                table.TableStyle = "TableStyleMedium2";
-                            }
-
-                            return $"成功创建表格 {tableName}";
-                        }
-
-                    case "get_table_names":
-                        {
-                            var fileName = GetFileName();
-                            var sheetName = GetSheetName();
-                            var worksheet = GetWorksheet(fileName, sheetName);
-
-                            var tableNames = new List<string>();
-                            foreach (Microsoft.Office.Interop.Excel.ListObject table in worksheet.ListObjects)
-                            {
-                                tableNames.Add(table.Name);
-                            }
-
-                            return $"工作表中的表格: {string.Join(", ", tableNames)}";
-                        }
-
-                    case "validate_formula":
-                        {
-                            var formula = arguments.GetProperty("formula").GetString();
-
-                            try
-                            {
-                                // 创建临时工作簿进行公式验证
-                                var tempWorkbook = ThisAddIn.app.Workbooks.Add();
-                                var tempSheet = tempWorkbook.Worksheets[1];
-                                var tempCell = tempSheet.Cells[1, 1];
-
-                                try
-                                {
-                                    tempCell.Formula = formula;
-                                    tempWorkbook.Close(false);
-                                    return "公式语法正确";
-                                }
-                                catch (Exception ex)
-                                {
-                                    tempWorkbook.Close(false);
-                                    return $"公式语法错误: {ex.Message}";
-                                }
-                            }
-                            catch (Exception ex)
-                            {
-                                return $"验证失败: {ex.Message}";
-                            }
-                        }
-
-                    case "find_value":
-                        {
-                            var fileName = GetFileName();
-                            var sheetName = GetSheetName();
-                            var searchValue = arguments.GetProperty("searchValue").GetString();
-                            var matchCase = arguments.TryGetProperty("matchCase", out var mcProp) && mcProp.GetBoolean();
-
-                            var worksheet = GetWorksheet(fileName, sheetName);
-                            var usedRange = worksheet.UsedRange;
-                            var results = new List<string>();
-
-                            var foundCell = usedRange.Find(
-                                What: searchValue,
-                                LookIn: Microsoft.Office.Interop.Excel.XlFindLookIn.xlValues,
-                                LookAt: Microsoft.Office.Interop.Excel.XlLookAt.xlPart,
-                                SearchOrder: Microsoft.Office.Interop.Excel.XlSearchOrder.xlByRows,
-                                MatchCase: matchCase);
-
-                            if (foundCell != null)
-                            {
-                                string firstAddress = foundCell.Address;
-                                do
-                                {
-                                    results.Add(foundCell.Address);
-                                    foundCell = usedRange.FindNext(foundCell);
-                                }
-                                while (foundCell != null && foundCell.Address != firstAddress);
-                            }
-
-                            return results.Count > 0 
-                                ? $"找到 {results.Count} 个匹配项: {string.Join(", ", results)}" 
-                                : "未找到匹配项";
-                        }
-
-                    case "find_and_replace":
-                        {
-                            var fileName = GetFileName();
-                            var sheetName = GetSheetName();
-                            var findWhat = arguments.GetProperty("findWhat").GetString();
-                            var replaceWith = arguments.GetProperty("replaceWith").GetString();
-                            var matchCase = arguments.TryGetProperty("matchCase", out var mcProp) && mcProp.GetBoolean();
-
-                            var worksheet = GetWorksheet(fileName, sheetName);
-                            var usedRange = worksheet.UsedRange;
-                            int count = 0;
-
-                            var foundCell = usedRange.Find(
-                                What: findWhat,
-                                LookIn: Microsoft.Office.Interop.Excel.XlFindLookIn.xlValues,
-                                LookAt: Microsoft.Office.Interop.Excel.XlLookAt.xlPart,
-                                MatchCase: matchCase);
-
-                            if (foundCell != null)
-                            {
-                                string firstAddress = foundCell.Address;
-                                do
-                                {
-                                    foundCell.Value = replaceWith;
-                                    count++;
-                                    foundCell = usedRange.FindNext(foundCell);
-                                }
-                                while (foundCell != null && foundCell.Address != firstAddress);
-                            }
-
-                            return $"成功替换了 {count} 个单元格";
-                        }
-
-                    case "freeze_panes":
-                        {
-                            var fileName = GetFileName();
-                            var sheetName = GetSheetName();
-                            var row = arguments.GetProperty("row").GetInt32();
-                            var column = arguments.GetProperty("column").GetInt32();
-
-                            var worksheet = GetWorksheet(fileName, sheetName);
-                            var cell = worksheet.Cells[row, column];
-                            cell.Select();
-                            ThisAddIn.app.ActiveWindow.FreezePanes = true;
-
-                            return $"成功冻结窗格（在行 {row}，列 {column} 处）";
-                        }
-
-                    case "unfreeze_panes":
-                        {
-                            var fileName = GetFileName();
-                            var sheetName = GetSheetName();
-                            var worksheet = GetWorksheet(fileName, sheetName);
-
-                            ThisAddIn.app.ActiveWindow.FreezePanes = false;
-                            return "成功取消冻结窗格";
-                        }
-
-                    case "autofit_columns":
-                        {
-                            var fileName = GetFileName();
-                            var sheetName = GetSheetName();
-                            var rangeAddress = arguments.GetProperty("rangeAddress").GetString();
-
-                            var worksheet = GetWorksheet(fileName, sheetName);
-                            var range = worksheet.Range[rangeAddress];
-                            range.Columns.AutoFit();
-
-                            return $"成功自动调整列宽: {rangeAddress}";
-                        }
-
-                    case "autofit_rows":
-                        {
-                            var fileName = GetFileName();
-                            var sheetName = GetSheetName();
-                            var rangeAddress = arguments.GetProperty("rangeAddress").GetString();
-
-                            var worksheet = GetWorksheet(fileName, sheetName);
-                            var range = worksheet.Range[rangeAddress];
-                            range.Rows.AutoFit();
-
-                            return $"成功自动调整行高: {rangeAddress}";
-                        }
-
-                    case "set_column_visible":
-                        {
-                            var fileName = GetFileName();
-                            var sheetName = GetSheetName();
-                            var columnIndex = arguments.GetProperty("columnIndex").GetInt32();
-                            var visible = arguments.GetProperty("visible").GetBoolean();
-
-                            var worksheet = GetWorksheet(fileName, sheetName);
-                            var column = worksheet.Columns[columnIndex];
-                            column.Hidden = !visible;
-
-                            return $"成功设置第 {columnIndex} 列的可见性为 {(visible ? "显示" : "隐藏")}";
-                        }
-
-                    case "set_row_visible":
-                        {
-                            var fileName = GetFileName();
-                            var sheetName = GetSheetName();
-                            var rowIndex = arguments.GetProperty("rowIndex").GetInt32();
-                            var visible = arguments.GetProperty("visible").GetBoolean();
-
-                            var worksheet = GetWorksheet(fileName, sheetName);
-                            var row = worksheet.Rows[rowIndex];
-                            row.Hidden = !visible;
-
-                            return $"成功设置第 {rowIndex} 行的可见性为 {(visible ? "显示" : "隐藏")}";
-                        }
-
-                    case "add_comment":
-                        {
-                            var fileName = GetFileName();
-                            var sheetName = GetSheetName();
-                            var cellAddress = arguments.GetProperty("cellAddress").GetString();
-                            var commentText = arguments.GetProperty("commentText").GetString();
-
-                            var worksheet = GetWorksheet(fileName, sheetName);
-                            var cell = worksheet.Range[cellAddress];
-
-                            // 如果已有批注，先删除
-                            if (cell.Comment != null)
-                            {
-                                cell.Comment.Delete();
-                            }
-
-                            cell.AddComment(commentText);
-                            return $"成功为单元格 {cellAddress} 添加批注";
-                        }
-
-                    case "delete_comment":
-                        {
-                            var fileName = GetFileName();
-                            var sheetName = GetSheetName();
-                            var cellAddress = arguments.GetProperty("cellAddress").GetString();
-
-                            var worksheet = GetWorksheet(fileName, sheetName);
-                            var cell = worksheet.Range[cellAddress];
-
-                            if (cell.Comment != null)
-                            {
-                                cell.Comment.Delete();
-                                return $"成功删除单元格 {cellAddress} 的批注";
-                            }
-
-                            return $"单元格 {cellAddress} 没有批注";
-                        }
-
-                    case "get_comment":
-                        {
-                            var fileName = GetFileName();
-                            var sheetName = GetSheetName();
-                            var cellAddress = arguments.GetProperty("cellAddress").GetString();
-
-                            var worksheet = GetWorksheet(fileName, sheetName);
-                            var cell = worksheet.Range[cellAddress];
-
-                            var commentText = cell.Comment?.Text() ?? "";
-                            return string.IsNullOrEmpty(commentText) 
-                                ? $"单元格 {cellAddress} 没有批注" 
-                                : $"单元格 {cellAddress} 的批注: {commentText}";
-                        }
-
-                    case "add_hyperlink":
-                        {
-                            var fileName = GetFileName();
-                            var sheetName = GetSheetName();
-                            var cellAddress = arguments.GetProperty("cellAddress").GetString();
-                            var url = arguments.GetProperty("url").GetString();
-                            var displayText = arguments.TryGetProperty("displayText", out var dtProp) ? dtProp.GetString() : null;
-
-                            var worksheet = GetWorksheet(fileName, sheetName);
-                            var cell = worksheet.Range[cellAddress];
-
-                            // 只处理外部链接（网址、文件路径等）
-                            // 不处理文档内跳转（应使用 set_hyperlink_formula）
-                            worksheet.Hyperlinks.Add(
-                                Anchor: cell,
-                                Address: url,
-                                TextToDisplay: displayText ?? url);
-
-                            return $"成功为单元格 {cellAddress} 添加超链接对象（外部链接）: {url}";
-                        }
-
-                    case "set_hyperlink_formula":
-                        {
-                            var fileName = GetFileName();
-                            var sheetName = GetSheetName();
-                            var cellAddress = arguments.GetProperty("cellAddress").GetString();
-                            var targetLocation = arguments.GetProperty("targetLocation").GetString();
-                            var displayText = arguments.GetProperty("displayText").GetString();
-
-                            var worksheet = GetWorksheet(fileName, sheetName);
-                            var cell = worksheet.Range[cellAddress];
-
-                            // 使用 HYPERLINK 公式
-                            // 格式：=HYPERLINK("#工作表名!单元格", "显示文本")
-                            var formula = $"=HYPERLINK(\"#{targetLocation}\", \"{displayText}\")";
-                            cell.Formula = formula;
-
-                            return $"成功为单元格 {cellAddress} 设置HYPERLINK公式，跳转目标: {targetLocation}";
-                        }
-
-                    case "delete_hyperlink":
-                        {
-                            var fileName = GetFileName();
-                            var sheetName = GetSheetName();
-                            var cellAddress = arguments.GetProperty("cellAddress").GetString();
-
-                            var worksheet = GetWorksheet(fileName, sheetName);
-                            var cell = worksheet.Range[cellAddress];
-
-                            if (cell.Hyperlinks.Count > 0)
-                            {
-                                cell.Hyperlinks.Delete();
-                                return $"成功删除单元格 {cellAddress} 的超链接";
-                            }
-
-                            return $"单元格 {cellAddress} 没有超链接";
-                        }
-
-                    case "get_used_range":
-                        {
-                            var fileName = GetFileName();
-                            var sheetName = GetSheetName();
-                            var worksheet = GetWorksheet(fileName, sheetName);
-
-                            var usedRange = worksheet.UsedRange;
-                            var address = usedRange.Address;
-
-                            return $"工作表 {sheetName} 的已使用范围: {address}";
-                        }
-
-                    case "get_range_statistics":
-                        {
-                            var fileName = GetFileName();
-                            var sheetName = GetSheetName();
-                            var rangeAddress = arguments.GetProperty("rangeAddress").GetString();
-
-                            var worksheet = GetWorksheet(fileName, sheetName);
-                            var range = worksheet.Range[rangeAddress];
-
-                            var stats = new System.Text.StringBuilder();
-                            stats.AppendLine($"范围 {rangeAddress} 的统计信息:");
-
-                            try
-                            {
-                                stats.AppendLine($"  总和: {ThisAddIn.app.WorksheetFunction.Sum(range)}");
-                            }
-                            catch { stats.AppendLine("  总和: N/A"); }
-
-                            try
-                            {
-                                stats.AppendLine($"  平均值: {ThisAddIn.app.WorksheetFunction.Average(range)}");
-                            }
-                            catch { stats.AppendLine("  平均值: N/A"); }
-
-                            try
-                            {
-                                stats.AppendLine($"  计数: {ThisAddIn.app.WorksheetFunction.Count(range)}");
-                            }
-                            catch { stats.AppendLine("  计数: N/A"); }
-
-                            try
-                            {
-                                stats.AppendLine($"  最大值: {ThisAddIn.app.WorksheetFunction.Max(range)}");
-                            }
-                            catch { stats.AppendLine("  最大值: N/A"); }
-
-                            try
-                            {
-                                stats.AppendLine($"  最小值: {ThisAddIn.app.WorksheetFunction.Min(range)}");
-                            }
-                            catch { stats.AppendLine("  最小值: N/A"); }
-
-                            return stats.ToString();
-                        }
-
-                    case "get_last_row":
-                        {
-                            var fileName = GetFileName();
-                            var sheetName = GetSheetName();
-                            var columnIndex = arguments.TryGetProperty("columnIndex", out var ciProp) ? ciProp.GetInt32() : 1;
-
-                            var worksheet = GetWorksheet(fileName, sheetName);
-                            var column = worksheet.Columns[columnIndex];
-                            var lastCell = column.Find("*", 
-                                SearchOrder: Microsoft.Office.Interop.Excel.XlSearchOrder.xlByRows, 
-                                SearchDirection: Microsoft.Office.Interop.Excel.XlSearchDirection.xlPrevious);
-
-                            var lastRow = lastCell?.Row ?? 0;
-                            return $"列 {columnIndex} 的最后一行: {lastRow}";
-                        }
-
-                    case "get_last_column":
-                        {
-                            var fileName = GetFileName();
-                            var sheetName = GetSheetName();
-                            var rowIndex = arguments.TryGetProperty("rowIndex", out var riProp) ? riProp.GetInt32() : 1;
-
-                            var worksheet = GetWorksheet(fileName, sheetName);
-                            var row = worksheet.Rows[rowIndex];
-                            var lastCell = row.Find("*", 
-                                SearchOrder: Microsoft.Office.Interop.Excel.XlSearchOrder.xlByColumns, 
-                                SearchDirection: Microsoft.Office.Interop.Excel.XlSearchDirection.xlPrevious);
-
-                            var lastColumn = lastCell?.Column ?? 0;
-                            return $"行 {rowIndex} 的最后一列: {lastColumn}";
-                        }
-
-                    case "sort_range":
-                        {
-                            var fileName = GetFileName();
-                            var sheetName = GetSheetName();
-                            var rangeAddress = arguments.GetProperty("rangeAddress").GetString();
-                            var sortColumnIndex = arguments.GetProperty("sortColumnIndex").GetInt32();
-                            var ascending = arguments.TryGetProperty("ascending", out var ascProp) ? ascProp.GetBoolean() : true;
-
-                            var worksheet = GetWorksheet(fileName, sheetName);
-                            var range = worksheet.Range[rangeAddress];
-                            var sortKey = range.Columns[sortColumnIndex];
-
-                            range.Sort(
-                                Key1: sortKey,
-                                Order1: ascending ? Microsoft.Office.Interop.Excel.XlSortOrder.xlAscending : Microsoft.Office.Interop.Excel.XlSortOrder.xlDescending,
-                                Header: Microsoft.Office.Interop.Excel.XlYesNoGuess.xlYes);
-
-                            return $"成功对范围 {rangeAddress} 按第 {sortColumnIndex} 列进行{(ascending ? "升序" : "降序")}排序";
-                        }
-
-                    case "set_auto_filter":
-                        {
-                            var fileName = GetFileName();
-                            var sheetName = GetSheetName();
-                            var rangeAddress = arguments.GetProperty("rangeAddress").GetString();
-                            var columnIndex = arguments.TryGetProperty("columnIndex", out var ciProp) ? ciProp.GetInt32() : 0;
-                            var criteria = arguments.TryGetProperty("criteria", out var cProp) ? cProp.GetString() : null;
-
-                            var worksheet = GetWorksheet(fileName, sheetName);
-                            var range = worksheet.Range[rangeAddress];
-
-                            // 如果已有筛选，先清除
-                            if (worksheet.AutoFilterMode)
-                            {
-                                worksheet.AutoFilterMode = false;
-                            }
-
-                            if (columnIndex > 0 && !string.IsNullOrEmpty(criteria))
-                            {
-                                range.AutoFilter(Field: columnIndex, Criteria1: criteria);
-                                return $"成功为范围 {rangeAddress} 的第 {columnIndex} 列设置筛选条件: {criteria}";
-                            }
-                            else
-                            {
-                                range.AutoFilter();
-                                return $"成功为范围 {rangeAddress} 设置自动筛选";
-                            }
-                        }
-
-                    case "remove_duplicates":
-                        {
-                            var fileName = GetFileName();
-                            var sheetName = GetSheetName();
-                            var rangeAddress = arguments.GetProperty("rangeAddress").GetString();
-                            var columnIndicesJson = arguments.GetProperty("columnIndices").GetString();
-
-                            var worksheet = GetWorksheet(fileName, sheetName);
-                            var range = worksheet.Range[rangeAddress];
-
-                            var columnIndices = JsonSerializer.Deserialize<int[]>(columnIndicesJson);
-                            var columns = columnIndices.Cast<object>().ToArray();
-
-                            range.RemoveDuplicates(Columns: columns, Header: Microsoft.Office.Interop.Excel.XlYesNoGuess.xlYes);
-                            return $"成功删除范围 {rangeAddress} 中的重复项";
-                        }
-
-                    case "move_worksheet":
-                        {
-                            var fileName = GetFileName();
-                            var sheetName = arguments.GetProperty("sheetName").GetString();
-                            var position = arguments.GetProperty("position").GetInt32();
-
-                            var workbook = GetCurrentWorkbook(fileName);
-                            var worksheet = workbook.Worksheets[sheetName];
-
-                            if (position == 1)
-                            {
-                                worksheet.Move(Before: workbook.Worksheets[1]);
-                            }
-                            else if (position > workbook.Worksheets.Count)
-                            {
-                                worksheet.Move(After: workbook.Worksheets[workbook.Worksheets.Count]);
-                            }
-                            else
-                            {
-                                worksheet.Move(Before: workbook.Worksheets[position]);
-                            }
-
-                            return $"成功将工作表 {sheetName} 移动到位置 {position}";
-                        }
-
-                    case "set_worksheet_visible":
-                        {
-                            var fileName = GetFileName();
-                            var sheetName = arguments.GetProperty("sheetName").GetString();
-                            var visible = arguments.GetProperty("visible").GetBoolean();
-
-                            var workbook = GetCurrentWorkbook(fileName);
-                            var worksheet = workbook.Worksheets[sheetName];
-                            worksheet.Visible = visible ? Microsoft.Office.Interop.Excel.XlSheetVisibility.xlSheetVisible : Microsoft.Office.Interop.Excel.XlSheetVisibility.xlSheetHidden;
-
-                            return $"成功设置工作表 {sheetName} 的可见性为 {(visible ? "显示" : "隐藏")}";
-                        }
-
-                    case "get_worksheet_index":
-                        {
-                            var fileName = GetFileName();
-                            var sheetName = arguments.GetProperty("sheetName").GetString();
-
-                            var workbook = GetCurrentWorkbook(fileName);
-                            var worksheet = workbook.Worksheets[sheetName];
-                            var index = worksheet.Index;
-
-                            return $"工作表 {sheetName} 的位置索引: {index}";
-                        }
-
-                    // 命名区域工具执行
-                    case "create_named_range":
-                        {
-                            var fileName = GetFileName();
-                            var sheetName = GetSheetName();
-                            var rangeName = arguments.GetProperty("rangeName").GetString();
-                            var rangeAddress = arguments.GetProperty("rangeAddress").GetString();
-
-                            _excelMcp.CreateNamedRange(fileName, sheetName, rangeName, rangeAddress);
-                            return $"成功创建命名区域 '{rangeName}' 引用 {rangeAddress}";
-                        }
-
-                    case "delete_named_range":
-                        {
-                            var fileName = GetFileName();
-                            var rangeName = arguments.GetProperty("rangeName").GetString();
-
-                            _excelMcp.DeleteNamedRange(fileName, rangeName);
-                            return $"成功删除命名区域 '{rangeName}'";
-                        }
-
-                    case "get_named_ranges":
-                        {
-                            var fileName = GetFileName();
-                            var namedRanges = _excelMcp.GetNamedRanges(fileName);
-
-                            if (namedRanges.Count == 0)
-                                return "工作簿中没有命名区域";
-
-                            return $"工作簿中的命名区域：\n{string.Join("\n", namedRanges)}";
-                        }
-
-                    case "get_named_range_address":
-                        {
-                            var fileName = GetFileName();
-                            var rangeName = arguments.GetProperty("rangeName").GetString();
-
-                            var address = _excelMcp.GetNamedRangeAddress(fileName, rangeName);
-                            return $"命名区域 '{rangeName}' 的引用地址: {address}";
-                        }
-
-                    // 单元格格式增强工具执行
-                    case "set_cell_text_wrap":
-                        {
-                            var fileName = GetFileName();
-                            var sheetName = GetSheetName();
-                            var rangeAddress = arguments.GetProperty("rangeAddress").GetString();
-                            var wrap = arguments.GetProperty("wrap").GetBoolean();
-
-                            _excelMcp.SetCellTextWrap(fileName, sheetName, rangeAddress, wrap);
-                            return $"成功设置 {rangeAddress} 的文本换行为: {(wrap ? "启用" : "禁用")}";
-                        }
-
-                    case "set_cell_indent":
-                        {
-                            var fileName = GetFileName();
-                            var sheetName = GetSheetName();
-                            var rangeAddress = arguments.GetProperty("rangeAddress").GetString();
-                            var indentLevel = arguments.GetProperty("indentLevel").GetInt32();
-
-                            _excelMcp.SetCellIndent(fileName, sheetName, rangeAddress, indentLevel);
-                            return $"成功设置 {rangeAddress} 的缩进级别为: {indentLevel}";
-                        }
-
-                    case "set_cell_orientation":
-                        {
-                            var fileName = GetFileName();
-                            var sheetName = GetSheetName();
-                            var rangeAddress = arguments.GetProperty("rangeAddress").GetString();
-                            var degrees = arguments.GetProperty("degrees").GetInt32();
-
-                            _excelMcp.SetCellOrientation(fileName, sheetName, rangeAddress, degrees);
-                            return $"成功设置 {rangeAddress} 的文本旋转角度为: {degrees}度";
-                        }
-
-                    case "set_cell_shrink_to_fit":
-                        {
-                            var fileName = GetFileName();
-                            var sheetName = GetSheetName();
-                            var rangeAddress = arguments.GetProperty("rangeAddress").GetString();
-                            var shrink = arguments.GetProperty("shrink").GetBoolean();
-
-                            _excelMcp.SetCellShrinkToFit(fileName, sheetName, rangeAddress, shrink);
-                            return $"成功设置 {rangeAddress} 的缩小字体填充为: {(shrink ? "启用" : "禁用")}";
-                        }
-
-                    case "get_current_selection":
-                        {
-                            try
-                            {
-                                if (ThisAddIn.app == null || ThisAddIn.app.Selection == null)
-                                    return "无法获取当前选中的单元格";
-
-                                var selection = ThisAddIn.app.Selection as Microsoft.Office.Interop.Excel.Range;
-                                if (selection == null)
-                                    return "当前没有选中单元格区域";
-
-                                var result = new System.Text.StringBuilder();
-                                result.AppendLine("当前选中的单元格信息:");
-                                result.AppendLine($"- 地址: {selection.Address}");
-                                result.AppendLine($"- 行号: {selection.Row}");
-                                result.AppendLine($"- 列号: {selection.Column}");
-                                result.AppendLine($"- 行数: {selection.Rows.Count}");
-                                result.AppendLine($"- 列数: {selection.Columns.Count}");
-
-                                // 如果是单个单元格，显示值
-                                if (selection.Cells.Count == 1)
-                                {
-                                    result.AppendLine($"- 值: {selection.Value?.ToString() ?? "(空)"}");
-                                    if (selection.HasFormula)
-                                    {
-                                        result.AppendLine($"- 公式: {selection.Formula}");
-                                    }
-                                }
-                                else
-                                {
-                                    result.AppendLine($"- 单元格总数: {selection.Cells.Count}");
-                                }
-
-                                if (ThisAddIn.app.ActiveWorkbook != null)
-                                {
-                                    result.AppendLine($"- 所属工作簿: {ThisAddIn.app.ActiveWorkbook.Name}");
-                                }
-
-                                if (ThisAddIn.app.ActiveSheet != null)
-                                {
-                                    Microsoft.Office.Interop.Excel.Worksheet ws = ThisAddIn.app.ActiveSheet;
-                                    result.AppendLine($"- 所属工作表: {ws.Name}");
-                                }
-
-                                return result.ToString();
-                            }
-                            catch (Exception ex)
-                            {
-                                return $"获取当前选中单元格信息失败: {ex.Message}";
-                            }
-                        }
-
-                    default:
-                        return $"未知的工具: {toolName}";
-                }
+            }
+            catch (AggregateException aex) when (aex.InnerException != null)
+            {
+                return $"执行工具 {toolName} 时出错：{aex.InnerException.Message}";
             }
             catch (Exception ex)
             {
-                return $"执行工具 {toolName} 时出错: {ex.Message}";
+                return $"执行工具 {toolName} 时出错：{ex.Message}";
             }
         }
 
@@ -4926,23 +1961,11 @@ namespace ExcelAddIn
         }
 
         //获取对话请求
-        private async Task<string> GetDeepSeekResponse(string userInput)
+        private async Task<string> GetAIResponse(string userInput)
         {
             string apiKey = _apiKey;
             string apiUrl = _apiUrl;
             bool useMcp = checkBoxUseMcp.Checked;
-
-            // 根据用户勾选情况设置Prompt Engineering模式
-            if (_isPromptEngineeringChecked)
-            {
-                // 用户勾选了"优先提示工程"，强制使用Prompt Engineering模式
-                _usePromptEngineering = true;
-            }
-            else
-            {
-                // 用户没有勾选，重置为自动判断模式（后续会根据模型大小自动判断）
-                _usePromptEngineering = false;
-            }
 
             // 记录用户输入
             WriteLog("用户输入", userInput);
@@ -4987,35 +2010,26 @@ namespace ExcelAddIn
                     // 对于支持的模型，尝试禁用思考模式
                     requestBody["think"] = false;
                 }
-
-                // 检测是否为小模型（参数量小于3B），小模型直接使用Prompt Engineering模式
-                // 或者用户勾选了"优先提示工程"，强制使用Prompt Engineering模式
-                bool isSmallModel = !_isCloudConnection && IsSmallModel(_model);
-                if ((isSmallModel || _isPromptEngineeringChecked) && useMcp && !_usePromptEngineering)
-                {
-                    string reason = _isPromptEngineeringChecked ? "用户勾选了'优先提示工程'" : $"检测到小模型 {_model}";
-                    WriteLog("模式切换", $"{reason}，切换到Prompt Engineering模式");
-                    _usePromptEngineering = true;
-                    // 重新构建消息（包含Prompt Engineering系统提示）
-                    requestBody["messages"] = BuildMessages(useMcp, userInput);
-                }
+                
+                // 添加流式输出参数
+                requestBody["stream"] = true;
 
                 // 如果启用MCP且ExcelMcp可用，且不是Prompt Engineering模式，添加工具定义
                 if (useMcp && _excelMcp != null && !_usePromptEngineering)
                 {
-                    // 对于本地模型，使用智能工具选择减少token数量
-                    if (!_isCloudConnection && _useToolGrouping)
+                    // 使用智能工具选择减少token数量
+                    if (_useToolGrouping)
                     {
                         // 根据用户输入预选相关工具组
                         var preSelectedGroups = PreSelectToolGroups(userInput);
                         var selectedTools = GetToolsByGroups(preSelectedGroups);
                         requestBody["tools"] = selectedTools;
-                        WriteLog("智能工具选择", $"根据用户输入预选工具组: [{string.Join(", ", preSelectedGroups)}], 工具数量: {selectedTools.Count}");
+                        WriteLog("智能工具选择", $"根据用户输入预选工具组：[{string.Join(", ", preSelectedGroups)}], 工具数量：{selectedTools.Count}");
                     }
                     else
                     {
-                        // 云端模型或禁用分组时，发送全部工具
-                        requestBody["tools"] = GetMcpTools();
+                        // 禁用分组时，发送全部工具
+                        requestBody["tools"] = GetExcelTools();
                     }
                 }
 
@@ -5023,378 +2037,348 @@ namespace ExcelAddIn
                 var requestJsonForLog = GetSimplifiedRequestBodyForLog(requestBody);
                 WriteLog("API请求", $"URL: {apiUrl}\n模型: {_model}\nPrompt Engineering模式: {_usePromptEngineering}\n请求体:\n{requestJsonForLog}");
 
-                var response = await client.PostAsJsonAsync(apiUrl, requestBody);
-                var responseContent = await response.Content.ReadAsStringAsync();
-
-                // 记录响应信息
-                WriteLog("API响应", $"状态码: {response.StatusCode}\n响应内容:\n{responseContent}");
-
-                System.Diagnostics.Debug.WriteLine($"API响应状态: {response.StatusCode}");
-                System.Diagnostics.Debug.WriteLine($"API响应内容: {responseContent.Substring(0, Math.Min(500, responseContent.Length))}");
-
-                if (!response.IsSuccessStatusCode)
+                // Kimi K2.5 模型要求 temperature=1，其他模型使用默认的 0.7
+                if (_model.StartsWith("kimi-k2.5") || _model.StartsWith("kimi-k2"))
                 {
-                    // 检查是否是因为不支持tools参数导致的错误（本地模型）
-                    // 扩展检测条件：BadRequest通常表示请求格式不被支持
-                    bool shouldSwitchToPromptEngineering = useMcp && !_isCloudConnection && !_usePromptEngineering &&
-                        (response.StatusCode == System.Net.HttpStatusCode.BadRequest ||
-                         responseContent.Contains("tools") || responseContent.Contains("tool") ||
-                         responseContent.Contains("function") || responseContent.Contains("not supported") ||
-                         responseContent.Contains("invalid") || responseContent.Contains("unknown"));
-
-                    WriteLog("模式检测", $"请求失败，状态码: {response.StatusCode}\n是否应切换到Prompt Engineering: {shouldSwitchToPromptEngineering}\n原因: 本地模型={!_isCloudConnection}, 使用MCP={useMcp}, 当前非PE模式={!_usePromptEngineering}");
-
-                    if (shouldSwitchToPromptEngineering)
-                    {
-                        // 本地模型不支持function calling，切换到Prompt Engineering模式
-                        WriteLog("模式切换", "本地模型不支持function calling或请求格式不兼容，切换到Prompt Engineering模式");
-                        System.Diagnostics.Debug.WriteLine("本地模型不支持function calling或请求格式不兼容，切换到Prompt Engineering模式");
-                        _usePromptEngineering = true;
-
-                        // 移除tools参数，重新构建消息（包含Prompt Engineering系统提示）
-                        requestBody.Remove("tools");
-                        requestBody["messages"] = BuildMessages(useMcp, userInput);
-
-                        // 记录重试请求（简化版）
-                        var retryRequestJsonForLog = GetSimplifiedRequestBodyForLog(requestBody);
-                        WriteLog("重试请求(Prompt Engineering)", $"URL: {apiUrl}\n请求体:\n{retryRequestJsonForLog}");
-
-                        response = await client.PostAsJsonAsync(apiUrl, requestBody);
-                        responseContent = await response.Content.ReadAsStringAsync();
-
-                        WriteLog("重试响应", $"状态码: {response.StatusCode}\n响应内容:\n{responseContent}");
-                        System.Diagnostics.Debug.WriteLine($"重试后API响应状态: {response.StatusCode}");
-
-                        if (!response.IsSuccessStatusCode)
-                        {
-                            throw new HttpRequestException($"HTTP Error: {response.StatusCode}, 响应: {responseContent.Substring(0, Math.Min(200, responseContent.Length))}");
-                        }
-                    }
-                    else
-                    {
-                        throw new HttpRequestException($"HTTP Error: {response.StatusCode}");
-                    }
-                }
-
-                var jsonResponse = JsonSerializer.Deserialize<DeepSeekResponse>(responseContent);
-                var choice = jsonResponse?.choices[0];
-
-                // 调试信息
-                System.Diagnostics.Debug.WriteLine($"AI响应内容: {choice?.message?.content}");
-                System.Diagnostics.Debug.WriteLine($"工具调用数量: {choice?.message?.tool_calls?.Length ?? 0}");
-                System.Diagnostics.Debug.WriteLine($"Prompt Engineering模式: {_usePromptEngineering}");
-
-                WriteLog("响应解析", $"AI响应内容: {choice?.message?.content}\n原生tool_calls数量: {choice?.message?.tool_calls?.Length ?? 0}\n当前Prompt Engineering模式: {_usePromptEngineering}");
-
-                // 检查本地模型是否支持function calling
-                // 如果是本地模型，发送了tools参数但没有返回tool_calls，需要判断是模型不支持还是模型主动选择不调用工具
-                if (!_isCloudConnection && useMcp && _excelMcp != null && !_usePromptEngineering)
-                {
-                    bool hasToolCalls = choice?.message?.tool_calls != null && choice.message.tool_calls.Length > 0;
-                    string responseText = choice?.message?.content?.Trim() ?? "";
-                    bool hasMeaningfulContent = !string.IsNullOrEmpty(responseText) && responseText.Length > 10;
-                    
-                    WriteLog("Function Calling检测", $"本地模型是否返回tool_calls: {hasToolCalls}, 是否有有意义的文本内容: {hasMeaningfulContent}, 内容长度: {responseText.Length}");
-                    
-                    if (!hasToolCalls)
-                    {
-                        // 如果模型返回了有意义的文本内容（如澄清问题），直接返回给用户，不切换模式
-                        if (hasMeaningfulContent)
-                        {
-                            WriteLog("响应处理", "本地模型未返回tool_calls但有有意义的文本内容，直接返回给用户（可能是澄清问题）");
-                            System.Diagnostics.Debug.WriteLine($"本地模型返回文本响应（非工具调用）: {responseText}");
-                            
-                            // 将AI回复加入历史
-                            _chatHistory.Add(new ChatMessage
-                            {
-                                Role = "assistant",
-                                Content = responseText
-                            });
-                            
-                            return responseText;
-                        }
-                        
-                        // 本地模型不支持function calling，切换到Prompt Engineering模式
-                        WriteLog("模式切换", "本地模型未返回tool_calls且无有意义内容，切换到Prompt Engineering模式");
-                        System.Diagnostics.Debug.WriteLine("本地模型未返回tool_calls，切换到Prompt Engineering模式");
-                        _usePromptEngineering = true;
-
-                        // 清空历史记录中刚添加的用户消息，重新发送
-                        if (_chatHistory.Count > 0 && _chatHistory[_chatHistory.Count - 1].Role == "user")
-                        {
-                            var lastUserMessage = _chatHistory[_chatHistory.Count - 1].Content;
-                            _chatHistory.RemoveAt(_chatHistory.Count - 1);
-
-                            // 重新添加用户消息
-                            _chatHistory.Add(new ChatMessage
-                            {
-                                Role = "user",
-                                Content = lastUserMessage
-                            });
-                        }
-
-                        // 移除tools参数，重新构建消息（包含Prompt Engineering系统提示）
-                        requestBody.Remove("tools");
-                        requestBody["messages"] = BuildMessages(useMcp, userInput);
-
-                        // 记录重试请求（简化版）
-                        var retryRequestJsonForLog2 = GetSimplifiedRequestBodyForLog(requestBody);
-                        WriteLog("重试请求(Prompt Engineering)", $"URL: {apiUrl}\n请求体:\n{retryRequestJsonForLog2}");
-
-                        response = await client.PostAsJsonAsync(apiUrl, requestBody);
-                        responseContent = await response.Content.ReadAsStringAsync();
-
-                        WriteLog("重试响应", $"状态码: {response.StatusCode}\n响应内容:\n{responseContent}");
-
-                        if (!response.IsSuccessStatusCode)
-                        {
-                            throw new HttpRequestException($"HTTP Error: {response.StatusCode}");
-                        }
-
-                        jsonResponse = JsonSerializer.Deserialize<DeepSeekResponse>(responseContent);
-                        choice = jsonResponse?.choices[0];
-
-                        System.Diagnostics.Debug.WriteLine($"Prompt Engineering模式响应: {choice?.message?.content}");
-                    }
-                }
-
-                // 如果是Prompt Engineering模式，解析响应中的工具调用
-                if (_usePromptEngineering && useMcp && _excelMcp != null)
-                {
-                    return await HandlePromptEngineeringResponse(client, apiUrl, choice?.message?.content ?? "", userInput);
-                }
-
-                // 原生Function Calling模式：检查是否有工具调用
-                if (choice?.message?.tool_calls != null && choice.message.tool_calls.Length > 0)
-                {
-                    // 处理工具调用
-                    var toolCalls = choice.message.tool_calls;
-
-                    System.Diagnostics.Debug.WriteLine($"开始执行 {toolCalls.Length} 个工具调用");
-                    SafeUpdatePromptLabel($"正在执行 {toolCalls.Length} 个工具操作...");
-
-                    // 将AI的工具调用消息加入历史
-                    _chatHistory.Add(new ChatMessage
-                    {
-                        Role = "assistant",
-                        Content = choice.message.content,
-                        ToolCalls = toolCalls.Select(tc => new ToolCall
-                        {
-                            Id = tc.id,
-                            Type = tc.type,
-                            Function = new FunctionCall
-                            {
-                                Name = tc.function.name,
-                                Arguments = tc.function.arguments
-                            }
-                        }).ToList()
-                    });
-
-                    // 执行每个工具调用
-                    foreach (var toolCall in toolCalls)
-                    {
-                        var functionName = toolCall.function.name;
-                        
-                        // 检查是否为一次性工具且已执行过
-                        if (_oneTimeTools.Contains(functionName) && _executedOneTimeTools.Contains(functionName))
-                        {
-                            WriteLog("跳过重复工具", $"工具 {functionName} 已在本次请求中执行过，跳过重复执行");
-                            // 将跳过信息作为工具结果加入历史
-                            _chatHistory.Add(new ChatMessage
-                            {
-                                Role = "tool",
-                                Content = $"工具 {functionName} 已执行过，跳过重复调用",
-                                ToolCallId = toolCall.id
-                            });
-                            continue;
-                        }
-                        
-                        var arguments = JsonSerializer.Deserialize<JsonElement>(toolCall.function.arguments);
-
-                        System.Diagnostics.Debug.WriteLine($"执行工具: {functionName}");
-                        System.Diagnostics.Debug.WriteLine($"参数: {toolCall.function.arguments}");
-                        SafeUpdatePromptLabel($"正在执行工具: {functionName}...");
-
-                        // 执行工具
-                        var toolResult = ExecuteMcpTool(functionName, arguments);
-
-                        System.Diagnostics.Debug.WriteLine($"工具执行结果: {toolResult}");
-                        
-                        // 记录一次性工具已执行
-                        if (_oneTimeTools.Contains(functionName))
-                        {
-                            _executedOneTimeTools.Add(functionName);
-                        }
-
-                        // 将工具结果加入历史
-                        _chatHistory.Add(new ChatMessage
-                        {
-                            Role = "tool",
-                            Content = toolResult,
-                            ToolCallId = toolCall.id
-                        });
-                    }
-
-                    // 循环处理工具调用，直到AI不再请求工具
-                    while (true)
-                    {
-                        // 再次调用API获取回复（可能是最终回复或更多工具调用）
-                        var finalRequestBody = new Dictionary<string, object>
-                        {
-                            { "model", _model },
-                            { "messages", BuildMessages(useMcp, userInput) },
-                            { "temperature", 0.7 },
-                            { "max_tokens", 2000 }
-                        };
-
-                        // 仅对Ollama API添加特有参数
-                        if (!_isCloudConnection && _isOllamaApi)
-                        {
-                            finalRequestBody["options"] = new Dictionary<string, object>
-                            {
-                                { "num_predict", 1000 },
-                                { "temperature", 0.7 }
-                            };
-                            finalRequestBody["think"] = false;
-                        }
-
-                        if (useMcp && _excelMcp != null)
-                        {
-                            // 对于本地模型，使用智能工具选择
-                            if (!_isCloudConnection && _useToolGrouping)
-                            {
-                                var preSelectedGroups = PreSelectToolGroups(userInput);
-                                finalRequestBody["tools"] = GetToolsByGroups(preSelectedGroups);
-                            }
-                            else
-                            {
-                                finalRequestBody["tools"] = GetMcpTools();
-                            }
-                        }
-
-                        SafeUpdatePromptLabel("等待AI响应...");
-                        var finalResponse = await client.PostAsJsonAsync(apiUrl, finalRequestBody);
-                        var finalResponseContent = await finalResponse.Content.ReadAsStringAsync();
-
-                        if (!finalResponse.IsSuccessStatusCode)
-                        {
-                            throw new HttpRequestException($"HTTP Error: {finalResponse.StatusCode}");
-                        }
-
-                        var finalJsonResponse = JsonSerializer.Deserialize<DeepSeekResponse>(finalResponseContent);
-                        var finalChoice = finalJsonResponse?.choices[0];
-
-                        System.Diagnostics.Debug.WriteLine($"第二轮AI响应内容: {finalChoice?.message?.content}");
-                        System.Diagnostics.Debug.WriteLine($"第二轮工具调用数量: {finalChoice?.message?.tool_calls?.Length ?? 0}");
-
-                        // 检查是否还有工具调用
-                        if (finalChoice?.message?.tool_calls != null && finalChoice.message.tool_calls.Length > 0)
-                        {
-                            // 继续执行工具调用
-                            var moreToolCalls = finalChoice.message.tool_calls;
-                            System.Diagnostics.Debug.WriteLine($"继续执行 {moreToolCalls.Length} 个工具调用");
-                            SafeUpdatePromptLabel($"正在执行 {moreToolCalls.Length} 个工具操作...");
-
-                            // 将AI的工具调用消息加入历史
-                            _chatHistory.Add(new ChatMessage
-                            {
-                                Role = "assistant",
-                                Content = finalChoice.message.content,
-                                ToolCalls = moreToolCalls.Select(tc => new ToolCall
-                                {
-                                    Id = tc.id,
-                                    Type = tc.type,
-                                    Function = new FunctionCall
-                                    {
-                                        Name = tc.function.name,
-                                        Arguments = tc.function.arguments
-                                    }
-                                }).ToList()
-                            });
-
-                            // 执行每个工具调用
-                            foreach (var toolCall in moreToolCalls)
-                            {
-                                var functionName = toolCall.function.name;
-                                
-                                // 检查是否为一次性工具且已执行过
-                                if (_oneTimeTools.Contains(functionName) && _executedOneTimeTools.Contains(functionName))
-                                {
-                                    WriteLog("跳过重复工具", $"工具 {functionName} 已在本次请求中执行过，跳过重复执行");
-                                    // 将跳过信息作为工具结果加入历史
-                                    _chatHistory.Add(new ChatMessage
-                                    {
-                                        Role = "tool",
-                                        Content = $"工具 {functionName} 已执行过，跳过重复调用",
-                                        ToolCallId = toolCall.id
-                                    });
-                                    continue;
-                                }
-                                
-                                var arguments = JsonSerializer.Deserialize<JsonElement>(toolCall.function.arguments);
-
-                                System.Diagnostics.Debug.WriteLine($"执行工具: {functionName}");
-                                System.Diagnostics.Debug.WriteLine($"参数: {toolCall.function.arguments}");
-                                SafeUpdatePromptLabel($"正在执行工具: {functionName}...");
-
-                                // 执行工具
-                                var toolResult = ExecuteMcpTool(functionName, arguments);
-
-                                System.Diagnostics.Debug.WriteLine($"工具执行结果: {toolResult}");
-                                
-                                // 记录一次性工具已执行
-                                if (_oneTimeTools.Contains(functionName))
-                                {
-                                    _executedOneTimeTools.Add(functionName);
-                                }
-
-                                // 将工具结果加入历史
-                                _chatHistory.Add(new ChatMessage
-                                {
-                                    Role = "tool",
-                                    Content = toolResult,
-                                    ToolCallId = toolCall.id
-                                });
-                            }
-
-                            // 继续循环，再次调用API
-                        }
-                        else
-                        {
-                            // 没有更多工具调用，这是最终回复
-                            var aiResponse = finalChoice?.message?.content?.Trim();
-
-                            // 将最终AI回复加入历史
-                            if (!string.IsNullOrEmpty(aiResponse))
-                            {
-                                _chatHistory.Add(new ChatMessage
-                                {
-                                    Role = "assistant",
-                                    Content = aiResponse
-                                });
-                            }
-
-                            return aiResponse ?? string.Empty;
-                        }
-                    }
+                    requestBody["temperature"] = 1.0;
                 }
                 else
                 {
-                    // 没有工具调用，直接返回回复
-                    var aiResponse = choice?.message?.content?.Trim();
+                    requestBody["temperature"] = 0.7;
+                }
 
-                    // 将AI回复加入历史
-                    if (!string.IsNullOrEmpty(aiResponse))
+                // 发送流式请求
+                using (var request = new HttpRequestMessage(HttpMethod.Post, apiUrl))
+                {
+                    request.Content = new StringContent(
+                        JsonSerializer.Serialize(requestBody),
+                        Encoding.UTF8,
+                        "application/json"
+                    );
+
+                    // 只有云端连接时才添加Authorization头
+                    if (_isCloudConnection && !string.IsNullOrEmpty(apiKey))
                     {
-                        _chatHistory.Add(new ChatMessage
-                        {
-                            Role = "assistant",
-                            Content = aiResponse
-                        });
+                        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", apiKey);
                     }
 
-                    return aiResponse ?? string.Empty;
+                    using (var response = await client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead))
+                    {
+                        if (!response.IsSuccessStatusCode)
+                        {
+                            var errorContent = await response.Content.ReadAsStringAsync();
+                            WriteLog("API响应", $"状态码: {response.StatusCode}\n错误内容:\n{errorContent}");
+                            
+                            // 检查是否是因为不支持tools参数导致的错误
+                            // 只有在真正不支持function calling时才切换到Prompt Engineering模式
+                            // 需要更严格的判断：错误内容必须明确提到 tools/function 不支持
+                            bool isToolsNotSupportedError = 
+                                errorContent.Contains("tools is not supported") ||
+                                errorContent.Contains("tool calls are not supported") ||
+                                errorContent.Contains("function calling is not supported") ||
+                                errorContent.Contains("does not support tools") ||
+                                errorContent.Contains("unsupported parameter: tools") ||
+                                errorContent.Contains("unknown parameter: tools") ||
+                                errorContent.Contains("invalid parameter: tools");
+                            
+                            bool shouldSwitchToPromptEngineering = useMcp && !_usePromptEngineering && isToolsNotSupportedError;
+
+                            WriteLog("模式检测", $"请求失败，状态码: {response.StatusCode}\n是否应切换到Prompt Engineering: {shouldSwitchToPromptEngineering}\n使用MCP={useMcp}, 当前非PE模式={!_usePromptEngineering}\n错误内容是否明确表示不支持tools: {isToolsNotSupportedError}");
+
+                            if (shouldSwitchToPromptEngineering)
+                            {
+                                // 本地模型不支持function calling，切换到Prompt Engineering模式
+                                WriteLog("模式切换", "本地模型不支持function calling或请求格式不兼容，切换到Prompt Engineering模式");
+                                System.Diagnostics.Debug.WriteLine("本地模型不支持function calling或请求格式不兼容，切换到Prompt Engineering模式");
+                                _usePromptEngineering = true;
+
+                                // 移除tools参数，重新构建消息（包含Prompt Engineering系统提示）
+                                requestBody.Remove("tools");
+                                requestBody["messages"] = BuildMessages(useMcp, userInput);
+
+                                // 记录重试请求（简化版）
+                                var retryRequestJsonForLog = GetSimplifiedRequestBodyForLog(requestBody);
+                                WriteLog("重试请求(Prompt Engineering)", $"URL: {apiUrl}\n请求体:\n{retryRequestJsonForLog}");
+
+                                // 重新发送请求
+                                using (var retryRequest = new HttpRequestMessage(HttpMethod.Post, apiUrl))
+                                {
+                                    retryRequest.Content = new StringContent(
+                                        JsonSerializer.Serialize(requestBody),
+                                        Encoding.UTF8,
+                                        "application/json"
+                                    );
+
+                                    if (_isCloudConnection && !string.IsNullOrEmpty(apiKey))
+                                    {
+                                        retryRequest.Headers.Authorization = new AuthenticationHeaderValue("Bearer", apiKey);
+                                    }
+
+                                    using (var retryResponse = await client.SendAsync(retryRequest, HttpCompletionOption.ResponseHeadersRead))
+                                    {
+                                        if (!retryResponse.IsSuccessStatusCode)
+                                        {
+                                            var retryErrorContent = await retryResponse.Content.ReadAsStringAsync();
+                                            throw new HttpRequestException($"HTTP Error: {retryResponse.StatusCode}, 响应: {retryErrorContent.Substring(0, Math.Min(200, retryErrorContent.Length))}");
+                                        }
+
+                                        return await HandleStreamingResponse(retryResponse);
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                // 不是 tools 不支持的错误，抛出包含详细信息的异常
+                                throw new HttpRequestException($"HTTP Error: {response.StatusCode}, 响应: {errorContent.Substring(0, Math.Min(500, errorContent.Length))}");
+                            }
+                        }
+
+                        // 先获取流式响应内容
+                        var streamingContent = await HandleStreamingResponse(response);
+                        
+                        // 如果有工具调用（无论是原生 Function Calling 还是 Prompt Engineering 模式），处理它们
+                        if (useMcp && streamingContent.Contains("<tool_calls>"))
+                        {
+                            // 处理工具调用（使用外层的 client）
+                            return await HandlePromptEngineeringResponse(client, apiUrl, streamingContent, userInput, 0, false);
+                        }
+                        
+                        return streamingContent;
+                    }
                 }
+            }
+        }
+
+        // 处理流式响应
+        private async Task<string> HandleStreamingResponse(HttpResponseMessage response)
+        {
+            using (var stream = await response.Content.ReadAsStreamAsync())
+            using (var reader = new StreamReader(stream))
+            {
+                var fullResponse = new StringBuilder();
+                var toolCallsBuilder = new StringBuilder();
+                string line;
+                
+                // 创建流式输出的聊天项
+                Panel streamingChatItem = null;
+                RichTextBox streamingRichTextBox = null;
+                
+                // 收集工具调用
+                var collectedToolCalls = new Dictionary<int, ToolCallBuilder>();
+                
+                try
+                {
+                    while ((line = await reader.ReadLineAsync()) != null)
+                    {
+                        if (string.IsNullOrWhiteSpace(line))
+                            continue;
+
+                        // 移除SSE前缀
+                        if (line.StartsWith("data: "))
+                        {
+                            line = line.Substring(6);
+                        }
+
+                        if (line == "[DONE]")
+                            break;
+
+                        try
+                        {
+                            var chunk = JsonSerializer.Deserialize<StreamResponse>(line);
+                            
+                            // 调试日志：记录原始响应
+                            if (chunk == null)
+                            {
+                                WriteLog("流式响应调试", $"反序列化结果为null，原始行: {line}");
+                                continue;
+                            }
+                            
+                            if (chunk.choices == null || chunk.choices.Length == 0)
+                            {
+                                WriteLog("流式响应调试", $"choices为空，原始行: {line}");
+                                continue;
+                            }
+                            
+                            var choice = chunk.choices[0];
+                            
+                            // 处理文本内容
+                            if (choice?.delta?.content != null)
+                            {
+                                string content = choice.delta.content;
+                                fullResponse.Append(content);
+                                
+                                // 第一次收到内容时创建聊天项
+                                if (streamingChatItem == null)
+                                {
+                                    // 创建流式聊天项
+                                    streamingChatItem = CreateStreamingChatItem();
+                                    streamingRichTextBox = (RichTextBox)streamingChatItem.Controls[0];
+                                }
+                                
+                                // 更新聊天内容
+                                UpdateStreamingChatItem(streamingRichTextBox, fullResponse.ToString());
+                            }
+                            
+                            // 处理工具调用（原生 Function Calling 模式）
+                            if (choice?.delta?.tool_calls != null)
+                            {
+                                foreach (var toolCall in choice.delta.tool_calls)
+                                {
+                                    int index = toolCall.index;
+                                    
+                                    if (!collectedToolCalls.ContainsKey(index))
+                                    {
+                                        collectedToolCalls[index] = new ToolCallBuilder
+                                        {
+                                            id = toolCall.id,
+                                            type = toolCall.type,
+                                            function = new FunctionCallBuilder()
+                                        };
+                                    }
+                                    
+                                    var builder = collectedToolCalls[index];
+                                    
+                                    if (!string.IsNullOrEmpty(toolCall.id))
+                                    {
+                                        builder.id = toolCall.id;
+                                    }
+                                    
+                                    if (toolCall.function != null)
+                                    {
+                                        if (!string.IsNullOrEmpty(toolCall.function.name))
+                                        {
+                                            builder.function.name += toolCall.function.name;
+                                        }
+                                        if (!string.IsNullOrEmpty(toolCall.function.arguments))
+                                        {
+                                            builder.function.arguments += toolCall.function.arguments;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            WriteLog("流式解析错误", $"解析流式响应失败: {ex.Message}\n原始行: {line}");
+                        }
+                    }
+                }
+                finally
+                {
+                    // 完成流式输出，移除思考占位符
+                    RemoveThinkingPlaceholder();
+                    
+                    // 如果创建了流式聊天项，确保最终内容正确
+                    if (streamingChatItem != null)
+                    {
+                        UpdateStreamingChatItem(streamingRichTextBox, fullResponse.ToString());
+                        // 标记已经创建了聊天项，避免重复创建
+                        _isStreamingChatItemCreated = true;
+                    }
+                }
+                
+                string finalResponse = fullResponse.ToString();
+                WriteLog("流式响应完成", $"最终响应长度: {finalResponse.Length}字符");
+                
+                // 如果收集到了工具调用，处理它们
+                if (collectedToolCalls.Count > 0)
+                {
+                    WriteLog("工具调用", $"检测到 {collectedToolCalls.Count} 个原生 Function Calling 工具调用");
+                    
+                    // 构建工具调用 JSON 格式（用于 Prompt Engineering 模式的解析）
+                    var toolCallsArray = new List<object>();
+                    foreach (var kv in collectedToolCalls.OrderBy(kv => kv.Key))
+                    {
+                        var builder = kv.Value;
+                        
+                        // 解析 arguments 字符串为 JSON 对象
+                        object argumentsObj = new { };
+                        try
+                        {
+                            if (!string.IsNullOrEmpty(builder.function.arguments))
+                            {
+                                // 尝试解析 arguments 字符串为 JsonElement
+                                using (var argsDoc = JsonDocument.Parse(builder.function.arguments))
+                                {
+                                    // 将 JsonElement 转换为 .NET 对象
+                                    argumentsObj = JsonElementToObject(argsDoc.RootElement);
+                                }
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            WriteLog("参数解析警告", $"无法解析参数 '{builder.function.arguments}': {ex.Message}");
+                        }
+                        
+                        toolCallsArray.Add(new
+                        {
+                            name = builder.function.name,
+                            arguments = argumentsObj
+                        });
+                    }
+                    
+                    var toolCallsJson = JsonSerializer.Serialize(toolCallsArray);
+                    finalResponse = $"<tool_calls>\n{toolCallsJson}\n</tool_calls>";
+                    
+                    WriteLog("工具调用详情", $"工具调用 JSON: {toolCallsJson}");
+                }
+                
+                return finalResponse;
+            }
+        }
+        
+        // 辅助类：用于构建工具调用
+        private class ToolCallBuilder
+        {
+            public string id { get; set; }
+            public string type { get; set; }
+            public FunctionCallBuilder function { get; set; }
+        }
+        
+        private class FunctionCallBuilder
+        {
+            public string name { get; set; }
+            public string arguments { get; set; }
+        }
+        
+        // 将 JsonElement 转换为 .NET 对象
+        private object JsonElementToObject(JsonElement element)
+        {
+            switch (element.ValueKind)
+            {
+                case JsonValueKind.Object:
+                    var dict = new Dictionary<string, object>();
+                    foreach (var prop in element.EnumerateObject())
+                    {
+                        dict[prop.Name] = JsonElementToObject(prop.Value);
+                    }
+                    return dict;
+                case JsonValueKind.Array:
+                    var list = new List<object>();
+                    foreach (var item in element.EnumerateArray())
+                    {
+                        list.Add(JsonElementToObject(item));
+                    }
+                    return list;
+                case JsonValueKind.String:
+                    return element.GetString();
+                case JsonValueKind.Number:
+                    if (element.TryGetInt32(out int intVal))
+                        return intVal;
+                    if (element.TryGetInt64(out long longVal))
+                        return longVal;
+                    if (element.TryGetDouble(out double doubleVal))
+                        return doubleVal;
+                    return element.GetDouble();
+                case JsonValueKind.True:
+                    return true;
+                case JsonValueKind.False:
+                    return false;
+                case JsonValueKind.Null:
+                case JsonValueKind.Undefined:
+                    return null;
+                default:
+                    return element.ToString();
             }
         }
 
@@ -5483,10 +2467,11 @@ namespace ExcelAddIn
             var toolResults = new StringBuilder();
             foreach (var toolCall in toolCalls)
             {
-                // 检查是否为一次性工具且已执行过
-                if (_oneTimeTools.Contains(toolCall.Name) && _executedOneTimeTools.Contains(toolCall.Name))
+                // 检查是否为一次性工具且已执行过（使用工具名称+参数作为唯一标识）
+                string toolCallKey = $"{toolCall.Name}:{toolCall.ArgumentsJson}";
+                if (_oneTimeTools.Contains(toolCall.Name) && _executedOneTimeTools.Contains(toolCallKey))
                 {
-                    WriteLog("跳过重复工具", $"工具 {toolCall.Name} 已在本次请求中执行过，跳过重复执行");
+                    WriteLog("跳过重复工具", $"工具 {toolCall.Name} 参数 {toolCall.ArgumentsJson} 已在本次请求中执行过，跳过重复执行");
                     toolResults.AppendLine($"工具 {toolCall.Name}: 已执行过，跳过重复调用");
                     continue;
                 }
@@ -5506,10 +2491,10 @@ namespace ExcelAddIn
 
                         toolResults.AppendLine($"工具 {toolCall.Name} 执行结果: {toolResult}");
                         
-                        // 记录一次性工具已执行
+                        // 记录一次性工具已执行（使用工具名称+参数作为唯一标识）
                         if (_oneTimeTools.Contains(toolCall.Name))
                         {
-                            _executedOneTimeTools.Add(toolCall.Name);
+                            _executedOneTimeTools.Add(toolCallKey);
                         }
                     }
                 }
@@ -5543,11 +2528,14 @@ namespace ExcelAddIn
             // 再次调用API获取最终回复
             SafeUpdatePromptLabel("等待AI响应...");
 
+            // Kimi K2.5 模型要求 temperature=1
+            double temperature = (_model.StartsWith("kimi-k2.5") || _model.StartsWith("kimi-k2")) ? 1.0 : 0.7;
+
             var requestBody = new Dictionary<string, object>
             {
                 { "model", _model },
                 { "messages", BuildMessages(true, userInput) },
-                { "temperature", 0.7 },
+                { "temperature", temperature },
                 { "max_tokens", 2000 }
             };
 
@@ -5557,12 +2545,13 @@ namespace ExcelAddIn
                 requestBody["options"] = new Dictionary<string, object>
                 {
                     { "num_predict", 1000 },
-                    { "temperature", 0.7 }
+                    { "temperature", temperature }
                 };
                 requestBody["think"] = false;
             }
 
-            var response = await client.PostAsJsonAsync(apiUrl, requestBody);
+            var requestContent = new StringContent(JsonSerializer.Serialize(requestBody), Encoding.UTF8, "application/json");
+            var response = await client.PostAsync(apiUrl, requestContent);
             var responseContent = await response.Content.ReadAsStringAsync();
 
             if (!response.IsSuccessStatusCode)
@@ -5570,9 +2559,9 @@ namespace ExcelAddIn
                 throw new HttpRequestException($"HTTP Error: {response.StatusCode}");
             }
 
-            var jsonResponse = JsonSerializer.Deserialize<DeepSeekResponse>(responseContent);
-            var choice = jsonResponse?.choices[0];
-            var finalResponse = choice?.message?.content ?? "";
+            var jsonResponse = JsonSerializer.Deserialize<AIResponse>(responseContent);
+            var finalChoice = jsonResponse?.choices != null && jsonResponse.choices.Length > 0 ? jsonResponse.choices[0] : null;
+            var finalResponse = finalChoice?.message?.content ?? "";
 
             // 检查是否还有更多工具调用
             var moreToolCalls = ParsePromptToolCalls(finalResponse);
@@ -5589,7 +2578,84 @@ namespace ExcelAddIn
                 Content = finalResponse
             });
 
+            // 在UI线程上添加最终回复到聊天界面
+            if (!string.IsNullOrWhiteSpace(finalResponse))
+            {
+                this.Invoke(new Action(() =>
+                {
+                    AddChatItem(finalResponse, false);
+                }));
+            }
+
             return finalResponse;
+        }
+
+        // 获取紧凑版系统提示词（用于提升性能）
+        private string GetCompactSystemPrompt()
+        {
+            string currentCell = "A1";
+            int currentRow = 1;
+            int currentCol = 1;
+            try
+            {
+                if (ThisAddIn.app?.Selection != null)
+                {
+                    Microsoft.Office.Interop.Excel.Range selection = ThisAddIn.app.Selection;
+                    currentCell = selection.Address.Replace("$", "");
+                    currentRow = selection.Row;
+                    currentCol = selection.Column;
+                }
+            }
+            catch { }
+            
+            string colLetter = GetColumnLetter(currentCol);
+            
+            return $@"你是Excel操作助手，必须通过调用工具来操作Excel。
+注意：你是Excel操作助手，不是Claude或其他AI模型。
+
+核心规则：
+1. 禁止仅用文字描述操作，必须实际调用工具函数
+2. 对于多步操作，必须调用多次工具
+3. 每次只输出一个工具调用，等待结果后再继续
+
+当前环境：
+- 当前工作簿：{(_activeWorkbook ?? "无")}
+- 当前工作表：{(_activeWorksheet ?? "无")}
+- 当前选中单元格：{currentCell}（行={currentRow}, 列={currentCol}即{colLetter}列）
+
+重要提示：
+- 当用户说""当前单元格""、""选中的单元格""时，指的是 {currentCell}
+- 当用户说""当前表""、""这个表""时，指的是 {_activeWorksheet}
+- 不要只是告诉用户你将要做什么，必须实际调用工具来执行操作";
+        }
+
+        // 获取详细版系统提示词（首次请求使用，包含完整规则说明）
+        private string GetDetailedSystemPrompt(string currentCell, int currentRow, int currentCol, string colLetter)
+        {
+            return $@"你是一个Excel操作助手。你必须通过调用工具来操作Excel文件。
+注意：你是Excel操作助手，不是Claude或其他AI模型。
+
+**核心原则**：
+🚫 **禁止仅用文字描述操作** - 例如：""我将在A1写入数据""、""现在我把名称写入A列""
+✅ **必须实际调用工具函数** - 直接使用 set_cell_value、get_worksheet_names 等工具
+
+**重要规则**：
+1. **必须直接调用工具，不要只是描述要做什么**
+2. **对于需要多步操作的任务，必须调用多次工具**
+3. **""表""默认指工作表（worksheet）**
+4. **理解""当前单元格""的含义**：当前选中单元格：{currentCell}（行={currentRow}, 列={currentCol}即{colLetter}列）
+
+**当前环境**：
+- 当前工作簿：{(_activeWorkbook ?? "无")}
+- 当前工作表：{(_activeWorksheet ?? "无")}
+- 当前选中单元格：{currentCell}
+
+**重要提示**：
+- 不要只是告诉用户你将要做什么，必须实际调用工具来执行操作
+- 每个操作都必须对应一个工具调用，不能省略
+- value参数必须填写用户实际指定的内容，不要使用示例中的占位符
+
+请根据用户的自然语言指令，**立即调用**相应的工具完成任务。";
         }
 
         // 构建消息列表（用于API请求）
@@ -5610,6 +2676,7 @@ namespace ExcelAddIn
                 }
                 else
                 {
+                    // 原生Function Calling模式
                     // 获取当前选中单元格信息
                     string currentCell = "A1";
                     int currentRow = 1;
@@ -5628,223 +2695,18 @@ namespace ExcelAddIn
                     
                     string colLetter = GetColumnLetter(currentCol);
                     
-                    // 原生Function Calling模式
-                    systemPrompt = @"你是一个Excel操作助手。你必须通过调用工具来操作Excel文件。
-
-**核心原则**：
-🚫 **禁止仅用文字描述操作** - 例如：""我将在A1写入数据""、""现在我把名称写入A列""
-✅ **必须实际调用工具函数** - 直接使用 set_cell_value、get_worksheet_names 等工具
-
-**重要规则**：
-1. **必须直接调用工具，不要只是描述要做什么**：
-   - 错误示例：""我将在A1单元格写入xxx"" ❌
-   - 错误示例：""现在我将这些工作表名称写入当前表的A列"" ❌
-   - 正确示例：直接调用 set_cell_value 工具，参数为 row=行号, column=列号, value=用户指定的内容 ✅
-   - 正确示例：循环调用 set_cell_value 工具，将每个工作表名称写入 A1、A2、A3... ✅
-
-2. **对于需要多步操作的任务，必须调用多次工具**：
-   - 例如：要将5个工作表名称写入A1-A5，必须调用5次 set_cell_value 工具
-   - 第一次：set_cell_value(row=1, column=1, value=第一个表名)
-   - 第二次：set_cell_value(row=2, column=1, value=第二个表名)
-   - ...以此类推
-
-3. **""表""默认指工作表（worksheet）**：
-   - 当用户说""新建一个表""、""创建表""时，指的是在当前工作簿中创建新的工作表（sheet），而不是创建新的工作簿
-   - 当用户说""新建工作簿""、""创建Excel文件""时，才是创建工作簿
-   - 例如：""新建一个销售表"" → 使用 create_worksheet，而不是 create_workbook
-   - **重要**：create_worksheet 默认会在工作簿的最前面（第一个位置）创建新工作表
-   - 除非用户明确说明""在某张表后面/前面新建""，否则默认就是在最前面新建
-
-4. **创建目录表的正确方式**：
-   - 当用户要求创建目录表并写入表名时，注意行号分配：
-   - 如果需要添加标题，标题应在A1，表名从A2开始
-   - 例如：创建目录表 → 先在A1写入标题 → 表名从A2、A3、A4...开始写入
-   - **错误做法**：标题在A1，第一个表名也在A1 ❌
-   - **正确做法**：标题在A1（row=1），第一个表名在A2（row=2），第二个在A3（row=3）✅
-
-5. **理解""当前单元格""的含义**：
-   - 当用户说""当前单元格""、""选中的单元格""、""这个单元格""时，指的是用户在Excel中当前选中的单元格或区域
-   - 当前选中单元格：" + currentCell + @"（行=" + currentRow + @", 列=" + currentCol + @"即" + colLetter + @"列）
-   - 操作当前单元格时，直接使用 row=" + currentRow + @", column=" + currentCol + @"
-   - 例如：""在当前单元格输入xxx"" → 调用 set_cell_value(row=" + currentRow + @", column=" + currentCol + @", value=用户指定的内容)
-
-6. **区分两种超链接方式及其应用场景**：
-   
-   **A. HYPERLINK公式方式（set_hyperlink_formula）**：
-   - 适用场景：工作簿内部跳转
-   - 典型用途：
-     * 跳转到同一工作簿的其他工作表
-     * 创建目录页，链接到各个数据表
-     * 在数据表中创建""返回目录""链接
-   - 优点：在Excel内部打开，不会启动浏览器
-   - 公式格式：=HYPERLINK(""#工作表名!单元格"", ""显示文本"")
-   - 示例用法：
-     * 用户说""在A1创建跳转到Sheet2的链接"" → 使用 set_hyperlink_formula
-     * 用户说""创建目录，链接到各个工作表"" → 使用 set_hyperlink_formula
-     * 用户说""在当前单元格添加返回首页的链接"" → 使用 set_hyperlink_formula
-   
-   **B. 超链接对象方式（add_hyperlink）**：
-   - 适用场景：外部资源访问
-   - 典型用途：
-     * 打开网址（会启动默认浏览器）
-     * 打开本地文件（Excel、Word、PDF等）
-     * 打开网络共享文件
-   - 优点：可以链接到任何外部资源
-   - 示例用法：
-     * 用户说""在A1添加某网站的链接"" → 使用 add_hyperlink
-     * 用户说""链接到本地的报告文档"" → 使用 add_hyperlink
-     * 用户说""添加公司网站链接"" → 使用 add_hyperlink
-   
-   **重要：如何选择**：
-   - 如果目标是同一工作簿内的其他位置 → 使用 set_hyperlink_formula ✅
-   - 如果目标是网址、本地文件、网络文件 → 使用 add_hyperlink ✅
-   - 错误示例：用户说""跳转到Sheet2""却使用 add_hyperlink ❌
-   - 正确示例：用户说""跳转到Sheet2""使用 set_hyperlink_formula ✅
-
-7. 当用户说""当前工作簿""、""这个工作簿""、""当前表""、""这个表""时，指的是最近操作的工作簿和工作表
-
-8. 当用户未明确指定工作簿名称时，使用当前活跃的工作簿
-
-9. 当用户未明确指定工作表名称时，使用当前活跃的工作表
-
-10. 通过上下文分析推断用户想要操作的对象
-
-**当前环境**：
-- 这是Excel插件环境，用户在Excel中打开了工作簿并启动了对话框
-- 当前活跃工作簿（文件名）：" + (string.IsNullOrEmpty(_activeWorkbook) ? "无" : _activeWorkbook) + @"
-- 当前活跃工作表（表名）：" + (string.IsNullOrEmpty(_activeWorksheet) ? "无" : _activeWorksheet) + @"
-- 当前选中单元格：" + currentCell + @"（行=" + currentRow + @", 列=" + currentCol + @"）
-- 注意：工作表名≠工作簿名！sheetName参数应填写工作表名（如""" + _activeWorksheet + @"""）
-
-**重要提示**：
-- 如果当前活跃工作簿为""无""，请先使用 get_current_excel_info 工具获取最新的Excel环境信息
-- 获取信息后，你就能知道用户当前打开的工作簿和工作表，然后可以直接对其进行操作
-- 不要只是告诉用户你将要做什么，必须实际调用工具来执行操作
-- 每个操作都必须对应一个工具调用，不能省略
-- value参数必须填写用户实际指定的内容，不要使用示例中的占位符
-
-**操作流程示例**：
-用户：""请将当前工作簿中所有表的名称写入当前表的A列""
-正确做法：
-1. 调用 get_worksheet_names 获取所有工作表名称
-2. 对每个工作表名称，调用 set_cell_value(row=行号, column=1, value=实际表名)
-3. 完成后告诉用户操作完成
-
-错误做法：
-只回复""现在我将这些工作表名称写入当前表的A列""但不调用任何工具 ❌
-
-用户：""在所有表前新建一个目录表，写入所有表名，并加上超链接""
-正确做法：
-1. 调用 create_worksheet(sheetName=用户指定的表名) → 自动在最前面创建目录表
-2. 调用 get_worksheet_names() → 获取所有表名
-3. 调用 set_cell_value(row=1, column=1, value=标题内容) → 在A1写入标题
-4. 对每个表名，调用 set_hyperlink_formula(cellAddress=对应单元格, targetLocation=表名!A1, displayText=表名) → 从A2开始
-5. 告诉用户完成
-
-**重要**：注意行号从2开始（跳过标题行A1），避免标题被覆盖
-
-用户：""在当前单元格输入xxx""
-正确做法：
-1. 直接调用 set_cell_value(row=" + currentRow + @", column=" + currentCol + @", value=用户指定的内容)
-2. 告诉用户操作完成
-
-用户：""在A1创建跳转到某工作表的链接""
-正确做法：
-1. 调用 set_hyperlink_formula(cellAddress=""A1"", targetLocation=""目标表名!A1"", displayText=用户指定的显示文本)
-2. 告诉用户已创建工作簿内部跳转链接
-
-错误做法：
-使用 add_hyperlink 添加外部链接 ❌（这会导致无法正确跳转）
-
-用户：""在B2添加某网站的链接""
-正确做法：
-1. 调用 add_hyperlink(cellAddress=""B2"", url=用户指定的网址, displayText=用户指定的显示文本)
-2. 告诉用户已添加外部网址链接
-
-错误做法：
-使用 set_hyperlink_formula ❌（这只适用于工作簿内部跳转）
-
-用户：""根据河南省数据生成图表"" 或 ""将某某数据生成折线图/柱状图""
-正确做法（必须按顺序执行）：
-1. **先查找数据位置**：调用 find_value(searchValue=""河南省"") → 找到数据所在行/列
-2. **再获取数据内容**：调用 get_range_values(rangeAddress=根据find_value结果确定的范围) → 获取完整数据
-3. **最后创建图表**：调用 create_chart(dataRange=数据范围, chartType=图表类型, title=标题)
-4. 告诉用户图表已创建，并简要分析数据
-
-错误做法：
-- 直接调用 create_chart 而不先查找和确认数据位置 ❌
-- 假设数据在某个固定位置而不验证 ❌
-- 只描述要创建图表但不调用工具 ❌
-
-用户：""分析当前选中区域的数据并生成图表""
-正确做法：
-1. 调用 get_range_values(rangeAddress=""" + currentCell + @""") → 获取选中区域数据
-2. 根据数据内容决定合适的图表类型
-3. 调用 create_chart(dataRange=选中区域, chartType=合适的类型, title=描述性标题)
-4. 分析数据并生成报告
-
-**⚠️ 数据操作的核心原则：先查找，再操作**
-
-当用户提到特定数据（如""河南省""、""销售额""、""2024年""等）时，必须遵循以下流程：
-
-**11. 数据查找与定位规则**：
-- **永远不要假设数据位置**：即使用户说""A列的数据""，也应先验证
-- **使用 find_value 定位**：根据关键词找到数据的确切位置
-- **使用 get_range_values 获取数据**：确认数据内容后再进行后续操作
-
-**数据操作标准流程**：
-| 操作类型 | 第一步 | 第二步 | 第三步 |
-|---------|--------|--------|--------|
-| 读取特定数据 | find_value 查找位置 | get_range_values 获取数据 | 返回结果给用户 |
-| 分析数据 | find_value 查找位置 | get_range_values 获取数据 | 分析并生成报告 |
-| 创建图表 | find_value 查找位置 | get_range_values 确认数据 | create_chart 创建图表 |
-| 修改特定数据 | find_value 查找位置 | 确认目标单元格 | set_cell_value 修改 |
-| 格式化特定区域 | find_value 查找位置 | 确定范围 | set_cell_format 等格式工具 |
-| 排序/筛选 | find_value 查找表头 | 确定数据范围 | sort_range/set_auto_filter |
-| 删除特定行/列 | find_value 查找位置 | 确认行号/列号 | delete_rows/delete_columns |
-
-用户：""读取北京市的GDP数据"" 或 ""获取某某的销售额""
-正确做法：
-1. 调用 find_value(searchValue=""北京市"") → 找到数据位置
-2. 根据返回的行列信息，调用 get_range_values 获取相关数据
-3. 返回数据给用户
-
-错误做法：
-- 直接调用 get_range_values(""A1:D10"") 假设数据位置 ❌
-- 不查找就直接读取 ❌
-
-用户：""分析2020-2024年的收入变化""
-正确做法：
-1. 调用 find_value(searchValue=""2020"") → 找到年份数据起始位置
-2. 调用 find_value(searchValue=""收入"") → 找到收入数据位置
-3. 调用 get_range_values 获取完整数据范围
-4. 分析数据趋势并生成报告
-
-用户：""将河南省的数据标红"" 或 ""给某某数据加粗""
-正确做法：
-1. 调用 find_value(searchValue=""河南省"") → 找到数据位置
-2. 根据返回的位置，调用 set_cell_format 设置格式
-
-错误做法：
-- 假设河南省在某行直接设置格式 ❌
-
-用户：""删除空白行"" 或 ""删除包含某某的行""
-正确做法：
-1. 如果是删除特定内容的行，先调用 find_value 查找位置
-2. 确认行号后调用 delete_rows
-
-用户：""对销售数据进行排序""
-正确做法：
-1. 调用 find_value(searchValue=""销售"") → 找到销售数据列
-2. 调用 get_range_values 确定数据范围
-3. 调用 sort_range 进行排序
-
-**特殊情况**：
-- 如果用户明确指定了单元格地址（如""读取A1:D10的数据""），可以直接操作
-- 如果用户说""当前选中区域""，使用当前选中单元格：" + currentCell + @"
-- 如果 find_value 返回""未找到""，应告知用户并询问正确的关键词
-
-请根据用户的自然语言指令，**立即调用**相应的工具完成任务，而不是仅仅描述你要做什么。";
+                    // 性能优化：首次请求使用详细提示词，后续请求使用紧凑提示词
+                    if (!_hasSentDetailedSystemPrompt)
+                    {
+                        // 首次请求：使用详细系统提示词
+                        systemPrompt = GetDetailedSystemPrompt(currentCell, currentRow, currentCol, colLetter);
+                        _hasSentDetailedSystemPrompt = true;
+                    }
+                    else
+                    {
+                        // 后续请求：使用紧凑系统提示词以提升性能
+                        systemPrompt = GetCompactSystemPrompt();
+                    }
                 }
 
                 messages.Add(new
@@ -5914,8 +2776,8 @@ namespace ExcelAddIn
             prompt_label.Text = "新对话已开始";
         }
 
-        // DeepSeek API响应模型
-        public class DeepSeekResponse
+        // AI API 响应模型
+        public class AIResponse
         {
             public Choice[] choices { get; set; }
 
@@ -6007,7 +2869,8 @@ namespace ExcelAddIn
                 {
                     Size = new Size(finalWidth, finalHeight),
                     BackColor = isUser ? Color.LightBlue : Color.LightGreen,
-                    Tag = isUser ? "user_container" : "model_container"
+                    Tag = isUser ? "user_container" : "model_container",
+                    Visible = false  // 先隐藏，等所有内容准备好后再显示
                 };
 
                 // 设置圆角
@@ -6188,6 +3051,9 @@ namespace ExcelAddIn
             rowPanel.Margin = new Padding(10, 5, 10, 10);
             flowLayoutPanelChat.Controls.Add(rowPanel);
             flowLayoutPanelChat.ScrollControlIntoView(rowPanel);
+            
+            // 所有内容准备好后，显示对话气泡
+            chatBubble.Visible = true;
             }
             finally
             {
@@ -6199,27 +3065,10 @@ namespace ExcelAddIn
         private ContextMenuStrip CreateMessageContextMenu(bool isUserMessage)
         {
             ContextMenuStrip menu = new ContextMenuStrip();
+            
+            // 复制菜单项
             ToolStripMenuItem copyItem = new ToolStripMenuItem("复制");
-            copyItem.Click += (s, e) => { if (menu.SourceControl is RichTextBox rtb) { Clipboard.SetText(rtb.SelectionLength > 0 ? rtb.SelectedText : rtb.Text); } };
-            menu.Items.Add(copyItem);
-            if (isUserMessage)
-            {
-                ToolStripMenuItem deleteItem = new ToolStripMenuItem("删除");
-                deleteItem.Click += (s, e) => { if (menu.SourceControl is RichTextBox rtb && flowLayoutPanelChat.Controls.Contains(rtb)) { flowLayoutPanelChat.Controls.Remove(rtb); rtb.Dispose(); } };
-                menu.Items.Add(deleteItem);
-            }
-            return menu;
-        }
-
-
-        // 创建右键上下文菜单
-        private ContextMenuStrip CreateContextMenu(bool isUserMessage)
-        {
-            ContextMenuStrip menu = new ContextMenuStrip();
-
-            // 复制菜单项（新增选中判断）
-            ToolStripMenuItem copyItem = new ToolStripMenuItem("复制");
-            copyItem.Click += (sender, e) =>
+            copyItem.Click += (s, e) =>
             {
                 if (menu.SourceControl is RichTextBox rtb)
                 {
@@ -6234,31 +3083,28 @@ namespace ExcelAddIn
                     }
                 }
             };
-
+            menu.Items.Add(copyItem);
+            
             // 删除菜单项（仅用户消息）
-            ToolStripMenuItem deleteItem = null;
             if (isUserMessage)
             {
-                deleteItem = new ToolStripMenuItem("删除");
-                deleteItem.Click += (sender, e) =>
+                ToolStripMenuItem deleteItem = new ToolStripMenuItem("删除");
+                deleteItem.Click += (s, e) =>
                 {
-                    if (menu.SourceControl is RichTextBox rtb &&
-                        flowLayoutPanelChat.Controls.Contains(rtb))
+                    if (menu.SourceControl is RichTextBox rtb && flowLayoutPanelChat.Controls.Contains(rtb))
                     {
                         flowLayoutPanelChat.Controls.Remove(rtb);
                         rtb.Dispose();
                     }
                 };
+                menu.Items.Add(deleteItem);
             }
-            // 添加菜单项
-            menu.Items.Add(copyItem);
-            if (deleteItem != null) menu.Items.Add(deleteItem);
-
+            
             // 样式设置
             menu.RenderMode = ToolStripRenderMode.Professional;
             menu.BackColor = Color.White;
             menu.Font = new Font("微软雅黑", 9f);
-
+            
             return menu;
         }
 
@@ -6291,11 +3137,9 @@ namespace ExcelAddIn
             if (_configBeforeSettings != newConfig)
             {
                 // 配置有变化，重新初始化
-                // 根据用户勾选状态设置Prompt Engineering模式标志
-                _usePromptEngineering = _isPromptEngineeringChecked;
 
                 // 记录配置变化
-                WriteLog("配置更新", $"模型: {_model}\nAPI地址: {_apiUrl}\n是否云端: {_isCloudConnection}\n是否Ollama: {_isOllamaApi}\n用户勾选'优先提示工程': {_isPromptEngineeringChecked}\nPrompt Engineering模式设置为: {_usePromptEngineering}");
+                WriteLog("配置更新", $"模型: {_model}\nAPI地址: {_apiUrl}\n是否云端: {_isCloudConnection}\n是否Ollama: {_isOllamaApi}");
 
                 // 更新提示信息
                 if (string.IsNullOrEmpty(_apiKey) && _isCloudConnection)
@@ -6313,9 +3157,6 @@ namespace ExcelAddIn
 
                 // 更新模型信息标签
                 UpdateModelInfoLabel();
-
-                // 根据连接类型设置"优先提示工程"复选框的状态
-                UpdatePromptEngineeringCheckBoxState();
             }
             // 配置没有变化，不做任何操作
         }
@@ -6390,8 +3231,22 @@ namespace ExcelAddIn
                     _isCloudConnection = !IsLocalApiUrl(_apiUrl);
                 }
 
+                // 特殊处理：如果模型名称包含 :cloud 后缀，则认为是云端模型
+                if (_model.Contains(":cloud") || _model.Contains(":Cloud"))
+                {
+                    _isCloudConnection = true;
+                    WriteLog("模型检测", $"检测到云端模型后缀 ':cloud'，设置为云端连接");
+                }
+
+                // 读取模型提供商(如果配置文件中有的话)
+                string provider = "";
+                if (parts.Length >= 8)
+                {
+                    provider = parts[7].Split('^')[1];
+                }
+
                 // 检测是否为Ollama API（通过端口或URL特征判断）
-                _isOllamaApi = IsOllamaApi(_apiUrl);
+                _isOllamaApi = IsOllamaApi(_apiUrl) || provider == "Ollama";
 
                 if (parts.Length >= 7)
                 {
@@ -6570,26 +3425,295 @@ namespace ExcelAddIn
             }
         }
 
-        private void checkBoxPromptEngineering_CheckedChanged(object sender, EventArgs e)
+        // 初始化Skills系统
+        private void InitializeSkills()
         {
-            _isPromptEngineeringChecked= checkBoxPromptEngineering.Checked;
+            _skillManager = new SkillManager();
+            
+            if (_excelMcp != null)
+            {
+                // 加载内置技能
+                _skillManager.LoadSkill(new ExcelBaseSkill(_excelMcp));
+                _skillManager.LoadSkill(new ExcelWorkbookSkill(_excelMcp));
+                _skillManager.LoadSkill(new ExcelCellSkill(_excelMcp));
+                _skillManager.LoadSkill(new ExcelAnalysisSkill(_excelMcp));
+                _skillManager.LoadSkill(new ExcelFinanceSkill(_excelMcp));
+                _skillManager.LoadSkill(new ExcelFormatSkill(_excelMcp));
+                _skillManager.LoadSkill(new ExcelSheetSkill(_excelMcp));
+                _skillManager.LoadSkill(new ExcelRangeSkill(_excelMcp));
+                _skillManager.LoadSkill(new ExcelChartSkill(_excelMcp));
+                _skillManager.LoadSkill(new ExcelPivotSkill(_excelMcp));
+                
+                // 加载插件目录中的技能
+                var skillsDir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "skills");
+                var pluginSkills = PluginLoader.LoadSkillsFromDirectory(skillsDir, _excelMcp);
+                foreach (var skill in pluginSkills)
+                {
+                    _skillManager.LoadSkill(skill);
+                }
+                
+                // 记录加载的技能
+                var loadedSkills = _skillManager.GetLoadedSkills();
+                WriteLog("Skills初始化", $"加载了 {loadedSkills.Count} 个技能: {string.Join(", ", loadedSkills.Select(s => s.Name))}");
+            }
         }
 
-        // 根据连接类型设置checkboxPromptEngineering的状态
-        private void UpdatePromptEngineeringCheckBoxState()
+        // 创建流式输出的聊天项
+        private Panel CreateStreamingChatItem()
         {
-            if (_isCloudConnection)
+            // 暂停布局更新，避免闪烁
+            flowLayoutPanelChat.SuspendLayout();
+            
+            try
             {
-                // 云端模型时，禁用"优先提示工程"复选框
-                checkBoxPromptEngineering.Enabled = false;
-                checkBoxPromptEngineering.Checked = false;
-                _isPromptEngineeringChecked = false;
+                int scrollBarWidth = SystemInformation.VerticalScrollBarWidth;
+                int availableWidth = flowLayoutPanelChat.ClientSize.Width - scrollBarWidth - 20;
+                // 最大宽度为容器宽度的75%
+                int maxWidth = (int)(availableWidth * 0.75);
+                int minWidth = 80; // 最小宽度
+                int cornerRadius = 12; // 圆角半径
+
+                // 创建RichTextBox
+                RichTextBox richTextBox = new RichTextBox
+                {
+                    BorderStyle = BorderStyle.None,
+                    ReadOnly = true,
+                    WordWrap = true,
+                    Padding = new Padding(8),
+                    ContextMenuStrip = CreateMessageContextMenu(false),
+                    ScrollBars = RichTextBoxScrollBars.None,
+                    Text = ""
+                };
+
+                // 创建圆角对话框容器Panel
+                Panel chatBubble = new Panel
+                {
+                    Size = new Size(minWidth, 30),
+                    BackColor = Color.LightGreen,
+                    Tag = "model_container",
+                    Visible = false  // 先隐藏，等有内容后再显示
+                };
+
+                // 设置圆角
+                System.Drawing.Drawing2D.GraphicsPath path = new System.Drawing.Drawing2D.GraphicsPath();
+                path.AddArc(0, 0, cornerRadius, cornerRadius, 180, 90);
+                path.AddArc(chatBubble.Width - cornerRadius, 0, cornerRadius, cornerRadius, 270, 90);
+                path.AddArc(chatBubble.Width - cornerRadius, chatBubble.Height - cornerRadius, cornerRadius, cornerRadius, 0, 90);
+                path.AddArc(0, chatBubble.Height - cornerRadius, cornerRadius, cornerRadius, 90, 90);
+                path.CloseAllFigures();
+                chatBubble.Region = new Region(path);
+
+                // 配置RichTextBox
+                int rtbWidth = chatBubble.Width - 4;
+                int rtbHeight = chatBubble.Height - 4;
+                
+                richTextBox.Size = new Size(rtbWidth, rtbHeight);
+                richTextBox.Location = new Point(2, 2);
+                richTextBox.BackColor = chatBubble.BackColor;
+                richTextBox.SelectionAlignment = HorizontalAlignment.Left;
+                richTextBox.Tag = "model_message";
+
+                chatBubble.Controls.Add(richTextBox);
+
+                // 添加到聊天面板
+                flowLayoutPanelChat.Controls.Add(chatBubble);
+                flowLayoutPanelChat.ResumeLayout(false);
+                flowLayoutPanelChat.PerformLayout();
+                
+                // 滚动到底部
+                flowLayoutPanelChat.ScrollControlIntoView(chatBubble);
+                
+                return chatBubble;
             }
-            else
+            catch
             {
-                // 本地模型时，启用"优先提示工程"复选框
-                checkBoxPromptEngineering.Enabled = true;
+                flowLayoutPanelChat.ResumeLayout(false);
+                throw;
             }
+        }
+
+        // 更新流式聊天项内容
+        private void UpdateStreamingChatItem(RichTextBox richTextBox, string content)
+        {
+            if (richTextBox.InvokeRequired)
+            {
+                richTextBox.Invoke(new Action<RichTextBox, string>(UpdateStreamingChatItem), richTextBox, content);
+                return;
+            }
+
+            try
+            {
+                // 暂停布局更新
+                flowLayoutPanelChat.SuspendLayout();
+                
+                // 更新内容
+                richTextBox.Text = content;
+                
+                // 调整大小
+                Panel chatBubble = (Panel)richTextBox.Parent;
+                
+                // 如果对话气泡还不可见，先显示它
+                if (!chatBubble.Visible)
+                {
+                    chatBubble.Visible = true;
+                }
+                
+                int scrollBarWidth = SystemInformation.VerticalScrollBarWidth;
+                int availableWidth = flowLayoutPanelChat.ClientSize.Width - scrollBarWidth - 20;
+                int maxWidth = (int)(availableWidth * 0.75);
+                int minWidth = 80;
+                int maxHeight = 300;
+                
+                using (Graphics g = flowLayoutPanelChat.CreateGraphics())
+                {
+                    // 计算文本尺寸
+                    SizeF textSize = g.MeasureString(content, richTextBox.Font, maxWidth - richTextBox.Padding.Horizontal);
+                    int textWidth = (int)Math.Ceiling(textSize.Width) + richTextBox.Padding.Horizontal + 10;
+                    int textHeight = (int)Math.Ceiling(textSize.Height) + richTextBox.Padding.Vertical + 6;
+                    
+                    // 限制宽度
+                    int finalWidth = Math.Max(minWidth, Math.Min(textWidth, maxWidth));
+                    
+                    // 限制高度
+                    int finalHeight = Math.Min(textHeight, maxHeight);
+                    bool needScroll = textHeight > maxHeight;
+                    
+                    // 更新RichTextBox大小
+                    richTextBox.Size = new Size(finalWidth - 4, finalHeight - 4);
+                    richTextBox.ScrollBars = needScroll ? RichTextBoxScrollBars.Vertical : RichTextBoxScrollBars.None;
+                    
+                    // 更新聊天气泡大小
+                    chatBubble.Size = new Size(finalWidth, finalHeight);
+                    
+                    // 重新设置圆角
+                    int cornerRadius = 12;
+                    System.Drawing.Drawing2D.GraphicsPath path = new System.Drawing.Drawing2D.GraphicsPath();
+                    path.AddArc(0, 0, cornerRadius, cornerRadius, 180, 90);
+                    path.AddArc(chatBubble.Width - cornerRadius, 0, cornerRadius, cornerRadius, 270, 90);
+                    path.AddArc(chatBubble.Width - cornerRadius, chatBubble.Height - cornerRadius, cornerRadius, cornerRadius, 0, 90);
+                    path.AddArc(0, chatBubble.Height - cornerRadius, cornerRadius, cornerRadius, 90, 90);
+                    path.CloseAllFigures();
+                    chatBubble.Region = new Region(path);
+                }
+                
+                // 恢复布局并滚动到底部
+                flowLayoutPanelChat.ResumeLayout(false);
+                flowLayoutPanelChat.PerformLayout();
+                flowLayoutPanelChat.ScrollControlIntoView(chatBubble);
+            }
+            catch (Exception ex)
+            {
+                WriteLog("流式更新错误", $"更新流式聊天项失败: {ex.Message}");
+            }
+        }
+
+        // 移除思考占位符（如果存在）
+        private void RemoveThinkingPlaceholder()
+        {
+            if (flowLayoutPanelChat.InvokeRequired)
+            {
+                flowLayoutPanelChat.Invoke(new Action(RemoveThinkingPlaceholder));
+                return;
+            }
+
+            flowLayoutPanelChat.SuspendLayout();
+            try
+            {
+                if (_thinkingPlaceholder != null && flowLayoutPanelChat.Controls.Contains(_thinkingPlaceholder))
+                {
+                    flowLayoutPanelChat.Controls.Remove(_thinkingPlaceholder);
+                    _thinkingPlaceholder.Dispose();
+                    _thinkingPlaceholder = null;
+                }
+            }
+            finally
+            {
+                flowLayoutPanelChat.ResumeLayout(true);
+            }
+        }
+
+        // 将思考占位符转换为AI回复容器，并填入内容
+        private void ConvertThinkingPlaceholderToResponse(string response)
+        {
+            if (_thinkingPlaceholder == null)
+                return;
+
+            flowLayoutPanelChat.SuspendLayout();
+            try
+            {
+                // 获取思考占位符中的控件
+                Panel chatBubble = _thinkingPlaceholder.Controls[0] as Panel;
+                if (chatBubble != null)
+                {
+                    RichTextBox richTextBox = chatBubble.Controls[0] as RichTextBox;
+                    if (richTextBox != null)
+                    {
+                        // 重置字体和对齐方式
+                        richTextBox.Font = new Font("微软雅黑", 9, FontStyle.Regular);
+                        richTextBox.SelectionAlignment = HorizontalAlignment.Left;
+                        // 更新Tag
+                        richTextBox.Tag = "model_message";
+                        
+                        // 计算文本尺寸
+                        int scrollBarWidth = SystemInformation.VerticalScrollBarWidth;
+                        int availableWidth = flowLayoutPanelChat.ClientSize.Width - scrollBarWidth - 20;
+                        int maxWidth = (int)(availableWidth * 0.75);
+                        int minWidth = 80;
+                        int maxHeight = 300;
+                        
+                        using (Graphics g = flowLayoutPanelChat.CreateGraphics())
+                        {
+                            SizeF textSize = g.MeasureString(response, richTextBox.Font, maxWidth - richTextBox.Padding.Horizontal);
+                            int textWidth = (int)Math.Ceiling(textSize.Width) + richTextBox.Padding.Horizontal + 10;
+                            int textHeight = (int)Math.Ceiling(textSize.Height) + richTextBox.Padding.Vertical + 6;
+                            
+                            int finalWidth = Math.Max(minWidth, Math.Min(textWidth, maxWidth));
+                            int finalHeight = Math.Min(textHeight, maxHeight);
+                            bool needScroll = textHeight > maxHeight;
+                            
+                            // 更新RichTextBox大小
+                            richTextBox.Size = new Size(finalWidth - 4, finalHeight - 4);
+                            richTextBox.ScrollBars = needScroll ? RichTextBoxScrollBars.Vertical : RichTextBoxScrollBars.None;
+                            
+                            // 更新聊天气泡大小
+                            chatBubble.Size = new Size(finalWidth, finalHeight);
+                            
+                            // 重新设置圆角
+                            int cornerRadius = 12;
+                            System.Drawing.Drawing2D.GraphicsPath path = new System.Drawing.Drawing2D.GraphicsPath();
+                            path.AddArc(0, 0, cornerRadius, cornerRadius, 180, 90);
+                            path.AddArc(chatBubble.Width - cornerRadius, 0, cornerRadius, cornerRadius, 270, 90);
+                            path.AddArc(chatBubble.Width - cornerRadius, chatBubble.Height - cornerRadius, cornerRadius, cornerRadius, 0, 90);
+                            path.AddArc(0, chatBubble.Height - cornerRadius, cornerRadius, cornerRadius, 90, 90);
+                            path.CloseAllFigures();
+                            chatBubble.Region = new Region(path);
+                            
+                            // 更新行容器大小
+                            _thinkingPlaceholder.Size = new Size(availableWidth, finalHeight);
+                        }
+                        
+                        // 设置内容
+                        richTextBox.Text = response;
+                    }
+                    // 更新Tag
+                    chatBubble.Tag = "model_container";
+                }
+                // 更新Tag
+                _thinkingPlaceholder.Tag = "model_row";
+                
+                // 滚动到底部
+                flowLayoutPanelChat.ScrollControlIntoView(_thinkingPlaceholder);
+            }
+            finally
+            {
+                flowLayoutPanelChat.ResumeLayout(true);
+            }
+        }
+
+        private void prompt_label_DoubleClick(object sender, EventArgs e)
+        {
+            Clipboard.SetText(prompt_label.Text);
+            MessageBox.Show("文本已复制到剪贴板", "提示", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
     }
 }
