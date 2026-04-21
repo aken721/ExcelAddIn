@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.OleDb;
@@ -30,7 +30,7 @@ using ZXing.QrCode;
 using ZXing.Rendering;
 using Excel = Microsoft.Office.Interop.Excel;
 
-namespace ExcelAddIn
+namespace TableMagic
 {
     public partial class Form1 : Form
     {
@@ -199,7 +199,7 @@ namespace ExcelAddIn
                     backColor_label.Visible = false;
                     QR_logo_label.Visible = false;
                     QR_logo_pictureBox.Visible = false;
-                    QR_logo_pictureBox.Image = ExcelAddIn.Properties.Resources.pic_logo;
+                    QR_logo_pictureBox.Image = TableMagic.Properties.Resources.pic_logo;
                     BC_radioButton.Visible = false;
                     BC_radioButton.Checked = false;
 
@@ -2178,7 +2178,7 @@ namespace ExcelAddIn
                                 Bitmap qrCode = writer.Write(Encoding.UTF8.GetString(utf8Bytes));
 
                                 // 如果提供了Logo图片路径，则在二维码中间添加Logo
-                                if (!string.IsNullOrEmpty(qr_logo_path) && QR_logo_pictureBox.Image != ExcelAddIn.Properties.Resources.pic_logo)
+                                if (!string.IsNullOrEmpty(qr_logo_path) && QR_logo_pictureBox.Image != TableMagic.Properties.Resources.pic_logo)
                                 {
                                     using (Bitmap logo = new Bitmap(qr_logo_path))
                                     {
@@ -2478,7 +2478,7 @@ namespace ExcelAddIn
             backColor_label.Visible = true;
             QR_logo_label.Visible = true;
             QR_logo_pictureBox.Visible = true;
-            QR_logo_pictureBox.Image = ExcelAddIn.Properties.Resources.pic_logo;
+            QR_logo_pictureBox.Image = TableMagic.Properties.Resources.pic_logo;
             qr_logo_path = "";
             BC_radioButton.Visible = true;
             BC_radioButton.Checked = false;
@@ -4012,12 +4012,12 @@ namespace ExcelAddIn
             if (pwd_textBox.UseSystemPasswordChar)
             {
                 pwd_textBox.UseSystemPasswordChar = false;
-                btnPwdChar.BackgroundImage = ExcelAddIn.Properties.Resources.eye_open;
+                btnPwdChar.BackgroundImage = TableMagic.Properties.Resources.eye_open;
             }
             else
             {
                 pwd_textBox.UseSystemPasswordChar = true;
-                btnPwdChar.BackgroundImage = ExcelAddIn.Properties.Resources.eye_hide;
+                btnPwdChar.BackgroundImage = TableMagic.Properties.Resources.eye_hide;
             }
         }
 
@@ -4026,12 +4026,12 @@ namespace ExcelAddIn
             if (apikey_textBox.UseSystemPasswordChar)
             {
                 apikey_textBox.UseSystemPasswordChar = false;
-                btnKeyChar.BackgroundImage = ExcelAddIn.Properties.Resources.eye_open;
+                btnKeyChar.BackgroundImage = TableMagic.Properties.Resources.eye_open;
             }
             else
             {
                 apikey_textBox.UseSystemPasswordChar = true;
-                btnKeyChar.BackgroundImage = ExcelAddIn.Properties.Resources.eye_hide;
+                btnKeyChar.BackgroundImage = TableMagic.Properties.Resources.eye_hide;
             }
         }
 
@@ -4262,8 +4262,8 @@ namespace ExcelAddIn
             keyPlaceholder_textBox.Text = string.Empty;
             pwd_textBox.UseSystemPasswordChar = true;
             apikey_textBox.UseSystemPasswordChar = true;
-            btnPwdChar.BackgroundImage = ExcelAddIn.Properties.Resources.eye_hide;
-            btnKeyChar.BackgroundImage = ExcelAddIn.Properties.Resources.eye_hide;
+            btnPwdChar.BackgroundImage = TableMagic.Properties.Resources.eye_hide;
+            btnKeyChar.BackgroundImage = TableMagic.Properties.Resources.eye_hide;
             SafeUpdateStatus("", System.Drawing.Color.Black);
 
             // 重置认证头配置

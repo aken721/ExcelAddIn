@@ -1,4 +1,4 @@
-﻿namespace ExcelAddIn
+namespace TableMagic
 {
     partial class Form4
     {
@@ -123,7 +123,7 @@
             // 
             // regulation_add_pictureBox1
             // 
-            this.regulation_add_pictureBox1.Image = global::ExcelAddIn.Properties.Resources.add;
+            this.regulation_add_pictureBox1.Image = global::TableMagic.Properties.Resources.add;
             this.regulation_add_pictureBox1.Location = new System.Drawing.Point(941, 287);
             this.regulation_add_pictureBox1.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.regulation_add_pictureBox1.Name = "regulation_add_pictureBox1";
@@ -220,7 +220,7 @@
             // 
             // regulation_reduce_pictureBox2
             // 
-            this.regulation_reduce_pictureBox2.Image = global::ExcelAddIn.Properties.Resources.reduce;
+            this.regulation_reduce_pictureBox2.Image = global::TableMagic.Properties.Resources.reduce;
             this.regulation_reduce_pictureBox2.Location = new System.Drawing.Point(980, 377);
             this.regulation_reduce_pictureBox2.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.regulation_reduce_pictureBox2.Name = "regulation_reduce_pictureBox2";
@@ -231,7 +231,7 @@
             // 
             // regulation_add_pictureBox2
             // 
-            this.regulation_add_pictureBox2.Image = global::ExcelAddIn.Properties.Resources.add;
+            this.regulation_add_pictureBox2.Image = global::TableMagic.Properties.Resources.add;
             this.regulation_add_pictureBox2.Location = new System.Drawing.Point(941, 377);
             this.regulation_add_pictureBox2.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.regulation_add_pictureBox2.Name = "regulation_add_pictureBox2";
@@ -242,7 +242,7 @@
             // 
             // regulation_reduce_pictureBox3
             // 
-            this.regulation_reduce_pictureBox3.Image = global::ExcelAddIn.Properties.Resources.reduce;
+            this.regulation_reduce_pictureBox3.Image = global::TableMagic.Properties.Resources.reduce;
             this.regulation_reduce_pictureBox3.Location = new System.Drawing.Point(941, 467);
             this.regulation_reduce_pictureBox3.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.regulation_reduce_pictureBox3.Name = "regulation_reduce_pictureBox3";

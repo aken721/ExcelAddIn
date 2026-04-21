@@ -204,7 +204,7 @@ Directory.Delete(tempDir);
 using DynamicPic.Core;
 using Excel = Microsoft.Office.Interop.Excel;
 
-public class MyExcelAddin
+public class MyTableMagicAddin
 {
     private Excel.Application _excelApp;
 

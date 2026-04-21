@@ -1,4 +1,4 @@
-﻿namespace ExcelAddIn
+namespace TableMagic
 {
     partial class Form9
     {
@@ -362,7 +362,7 @@
             // 
             // buttonDropDown2
             // 
-            this.buttonDropDown2.BackgroundImage = global::ExcelAddIn.Properties.Resources.dropdown;
+            this.buttonDropDown2.BackgroundImage = global::TableMagic.Properties.Resources.dropdown;
             this.buttonDropDown2.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
             this.buttonDropDown2.Location = new System.Drawing.Point(391, 81);
             this.buttonDropDown2.Name = "buttonDropDown2";
@@ -374,7 +374,7 @@
             // 
             // buttonDropDown1
             // 
-            this.buttonDropDown1.BackgroundImage = global::ExcelAddIn.Properties.Resources.dropdown;
+            this.buttonDropDown1.BackgroundImage = global::TableMagic.Properties.Resources.dropdown;
             this.buttonDropDown1.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
             this.buttonDropDown1.Location = new System.Drawing.Point(392, 21);
             this.buttonDropDown1.Name = "buttonDropDown1";

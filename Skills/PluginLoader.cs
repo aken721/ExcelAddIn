@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 
-namespace ExcelAddIn.Skills
+namespace TableMagic.Skills
 {
     public class PluginLoader
     {

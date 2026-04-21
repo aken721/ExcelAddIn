@@ -12,7 +12,7 @@
 - ✅ `runtimes/` 文件夹 - 包含不同平台的本地依赖（x86、x64、ARM64）
 
 ### 已添加的项目引用
-已在 `ExcelAddIn.csproj` 文件中添加了以下引用：
+已在 `TableMagic.csproj` 文件中添加了以下引用：
 - HtmlEditorControl
 - Microsoft.Web.WebView2.Core
 - Microsoft.Web.WebView2.WinForms
@@ -40,7 +40,7 @@
    - 选择 "选择项..."
    - 在弹出的对话框中，点击 ".NET Framework 组件" 选项卡
    - 点击 "浏览..." 按钮
-   - 导航到项目根目录（`E:\SourceCode\Csharp\ExcelAddIn`）
+   - 导航到项目根目录（`E:\SourceCode\Csharp\TableMagic`）
    - 选择 `HtmlEditorControl.dll` 文件
    - 点击 "打开"
    - 确保 `HtmlEditorControl` 已被勾选

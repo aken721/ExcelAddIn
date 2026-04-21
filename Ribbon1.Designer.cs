@@ -1,4 +1,4 @@
-﻿namespace ExcelAddIn
+namespace TableMagic
 {
     partial class Ribbon1 : Microsoft.Office.Tools.Ribbon.RibbonBase
     {
@@ -126,7 +126,6 @@
             // 
             // tab1
             // 
-            this.tab1.ControlId.ControlIdType = Microsoft.Office.Tools.Ribbon.RibbonControlIdType.Office;
             this.tab1.Groups.Add(this.group1);
             this.tab1.Groups.Add(this.group5);
             this.tab1.Groups.Add(this.group2);
@@ -134,7 +133,7 @@
             this.tab1.Groups.Add(this.group4);
             this.tab1.Groups.Add(this.group6);
             this.tab1.Groups.Add(this.group7);
-            this.tab1.Label = "智能工具箱";
+            this.tab1.Label = "万象插件";
             this.tab1.Name = "tab1";
             // 
             // group1
@@ -151,7 +150,7 @@
             // Excel_extend
             // 
             this.Excel_extend.ControlSize = Microsoft.Office.Core.RibbonControlSize.RibbonControlSizeLarge;
-            this.Excel_extend.Image = global::ExcelAddIn.Properties.Resources.excel;
+            this.Excel_extend.Image = global::TableMagic.Properties.Resources.excel;
             this.Excel_extend.Label = "Excel表操作";
             this.Excel_extend.Name = "Excel_extend";
             this.Excel_extend.ShowImage = true;
@@ -164,7 +163,7 @@
             // confirm_spotlight
             // 
             this.confirm_spotlight.ControlSize = Microsoft.Office.Core.RibbonControlSize.RibbonControlSizeLarge;
-            this.confirm_spotlight.Image = global::ExcelAddIn.Properties.Resources.spotlight_close;
+            this.confirm_spotlight.Image = global::TableMagic.Properties.Resources.spotlight_close;
             this.confirm_spotlight.Label = "打开聚光灯";
             this.confirm_spotlight.Name = "confirm_spotlight";
             this.confirm_spotlight.ShowImage = true;
@@ -178,17 +177,17 @@
             // 
             // spotlightDropDown
             // 
-            ribbonDropDownItemImpl1.Image = global::ExcelAddIn.Properties.Resources.green35;
+            ribbonDropDownItemImpl1.Image = global::TableMagic.Properties.Resources.green35;
             ribbonDropDownItemImpl1.Label = "浅绿";
-            ribbonDropDownItemImpl2.Image = global::ExcelAddIn.Properties.Resources.blue37;
+            ribbonDropDownItemImpl2.Image = global::TableMagic.Properties.Resources.blue37;
             ribbonDropDownItemImpl2.Label = "浅蓝";
-            ribbonDropDownItemImpl3.Image = global::ExcelAddIn.Properties.Resources.purple24;
+            ribbonDropDownItemImpl3.Image = global::TableMagic.Properties.Resources.purple24;
             ribbonDropDownItemImpl3.Label = "浅紫";
-            ribbonDropDownItemImpl4.Image = global::ExcelAddIn.Properties.Resources.yellow36;
+            ribbonDropDownItemImpl4.Image = global::TableMagic.Properties.Resources.yellow36;
             ribbonDropDownItemImpl4.Label = "浅黄";
-            ribbonDropDownItemImpl5.Image = global::ExcelAddIn.Properties.Resources.gray15;
+            ribbonDropDownItemImpl5.Image = global::TableMagic.Properties.Resources.gray15;
             ribbonDropDownItemImpl5.Label = "浅灰";
-            ribbonDropDownItemImpl6.Image = global::ExcelAddIn.Properties.Resources.orange44;
+            ribbonDropDownItemImpl6.Image = global::TableMagic.Properties.Resources.orange44;
             ribbonDropDownItemImpl6.Label = "浅橙";
             this.spotlightDropDown.Items.Add(ribbonDropDownItemImpl1);
             this.spotlightDropDown.Items.Add(ribbonDropDownItemImpl2);
@@ -211,7 +210,7 @@
             // scan_button
             // 
             this.scan_button.ControlSize = Microsoft.Office.Core.RibbonControlSize.RibbonControlSizeLarge;
-            this.scan_button.Image = global::ExcelAddIn.Properties.Resources.QR;
+            this.scan_button.Image = global::TableMagic.Properties.Resources.QR;
             this.scan_button.Label = "识别二维码";
             this.scan_button.Name = "scan_button";
             this.scan_button.ShowImage = true;
@@ -226,7 +225,7 @@
             // management_splitButton
             // 
             this.management_splitButton.ControlSize = Microsoft.Office.Core.RibbonControlSize.RibbonControlSizeLarge;
-            this.management_splitButton.Image = global::ExcelAddIn.Properties.Resources.management;
+            this.management_splitButton.Image = global::TableMagic.Properties.Resources.management;
             this.management_splitButton.Items.Add(this.fapiao_button);
             this.management_splitButton.Items.Add(this.doc_button);
             this.management_splitButton.Label = "内部管理";
@@ -234,7 +233,7 @@
             // 
             // fapiao_button
             // 
-            this.fapiao_button.Image = global::ExcelAddIn.Properties.Resources.Fapiao;
+            this.fapiao_button.Image = global::TableMagic.Properties.Resources.Fapiao;
             this.fapiao_button.Label = "发票批量导入";
             this.fapiao_button.Name = "fapiao_button";
             this.fapiao_button.ShowImage = true;
@@ -242,7 +241,7 @@
             // 
             // doc_button
             // 
-            this.doc_button.Image = global::ExcelAddIn.Properties.Resources.document;
+            this.doc_button.Image = global::TableMagic.Properties.Resources.document;
             this.doc_button.Label = "文档批量生成";
             this.doc_button.Name = "doc_button";
             this.doc_button.ShowImage = true;
@@ -259,7 +258,7 @@
             // Send_mail
             // 
             this.Send_mail.ControlSize = Microsoft.Office.Core.RibbonControlSize.RibbonControlSizeLarge;
-            this.Send_mail.Image = global::ExcelAddIn.Properties.Resources.email;
+            this.Send_mail.Image = global::TableMagic.Properties.Resources.email;
             this.Send_mail.Label = "Email群发";
             this.Send_mail.Name = "Send_mail";
             this.Send_mail.ShowImage = true;
@@ -272,7 +271,7 @@
             // btnTimer
             // 
             this.btnTimer.ControlSize = Microsoft.Office.Core.RibbonControlSize.RibbonControlSizeLarge;
-            this.btnTimer.Image = global::ExcelAddIn.Properties.Resources.timer;
+            this.btnTimer.Image = global::TableMagic.Properties.Resources.timer;
             this.btnTimer.Label = "定时任务";
             this.btnTimer.Name = "btnTimer";
             this.btnTimer.ShowImage = true;
@@ -292,7 +291,7 @@
             // Files_read
             // 
             this.Files_read.ControlSize = Microsoft.Office.Core.RibbonControlSize.RibbonControlSizeLarge;
-            this.Files_read.Image = global::ExcelAddIn.Properties.Resources.read;
+            this.Files_read.Image = global::TableMagic.Properties.Resources.read;
             this.Files_read.Label = "批读文件名";
             this.Files_read.Name = "Files_read";
             this.Files_read.ShowImage = true;
@@ -305,7 +304,7 @@
             // File_rename
             // 
             this.File_rename.ControlSize = Microsoft.Office.Core.RibbonControlSize.RibbonControlSizeLarge;
-            this.File_rename.Image = global::ExcelAddIn.Properties.Resources.write;
+            this.File_rename.Image = global::TableMagic.Properties.Resources.write;
             this.File_rename.Label = "批量重命名";
             this.File_rename.Name = "File_rename";
             this.File_rename.ShowImage = true;
@@ -318,7 +317,7 @@
             // delandmove_button
             // 
             this.delandmove_button.ControlSize = Microsoft.Office.Core.RibbonControlSize.RibbonControlSizeLarge;
-            this.delandmove_button.Image = global::ExcelAddIn.Properties.Resources.移动文件;
+            this.delandmove_button.Image = global::TableMagic.Properties.Resources.移动文件;
             this.delandmove_button.Label = "批量删或移";
             this.delandmove_button.Name = "delandmove_button";
             this.delandmove_button.ShowImage = true;
@@ -333,7 +332,7 @@
             // 
             // Select_f_or_d
             // 
-            this.Select_f_or_d.Image = global::ExcelAddIn.Properties.Resources.Radio_Button_off;
+            this.Select_f_or_d.Image = global::TableMagic.Properties.Resources.Radio_Button_off;
             this.Select_f_or_d.Label = "文件名";
             this.Select_f_or_d.Name = "Select_f_or_d";
             this.Select_f_or_d.ShowImage = true;
@@ -357,7 +356,7 @@
             // to_pdf_button
             // 
             this.to_pdf_button.ControlSize = Microsoft.Office.Core.RibbonControlSize.RibbonControlSizeLarge;
-            this.to_pdf_button.Image = global::ExcelAddIn.Properties.Resources.pdf;
+            this.to_pdf_button.Image = global::TableMagic.Properties.Resources.pdf;
             this.to_pdf_button.Label = "转为PDF";
             this.to_pdf_button.Name = "to_pdf_button";
             this.to_pdf_button.ShowImage = true;
@@ -467,7 +466,7 @@
             // 
             // Select_mp3_button
             // 
-            this.Select_mp3_button.Image = global::ExcelAddIn.Properties.Resources.no_open_fold;
+            this.Select_mp3_button.Image = global::TableMagic.Properties.Resources.no_open_fold;
             this.Select_mp3_button.Label = "音乐目录";
             this.Select_mp3_button.Name = "Select_mp3_button";
             this.Select_mp3_button.ScreenTip = "选择音乐所在文件夹";
@@ -477,7 +476,7 @@
             // 
             // Mode_button
             // 
-            this.Mode_button.Image = global::ExcelAddIn.Properties.Resources.order_play;
+            this.Mode_button.Image = global::TableMagic.Properties.Resources.order_play;
             this.Mode_button.Label = "顺序播放";
             this.Mode_button.Name = "Mode_button";
             this.Mode_button.ScreenTip = "顺序播放";
@@ -495,7 +494,7 @@
             // 
             // Play_button
             // 
-            this.Play_button.Image = global::ExcelAddIn.Properties.Resources.play;
+            this.Play_button.Image = global::TableMagic.Properties.Resources.play;
             this.Play_button.Label = "播放";
             this.Play_button.Name = "Play_button";
             this.Play_button.ScreenTip = "播放";
@@ -505,7 +504,7 @@
             // 
             // Stop_button
             // 
-            this.Stop_button.Image = global::ExcelAddIn.Properties.Resources.stop;
+            this.Stop_button.Image = global::TableMagic.Properties.Resources.stop;
             this.Stop_button.Label = "停止";
             this.Stop_button.Name = "Stop_button";
             this.Stop_button.ScreenTip = "停止";
@@ -515,7 +514,7 @@
             // 
             // Next_button
             // 
-            this.Next_button.Image = global::ExcelAddIn.Properties.Resources.next;
+            this.Next_button.Image = global::TableMagic.Properties.Resources.next;
             this.Next_button.Label = "下一首";
             this.Next_button.Name = "Next_button";
             this.Next_button.ScreenTip = "下一曲";
@@ -525,7 +524,7 @@
             // 
             // Previous_button
             // 
-            this.Previous_button.Image = global::ExcelAddIn.Properties.Resources.previous;
+            this.Previous_button.Image = global::TableMagic.Properties.Resources.previous;
             this.Previous_button.Label = "上一首";
             this.Previous_button.Name = "Previous_button";
             this.Previous_button.ScreenTip = "上一曲";
@@ -542,7 +541,7 @@
             // deepseek_api_button
             // 
             this.deepseek_api_button.ControlSize = Microsoft.Office.Core.RibbonControlSize.RibbonControlSizeLarge;
-            this.deepseek_api_button.Image = global::ExcelAddIn.Properties.Resources.ai;
+            this.deepseek_api_button.Image = global::TableMagic.Properties.Resources.ai;
             this.deepseek_api_button.Label = "AI对话";
             this.deepseek_api_button.Name = "deepseek_api_button";
             this.deepseek_api_button.ShowImage = true;

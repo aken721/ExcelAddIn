@@ -1,4 +1,4 @@
-﻿﻿﻿﻿namespace ExcelAddIn
+﻿﻿﻿namespace TableMagic
 {
     partial class Form7
     {
@@ -127,7 +127,7 @@
             // send_button
             // 
             this.send_button.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.send_button.BackgroundImage = global::ExcelAddIn.Properties.Resources.send;
+            this.send_button.BackgroundImage = global::TableMagic.Properties.Resources.send;
             this.send_button.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
             this.send_button.Location = new System.Drawing.Point(674, 376);
             this.send_button.Name = "send_button";

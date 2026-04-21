@@ -14,7 +14,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 
 
-namespace ExcelAddIn
+namespace TableMagic
 {
     public partial class Form8 : Form
     {

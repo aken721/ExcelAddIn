@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Net.Mail;
@@ -7,7 +7,7 @@ using System.Windows.Forms;
 using Excel = Microsoft.Office.Interop.Excel;
 using HtmlEditorControl;
 
-namespace ExcelAddIn
+namespace TableMagic
 {
     public partial class Form2 : Form
     {
@@ -791,12 +791,12 @@ namespace ExcelAddIn
             switch (pictureType)
             {
                 case "hide":
-                    mailpassword_pictureBox.Image = ExcelAddIn.Properties.Resources.eye_open;
+                    mailpassword_pictureBox.Image = TableMagic.Properties.Resources.eye_open;
                     mailpassword_textBox.UseSystemPasswordChar = false;
                     pictureType = "open";
                     break;
                 case "open":
-                    mailpassword_pictureBox.Image = ExcelAddIn.Properties.Resources.eye_hide;
+                    mailpassword_pictureBox.Image = TableMagic.Properties.Resources.eye_hide;
                     mailpassword_textBox.UseSystemPasswordChar = true;
                     pictureType = "hide";
                     break;

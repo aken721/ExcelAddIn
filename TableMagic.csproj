@@ -24,8 +24,8 @@
     <ProjectGuid>{534C1A85-CFCD-4370-BE6A-FF5B1C55053B}</ProjectGuid>
     <OutputType>Library</OutputType>
     <NoStandardLibraries>false</NoStandardLibraries>
-    <RootNamespace>ExcelAddIn</RootNamespace>
-    <AssemblyName>ExcelAddIn</AssemblyName>
+    <RootNamespace>TableMagic</RootNamespace>
+    <AssemblyName>TableMagic</AssemblyName>
     <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <DefineConstants>VSTO40</DefineConstants>
     <NuGetPackageImportStamp>
@@ -39,17 +39,17 @@
     <NoWarn>MSB3245,MSB3270</NoWarn>
     <BootstrapperEnabled>true</BootstrapperEnabled>
     <PublishUrl>ftp://localhost/</PublishUrl>
-    <InstallUrl>http://localhost/ExcelAddIn/</InstallUrl>
+    <InstallUrl>http://localhost/TableMagic/</InstallUrl>
     <TargetCulture>zh-chs</TargetCulture>
-    <ApplicationVersion>2.5.0.0</ApplicationVersion>
+    <ApplicationVersion>2.5.1.0</ApplicationVersion>
     <AutoIncrementApplicationRevision>true</AutoIncrementApplicationRevision>
     <UpdateEnabled>true</UpdateEnabled>
     <UpdateInterval>7</UpdateInterval>
     <UpdateIntervalUnits>days</UpdateIntervalUnits>
-    <ProductName>ExcelAddIn</ProductName>
+    <ProductName>TableMagic</ProductName>
     <PublisherName />
     <SupportUrl />
-    <FriendlyName>ExcelAddIn</FriendlyName>
+    <FriendlyName>TableMagic</FriendlyName>
     <OfficeApplicationDescription />
     <LoadBehavior>3</LoadBehavior>
   </PropertyGroup>
@@ -314,7 +314,7 @@
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>
-    <None Include="ExcelAddIn_TemporaryKey.pfx" />
+    <None Include="TableMagic_TemporaryKey.pfx" />
     <None Include="Properties\Resources\switch.png" />
     <None Include="Properties\Resources\document.ico" />
     <None Include="Properties\Resources\document.png" />
@@ -369,9 +369,7 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
-    <Compile Include="Ribbon1.cs">
-      <SubType>Component</SubType>
-    </Compile>
+    <Compile Include="Ribbon1.cs" />
     <Compile Include="Ribbon1.Designer.cs">
       <DependentUpon>Ribbon1.cs</DependentUpon>
     </Compile>
@@ -397,6 +395,21 @@
     <Compile Include="Skills\ExcelRangeSkill.cs" />
     <Compile Include="Skills\ExcelChartSkill.cs" />
     <Compile Include="Skills\ExcelPivotSkill.cs" />
+    <Compile Include="Skills\ExcelDataSkill.cs" />
+    <Compile Include="Skills\ExcelDatabaseSkill.cs" />
+    <Compile Include="Skills\ExcelApiSkill.cs" />
+    <Compile Include="Skills\ExcelChartEnhanceSkill.cs" />
+    <Compile Include="Skills\ExcelMailSkill.cs" />
+    <Compile Include="Skills\ExcelFileSkill.cs" />
+    <Compile Include="Skills\ExcelQRSkill.cs" />
+    <Compile Include="Skills\ExcelInvoiceSkill.cs" />
+    <Compile Include="Skills\ExcelRegexSkill.cs" />
+    <Compile Include="Skills\ExcelTocSkill.cs" />
+    <Compile Include="Skills\ExcelScheduleSkill.cs" />
+    <Compile Include="Skills\DocumentGenerationSkill.cs" />
+    <Compile Include="Skills\ExcelPdfSkill.cs" />
+    <Compile Include="Skills\ExcelSpotlightSkill.cs" />
+    <Compile Include="Skills\ExcelMusicSkill.cs" />
     <AppDesigner Include="Properties\" />
   </ItemGroup>
   <ItemGroup>
@@ -790,6 +803,8 @@
     <Content Include="PaddleOCRInvoice\musl-arm64\**\*">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="Properties\Resources\tablemagic_ico.ico" />
+    <Content Include="Properties\Resources\tablemagic_icon.png" />
     <Content Include="runtimes\**\*">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
@@ -822,7 +837,7 @@
     <SignManifests>true</SignManifests>
   </PropertyGroup>
   <PropertyGroup>
-    <ManifestKeyFile>ExcelAddIn_TemporaryKey.pfx</ManifestKeyFile>
+    <ManifestKeyFile>TableMagic_TemporaryKey.pfx</ManifestKeyFile>
   </PropertyGroup>
   <PropertyGroup>
     <ManifestCertificateThumbprint>DE5B68A9F8D606B7FD92C3936CD8C3021C86A65C</ManifestCertificateThumbprint>
@@ -895,7 +910,7 @@
     <VisualStudio>
       <FlavorProperties GUID="{BAA0C2D2-18E2-41B9-852F-F413020CAA33}">
         <ProjectProperties HostName="Excel" HostPackage="{29A7B9D7-A7F1-4328-8EF0-6B2D1A56B2C1}" OfficeVersion="15.0" VstxVersion="4.0" ApplicationType="Excel" Language="cs" TemplatesPath="" DebugInfoExeName="#Software\Microsoft\Office\16.0\Excel\InstallRoot\Path#excel.exe" DebugInfoCommandLine="/x" AddItemTemplatesGuid="{51063C3A-E220-4D12-8922-BDA915ACD783}" />
-        <Host Name="Excel" GeneratedCodeNamespace="ExcelAddIn" PublishedHash="69C324AB27932AA2FBF2B7EA72250886FF164DE6" IconIndex="0">
+        <Host Name="Excel" GeneratedCodeNamespace="TableMagic" PublishedHash="69C324AB27932AA2FBF2B7EA72250886FF164DE6" IconIndex="0">
           <HostItem Name="ThisAddIn" Code="ThisAddIn.cs" CanonicalName="AddIn" PublishedHash="64E28B1A55C5E137AEE7B0230988D462C925A37E" CanActivate="false" IconIndex="1" Blueprint="ThisAddIn.Designer.xml" GeneratedCode="ThisAddIn.Designer.cs" />
         </Host>
       </FlavorProperties>

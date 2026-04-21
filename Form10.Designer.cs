@@ -1,4 +1,4 @@
-﻿namespace ExcelAddIn
+namespace TableMagic
 {
     partial class Form10
     {

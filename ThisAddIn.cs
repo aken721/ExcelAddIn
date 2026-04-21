@@ -1,6 +1,7 @@
-﻿using Excel = Microsoft.Office.Interop.Excel;
+using System.Collections.Generic;
+using Excel = Microsoft.Office.Interop.Excel;
 
-namespace ExcelAddIn
+namespace TableMagic
 {
 
     public partial class ThisAddIn
@@ -14,7 +15,25 @@ namespace ExcelAddIn
             public static int spotlight;
             public static int spotlightColorIndex;
 
+            //聚光灯功能打开前保存的彩色单元格位置和填充颜色
+            public static Dictionary<string, int> cellColor = new Dictionary<string, int>();
+
             public static bool created_qr_sheet = false;
+
+            public static Dictionary<string, int> GetColorDictionary(Excel.Range usedRange)
+            {
+                Dictionary<string, int> cellColorDict = new Dictionary<string, int>();
+                foreach (Excel.Range cell in usedRange)
+                {
+                    if (cell.Interior.ColorIndex > 0)
+                    {
+                        string cellAddress = cell.Address;
+                        int cellColorIndex = cell.Interior.ColorIndex;
+                        cellColorDict.Add(cellAddress, cellColorIndex);
+                    }
+                }
+                return cellColorDict;
+            }
         }
 
         public static Excel.Application app;         //声明一个Excel的Application变量

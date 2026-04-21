@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -10,7 +10,7 @@ using Microsoft.Office.Tools.Ribbon;
 using NAudio.Wave;
 using Excel = Microsoft.Office.Interop.Excel;
 
-namespace ExcelAddIn
+namespace TableMagic
 {
     public partial class Ribbon1
     {
@@ -797,12 +797,12 @@ namespace ExcelAddIn
         {
             if (Select_f_or_d.Checked == true)
             {
-                Select_f_or_d.Image = ExcelAddIn.Properties.Resources.Radio_Button_on;
+                Select_f_or_d.Image = TableMagic.Properties.Resources.Radio_Button_on;
                 Select_f_or_d.Label = "目录名";
             }
             else
             {
-                Select_f_or_d.Image = ExcelAddIn.Properties.Resources.Radio_Button_off;
+                Select_f_or_d.Image = TableMagic.Properties.Resources.Radio_Button_off;
                 Select_f_or_d.Label = "文件名";
             }
 
@@ -1256,33 +1256,29 @@ namespace ExcelAddIn
             UpdateTrackInfo();
         }
 
-        //记录聚光灯功能打开前的彩色单元格位置和填充颜色
-        Dictionary<string, int> cellColor = new Dictionary<string, int>();
-
-        //聚光灯功能按钮
         private void confirm_spotlight_Click(object sender, RibbonControlEventArgs e)
         {
             Excel.Worksheet currentWorksheet = ThisAddIn.app.ActiveSheet;
             Excel.Range usedRange = currentWorksheet.UsedRange;
             if (confirm_spotlight.Checked == true)
             {
-                cellColor = GetColorDictionary(usedRange);
+                ThisAddIn.Global.cellColor = ThisAddIn.Global.GetColorDictionary(usedRange);
                 confirm_spotlight.Label = "关闭聚光灯";
-                confirm_spotlight.Image = ExcelAddIn.Properties.Resources.spotlight_open;
+                confirm_spotlight.Image = TableMagic.Properties.Resources.spotlight_open;
                 ThisAddIn.Global.spotlight = 1;
             }
             else
             {
                 confirm_spotlight.Label = "打开聚光灯";
-                confirm_spotlight.Image = ExcelAddIn.Properties.Resources.spotlight_close;
+                confirm_spotlight.Image = TableMagic.Properties.Resources.spotlight_close;
                 ThisAddIn.Global.spotlight = 0;
                 Excel.Range selectCell = ThisAddIn.app.ActiveCell;
                 ThisAddIn.app.ScreenUpdating = false;
                 selectCell.EntireRow.Interior.ColorIndex = 0;
                 selectCell.EntireColumn.Interior.ColorIndex = 0;
-                if (cellColor.Count > 0)
+                if (ThisAddIn.Global.cellColor.Count > 0)
                 {
-                    foreach (var cellColorEntry in cellColor)
+                    foreach (var cellColorEntry in ThisAddIn.Global.cellColor)
                     {
                         string cellAddress = cellColorEntry.Key;
                         int cellColorIndex = cellColorEntry.Value;
@@ -1290,25 +1286,9 @@ namespace ExcelAddIn
                         cell.Interior.ColorIndex = cellColorIndex;
                     }
                 }
-                cellColor.Clear();
+                ThisAddIn.Global.cellColor.Clear();
                 ThisAddIn.app.ScreenUpdating = true;
             }
-        }
-
-        //获取已有彩色单元格位置和颜色索引的字典变量的方法
-        private Dictionary<string, int> GetColorDictionary(Excel.Range usedRange)
-        {
-            Dictionary<string, int> cellColorDict = new Dictionary<string, int>();
-            foreach (Excel.Range cell in usedRange)
-            {
-                if (cell.Interior.ColorIndex > 0)
-                {
-                    string cellAddress = cell.Address;
-                    int cellColorIndex = cell.Interior.ColorIndex;
-                    cellColorDict.Add(cellAddress, cellColorIndex);
-                }
-            }
-            return cellColorDict;
         }
 
         private void spotlightDropDown_SelectionChanged(object sender, RibbonControlEventArgs e)

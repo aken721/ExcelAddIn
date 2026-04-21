@@ -1,8 +1,9 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
-namespace ExcelAddIn.Skills
+namespace TableMagic.Skills
 {
     public class ExcelSheetSkill : ISkill
     {
@@ -208,16 +209,75 @@ namespace ExcelAddIn.Skills
                             var newSheetName = arguments["newSheetName"].ToString();
                             var fileName = arguments.ContainsKey("fileName") ? arguments["fileName"].ToString() : null;
 
-                            _excelMcp.RenameWorksheet(fileName, oldSheetName, newSheetName);
-                            return new SkillResult { Success = true, Content = "重命名工作表成功" };
+                            try
+                            {
+                                _excelMcp.RenameWorksheet(fileName, oldSheetName, newSheetName);
+                                return new SkillResult { Success = true, Content = "重命名工作表成功" };
+                            }
+                            catch (ArgumentException ex) when (ex.Message.Contains("已存在"))
+                            {
+                                var existingNames = _excelMcp.GetWorksheetNames(fileName);
+                                string existingActualName = existingNames.FirstOrDefault(n => string.Equals(n, newSheetName, StringComparison.OrdinalIgnoreCase)) ?? newSheetName;
+                                string altName = newSheetName;
+                                int suffix = 2;
+                                while (existingNames.Any(n => string.Equals(n, altName, StringComparison.OrdinalIgnoreCase)))
+                                {
+                                    altName = $"{newSheetName}_{suffix}";
+                                    suffix++;
+                                }
+                                return SkillResult.FromError(
+                                    $"工作表名称 '{newSheetName}' 已存在（实际名称：'{existingActualName}'），无法重命名",
+                                    new List<string>
+                                    {
+                                        $"1. 使用其他名称重命名，例如：'{altName}'",
+                                        $"2. 先删除现有的 '{existingActualName}' 工作表，再重命名",
+                                        $"3. 重命名现有的 '{existingActualName}' 工作表为其他名称后再操作"
+                                    },
+                                    requiresUserDecision: true);
+                            }
+                            catch (System.Runtime.InteropServices.COMException ex) when (ex.Message.Contains("已被使用") || ex.Message.Contains("already") || ex.Message.Contains("重名"))
+                            {
+                                var existingNames = _excelMcp.GetWorksheetNames(fileName);
+                                string existingActualName = existingNames.FirstOrDefault(n => string.Equals(n, newSheetName, StringComparison.OrdinalIgnoreCase)) ?? newSheetName;
+                                string altName = newSheetName;
+                                int suffix = 2;
+                                while (existingNames.Any(n => string.Equals(n, altName, StringComparison.OrdinalIgnoreCase)))
+                                {
+                                    altName = $"{newSheetName}_{suffix}";
+                                    suffix++;
+                                }
+                                return SkillResult.FromError(
+                                    $"工作表名称 '{newSheetName}' 已存在（实际名称：'{existingActualName}'），无法重命名",
+                                    new List<string>
+                                    {
+                                        $"1. 使用其他名称重命名，例如：'{altName}'",
+                                        $"2. 先删除现有的 '{existingActualName}' 工作表，再重命名",
+                                        $"3. 重命名现有的 '{existingActualName}' 工作表为其他名称后再操作"
+                                    },
+                                    requiresUserDecision: true);
+                            }
                         }
                     case "delete_worksheet":
                         {
                             var sheetName = arguments["sheetName"].ToString();
                             var fileName = arguments.ContainsKey("fileName") ? arguments["fileName"].ToString() : null;
 
-                            _excelMcp.DeleteWorksheet(fileName, sheetName);
-                            return new SkillResult { Success = true, Content = "删除工作表成功" };
+                            try
+                            {
+                                _excelMcp.DeleteWorksheet(fileName, sheetName);
+                                return new SkillResult { Success = true, Content = "删除工作表成功" };
+                            }
+                            catch (System.Runtime.InteropServices.COMException ex) when (ex.Message.Contains("不能删除") || ex.Message.Contains("cannot") || ex.Message.Contains("无法删除"))
+                            {
+                                return SkillResult.FromError(
+                                    $"无法删除工作表 '{sheetName}'",
+                                    new List<string>
+                                    {
+                                        "1. 工作簿至少需要保留一个可见工作表，请确认是否要删除",
+                                        "2. 如果是隐藏工作表无法删除，请先取消隐藏再删除"
+                                    },
+                                    requiresUserDecision: true);
+                            }
                         }
                     case "copy_worksheet":
                         {
@@ -225,8 +285,53 @@ namespace ExcelAddIn.Skills
                             var targetSheetName = arguments["targetSheetName"].ToString();
                             var fileName = arguments.ContainsKey("fileName") ? arguments["fileName"].ToString() : null;
 
-                            _excelMcp.CopyWorksheet(fileName, sourceSheetName, targetSheetName);
-                            return new SkillResult { Success = true, Content = "复制工作表成功" };
+                            try
+                            {
+                                _excelMcp.CopyWorksheet(fileName, sourceSheetName, targetSheetName);
+                                return new SkillResult { Success = true, Content = "复制工作表成功" };
+                            }
+                            catch (ArgumentException ex) when (ex.Message.Contains("已存在"))
+                            {
+                                var existingNames = _excelMcp.GetWorksheetNames(fileName);
+                                string altName = targetSheetName;
+                                int suffix = 2;
+                                while (existingNames.Any(n => string.Equals(n, altName, StringComparison.OrdinalIgnoreCase)))
+                                {
+                                    altName = $"{targetSheetName}_{suffix}";
+                                    suffix++;
+                                }
+                                string existingActualName = existingNames.FirstOrDefault(n => string.Equals(n, targetSheetName, StringComparison.OrdinalIgnoreCase)) ?? targetSheetName;
+                                return SkillResult.FromError(
+                                    $"目标工作表名称 '{targetSheetName}' 已存在（实际名称：'{existingActualName}'），无法复制",
+                                    new List<string>
+                                    {
+                                        $"1. 使用其他名称复制，例如：'{altName}'",
+                                        $"2. 先删除现有的 '{existingActualName}' 工作表，再复制",
+                                        $"3. 重命名现有的 '{existingActualName}' 工作表后再操作"
+                                    },
+                                    requiresUserDecision: true);
+                            }
+                            catch (System.Runtime.InteropServices.COMException ex) when (ex.Message.Contains("已被使用") || ex.Message.Contains("already") || ex.Message.Contains("重名"))
+                            {
+                                var existingNames = _excelMcp.GetWorksheetNames(fileName);
+                                string altName = targetSheetName;
+                                int suffix = 2;
+                                while (existingNames.Any(n => string.Equals(n, altName, StringComparison.OrdinalIgnoreCase)))
+                                {
+                                    altName = $"{targetSheetName}_{suffix}";
+                                    suffix++;
+                                }
+                                string existingActualName = existingNames.FirstOrDefault(n => string.Equals(n, targetSheetName, StringComparison.OrdinalIgnoreCase)) ?? targetSheetName;
+                                return SkillResult.FromError(
+                                    $"目标工作表名称 '{targetSheetName}' 已存在（实际名称：'{existingActualName}'），无法复制",
+                                    new List<string>
+                                    {
+                                        $"1. 使用其他名称复制，例如：'{altName}'",
+                                        $"2. 先删除现有的 '{existingActualName}' 工作表，再复制",
+                                        $"3. 重命名现有的 '{existingActualName}' 工作表后再操作"
+                                    },
+                                    requiresUserDecision: true);
+                            }
                         }
                     case "move_worksheet":
                         {
@@ -248,7 +353,6 @@ namespace ExcelAddIn.Skills
                         }
                     case "create_worksheet":
                         {
-                            // 参数名称映射：支持 "name" 作为 "sheetName" 的别名
                             string sheetName = null;
                             if (arguments.ContainsKey("name"))
                             {
@@ -261,13 +365,59 @@ namespace ExcelAddIn.Skills
                             
                             if (string.IsNullOrEmpty(sheetName))
                             {
-                                return new SkillResult { Success = false, Error = "缺少必需参数：sheetName 或 name" };
+                                return SkillResult.FromError("缺少必需参数：sheetName 或 name",
+                                    new List<string> { "请提供工作表名称" });
                             }
                             
                             var fileName = arguments.ContainsKey("fileName") ? arguments["fileName"].ToString() : null;
 
-                            _excelMcp.CreateWorksheet(fileName, sheetName);
-                            return new SkillResult { Success = true, Content = $"创建工作表 '{sheetName}' 成功" };
+                            try
+                            {
+                                _excelMcp.CreateWorksheet(fileName, sheetName);
+                                return new SkillResult { Success = true, Content = $"创建工作表 '{sheetName}' 成功" };
+                            }
+                            catch (ArgumentException ex) when (ex.Message.Contains("已存在"))
+                            {
+                                var existingNames = _excelMcp.GetWorksheetNames(fileName);
+                                string newName = sheetName;
+                                int suffix = 2;
+                                while (existingNames.Any(n => string.Equals(n, newName, StringComparison.OrdinalIgnoreCase)))
+                                {
+                                    newName = $"{sheetName}_{suffix}";
+                                    suffix++;
+                                }
+                                string existingActualName = existingNames.FirstOrDefault(n => string.Equals(n, sheetName, StringComparison.OrdinalIgnoreCase)) ?? sheetName;
+                                return SkillResult.FromError(
+                                    $"工作表名称 '{sheetName}' 已存在（实际名称：'{existingActualName}'），无法创建同名工作表",
+                                    new List<string>
+                                    {
+                                        $"1. 使用其他名称创建，例如：'{newName}'",
+                                        $"2. 先删除现有的 '{existingActualName}' 工作表，再重新创建",
+                                        $"3. 重命名现有的 '{existingActualName}' 工作表为其他名称，再创建"
+                                    },
+                                    requiresUserDecision: true);
+                            }
+                            catch (System.Runtime.InteropServices.COMException ex) when (ex.Message.Contains("已被使用") || ex.Message.Contains("already") || ex.Message.Contains("重名"))
+                            {
+                                var existingNames = _excelMcp.GetWorksheetNames(fileName);
+                                string newName = sheetName;
+                                int suffix = 2;
+                                while (existingNames.Any(n => string.Equals(n, newName, StringComparison.OrdinalIgnoreCase)))
+                                {
+                                    newName = $"{sheetName}_{suffix}";
+                                    suffix++;
+                                }
+                                string existingActualName = existingNames.FirstOrDefault(n => string.Equals(n, sheetName, StringComparison.OrdinalIgnoreCase)) ?? sheetName;
+                                return SkillResult.FromError(
+                                    $"工作表名称 '{sheetName}' 已存在（实际名称：'{existingActualName}'），无法创建同名工作表",
+                                    new List<string>
+                                    {
+                                        $"1. 使用其他名称创建，例如：'{newName}'",
+                                        $"2. 先删除现有的 '{existingActualName}' 工作表，再重新创建",
+                                        $"3. 重命名现有的 '{existingActualName}' 工作表为其他名称，再创建"
+                                    },
+                                    requiresUserDecision: true);
+                            }
                         }
                     case "get_worksheet_index":
                         {

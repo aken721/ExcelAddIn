@@ -1,4 +1,4 @@
-﻿namespace ExcelAddIn
+namespace TableMagic
 {
     partial class Form6
     {
@@ -166,7 +166,7 @@
             // 
             // clear_pictureBox
             // 
-            this.clear_pictureBox.Image = global::ExcelAddIn.Properties.Resources.clear;
+            this.clear_pictureBox.Image = global::TableMagic.Properties.Resources.clear;
             this.clear_pictureBox.Location = new System.Drawing.Point(434, 61);
             this.clear_pictureBox.Name = "clear_pictureBox";
             this.clear_pictureBox.Size = new System.Drawing.Size(15, 15);
@@ -256,7 +256,7 @@
             // 
             // last_pictureBox
             // 
-            this.last_pictureBox.Image = global::ExcelAddIn.Properties.Resources.last;
+            this.last_pictureBox.Image = global::TableMagic.Properties.Resources.last;
             this.last_pictureBox.Location = new System.Drawing.Point(200, 97);
             this.last_pictureBox.Name = "last_pictureBox";
             this.last_pictureBox.Size = new System.Drawing.Size(20, 20);
@@ -267,7 +267,7 @@
             // 
             // next_pictureBox
             // 
-            this.next_pictureBox.Image = global::ExcelAddIn.Properties.Resources.next1;
+            this.next_pictureBox.Image = global::TableMagic.Properties.Resources.next1;
             this.next_pictureBox.Location = new System.Drawing.Point(173, 97);
             this.next_pictureBox.Name = "next_pictureBox";
             this.next_pictureBox.Size = new System.Drawing.Size(20, 20);
@@ -278,7 +278,7 @@
             // 
             // preview_pictureBox
             // 
-            this.preview_pictureBox.Image = global::ExcelAddIn.Properties.Resources.preview;
+            this.preview_pictureBox.Image = global::TableMagic.Properties.Resources.preview;
             this.preview_pictureBox.Location = new System.Drawing.Point(122, 97);
             this.preview_pictureBox.Name = "preview_pictureBox";
             this.preview_pictureBox.Size = new System.Drawing.Size(20, 20);
@@ -289,7 +289,7 @@
             // 
             // begin_pictureBox
             // 
-            this.begin_pictureBox.Image = global::ExcelAddIn.Properties.Resources.begin;
+            this.begin_pictureBox.Image = global::TableMagic.Properties.Resources.begin;
             this.begin_pictureBox.Location = new System.Drawing.Point(95, 97);
             this.begin_pictureBox.Name = "begin_pictureBox";
             this.begin_pictureBox.Size = new System.Drawing.Size(20, 20);
@@ -393,7 +393,7 @@
             // 
             // clear_pictureBox1
             // 
-            this.clear_pictureBox1.Image = global::ExcelAddIn.Properties.Resources.clear;
+            this.clear_pictureBox1.Image = global::TableMagic.Properties.Resources.clear;
             this.clear_pictureBox1.Location = new System.Drawing.Point(434, 61);
             this.clear_pictureBox1.Name = "clear_pictureBox1";
             this.clear_pictureBox1.Size = new System.Drawing.Size(15, 15);
@@ -507,7 +507,7 @@
             // 
             // last_pictureBox1
             // 
-            this.last_pictureBox1.Image = global::ExcelAddIn.Properties.Resources.last;
+            this.last_pictureBox1.Image = global::TableMagic.Properties.Resources.last;
             this.last_pictureBox1.Location = new System.Drawing.Point(200, 97);
             this.last_pictureBox1.Name = "last_pictureBox1";
             this.last_pictureBox1.Size = new System.Drawing.Size(20, 20);
@@ -518,7 +518,7 @@
             // 
             // next_pictureBox1
             // 
-            this.next_pictureBox1.Image = global::ExcelAddIn.Properties.Resources.next1;
+            this.next_pictureBox1.Image = global::TableMagic.Properties.Resources.next1;
             this.next_pictureBox1.Location = new System.Drawing.Point(173, 97);
             this.next_pictureBox1.Name = "next_pictureBox1";
             this.next_pictureBox1.Size = new System.Drawing.Size(20, 20);
@@ -529,7 +529,7 @@
             // 
             // preview_pictureBox1
             // 
-            this.preview_pictureBox1.Image = global::ExcelAddIn.Properties.Resources.preview;
+            this.preview_pictureBox1.Image = global::TableMagic.Properties.Resources.preview;
             this.preview_pictureBox1.Location = new System.Drawing.Point(122, 97);
             this.preview_pictureBox1.Name = "preview_pictureBox1";
             this.preview_pictureBox1.Size = new System.Drawing.Size(20, 20);
@@ -540,7 +540,7 @@
             // 
             // begin_pictureBox1
             // 
-            this.begin_pictureBox1.Image = global::ExcelAddIn.Properties.Resources.begin;
+            this.begin_pictureBox1.Image = global::TableMagic.Properties.Resources.begin;
             this.begin_pictureBox1.Location = new System.Drawing.Point(95, 97);
             this.begin_pictureBox1.Name = "begin_pictureBox1";
             this.begin_pictureBox1.Size = new System.Drawing.Size(20, 20);

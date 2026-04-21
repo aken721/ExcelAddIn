@@ -6,7 +6,7 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using Microsoft.Office.Interop.Excel;
 
-namespace ExcelAddIn
+namespace TableMagic
 {
     /// <summary>
     /// Excel MCP Agent Core - 基于Microsoft.Office.Interop.Excel提供Excel文件操作的完整功能集
@@ -169,17 +169,45 @@ namespace ExcelAddIn
         public string CreateWorksheet(string fileName, string sheetName)
         {
             var workbook = GetWorkbookById(fileName);
+            
+            foreach (Worksheet ws in workbook.Worksheets)
+            {
+                if (string.Equals(ws.Name, sheetName, StringComparison.OrdinalIgnoreCase))
+                {
+                    Marshal.ReleaseComObject(ws);
+                    Marshal.ReleaseComObject(workbook);
+                    throw new ArgumentException($"工作表名称 '{sheetName}' 已存在（实际名称：'{ws.Name}'）");
+                }
+                Marshal.ReleaseComObject(ws);
+            }
+            
             Worksheet worksheet = (Worksheet)workbook.Worksheets.Add();
             worksheet.Name = sheetName;
             Marshal.ReleaseComObject(worksheet);
+            Marshal.ReleaseComObject(workbook);
             return sheetName;
         }
 
         public void RenameWorksheet(string fileName, string oldSheetName, string newSheetName)
         {
+            var workbook = GetWorkbookById(fileName);
+            
+            foreach (Worksheet ws in workbook.Worksheets)
+            {
+                if (string.Equals(ws.Name, newSheetName, StringComparison.OrdinalIgnoreCase) &&
+                    !string.Equals(ws.Name, oldSheetName, StringComparison.OrdinalIgnoreCase))
+                {
+                    Marshal.ReleaseComObject(ws);
+                    Marshal.ReleaseComObject(workbook);
+                    throw new ArgumentException($"工作表名称 '{newSheetName}' 已存在（实际名称：'{ws.Name}'）");
+                }
+                Marshal.ReleaseComObject(ws);
+            }
+            
             Worksheet worksheet = GetWorksheetById(fileName, oldSheetName);
             worksheet.Name = newSheetName;
             Marshal.ReleaseComObject(worksheet);
+            Marshal.ReleaseComObject(workbook);
         }
 
         public void DeleteWorksheet(string fileName, string sheetName)
@@ -515,6 +543,18 @@ namespace ExcelAddIn
         public void CopyWorksheet(string fileName, string sourceSheetName, string targetSheetName)
         {
             var workbook = GetWorkbookById(fileName);
+            
+            foreach (Worksheet ws in workbook.Worksheets)
+            {
+                if (string.Equals(ws.Name, targetSheetName, StringComparison.OrdinalIgnoreCase))
+                {
+                    Marshal.ReleaseComObject(ws);
+                    Marshal.ReleaseComObject(workbook);
+                    throw new ArgumentException($"工作表名称 '{targetSheetName}' 已存在（实际名称：'{ws.Name}'）");
+                }
+                Marshal.ReleaseComObject(ws);
+            }
+            
             Worksheet sourceSheet = null;
             Worksheet newSheet = null;
 

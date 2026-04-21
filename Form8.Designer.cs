@@ -1,4 +1,4 @@
-﻿﻿﻿﻿namespace ExcelAddIn
+﻿﻿﻿namespace TableMagic
 {
     partial class Form8
     {
@@ -175,7 +175,7 @@
             // 
             // pbxPassword
             // 
-            this.pbxPassword.BackgroundImage = global::ExcelAddIn.Properties.Resources.eye_hide;
+            this.pbxPassword.BackgroundImage = global::TableMagic.Properties.Resources.eye_hide;
             this.pbxPassword.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
             this.pbxPassword.Location = new System.Drawing.Point(348, 115);
             this.pbxPassword.Name = "pbxPassword";

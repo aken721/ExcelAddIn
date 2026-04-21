@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Drawing;
@@ -8,13 +8,13 @@ using System.Media;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using AForge.Video.DirectShow;
-using ExcelAddIn.Properties;
+using TableMagic.Properties;
 using ZXing;
 using ZXing.Common;
 using Excel = Microsoft.Office.Interop.Excel;
 
 
-namespace ExcelAddIn
+namespace TableMagic
 {
     public partial class Form5 : Form
     {

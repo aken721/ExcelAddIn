@@ -10,11 +10,11 @@ using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using ExcelAddIn.Skills;
+using TableMagic.Skills;
 
 
 
-namespace ExcelAddIn
+namespace TableMagic
 {
     public partial class Form7 : Form
     {
@@ -90,6 +90,66 @@ namespace ExcelAddIn
             ["link"] = (
                 "批注和超链接：添加/删除批注、内部跳转、外部链接",
                 new[] { "add_comment", "get_comment", "delete_comment", "add_hyperlink", "set_hyperlink_formula", "delete_hyperlink" }
+            ),
+            ["data_process"] = (
+                "数据处理：分表、并表、批量导删、转置、工资条",
+                new[] { "split_sheet_by_column", "split_and_export", "merge_sheets", "merge_workbooks", "export_sheets", "delete_sheets", "transpose_columns", "import_sheets_from_folder", "create_multiple_sheets", "generate_payslips" }
+            ),
+            ["database"] = (
+                "数据库：连接数据库、执行SQL、导出表",
+                new[] { "connect_database", "execute_query", "export_table_to_excel", "get_table_structure" }
+            ),
+            ["api"] = (
+                "API接口：获取API数据、测试连接",
+                new[] { "fetch_api_data", "test_api_connection" }
+            ),
+            ["chart_enhance"] = (
+                "图表增强：词云、动态图表、帕累托图、直方图",
+                new[] { "create_word_cloud", "create_dynamic_chart", "create_comparison_chart", "create_pareto_chart", "create_histogram", "create_box_plot" }
+            ),
+            ["mail"] = (
+                "邮件：发送邮件、批量群发",
+                new[] { "send_email", "batch_send_emails", "configure_smtp", "test_smtp_connection", "preview_email" }
+            ),
+            ["file"] = (
+                "文件操作：批量重命名、复制、移动、删除",
+                new[] { "list_files", "batch_rename", "batch_copy", "batch_move", "batch_delete", "create_folder", "get_file_info", "open_folder" }
+            ),
+            ["qr"] = (
+                "二维码：生成二维码、条形码、扫描识别",
+                new[] { "generate_qr_code", "generate_barcode", "scan_qr_code", "scan_qr_code_folder", "decode_qr_code_from_range" }
+            ),
+            ["invoice"] = (
+                "发票：导入XML发票、批量导入",
+                new[] { "import_xml_invoice", "batch_import_invoices", "get_invoice_fields", "export_invoice_summary", "clear_invoice_data" }
+            ),
+            ["regex"] = (
+                "正则表达式：提取内容、验证模式",
+                new[] { "extract_by_regex", "get_regex_patterns", "validate_regex" }
+            ),
+            ["toc"] = (
+                "目录页：创建目录、批量建表",
+                new[] { "create_sheets_from_toc", "create_toc_sheet", "update_toc_hyperlinks" }
+            ),
+            ["schedule"] = (
+                "定时任务：创建、管理定时任务",
+                new[] { "create_scheduled_task", "list_scheduled_tasks", "delete_scheduled_task", "enable_task", "disable_task", "run_task_now", "get_task_status" }
+            ),
+            ["document"] = (
+                "文档生成：批量生成Word文档",
+                new[] { "generate_documents", "generate_documents_with_images", "preview_document", "create_template" }
+            ),
+            ["pdf"] = (
+                "PDF转换：Excel转PDF",
+                new[] { "export_sheet_to_pdf", "export_workbook_to_pdf", "batch_export_sheets_to_pdf", "export_range_to_pdf" }
+            ),
+            ["spotlight"] = (
+                "聚光灯：高亮行列",
+                new[] { "enable_spotlight", "disable_spotlight", "toggle_spotlight", "get_spotlight_status", "set_spotlight_colors" }
+            ),
+            ["music"] = (
+                "音乐播放：播放、暂停、音量控制",
+                new[] { "play_music", "play_playlist", "pause_music", "stop_music", "set_volume", "next_track", "previous_track", "get_player_status" }
             )
         };
 
@@ -155,12 +215,12 @@ namespace ExcelAddIn
                 try
                 {
                     string docPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
-                    _logFilePath = Path.Combine(docPath, "ExcelAddIn_aiDialog.txt");
+                    _logFilePath = Path.Combine(docPath, "TableMagic_aiDialog.txt");
                 }
                 catch
                 {
                     // 最后备用：使用临时目录
-                    _logFilePath = Path.Combine(Path.GetTempPath(), "ExcelAddIn_aiDialog.txt");
+                    _logFilePath = Path.Combine(Path.GetTempPath(), "TableMagic_aiDialog.txt");
                 }
             }
             return _logFilePath;
@@ -1709,6 +1769,66 @@ namespace ExcelAddIn
                     "批注", "注释", "超链接", "链接", "跳转",
                     "添加批注", "添加注释", "插入批注", "插入注释",
                     "添加链接", "插入链接", "设置链接", "添加超链接"
+                },
+                ["spotlight"] = new[] { 
+                    "聚光灯", "高亮", "行列高亮", "突出显示", "十字光标", "十字高亮",
+                    "开启聚光灯", "打开聚光灯", "关闭聚光灯", "聚光灯功能",
+                    "高亮行", "高亮列", "高亮行列", "突出行列",
+                    "行列指示", "单元格高亮", "当前行高亮", "当前列高亮"
+                },
+                ["music"] = new[] { 
+                    "音乐", "播放", "mp3", "歌曲", "音量", "暂停", "下一首", "上一首",
+                    "播放音乐", "播放歌曲", "暂停音乐", "停止音乐",
+                    "调大音量", "调小音量", "设置音量"
+                },
+                ["pdf"] = new[] { 
+                    "pdf", "PDF", "导出pdf", "转pdf", "pdf转换", "导出为pdf",
+                    "转换pdf", "生成pdf", "保存为pdf", "输出pdf"
+                },
+                ["qr"] = new[] { 
+                    "二维码", "条形码", "qr", "QR", "扫码", "生成码",
+                    "生成二维码", "创建二维码", "扫描二维码", "识别二维码",
+                    "生成条形码", "创建条形码", "扫描条形码"
+                },
+                ["database"] = new[] { 
+                    "数据库", "sql", "SQL", "查询数据库", "执行sql",
+                    "连接数据库", "数据库查询", "数据库操作", "mysql", "sqlite", "postgres"
+                },
+                ["api"] = new[] { 
+                    "api", "API", "接口", "请求", "http", "HTTP", "get", "post", "GET", "POST",
+                    "调用接口", "api调用", "接口请求", "http请求", "获取接口数据"
+                },
+                ["mail"] = new[] { 
+                    "邮件", "发送邮件", "email", "Email", "邮箱", "发邮件",
+                    "发送邮件", "发信", "邮件发送"
+                },
+                ["file"] = new[] { 
+                    "文件管理", "文件夹", "目录", "创建文件夹", "删除文件", "重命名文件",
+                    "复制文件", "移动文件", "文件操作", "目录操作", "新建文件夹"
+                },
+                ["invoice"] = new[] { 
+                    "发票", "发票识别", "发票导入", "发票批量", "识别发票",
+                    "导入发票", "发票处理", "发票数据"
+                },
+                ["regex"] = new[] { 
+                    "正则", "正则表达式", "提取", "匹配", "模式匹配",
+                    "正则提取", "正则匹配", "文本提取", "内容提取"
+                },
+                ["toc"] = new[] { 
+                    "目录", "目录页", "目录生成", "生成目录", "创建目录",
+                    "工作表目录", "sheet目录", "导航页"
+                },
+                ["schedule"] = new[] { 
+                    "定时", "定时任务", "计划任务", "调度", "定时执行",
+                    "创建定时", "设置定时", "定时运行", "计划执行"
+                },
+                ["document"] = new[] { 
+                    "文档生成", "生成文档", "批量生成", "word", "Word", "批量文档",
+                    "模板生成", "文档模板", "生成word"
+                },
+                ["chart_enhance"] = new[] { 
+                    "词云", "动态图表", "高级图表", "图表增强", "词云图",
+                    "生成词云", "创建词云", "词频统计"
                 }
             };
 
@@ -1901,10 +2021,8 @@ namespace ExcelAddIn
         {
             try
             {
-                // 工具名称规范化：处理模型可能输出的变体名称
                 toolName = NormalizeToolName(toolName);
 
-                // 直接使用技能系统执行所有工具
                 var argumentsDict = JsonElementToDictionary(arguments);
                 var result = _skillManager.ExecuteToolAsync(toolName, argumentsDict).Result;
                 
@@ -1914,16 +2032,37 @@ namespace ExcelAddIn
                 }
                 else
                 {
-                    return $"错误：{result.Error}";
+                    var errorBuilder = new StringBuilder();
+                    errorBuilder.AppendLine($"❌ 执行失败：{result.Error}");
+                    
+                    if (result.Suggestions != null && result.Suggestions.Count > 0)
+                    {
+                        errorBuilder.AppendLine("📋 处理建议：");
+                        foreach (var suggestion in result.Suggestions)
+                        {
+                            errorBuilder.AppendLine($"  {suggestion}");
+                        }
+                        
+                        if (result.RequiresUserDecision)
+                        {
+                            errorBuilder.AppendLine("⚠️ 此操作需要用户确认，请向用户说明情况并询问选择哪种处理方式，然后根据用户的选择继续执行。");
+                        }
+                    }
+                    else
+                    {
+                        errorBuilder.AppendLine("请向用户说明此错误，并询问是否需要尝试其他方式。");
+                    }
+                    
+                    return errorBuilder.ToString();
                 }
             }
             catch (AggregateException aex) when (aex.InnerException != null)
             {
-                return $"执行工具 {toolName} 时出错：{aex.InnerException.Message}";
+                return $"❌ 执行工具 {toolName} 时出错：{aex.InnerException.Message}\n请向用户说明此错误，并询问是否需要尝试其他方式。";
             }
             catch (Exception ex)
             {
-                return $"执行工具 {toolName} 时出错：{ex.Message}";
+                return $"❌ 执行工具 {toolName} 时出错：{ex.Message}\n请向用户说明此错误，并询问是否需要尝试其他方式。";
             }
         }
 
@@ -2207,15 +2346,13 @@ namespace ExcelAddIn
                                 string content = choice.delta.content;
                                 fullResponse.Append(content);
                                 
-                                // 第一次收到内容时创建聊天项
                                 if (streamingChatItem == null)
                                 {
-                                    // 创建流式聊天项
-                                    streamingChatItem = CreateStreamingChatItem();
+                                    RemoveThinkingPlaceholder();
+                                    streamingChatItem = CreateStreamingChatItem(fullResponse.ToString());
                                     streamingRichTextBox = (RichTextBox)streamingChatItem.Controls[0];
                                 }
                                 
-                                // 更新聊天内容
                                 UpdateStreamingChatItem(streamingRichTextBox, fullResponse.ToString());
                             }
                             
@@ -2509,15 +2646,31 @@ namespace ExcelAddIn
             // 将工具执行结果作为用户消息加入历史，让AI继续处理
             // 构建更清晰的结果消息，明确告知已完成的操作
             var toolResultMessage = new StringBuilder();
+            bool hasError = toolResults.ToString().Contains("❌");
+            
             toolResultMessage.AppendLine("工具执行完成，结果如下：");
             toolResultMessage.AppendLine(toolResults.ToString());
             
-            // 如果执行了一次性工具，明确告知不要重复
+            if (hasError)
+            {
+                toolResultMessage.AppendLine();
+                toolResultMessage.AppendLine("【重要】上述结果中包含执行失败的操作。请你：");
+                toolResultMessage.AppendLine("1. 向用户清晰说明哪些操作失败了以及失败原因");
+                toolResultMessage.AppendLine("2. 如果结果中包含处理建议，请将建议展示给用户");
+                toolResultMessage.AppendLine("3. 询问用户选择哪种处理方式");
+                toolResultMessage.AppendLine("4. 等待用户回复后，根据用户选择继续执行剩余操作");
+                toolResultMessage.AppendLine("5. 不要自行决定如何处理错误，必须等待用户确认");
+            }
+            
             if (_executedOneTimeTools.Count > 0)
             {
                 toolResultMessage.AppendLine($"⚠️ 以下工具已执行完成，请勿重复调用：{string.Join(", ", _executedOneTimeTools)}");
             }
-            toolResultMessage.AppendLine("请根据执行结果用文字回复用户，不要再调用已执行的工具。");
+            
+            if (!hasError)
+            {
+                toolResultMessage.AppendLine("请根据执行结果用文字回复用户，不要再调用已执行的工具。");
+            }
             
             _chatHistory.Add(new ChatMessage
             {
@@ -2838,21 +2991,15 @@ namespace ExcelAddIn
                 int finalWidth, finalHeight;
                 bool needScroll = false;
 
-                // 使用临时字体计算文本尺寸
                 using (Graphics g = flowLayoutPanelChat.CreateGraphics())
                 {
-                    // 先计算单行文本的宽度
                     SizeF singleLineSize = g.MeasureString(text, richTextBox.Font);
                     int textWidth = (int)Math.Ceiling(singleLineSize.Width) + richTextBox.Padding.Horizontal + 10;
-
-                    // 限制宽度在最小和最大之间
                     finalWidth = Math.Max(minWidth, Math.Min(textWidth, maxWidth));
 
-                    // 根据最终宽度计算高度
                     SizeF textSize = g.MeasureString(text, richTextBox.Font, finalWidth - richTextBox.Padding.Horizontal);
-                    int calculatedHeight = (int)Math.Ceiling(textSize.Height) + richTextBox.Padding.Vertical + 6;
+                    int calculatedHeight = (int)Math.Ceiling(textSize.Height) + richTextBox.Padding.Vertical;
                     
-                    // 如果高度超过最大高度，启用滚动条
                     if (calculatedHeight > maxHeight)
                     {
                         finalHeight = maxHeight;
@@ -2860,7 +3007,7 @@ namespace ExcelAddIn
                     }
                     else
                     {
-                        finalHeight = Math.Max(calculatedHeight, 30);
+                        finalHeight = Math.Max(calculatedHeight, 20);
                     }
                 }
 
@@ -2882,24 +3029,8 @@ namespace ExcelAddIn
                 path.CloseAllFigures();
                 chatBubble.Region = new Region(path);
 
-                // 配置RichTextBox - 实现文本垂直居中
                 int rtbWidth = finalWidth - 4;
                 int rtbHeight = finalHeight - 4;
-                
-                // 计算实际文本高度，用于垂直居中
-                int textTopPadding = 0;
-                if (!needScroll)
-                {
-                    using (Graphics g = flowLayoutPanelChat.CreateGraphics())
-                    {
-                        SizeF textSize = g.MeasureString(text, richTextBox.Font, rtbWidth - richTextBox.Padding.Horizontal);
-                        int actualTextHeight = (int)Math.Ceiling(textSize.Height) + richTextBox.Padding.Vertical;
-                        if (actualTextHeight < rtbHeight)
-                        {
-                            textTopPadding = (rtbHeight - actualTextHeight) / 2;
-                        }
-                    }
-                }
                 
                 richTextBox.Size = new Size(rtbWidth, rtbHeight);
                 richTextBox.Location = new Point(2, 2);
@@ -2908,13 +3039,6 @@ namespace ExcelAddIn
                 richTextBox.SelectionAlignment = HorizontalAlignment.Left;
                 richTextBox.Tag = isUser ? "user_message" : "model_message";
                 
-                // 通过设置上边距实现垂直居中效果
-                if (textTopPadding > 0)
-                {
-                    richTextBox.Padding = new Padding(8, 8 + textTopPadding, 8, 8);
-                }
-                
-                // 最后设置文本，避免提前触发布局
                 richTextBox.Text = text;
 
                 chatBubble.Controls.Add(richTextBox);
@@ -3047,18 +3171,16 @@ namespace ExcelAddIn
             rowPanel.Controls.Add(chatBubble);
             rowPanel.Controls.Add(buttonPanel);
 
-            // 设置外层容器的边距 - 左边距固定为10，确保靠左显示
             rowPanel.Margin = new Padding(10, 5, 10, 10);
+            
+            chatBubble.Visible = true;
             flowLayoutPanelChat.Controls.Add(rowPanel);
             flowLayoutPanelChat.ScrollControlIntoView(rowPanel);
-            
-            // 所有内容准备好后，显示对话气泡
-            chatBubble.Visible = true;
             }
             finally
             {
-                // 恢复布局更新
-                flowLayoutPanelChat.ResumeLayout(true);
+                flowLayoutPanelChat.ResumeLayout(false);
+                flowLayoutPanelChat.PerformLayout();
             }
         }
 
@@ -3444,6 +3566,23 @@ namespace ExcelAddIn
                 _skillManager.LoadSkill(new ExcelChartSkill(_excelMcp));
                 _skillManager.LoadSkill(new ExcelPivotSkill(_excelMcp));
                 
+                // 加载新增的插件功能技能
+                _skillManager.LoadSkill(new ExcelDataSkill());
+                _skillManager.LoadSkill(new ExcelDatabaseSkill());
+                _skillManager.LoadSkill(new ExcelApiSkill());
+                _skillManager.LoadSkill(new ExcelChartEnhanceSkill());
+                _skillManager.LoadSkill(new ExcelMailSkill());
+                _skillManager.LoadSkill(new ExcelFileSkill());
+                _skillManager.LoadSkill(new ExcelQRSkill());
+                _skillManager.LoadSkill(new ExcelInvoiceSkill());
+                _skillManager.LoadSkill(new ExcelRegexSkill());
+                _skillManager.LoadSkill(new ExcelTocSkill());
+                _skillManager.LoadSkill(new ExcelScheduleSkill());
+                _skillManager.LoadSkill(new DocumentGenerationSkill());
+                _skillManager.LoadSkill(new ExcelPdfSkill());
+                _skillManager.LoadSkill(new ExcelSpotlightSkill());
+                _skillManager.LoadSkill(new ExcelMusicSkill());
+                
                 // 加载插件目录中的技能
                 var skillsDir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "skills");
                 var pluginSkills = PluginLoader.LoadSkillsFromDirectory(skillsDir, _excelMcp);
@@ -3459,21 +3598,19 @@ namespace ExcelAddIn
         }
 
         // 创建流式输出的聊天项
-        private Panel CreateStreamingChatItem()
+        private Panel CreateStreamingChatItem(string initialContent)
         {
-            // 暂停布局更新，避免闪烁
             flowLayoutPanelChat.SuspendLayout();
             
             try
             {
                 int scrollBarWidth = SystemInformation.VerticalScrollBarWidth;
                 int availableWidth = flowLayoutPanelChat.ClientSize.Width - scrollBarWidth - 20;
-                // 最大宽度为容器宽度的75%
                 int maxWidth = (int)(availableWidth * 0.75);
-                int minWidth = 80; // 最小宽度
-                int cornerRadius = 12; // 圆角半径
+                int minWidth = 80;
+                int maxHeight = 300;
+                int cornerRadius = 12;
 
-                // 创建RichTextBox
                 RichTextBox richTextBox = new RichTextBox
                 {
                     BorderStyle = BorderStyle.None,
@@ -3481,20 +3618,30 @@ namespace ExcelAddIn
                     WordWrap = true,
                     Padding = new Padding(8),
                     ContextMenuStrip = CreateMessageContextMenu(false),
-                    ScrollBars = RichTextBoxScrollBars.None,
-                    Text = ""
+                    ScrollBars = RichTextBoxScrollBars.None
                 };
 
-                // 创建圆角对话框容器Panel
+                int finalWidth, finalHeight;
+                bool needScroll = false;
+
+                using (Graphics g = flowLayoutPanelChat.CreateGraphics())
+                {
+                    SizeF textSize = g.MeasureString(initialContent, richTextBox.Font, maxWidth - richTextBox.Padding.Horizontal);
+                    int textWidth = (int)Math.Ceiling(textSize.Width) + richTextBox.Padding.Horizontal + 10;
+                    int textHeight = (int)Math.Ceiling(textSize.Height) + richTextBox.Padding.Vertical;
+
+                    finalWidth = Math.Max(minWidth, Math.Min(textWidth, maxWidth));
+                    finalHeight = Math.Min(Math.Max(textHeight, 20), maxHeight);
+                    needScroll = textHeight > maxHeight;
+                }
+
                 Panel chatBubble = new Panel
                 {
-                    Size = new Size(minWidth, 30),
+                    Size = new Size(finalWidth, finalHeight),
                     BackColor = Color.LightGreen,
-                    Tag = "model_container",
-                    Visible = false  // 先隐藏，等有内容后再显示
+                    Tag = "model_container"
                 };
 
-                // 设置圆角
                 System.Drawing.Drawing2D.GraphicsPath path = new System.Drawing.Drawing2D.GraphicsPath();
                 path.AddArc(0, 0, cornerRadius, cornerRadius, 180, 90);
                 path.AddArc(chatBubble.Width - cornerRadius, 0, cornerRadius, cornerRadius, 270, 90);
@@ -3503,32 +3650,25 @@ namespace ExcelAddIn
                 path.CloseAllFigures();
                 chatBubble.Region = new Region(path);
 
-                // 配置RichTextBox
-                int rtbWidth = chatBubble.Width - 4;
-                int rtbHeight = chatBubble.Height - 4;
-                
-                richTextBox.Size = new Size(rtbWidth, rtbHeight);
+                richTextBox.Size = new Size(finalWidth - 4, finalHeight - 4);
                 richTextBox.Location = new Point(2, 2);
                 richTextBox.BackColor = chatBubble.BackColor;
+                richTextBox.ScrollBars = needScroll ? RichTextBoxScrollBars.Vertical : RichTextBoxScrollBars.None;
                 richTextBox.SelectionAlignment = HorizontalAlignment.Left;
                 richTextBox.Tag = "model_message";
+                richTextBox.Text = initialContent;
 
                 chatBubble.Controls.Add(richTextBox);
 
-                // 添加到聊天面板
                 flowLayoutPanelChat.Controls.Add(chatBubble);
-                flowLayoutPanelChat.ResumeLayout(false);
-                flowLayoutPanelChat.PerformLayout();
-                
-                // 滚动到底部
                 flowLayoutPanelChat.ScrollControlIntoView(chatBubble);
-                
+
                 return chatBubble;
             }
-            catch
+            finally
             {
                 flowLayoutPanelChat.ResumeLayout(false);
-                throw;
+                flowLayoutPanelChat.PerformLayout();
             }
         }
 
@@ -3543,20 +3683,11 @@ namespace ExcelAddIn
 
             try
             {
-                // 暂停布局更新
                 flowLayoutPanelChat.SuspendLayout();
                 
-                // 更新内容
                 richTextBox.Text = content;
                 
-                // 调整大小
                 Panel chatBubble = (Panel)richTextBox.Parent;
-                
-                // 如果对话气泡还不可见，先显示它
-                if (!chatBubble.Visible)
-                {
-                    chatBubble.Visible = true;
-                }
                 
                 int scrollBarWidth = SystemInformation.VerticalScrollBarWidth;
                 int availableWidth = flowLayoutPanelChat.ClientSize.Width - scrollBarWidth - 20;
@@ -3566,16 +3697,12 @@ namespace ExcelAddIn
                 
                 using (Graphics g = flowLayoutPanelChat.CreateGraphics())
                 {
-                    // 计算文本尺寸
                     SizeF textSize = g.MeasureString(content, richTextBox.Font, maxWidth - richTextBox.Padding.Horizontal);
                     int textWidth = (int)Math.Ceiling(textSize.Width) + richTextBox.Padding.Horizontal + 10;
-                    int textHeight = (int)Math.Ceiling(textSize.Height) + richTextBox.Padding.Vertical + 6;
+                    int textHeight = (int)Math.Ceiling(textSize.Height) + richTextBox.Padding.Vertical;
                     
-                    // 限制宽度
                     int finalWidth = Math.Max(minWidth, Math.Min(textWidth, maxWidth));
-                    
-                    // 限制高度
-                    int finalHeight = Math.Min(textHeight, maxHeight);
+                    int finalHeight = Math.Min(Math.Max(textHeight, 20), maxHeight);
                     bool needScroll = textHeight > maxHeight;
                     
                     // 更新RichTextBox大小
@@ -3665,10 +3792,10 @@ namespace ExcelAddIn
                         {
                             SizeF textSize = g.MeasureString(response, richTextBox.Font, maxWidth - richTextBox.Padding.Horizontal);
                             int textWidth = (int)Math.Ceiling(textSize.Width) + richTextBox.Padding.Horizontal + 10;
-                            int textHeight = (int)Math.Ceiling(textSize.Height) + richTextBox.Padding.Vertical + 6;
+                            int textHeight = (int)Math.Ceiling(textSize.Height) + richTextBox.Padding.Vertical;
                             
                             int finalWidth = Math.Max(minWidth, Math.Min(textWidth, maxWidth));
-                            int finalHeight = Math.Min(textHeight, maxHeight);
+                            int finalHeight = Math.Min(Math.Max(textHeight, 20), maxHeight);
                             bool needScroll = textHeight > maxHeight;
                             
                             // 更新RichTextBox大小

@@ -7,7 +7,7 @@ using System.Windows.Forms;
 using Microsoft.VisualBasic.FileIO;
 using Excel = Microsoft.Office.Interop.Excel;
 
-namespace ExcelAddIn
+namespace TableMagic
 {
     public partial class Form4 : Form
     {

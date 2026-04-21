@@ -1,4 +1,4 @@
-﻿namespace ExcelAddIn
+namespace TableMagic
 {
     partial class Form5
     {
@@ -157,7 +157,7 @@
             // 
             // switchCamera_button
             // 
-            this.switchCamera_button.BackgroundImage = global::ExcelAddIn.Properties.Resources._switch;
+            this.switchCamera_button.BackgroundImage = global::TableMagic.Properties.Resources._switch;
             this.switchCamera_button.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
             this.switchCamera_button.Location = new System.Drawing.Point(553, 200);
             this.switchCamera_button.Name = "switchCamera_button";

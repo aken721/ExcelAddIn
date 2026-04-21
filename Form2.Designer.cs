@@ -1,4 +1,4 @@
-﻿namespace ExcelAddIn
+namespace TableMagic
 {
     partial class Form2
     {
@@ -403,7 +403,7 @@
             // mailpassword_pictureBox
             // 
             this.mailpassword_pictureBox.BackgroundImageLayout = System.Windows.Forms.ImageLayout.None;
-            this.mailpassword_pictureBox.Image = global::ExcelAddIn.Properties.Resources.eye_hide;
+            this.mailpassword_pictureBox.Image = global::TableMagic.Properties.Resources.eye_hide;
             this.mailpassword_pictureBox.Location = new System.Drawing.Point(586, 280);
             this.mailpassword_pictureBox.Name = "mailpassword_pictureBox";
             this.mailpassword_pictureBox.Size = new System.Drawing.Size(27, 27);

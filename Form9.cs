@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Globalization;
@@ -13,7 +13,7 @@ using Microsoft.Office.Interop.Excel;
 using Microsoft.Vbe.Interop;
 using Excel = Microsoft.Office.Interop.Excel;
 
-namespace ExcelAddIn
+namespace TableMagic
 {
 
 

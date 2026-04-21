@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using System.Text.Json;
 
-namespace ExcelAddIn.Skills
+namespace TableMagic.Skills
 {
     public class ExcelCellSkill : ISkill
     {

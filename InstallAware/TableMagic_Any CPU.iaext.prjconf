@@ -2,7 +2,7 @@
 <iasettings>
   <projectproperties>
     <manufacturer>Administrator</manufacturer>
-    <productname>ExcelAddIn</productname>
+    <productname>TableMagic</productname>
     <productversion>1.0.0</productversion>
     <productcode>{69489d9f-e3b2-4b7b-8591-0b858205b28b}</productcode>
     <upgradecode>{788a7bea-de2f-4fd7-9524-59697eb661fd}</upgradecode>
@@ -10,10 +10,10 @@
     <languagename>English</languagename>
   </projectproperties>
   <summary>
-    <title>ExcelAddIn</title>
-    <subject>ExcelAddIn</subject>
+    <title>TableMagic</title>
+    <subject>TableMagic</subject>
     <author>Administrator</author>
-    <summarycomments>ExcelAddIn</summarycomments>
+    <summarycomments>TableMagic</summarycomments>
     <revisioncode>{c6665e34-2f05-4711-a826-23144a2cfed4}</revisioncode>
     <uacelevation>highestAvailable</uacelevation>
   </summary>
@@ -40,7 +40,7 @@
   </build>
   <targetfolders />
   <files>
-    <filedetails filename="D:\SourceCode\C#\ExcelAddIn\bin\Debug\ExcelAddIn.dll" targetlocation="$TARGETDIR$" type="3" generatenativeimage="0" registerassembly="0" runinstallerclass="0" createshortcut="0" runprogram="0" installfilecommand="1" VsProjectOutputfile ="1" />
+    <filedetails filename="E:\SourceCode\Csharp\TableMagic\bin\Debug\TableMagic.dll" targetlocation="$TARGETDIR$" type="3" generatenativeimage="0" registerassembly="0" runinstallerclass="0" createshortcut="0" runprogram="0" installfilecommand="1" VsProjectOutputfile ="1" />
   </files>
   <dependencies />
   <registry />

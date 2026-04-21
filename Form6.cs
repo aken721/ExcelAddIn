@@ -1,4 +1,4 @@
-﻿#nullable enable
+#nullable enable
 
 using System;
 using System.Collections.Generic;
@@ -24,7 +24,7 @@ using Excel = Microsoft.Office.Interop.Excel;
 
 
 
-namespace ExcelAddIn
+namespace TableMagic
 {
     public partial class Form6 : Form
     {

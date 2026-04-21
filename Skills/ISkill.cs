@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace ExcelAddIn.Skills
+namespace TableMagic.Skills
 {
     public interface ISkill
     {
@@ -25,5 +25,18 @@ namespace ExcelAddIn.Skills
         public bool Success { get; set; }
         public string Content { get; set; }
         public string Error { get; set; }
+        public List<string> Suggestions { get; set; } = new List<string>();
+        public bool RequiresUserDecision { get; set; }
+
+        public static SkillResult FromError(string error, List<string> suggestions = null, bool requiresUserDecision = false)
+        {
+            return new SkillResult
+            {
+                Success = false,
+                Error = error,
+                Suggestions = suggestions ?? new List<string>(),
+                RequiresUserDecision = requiresUserDecision
+            };
+        }
     }
 }

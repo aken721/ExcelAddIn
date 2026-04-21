@@ -1,4 +1,4 @@
-namespace ExcelAddIn
+namespace TableMagic
 {
     partial class Form1
     {
@@ -777,7 +777,7 @@ namespace ExcelAddIn
             // 
             // QR_logo_pictureBox
             // 
-            this.QR_logo_pictureBox.Image = global::ExcelAddIn.Properties.Resources.pic_logo;
+            this.QR_logo_pictureBox.Image = global::TableMagic.Properties.Resources.pic_logo;
             this.QR_logo_pictureBox.Location = new System.Drawing.Point(580, 151);
             this.QR_logo_pictureBox.Name = "QR_logo_pictureBox";
             this.QR_logo_pictureBox.Size = new System.Drawing.Size(80, 80);
@@ -1139,7 +1139,7 @@ namespace ExcelAddIn
             // 
             // find_keywordclear_pictureBox
             // 
-            this.find_keywordclear_pictureBox.Image = global::ExcelAddIn.Properties.Resources.clear;
+            this.find_keywordclear_pictureBox.Image = global::TableMagic.Properties.Resources.clear;
             this.find_keywordclear_pictureBox.Location = new System.Drawing.Point(582, 94);
             this.find_keywordclear_pictureBox.Name = "find_keywordclear_pictureBox";
             this.find_keywordclear_pictureBox.Size = new System.Drawing.Size(18, 18);
@@ -1384,7 +1384,7 @@ namespace ExcelAddIn
             // 
             // find_keywordbutton_pictureBox
             // 
-            this.find_keywordbutton_pictureBox.Image = global::ExcelAddIn.Properties.Resources.search;
+            this.find_keywordbutton_pictureBox.Image = global::TableMagic.Properties.Resources.search;
             this.find_keywordbutton_pictureBox.Location = new System.Drawing.Point(609, 89);
             this.find_keywordbutton_pictureBox.Name = "find_keywordbutton_pictureBox";
             this.find_keywordbutton_pictureBox.Size = new System.Drawing.Size(27, 27);
@@ -1459,7 +1459,7 @@ namespace ExcelAddIn
             // 
             // btnKeyChar
             // 
-            this.btnKeyChar.BackgroundImage = global::ExcelAddIn.Properties.Resources.eye_hide;
+            this.btnKeyChar.BackgroundImage = global::TableMagic.Properties.Resources.eye_hide;
             this.btnKeyChar.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
             this.btnKeyChar.Location = new System.Drawing.Point(328, 3);
             this.btnKeyChar.Margin = new System.Windows.Forms.Padding(0, 3, 3, 3);
@@ -1693,7 +1693,7 @@ namespace ExcelAddIn
             // 
             // btnPwdChar
             // 
-            this.btnPwdChar.BackgroundImage = global::ExcelAddIn.Properties.Resources.eye_hide;
+            this.btnPwdChar.BackgroundImage = global::TableMagic.Properties.Resources.eye_hide;
             this.btnPwdChar.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
             this.btnPwdChar.Location = new System.Drawing.Point(173, 3);
             this.btnPwdChar.Margin = new System.Windows.Forms.Padding(0, 3, 3, 3);
