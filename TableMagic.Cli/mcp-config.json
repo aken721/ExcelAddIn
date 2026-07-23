@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "tablemagic": {
+      "command": "./tablemagic.exe",
+      "args": ["mcp"]
+    }
+  }
+}

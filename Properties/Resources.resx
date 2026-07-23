@@ -154,6 +154,9 @@
   <data name="EXCEL_icon" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>Resources\EXCEL表单 icon.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>
+  <data name="extract_from_doc" type="System.Resources.ResXFileRef, System.Windows.Forms">
+    <value>Resources\extract_from_doc.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
+  </data>
   <data name="eye_hide" type="System.Resources.ResXFileRef, System.Windows.Forms">
     <value>Resources\eye_hide.png;System.Drawing.Bitmap, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a</value>
   </data>

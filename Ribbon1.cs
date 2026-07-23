@@ -1688,6 +1688,12 @@ namespace TableMagic
             Form10 form10 = new Form10();
             form10.Show();
         }
+
+        private void extract_from_doc_button_Click(object sender, RibbonControlEventArgs e)
+        {
+            Form11 form11= new Form11();
+            form11.Show();
+        }
     }
 }
 

@@ -361,3 +361,13 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+
+# TableMagic.Cli build artifacts
+table-magic-skill.zip
+nupkg/
+publish-sc/
+publish_singlefile/
+publish_fdd/
+staging-tablemagic/
+excel_files/
+.arts/

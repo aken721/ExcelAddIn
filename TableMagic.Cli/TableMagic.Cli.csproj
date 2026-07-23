@@ -1,0 +1,45 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <AssemblyName>tablemagic</AssemblyName>
+    <RootNamespace>TableMagic.Cli</RootNamespace>
+    <Version>2.5.1</Version>
+    <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
+    <Description>TableMagic Excel Skill CLI &amp; MCP Server - 107 tools for Excel operations via MCP protocol</Description>
+    <PackAsTool>true</PackAsTool>
+    <ToolCommandName>tablemagic</ToolCommandName>
+    <PackageId>TableMagic.Cli</PackageId>
+    <Authors>TableMagic</Authors>
+    <PackageTags>mcp;excel;skill;tablemagic;closedxml;pdf;qr-code</PackageTags>
+    <PackageProjectUrl>https://github.com/tablemagic/tablemagic-cli</PackageProjectUrl>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="README.md" Pack="true" PackagePath="\" />
+    <None Include="skill.md" Pack="true" PackagePath="\" />
+    <None Include="mcp-config.json" Pack="true" PackagePath="\" />
+  </ItemGroup>
+
+  <ItemGroup>
+
+    <PackageReference Include="ClosedXML" Version="0.104.2" />
+    <PackageReference Include="Microsoft.Data.SqlClient" Version="7.0.2" />
+    <PackageReference Include="QuestPDF" Version="2026.7.1" />
+    <PackageReference Include="SkiaSharp" Version="4.150.1" />
+    <PackageReference Include="System.Text.Json" Version="9.0.0" />
+    <PackageReference Include="System.CommandLine" Version="2.0.0-beta4.22272.1" />
+    <PackageReference Include="System.Data.SQLite.Core" Version="1.0.119" />
+    <PackageReference Include="MySql.Data" Version="9.4.0" />
+    <PackageReference Include="Npgsql" Version="8.0.7" />
+    <PackageReference Include="ZXing.Net" Version="0.16.11" />
+    <PackageReference Include="ZXing.Net.Bindings.SkiaSharp" Version="0.16.22" />
+  </ItemGroup>
+
+</Project>

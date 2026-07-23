@@ -2016,6 +2016,74 @@ namespace TableMagic
             return ExecuteMcpToolInternal(toolName, arguments);
         }
 
+        private bool _useCliFallback = true;
+        private string _cliPath = "";
+
+        private string GetCliPath()
+        {
+            if (!string.IsNullOrEmpty(_cliPath) && File.Exists(_cliPath))
+                return _cliPath;
+
+            var baseDir = AppDomain.CurrentDomain.BaseDirectory;
+            var cliName = "tablemagic.exe";
+            var searchPaths = new[]
+            {
+                Path.Combine(baseDir, cliName),
+                Path.Combine(baseDir, "cli", cliName),
+                Path.Combine(Directory.GetParent(baseDir)?.FullName ?? baseDir, cliName),
+            };
+
+            foreach (var path in searchPaths)
+            {
+                if (File.Exists(path))
+                {
+                    _cliPath = path;
+                    return path;
+                }
+            }
+
+            return null;
+        }
+
+        private string ExecuteToolViaCli(string toolName, Dictionary<string, object> arguments)
+        {
+            var cliPath = GetCliPath();
+            if (cliPath == null)
+                return null;
+
+            try
+            {
+                var argsJson = Newtonsoft.Json.JsonConvert.SerializeObject(arguments);
+                var startInfo = new System.Diagnostics.ProcessStartInfo
+                {
+                    FileName = cliPath,
+                    Arguments = $"call {toolName} --args \"{argsJson.Replace("\"", "\\\"")}\"",
+                    UseShellExecute = false,
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true,
+                    CreateNoWindow = true
+                };
+
+                using (var process = System.Diagnostics.Process.Start(startInfo))
+                {
+                    var output = process.StandardOutput.ReadToEnd();
+                    var error = process.StandardError.ReadToEnd();
+                    process.WaitForExit(30000);
+
+                    if (process.ExitCode == 0 && !string.IsNullOrEmpty(output))
+                        return output;
+                    if (!string.IsNullOrEmpty(error))
+                        return $"CLI执行错误: {error}";
+                    return null;
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"CLI调用失败: {ex.Message}");
+                return null;
+            }
+        }
+
         // 实际执行MCP工具调用的内部方法
         private string ExecuteMcpToolInternal(string toolName, JsonElement arguments)
         {
@@ -2024,37 +2092,50 @@ namespace TableMagic
                 toolName = NormalizeToolName(toolName);
 
                 var argumentsDict = JsonElementToDictionary(arguments);
-                var result = _skillManager.ExecuteToolAsync(toolName, argumentsDict).Result;
-                
-                if (result.Success)
+
+                if (_skillManager != null && _skillManager.IsToolAvailable(toolName))
                 {
-                    return result.Content;
-                }
-                else
-                {
-                    var errorBuilder = new StringBuilder();
-                    errorBuilder.AppendLine($"❌ 执行失败：{result.Error}");
+                    var result = _skillManager.ExecuteToolAsync(toolName, argumentsDict).Result;
                     
-                    if (result.Suggestions != null && result.Suggestions.Count > 0)
+                    if (result.Success)
                     {
-                        errorBuilder.AppendLine("📋 处理建议：");
-                        foreach (var suggestion in result.Suggestions)
-                        {
-                            errorBuilder.AppendLine($"  {suggestion}");
-                        }
-                        
-                        if (result.RequiresUserDecision)
-                        {
-                            errorBuilder.AppendLine("⚠️ 此操作需要用户确认，请向用户说明情况并询问选择哪种处理方式，然后根据用户的选择继续执行。");
-                        }
+                        return result.Content;
                     }
                     else
                     {
-                        errorBuilder.AppendLine("请向用户说明此错误，并询问是否需要尝试其他方式。");
+                        var errorBuilder = new StringBuilder();
+                        errorBuilder.AppendLine($"❌ 执行失败：{result.Error}");
+                        
+                        if (result.Suggestions != null && result.Suggestions.Count > 0)
+                        {
+                            errorBuilder.AppendLine("📋 处理建议：");
+                            foreach (var suggestion in result.Suggestions)
+                            {
+                                errorBuilder.AppendLine($"  {suggestion}");
+                            }
+                            
+                            if (result.RequiresUserDecision)
+                            {
+                                errorBuilder.AppendLine("⚠️ 此操作需要用户确认，请向用户说明情况并询问选择哪种处理方式，然后根据用户的选择继续执行。");
+                            }
+                        }
+                        else
+                        {
+                            errorBuilder.AppendLine("请向用户说明此错误，并询问是否需要尝试其他方式。");
+                        }
+                        
+                        return errorBuilder.ToString();
                     }
-                    
-                    return errorBuilder.ToString();
                 }
+
+                if (_useCliFallback)
+                {
+                    var cliResult = ExecuteToolViaCli(toolName, argumentsDict);
+                    if (cliResult != null)
+                        return cliResult;
+                }
+
+                return $"❌ 工具 {toolName} 未找到。请向用户说明此错误，并询问是否需要尝试其他方式。";
             }
             catch (AggregateException aex) when (aex.InnerException != null)
             {
