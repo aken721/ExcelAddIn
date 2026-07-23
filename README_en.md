@@ -4,7 +4,7 @@
 
 **The Excel Plugin That Does the Heavy Lifting**
 
-[🇨🇳 中文](./README.md) · [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT) · [![Version](https://img.shields.io/badge/Version-v2.5.0.0-blue.svg)](https://gitee.com/aken721/table-magic/releases) · [![Platform](https://img.shields.io/badge/Platform-Office%20%2B%20WPS-orange.svg)]() · [![Stars](https://img.shields.io/badge/Stars-⭐%20Give%20a%20Star-yellow.svg)](https://gitee.com/aken721/table-magic)
+[🇨🇳 中文](./README.md) · [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT) · [![Version](https://img.shields.io/badge/Version-v2.5.1.0-blue.svg)](https://gitee.com/aken721/table-magic/releases) · [![Platform](https://img.shields.io/badge/Platform-Office%20%2B%20WPS-orange.svg)]() · [![Stars](https://img.shields.io/badge/Stars-⭐%20Give%20a%20Star-yellow.svg)](https://gitee.com/aken721/table-magic)
 
 [📥 Download](https://gitee.com/aken721/table-magic/releases) · [🐛 Issues](https://gitee.com/aken721/table-magic/issues) · [📧 Custom Dev](mailto:aken721@163.com)
 
@@ -102,7 +102,7 @@ Unlike ordinary toolboxes that only provide basic spreadsheet operations, this a
 - Typical use cases: internal enterprise systems, weather/finance/government open data feeds
 
 #### 🤖 AI Chat & Natural Language Excel Operations (Major Update in v2.5)
-- Supports 14 mainstream LLM providers: DeepSeek, Qwen, Kimi, ChatGLM, ChatGPT, Claude, and more
+- Supports 14 mainstream LLM providers: DeepSeek, Qwen, Kimi, GLM, ChatGPT, Claude, and more
 - Supports local models via **Ollama / LM Studio / vLLM / llama.cpp** (data stays on your machine)
 - Automatically detects model capabilities, intelligently switches between Function Calling and Prompt Engineering modes
 - **Skills plug-in architecture**: Load third-party extensions via the standard ISkill interface — 24 built-in skills covering workbooks, worksheets, cells, ranges, formatting, charts, pivot tables, financial analysis, and more

@@ -116,7 +116,6 @@
 - 典型场景：对接企业内网系统、气象/财经/政务数据抓取
 
 #### 🤖 AI对话 & 自然语言操作（v2.5重大更新）
-
 - 支持 DeepSeek、Qwen（通义千问）、Kimi、ChatGLM、ChatGPT、Claude 等14种主流API
 - 支持 Ollama / LM Studio / vLLM / llama.cpp 等**本地模型**（数据不出本机）
 - 自动识别模型能力，智能切换 Function Calling / 提示工程模式
