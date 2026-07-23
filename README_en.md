@@ -4,7 +4,7 @@
 
 **The Excel Plugin That Does the Heavy Lifting**
 
-[🇨🇳 中文](./README.md) · [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT) · [![Version](https://img.shields.io/badge/Version-v2.5.1.0-blue.svg)](https://gitee.com/aken721/table-magic/releases) · [![Platform](https://img.shields.io/badge/Platform-Office%20%2B%20WPS-orange.svg)]() · [![Stars](https://img.shields.io/badge/Stars-⭐%20Give%20a%20Star-yellow.svg)](https://gitee.com/aken721/table-magic)
+[🇨🇳 中文](./README.md) · [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT) · [![Version](https://img.shields.io/badge/Version-v2.5.1-blue.svg)](https://gitee.com/aken721/table-magic/releases) · [![Platform](https://img.shields.io/badge/Platform-Office%20%2B%20WPS-orange.svg)]() · [![Stars](https://img.shields.io/badge/Stars-⭐%20Give%20a%20Star-yellow.svg)](https://gitee.com/aken721/table-magic)
 
 [📥 Download](https://gitee.com/aken721/table-magic/releases) · [🐛 Issues](https://gitee.com/aken721/table-magic/issues) · [📧 Custom Dev](mailto:aken721@163.com)
 
@@ -102,11 +102,27 @@ Unlike ordinary toolboxes that only provide basic spreadsheet operations, this a
 - Typical use cases: internal enterprise systems, weather/finance/government open data feeds
 
 #### 🤖 AI Chat & Natural Language Excel Operations (Major Update in v2.5)
-- Supports 14 mainstream LLM providers: DeepSeek, Qwen, Kimi, GLM, ChatGPT, Claude, and more
+- Supports 14 mainstream LLM providers: DeepSeek, Qwen, Kimi, ChatGLM, ChatGPT, Claude, and more
 - Supports local models via **Ollama / LM Studio / vLLM / llama.cpp** (data stays on your machine)
 - Automatically detects model capabilities, intelligently switches between Function Calling and Prompt Engineering modes
 - **Skills plug-in architecture**: Load third-party extensions via the standard ISkill interface — 24 built-in skills covering workbooks, worksheets, cells, ranges, formatting, charts, pivot tables, financial analysis, and more
 - Just describe what you want in plain language — AI handles the Excel operation
+
+#### 🔌 Universal MCP Skill (New in v2.5.1)
+
+The add-in's 111 Excel operation tools are packaged as a **universal MCP Skill** that can be installed and used in standalone Agents such as openclaw, hermes, workbuddy, qclaw, and Trae Work — no Excel installation required.
+
+- **Protocol**: MCP (Model Context Protocol) 2024-11-05, stdio transport
+- **Engine**: ClosedXML (no Excel installation needed)
+- **Features**: 111 tools for workbook/worksheet/cell/range/format/chart/analysis/database/API/email/file/QR/invoice/regex/TOC/schedule/PDF operations
+- **Performance**: Single-process persistent MCP mode — 10 sheet creations in just 4ms; compound tools complete multi-step operations in a single call
+
+**Installation**:
+
+1. **Download pre-built package** (recommended): Download `table-magic-skill.zip`, extract it to the Agent's skill installation directory, and the Agent will automatically discover and register this skill via `skill.md` and `mcp-config.json`; or drag `table-magic-skill.zip` into the Agent's chat window and instruct the Agent to install the skill
+2. **Build from source**: `git clone` this repository, run the `pack-skill.ps1` script to build and generate `table-magic-skill.zip`, then extract the package to the Agent's skill installation directory
+
+See [TableMagic.Cli/README.md](./TableMagic.Cli/README.md) for details.
 
 ### 📥 Installation
 
